@@ -1,8 +1,6 @@
-# BSV TEMPLATE
+# BSV BLOCKCHAIN | Standard Development Kit for Go
 
-BSV BLOCKCHAIN | Template repository for open-source projects
-
-Update this README with information about the project.
+Welcome to the BSV Blockchain Libraries Project, the comprehensive Go SDK designed to provide an updated and unified layer for developing scalable applications on the BSV Blockchain. This SDK addresses the limitations of previous tools by offering a fresh, peer-to-peer approach, adhering to SPV, and ensuring privacy and scalability.
 
 ## Table of Contents
 
@@ -15,22 +13,23 @@ Update this README with information about the project.
 
 ## Objective
 
-Toe objective of this project is to make it easier to create new open-source projects within Bitcoin SV.
+The BSV Blockchain Libraries Project aims to structure and maintain a middleware layer of the BSV Blockchain technology stack. By facilitating the development and maintenance of core libraries, it serves as an essential toolkit for developers looking to build on the BSV Blockchain.
 
 ## Getting Started
 
-### Fork the repo
+### Installation
 
-To create a project from this template:
+To install the SDK, run:
 
 ```bash
-git clone https://github.com/bitcoin-sv/template
+go install github.com/bitcoin-sv/go-sdk
 ```
 
 ### Basic Usage
 
+Here's a simple example of using the SDK to create and sign a transaction:
 
-```typescript
+```go
 // TODO: Code Example Will Go Here
 ```
 
@@ -38,24 +37,32 @@ For a more detailed tutorial and advanced examples, check our [Documentation](#d
 
 ## Features & Deliverables
 
-- **Main Project Feature**: Description of the feature
-
-- **Main Project Feature 2**: Description of the feature
-
-- **Secondary Project Feature**: Description of the feature
+- **Sound Cryptographic Primitives**: Secure key management, signature computations, and encryption protocols.
+  
+- **Script Level Constructs**: Network-compliant script interpreter with support for custom scripts and serialization formats.
+  
+- **Transaction Construction and Signing**: Comprehensive transaction builder API, ensuring versatile and secure transaction creation.
+  
+- **Transaction Broadcast Management**: Mechanisms to send transactions to both miners and overlays, ensuring extensibility and future-proofing.
+  
+- **Merkle Proof Verification**: Tools for representing and verifying merkle proofs, adhering to various serialization standards.
+  
+- **Serializable SPV Structures**: Structures and interfaces for full SPV verification.
+  
+- **Secure Encryption and Signed Messages**: Enhanced mechanisms for encryption and digital signatures, replacing outdated methods.
 
 ## Documentation
 
-Provide detailed information and links to the various places the project is documented, including concepts, getting started guides, tutorials, and API specifications.
+The SDK is richly documented with code-level annotations. This should show up well within editors like VSCode. For complete API docs, check out [API.md](./API.md). Please refer to the [Libraries Wiki](#) (link to be provided) for a deep dive into each feature, tutorials, and usage examples.
 
 ## Contribution Guidelines
 
-We're always looking for contributors to help us improve the project. Whether it's bug reports, feature requests, or pull requests - all contributions are welcome.
+We're always looking for contributors to help us improve the SDK. Whether it's bug reports, feature requests, or pull requests - all contributions are welcome.
 
 1. **Fork & Clone**: Fork this repository and clone it to your local machine.
-2. **Set Up**: Run `npm install` to install all dependencies.
+2. **Set Up**: Run `go get github.com/bitcoin-sv/go-sdk` to get all the modules.
 3. **Make Changes**: Create a new branch and make your changes.
-4. **Test**: Ensure all tests pass by running `npm test`.
+4. **Test**: Ensure all tests pass by running `go test ./...`.
 5. **Commit**: Commit your changes and push to your fork.
 6. **Pull Request**: Open a pull request from your fork to this repository.
 
@@ -65,9 +72,9 @@ For information on past releases, check out the [changelog](./CHANGELOG.md). For
 
 ## Support & Contacts
 
-Project Owners: `<names and email addresses>`
+Project Owners: Thomas Giacomo and Darren Kellenschwiler
 
-Development Team Lead: `<name and email>`
+Development Team Lead: TBD
 
 For questions, bug reports, or feature requests, please open an issue on GitHub or contact us directly.
 
@@ -75,4 +82,4 @@ For questions, bug reports, or feature requests, please open an issue on GitHub 
 
 The license for the code in this repository is the Open BSV License. Refer to [LICENSE.txt](./LICENSE.txt) for the license text.
 
-Thank you for being a part of the BSV Blockchain ecosystem. Let's build the future of BSV Blockchain together!
+Thank you for being a part of the BSV Blockchain Libraries Project. Let's build the future of BSV Blockchain together!
