@@ -3,6 +3,10 @@ package ec
 import (
 	"bytes"
 	"encoding/hex"
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"runtime"
 	"strconv"
 	"testing"
 )
@@ -53,33 +57,43 @@ func TestPrivKeys(t *testing.T) {
 }
 
 // Test vector struct
-type testVector struct {
+type privateTestVector struct {
 	senderPublicKey     string
 	recipientPrivateKey string
 	invoiceNumber       string
 	expectedPrivateKey  string
 }
 
-// Test vectors
-var testVectors = []testVector{
-	{
-		senderPublicKey:     "033f9160df035156f1c48e75eae99914fa1a1546bec19781e8eddb900200bff9d1",
-		recipientPrivateKey: "6a1751169c111b4667a6539ee1be6b7cd9f6e9c8fe011a5f2fe31e03a15e0ede",
-		invoiceNumber:       "f3WCaUmnN9U=",
-		expectedPrivateKey:  "761656715bbfa172f8f9f58f5af95d9d0dfd69014cfdcacc9a245a10ff8893ef",
-	},
-	// Add the remaining vectors...
-}
+func TestBRC42PrivateVectors(t *testing.T) {
+	// Determine the directory of the current test file
+	_, currentFile, _, _ := runtime.Caller(0)
+	testdataPath := filepath.Join(filepath.Dir(currentFile), "testdata", "BRC42.private.vectors.json")
 
-func TestBRC42Vectors(t *testing.T) {
+	// Read in the file
+	vectors, err := os.ReadFile(testdataPath)
+	if err != nil {
+		t.Fatalf("Could not read test vectors: %v", err) // use Fatalf to stop test if file cannot be read
+	}
+	// unmarshal the json
+	var testVectors []privateTestVector
+	err = json.Unmarshal(vectors, &testVectors)
+	if err != nil {
+		t.Errorf("Could not unmarshal test vectors: %v", err)
+	}
 	for i, v := range testVectors {
 		t.Run("BRC42 private vector #"+strconv.Itoa(i+1), func(t *testing.T) {
-			publicKey := PublicKeyFromString(v.senderPublicKey)
+			publicKey, err := PublicKeyFromString(v.senderPublicKey)
+			if err != nil {
+				t.Errorf("Could not parse public key: %v", err)
+			}
 			privateKey, err := PrivateKeyFromString(v.recipientPrivateKey)
 			if err != nil {
 				t.Errorf("Could not parse private key: %v", err)
 			}
-			derived := privateKey.DeriveChild(publicKey, v.invoiceNumber)
+			derived, err := privateKey.DeriveChild(publicKey, v.invoiceNumber)
+			if err != nil {
+				t.Errorf("Could not derive child key: %v", err)
+			}
 
 			// Convert derived private key to hex and compare
 			derivedHex := hex.EncodeToString(derived.Serialise())

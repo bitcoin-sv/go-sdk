@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+
+	"github.com/bitcoin-sv/go-sdk/crypto"
 )
 
 // These constants define the lengths of serialised public keys.
@@ -191,40 +193,24 @@ func paddedAppend(size uint, dst, src []byte) []byte { //nolint:unparam //
 }
 
 // PublicKeyFromString returns a PublicKey from a hex string.
-func PublicKeyFromString(pubKeyHex string) *PublicKey {
-	pubKeyBytes, _ := hex.DecodeString(pubKeyHex)
-	pubKey, _ := ParsePubKey(pubKeyBytes, S256())
-	return pubKey
-}
-
-// PrivateKey is an ecdsa.PrivateKey with additional functions to
-func PrivateKeyFromString(privKeyHex string) (*PrivateKey, error) {
-	privKeyBytes, _ := hex.DecodeString(privKeyHex)
-	privKey, _ := PrivateKeyFromBytes(S256(), privKeyBytes)
-	return privKey, nil
+func PublicKeyFromString(pubKeyHex string) (*PublicKey, error) {
+	pubKeyBytes, err := hex.DecodeString(pubKeyHex)
+	if err != nil {
+		return nil, err
+	}
+	pubKey, err := ParsePubKey(pubKeyBytes, S256())
+	if err != nil {
+		return nil, err
+	}
+	return pubKey, nil
 }
 
 // validate key belongs on given curve
 func (p *PublicKey) Validate() bool {
-	// TODO: this doesnt work
-	// _, err := x509.ParsePKIXPublicKey(p.SerialiseUncompressed())
-	// return err == nil
 	return p.Curve.IsOnCurve(p.X, p.Y)
 }
 
-// /**
-//  * Multiplies this Point by a scalar value, returning a new Point.
-//  *
-//  * @method mul
-//  * @param k - The scalar value to multiply this Point by.
-//  * @returns  A new Point that results from the multiplication.
-//  *
-//  * @example
-//  * const p = new Point(1, 2);
-//  * const result = p.mul(2); // this doubles the Point
-//  */
-//  mul (k: BigNumber | number | number[] | string): PublicKey {
-
+// Multiplies this Point by a scalar value
 func (p *PublicKey) Mul(k *big.Int) *PublicKey {
 	x, y := p.Curve.ScalarMult(p.X, p.Y, k.Bytes())
 	return &PublicKey{
@@ -258,4 +244,39 @@ func (p *PublicKey) encode(compact bool) ([]byte, error) {
 
 	// Non-compact format
 	return append(append([]byte{0x04}, xBytes...), yBytes...), nil
+}
+
+func (p *PublicKey) ToDER() string {
+	encoded, _ := p.encode(true)
+	return hex.EncodeToString(encoded)
+}
+
+func (p *PublicKey) DeriveChild(privateKey PrivateKey, invoiceNumber string) (error, *PublicKey) {
+
+	sharedSecret, err := p.deriveSharedSecret(privateKey)
+	if err != nil {
+		return err, nil
+	}
+	invoiceNumberBin := []byte(invoiceNumber)
+	pubKeyEncoded, _ := sharedSecret.encode(true)
+	hmac := crypto.Sha256HMAC(pubKeyEncoded, invoiceNumberBin)
+	curve := S256()
+	hmacBigint := new(big.Int).SetBytes(hmac)
+	privBigint := new(big.Int).SetBytes(privateKey.Serialise())
+	privBigint.Add(privBigint, hmacBigint)
+	privBigint.Mod(privBigint, curve.Params().N)
+	_, pubKey := PrivateKeyFromBytes(curve, privBigint.Bytes())
+	if !pubKey.Validate() {
+		panic("Public key is not on the curve")
+	}
+	return nil, pubKey
+
+}
+
+func (p *PublicKey) deriveSharedSecret(priv PrivateKey) (*PublicKey, error) {
+	if !p.IsOnCurve(p.X, p.Y) {
+		// throw new Error('Public key not valid for ECDH secret derivation')
+		return nil, errors.New("public key not valid for ECDH secret derivation")
+	}
+	return p.Mul(priv.D), nil
 }

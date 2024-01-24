@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/hex"
 	"fmt"
-	"math/big"
 
 	"github.com/bitcoin-sv/go-sdk/crypto"
 	"github.com/bitcoin-sv/go-sdk/ec"
@@ -16,16 +15,17 @@ func deriveMessagePoint(message []byte) (ec.Point, string, error) {
 	cId := hex.EncodeToString(hash[:])
 
 	// Convert hash to a big integer
-	mBn := new(big.Int).SetBytes(hash[:])
+	// mBn := new(big.Int).SetBytes(hash[:])
 
 	// Get the generator point of the elliptic curve
 	curve := ec.S256()
 	Gx, Gy := curve.Params().Gx, curve.Params().Gy
 
+	// TODO: Dont multiple by a random hash
 	// Multiply the hash big integer with the generator point
-	Mx, My := curve.ScalarMult(Gx, Gy, mBn.Bytes())
+	// Mx, My := curve.ScalarMult(Gx, Gy, mBn.Bytes())
 
-	return ec.Point{X: Mx, Y: My}, cId, nil
+	return ec.Point{X: Gx, Y: Gy}, cId, nil
 }
 
 func main() {

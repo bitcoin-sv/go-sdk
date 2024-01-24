@@ -4,6 +4,8 @@ import (
 	e "crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"encoding/hex"
+	"fmt"
 	"math/big"
 
 	"github.com/bitcoin-sv/go-sdk/crypto"
@@ -17,9 +19,7 @@ type PrivateKey e.PrivateKey
 // PrivateKeyFromBytes returns a private and public key for `curve' based on the
 // private key passed as an argument as a byte slice.
 func PrivateKeyFromBytes(curve elliptic.Curve, pk []byte) (*PrivateKey, *PublicKey) {
-
 	x, y := curve.ScalarBaseMult(pk)
-
 	priv := &e.PrivateKey{
 		PublicKey: e.PublicKey{
 			Curve: curve,
@@ -28,7 +28,6 @@ func PrivateKeyFromBytes(curve elliptic.Curve, pk []byte) (*PrivateKey, *PublicK
 		},
 		D: new(big.Int).SetBytes(pk),
 	}
-
 	return (*PrivateKey)(priv), (*PublicKey)(&priv.PublicKey)
 }
 
@@ -40,6 +39,13 @@ func NewPrivateKey(curve elliptic.Curve) (*PrivateKey, error) {
 		return nil, err
 	}
 	return (*PrivateKey)(key), nil
+}
+
+// PrivateKey is an ecdsa.PrivateKey with additional functions to
+func PrivateKeyFromString(privKeyHex string) (*PrivateKey, error) {
+	privKeyBytes, _ := hex.DecodeString(privKeyHex)
+	privKey, _ := PrivateKeyFromBytes(S256(), privKeyBytes)
+	return privKey, nil
 }
 
 // PubKey returns the PublicKey corresponding to this private key.
@@ -70,24 +76,27 @@ func (p *PrivateKey) Serialise() []byte {
 	return paddedAppend(PrivateKeyBytesLen, b, p.ToECDSA().D.Bytes())
 }
 
-func (p *PrivateKey) deriveSharedSecret(key *PublicKey) *PrivateKey {
+func (p *PrivateKey) deriveSharedSecret(key *PublicKey) (*PrivateKey, error) {
 	if !key.Validate() {
-		panic("Public key is not on the curve")
+		return nil, fmt.Errorf("public key is not on the curve")
 	}
 	// x or y can be used as the shared secret
 	x, _ := SharedSecret(p, key)
 	priv, _ := PrivateKeyFromBytes(S256(), x)
-	return priv
-	// pBigint := new(big.Int).SetBytes(p.Serialise())
-	// return key.Mul(pBigint)
+	return priv, nil
 }
 
 // Derives a child key with BRC-42
-func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) *PrivateKey {
-	// return p.deriveSharedSecret(pub)
-	sharedSecret := p.deriveSharedSecret(pub)
+func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*PrivateKey, error) {
+	sharedSecret, err := p.deriveSharedSecret(pub)
+	if err != nil {
+		return nil, err
+	}
 	invoiceNumberBin := []byte(invoiceNumber)
-	pubKeyEncoded, _ := sharedSecret.PubKey().encode(true)
+	pubKeyEncoded, err := sharedSecret.PubKey().encode(true)
+	if err != nil {
+		return nil, err
+	}
 	hmac := crypto.Sha256HMAC(pubKeyEncoded, invoiceNumberBin)
 	curve := S256()
 	hmacBigint := new(big.Int).SetBytes(hmac)
@@ -96,9 +105,9 @@ func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) *PrivateK
 	privBigint.Mod(privBigint, curve.Params().N)
 	privKey, pubKey := PrivateKeyFromBytes(curve, privBigint.Bytes())
 	if !pubKey.Validate() {
-		panic("Public key is not on the curve")
+		return nil, fmt.Errorf("public key is not on the curve")
 	}
-	return privKey
+	return privKey, nil
 }
 
 func SharedSecret(privKeyA *PrivateKey, pubKeyB *PublicKey) ([]byte, []byte) {

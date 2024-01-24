@@ -6,6 +6,11 @@ package ec
 
 import (
 	"bytes"
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"runtime"
+	"strconv"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -292,5 +297,55 @@ func TestIsCompressed(t *testing.T) {
 				"got %v, want %v", test.name, test.key,
 				isCompressed, wantCompressed)
 		}
+	}
+}
+
+type publicTestVector struct {
+	senderPrivateKey   string
+	recipientPublicKey string
+	invoiceNumber      string
+	expectedPublicKey  string
+}
+
+func TestBRC42PublicVectors(t *testing.T) {
+	// Determine the directory of the current test file
+	_, currentFile, _, _ := runtime.Caller(0)
+	testdataPath := filepath.Join(filepath.Dir(currentFile), "testdata", "BRC42.public.vectors.json")
+
+	// Read in the file
+	vectors, err := os.ReadFile(testdataPath)
+	if err != nil {
+		t.Fatalf("Could not read test vectors: %v", err)
+	}
+
+	// Unmarshal the json
+	var testVectors []publicTestVector
+	err = json.Unmarshal(vectors, &testVectors)
+	if err != nil {
+		t.Errorf("Could not unmarshal test vectors: %v", err)
+	}
+
+	for i, v := range testVectors {
+		t.Run("BRC42 public vector #"+strconv.Itoa(i+1), func(t *testing.T) {
+			privateKey, err := PrivateKeyFromString(v.senderPrivateKey)
+			if err != nil {
+				t.Errorf("Could not parse private key: %v", err)
+			}
+			publicKey, err := PublicKeyFromString(v.recipientPublicKey)
+			if err != nil {
+				t.Errorf("Could not parse public key: %v", err)
+			}
+
+			derived, err := privateKey.DeriveChild(publicKey, v.invoiceNumber) // Adjust this line according to your actual implementation
+			if err != nil {
+				t.Errorf("Could not derive child: %v", err)
+			}
+
+			// Convert derived public key to string/hex and compare
+			derivedStr := derived.PubKey().ToDER() // Adjust this line according to your actual implementation
+			if derivedStr != v.expectedPublicKey {
+				t.Errorf("Derived public key does not match expected: got %v, want %v", derivedStr, v.expectedPublicKey)
+			}
+		})
 	}
 }
