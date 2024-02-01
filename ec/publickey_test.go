@@ -307,6 +307,7 @@ type publicTestVector struct {
 	expectedPublicKey  string
 }
 
+// FIXME: these tests are not passing yet
 func TestBRC42PublicVectors(t *testing.T) {
 	// Determine the directory of the current test file
 	_, currentFile, _, _ := runtime.Caller(0)

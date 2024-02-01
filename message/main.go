@@ -8,6 +8,7 @@ import (
 	"github.com/bitcoin-sv/go-sdk/ec"
 )
 
+// FIXME: This is just sample code - need to implement messaging standard
 // deriveMessagePoint takes a message, hashes it, and maps it to a point on the elliptic curve.
 func deriveMessagePoint(message []byte) (ec.Point, string, error) {
 	// Hash the message using SHA-256
