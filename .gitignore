@@ -1,0 +1,36 @@
+# Ignore compiled binaries
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Ignore dependencies
+/node_modules
+/vendor
+
+# Ignore build artifacts
+/build
+/dist
+
+# Ignore logs and temporary files
+/logs
+/tmp
+
+# Ignore IDE and editor specific files
+.idea
+*.sublime-project
+*.sublime-workspace
+
+# Ignore system files
+.DS_Store
+Thumbs.db
+
+# Ignore sensitive or environment-specific information
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Ignore any other files or directories specific to your project
