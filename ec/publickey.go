@@ -251,31 +251,27 @@ func (p *PublicKey) ToDER() string {
 	return hex.EncodeToString(encoded)
 }
 
-func (p *PublicKey) DeriveChild(privateKey PrivateKey, invoiceNumber string) (error, *PublicKey) {
-
+func (p *PublicKey) DeriveChild(privateKey *PrivateKey, invoiceNumber string) (*PublicKey, error) {
+	invoiceNumberBin := []byte(invoiceNumber)
 	sharedSecret, err := p.deriveSharedSecret(privateKey)
 	if err != nil {
-		return err, nil
+		return nil, err
 	}
-	invoiceNumberBin := []byte(invoiceNumber)
 	pubKeyEncoded, _ := sharedSecret.encode(true)
-	hmac := crypto.Sha256HMAC(pubKeyEncoded, invoiceNumberBin)
-	curve := S256()
-	hmacBigint := new(big.Int).SetBytes(hmac)
-	privBigint := new(big.Int).SetBytes(privateKey.Serialise())
-	privBigint.Add(privBigint, hmacBigint)
-	privBigint.Mod(privBigint, curve.Params().N)
-	_, pubKey := PrivateKeyFromBytes(curve, privBigint.Bytes())
-	if !pubKey.Validate() {
-		panic("Public key is not on the curve")
-	}
-	return nil, pubKey
+	hmac := crypto.Sha256HMAC(invoiceNumberBin, pubKeyEncoded)
+
+	newPointX, newPointY := S256().ScalarBaseMult(hmac)
+	newPubKeyX, newPubKeyY := S256().Add(newPointX, newPointY, p.X, p.Y)
+	return &PublicKey{
+		Curve: S256(),
+		X:     newPubKeyX,
+		Y:     newPubKeyY,
+	}, nil
 
 }
 
-func (p *PublicKey) deriveSharedSecret(priv PrivateKey) (*PublicKey, error) {
+func (p *PublicKey) deriveSharedSecret(priv *PrivateKey) (*PublicKey, error) {
 	if !p.IsOnCurve(p.X, p.Y) {
-		// throw new Error('Public key not valid for ECDH secret derivation')
 		return nil, errors.New("public key not valid for ECDH secret derivation")
 	}
 	return p.Mul(priv.D), nil

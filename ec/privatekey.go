@@ -105,6 +105,7 @@ func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*Private
 	return privKey, nil
 }
 
+// FIXME: delete? where is this used?
 func SharedSecret(privKeyA *PrivateKey, pubKeyB *PublicKey) ([]byte, []byte) {
 	curve := S256()
 	x, y := curve.ScalarMult(pubKeyB.X, pubKeyB.Y, privKeyA.D.Bytes())
