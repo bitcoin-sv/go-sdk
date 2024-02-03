@@ -76,37 +76,32 @@ func (p *PrivateKey) Serialise() []byte {
 	return paddedAppend(PrivateKeyBytesLen, b, p.ToECDSA().D.Bytes())
 }
 
-func (p *PrivateKey) deriveSharedSecret(key *PublicKey) (*PrivateKey, error) {
+func (p *PrivateKey) deriveSharedSecret(key *PublicKey) (*PublicKey, error) {
 	if !key.Validate() {
 		return nil, fmt.Errorf("public key is not on the curve")
 	}
-	// x or y can be used as the shared secret
-	x, _ := SharedSecret(p, key)
-	priv, _ := PrivateKeyFromBytes(S256(), x)
-	return priv, nil
+	return key.Mul(p.D), nil
 }
 
 // Derives a child key with BRC-42
+//
+// See BRC-42 spec here: https://github.com/bitcoin-sv/BRCs/blob/master/key-derivation/0042.md
 func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*PrivateKey, error) {
+	invoiceNumberBin := []byte(invoiceNumber)
 	sharedSecret, err := p.deriveSharedSecret(pub)
 	if err != nil {
 		return nil, err
 	}
-	invoiceNumberBin := []byte(invoiceNumber)
-	pubKeyEncoded, err := sharedSecret.PubKey().encode(true)
+	pubKeyEncoded, err := sharedSecret.encode(true)
 	if err != nil {
 		return nil, err
 	}
-	hmac := crypto.Sha256HMAC(pubKeyEncoded, invoiceNumberBin)
-	curve := S256()
-	hmacBigint := new(big.Int).SetBytes(hmac)
-	privBigint := new(big.Int).SetBytes(p.Serialise())
-	privBigint.Add(privBigint, hmacBigint)
-	privBigint.Mod(privBigint, curve.Params().N)
-	privKey, pubKey := PrivateKeyFromBytes(curve, privBigint.Bytes())
-	if !pubKey.Validate() {
-		return nil, fmt.Errorf("public key is not on the curve")
-	}
+	hmac := crypto.Sha256HMAC(invoiceNumberBin, pubKeyEncoded)
+
+	newPrivKey := new(big.Int)
+	newPrivKey.Add(p.D, new(big.Int).SetBytes(hmac))
+	newPrivKey.Mod(newPrivKey, S256().N)
+	privKey, _ := PrivateKeyFromBytes(S256(), newPrivKey.Bytes())
 	return privKey, nil
 }
 
