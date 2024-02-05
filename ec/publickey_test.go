@@ -6,6 +6,7 @@ package ec
 
 import (
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -301,13 +302,12 @@ func TestIsCompressed(t *testing.T) {
 }
 
 type publicTestVector struct {
-	senderPrivateKey   string
-	recipientPublicKey string
-	invoiceNumber      string
-	expectedPublicKey  string
+	SenderPrivateKey   string `json:"senderPrivateKey"`
+	RecipientPublicKey string `json:"recipientPublicKey"`
+	InvoiceNumber      string `json:"invoiceNumber"`
+	ExpectedPublicKey  string `json:"publicKey"`
 }
 
-// FIXME: these tests are not passing yet
 func TestBRC42PublicVectors(t *testing.T) {
 	// Determine the directory of the current test file
 	_, currentFile, _, _ := runtime.Caller(0)
@@ -328,24 +328,24 @@ func TestBRC42PublicVectors(t *testing.T) {
 
 	for i, v := range testVectors {
 		t.Run("BRC42 public vector #"+strconv.Itoa(i+1), func(t *testing.T) {
-			privateKey, err := PrivateKeyFromString(v.senderPrivateKey)
+			privateKey, err := PrivateKeyFromString(v.SenderPrivateKey)
 			if err != nil {
 				t.Errorf("Could not parse private key: %v", err)
 			}
-			publicKey, err := PublicKeyFromString(v.recipientPublicKey)
+			publicKey, err := PublicKeyFromString(v.RecipientPublicKey)
 			if err != nil {
 				t.Errorf("Could not parse public key: %v", err)
 			}
 
-			derived, err := privateKey.DeriveChild(publicKey, v.invoiceNumber) // Adjust this line according to your actual implementation
+			derived, err := publicKey.DeriveChild(privateKey, v.InvoiceNumber)
 			if err != nil {
 				t.Errorf("Could not derive child: %v", err)
 			}
 
 			// Convert derived public key to string/hex and compare
-			derivedStr := derived.PubKey().ToDER() // Adjust this line according to your actual implementation
-			if derivedStr != v.expectedPublicKey {
-				t.Errorf("Derived public key does not match expected: got %v, want %v", derivedStr, v.expectedPublicKey)
+			derivedStr := hex.EncodeToString(derived.SerialiseCompressed())
+			if derivedStr != v.ExpectedPublicKey {
+				t.Errorf("Derived public key does not match expected: got %v, want %v", derivedStr, v.ExpectedPublicKey)
 			}
 		})
 	}

@@ -58,13 +58,12 @@ func TestPrivKeys(t *testing.T) {
 
 // Test vector struct
 type privateTestVector struct {
-	senderPublicKey     string
-	recipientPrivateKey string
-	invoiceNumber       string
-	expectedPrivateKey  string
+	SenderPublicKey     string `json:"senderPublicKey"`
+	RecipientPrivateKey string `json:"recipientPrivateKey"`
+	InvoiceNumber       string `json:"invoiceNumber"`
+	ExpectedPrivateKey  string `json:"privateKey"`
 }
 
-// FIXME: these tests are not passing yet
 func TestBRC42PrivateVectors(t *testing.T) {
 	// Determine the directory of the current test file
 	_, currentFile, _, _ := runtime.Caller(0)
@@ -83,23 +82,23 @@ func TestBRC42PrivateVectors(t *testing.T) {
 	}
 	for i, v := range testVectors {
 		t.Run("BRC42 private vector #"+strconv.Itoa(i+1), func(t *testing.T) {
-			publicKey, err := PublicKeyFromString(v.senderPublicKey)
+			publicKey, err := PublicKeyFromString(v.SenderPublicKey)
 			if err != nil {
 				t.Errorf("Could not parse public key: %v", err)
 			}
-			privateKey, err := PrivateKeyFromString(v.recipientPrivateKey)
+			privateKey, err := PrivateKeyFromString(v.RecipientPrivateKey)
 			if err != nil {
 				t.Errorf("Could not parse private key: %v", err)
 			}
-			derived, err := privateKey.DeriveChild(publicKey, v.invoiceNumber)
+			derived, err := privateKey.DeriveChild(publicKey, v.InvoiceNumber)
 			if err != nil {
 				t.Errorf("Could not derive child key: %v", err)
 			}
 
 			// Convert derived private key to hex and compare
 			derivedHex := hex.EncodeToString(derived.Serialise())
-			if derivedHex != v.expectedPrivateKey {
-				t.Errorf("Derived private key does not match expected: got %v, want %v", derivedHex, v.expectedPrivateKey)
+			if derivedHex != v.ExpectedPrivateKey {
+				t.Errorf("Derived private key does not match expected: got %v, want %v", derivedHex, v.ExpectedPrivateKey)
 			}
 		})
 	}
