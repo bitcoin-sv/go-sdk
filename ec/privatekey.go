@@ -76,7 +76,7 @@ func (p *PrivateKey) Serialise() []byte {
 	return paddedAppend(PrivateKeyBytesLen, b, p.ToECDSA().D.Bytes())
 }
 
-func (p *PrivateKey) deriveSharedSecret(key *PublicKey) (*PublicKey, error) {
+func (p *PrivateKey) DeriveSharedSecret(key *PublicKey) (*PublicKey, error) {
 	if !key.Validate() {
 		return nil, fmt.Errorf("public key is not on the curve")
 	}
@@ -88,7 +88,7 @@ func (p *PrivateKey) deriveSharedSecret(key *PublicKey) (*PublicKey, error) {
 // See BRC-42 spec here: https://github.com/bitcoin-sv/BRCs/blob/master/key-derivation/0042.md
 func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*PrivateKey, error) {
 	invoiceNumberBin := []byte(invoiceNumber)
-	sharedSecret, err := p.deriveSharedSecret(pub)
+	sharedSecret, err := p.DeriveSharedSecret(pub)
 	if err != nil {
 		return nil, err
 	}
