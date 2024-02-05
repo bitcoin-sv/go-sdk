@@ -267,7 +267,6 @@ func (p *PublicKey) DeriveChild(privateKey *PrivateKey, invoiceNumber string) (*
 		X:     newPubKeyX,
 		Y:     newPubKeyY,
 	}, nil
-
 }
 
 // TODO: refactor to have 1 function for both private and public key
@@ -275,7 +274,13 @@ func (p *PublicKey) DeriveChild(privateKey *PrivateKey, invoiceNumber string) (*
 // and public key
 func (p *PublicKey) DeriveSharedSecret(priv *PrivateKey) (*PublicKey, error) {
 	if !p.IsOnCurve(p.X, p.Y) {
-		return nil, errors.New("public key not valid for ECDH secret derivation")
+		return nil, errors.New("public key not valid for secret derivation")
 	}
 	return p.Mul(priv.D), nil
+}
+
+// Verify a signature of a message using this public key.
+func (p *PublicKey) Verify(msg []byte, sig *Signature) bool {
+	msgHash := crypto.Sha256(msg)
+	return sig.Verify(msgHash, p)
 }
