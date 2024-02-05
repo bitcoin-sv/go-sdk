@@ -11,42 +11,24 @@ import (
 )
 
 // BRC-78: https://github.com/bitcoin-sv/BRCs/blob/master/peer-to-peer/0078.md
-
 const VERSION = "42421033"
 
-type Message struct {
-	version         []byte
-	senderPublicKey []byte
-	recipient       []byte
-	keyID           []byte
-	encrypted       []byte
-}
-
 // Encrypt encrypts a message using the sender's private key and the recipient's public key.
-func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) (*Message, error) {
-	// secure random 32 bytes
+func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]byte, error) {
 	var keyID [8]byte
 	if _, err := rand.Read(keyID[:]); err != nil {
 		return nil, err
 	}
-	// golang - convert to base64
 	keyIDBase64 := hex.EncodeToString(keyID[:])
-	// TODO: Look into this - TS library is using this pattern. Might be definied in the
 	invoiceNumber := "2-message encryption-" + keyIDBase64
-
-	// Derive a signing key
 	signingPriv, err := sender.DeriveChild(recipient, invoiceNumber)
 	if err != nil {
 		return nil, err
 	}
-	//	const recipientPub = recipient.deriveChild(sender, invoiceNumber)
-	//
-	// convert from typescript above
 	recipientPub, err := recipient.DeriveChild(sender, invoiceNumber)
 	if err != nil {
 		return nil, err
 	}
-
 	sharedSecret, err := signingPriv.DeriveSharedSecret(recipientPub)
 	if err != nil {
 		return nil, err
@@ -78,49 +60,15 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) (*M
 		return nil, err
 	}
 
-	return &Message{
-		version:         version,
-		senderPublicKey: sender.PubKey().SerialiseCompressed(),
-		recipient:       recipient.SerialiseCompressed(),
-		keyID:           keyID[:],
-		encrypted:       cyphertext,
-	}, nil
+	senderPublicKey := sender.PubKey().SerialiseCompressed()
+	recipientDER := recipient.SerialiseCompressed()
 
+	encryptedMessage := append(version, senderPublicKey...)
+	encryptedMessage = append(encryptedMessage, recipientDER...)
+	encryptedMessage = append(encryptedMessage, keyID[:8]...)
+	encryptedMessage = append(encryptedMessage, cyphertext...)
+	return encryptedMessage, nil
 }
-
-// FIXME: This is just sample code - need to implement messaging standard
-// deriveMessagePoint takes a message, hashes it, and maps it to a point on the elliptic curve.
-// func deriveMessagePoint(message []byte) (ec.Point, string, error) {
-// 	// Hash the message using SHA-256
-// 	hash := crypto.Sha256(message)
-// 	cId := hex.EncodeToString(hash[:])
-
-// 	// Convert hash to a big integer
-// 	// mBn := new(big.Int).SetBytes(hash[:])
-
-// 	// Get the generator point of the elliptic curve
-// 	curve := ec.S256()
-// 	Gx, Gy := curve.Params().Gx, curve.Params().Gy
-
-// 	// TODO: Dont multiple by a random hash
-// 	// Multiply the hash big integer with the generator point
-// 	// Mx, My := curve.ScalarMult(Gx, Gy, mBn.Bytes())
-
-// 	return ec.Point{X: Gx, Y: Gy}, cId, nil
-// }
-
-// func main() {
-// 	// Example usage
-// 	message := []byte("Hello, World!")
-// 	point, cId, err := deriveMessagePoint(message)
-// 	if err != nil {
-// 		panic(err)
-// 	}
-
-// 	// Output the results
-// 	fmt.Printf("Message Point: (%s, %s)\n", point.X.String(), point.Y.String())
-// 	fmt.Printf("cId: %s\n", cId)
-// }
 
 // /**
 //   - Decrypts a message from one party to another using the BRC-78 message encryption protocol.

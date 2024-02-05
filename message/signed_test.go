@@ -62,21 +62,15 @@ import (
 // })
 
 func TestSignMessage(t *testing.T) {
-	sender, err := ec.NewPrivateKey(ec.S256())
-	if err != nil {
-		t.Error(err)
-	}
-	recipient, err := ec.NewPrivateKey(ec.S256())
-	if err != nil {
-		t.Error(err)
-	}
-	recipientPub := recipient.PubKey()
+	senderPriv, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{15})
+	recipientPriv, recipientPub := ec.PrivateKeyFromBytes(ec.S256(), []byte{21})
+
 	message := []byte{1, 2, 4, 8, 16, 32}
-	signature, err := Sign(message, sender, recipientPub)
+	signature, err := Sign(message, senderPriv, recipientPub)
 	if err != nil {
 		t.Error(err)
 	}
-	verified, err := Verify(message, signature, recipient)
+	verified, err := Verify(message, signature, recipientPriv)
 	if err != nil {
 		t.Error(err)
 	}
