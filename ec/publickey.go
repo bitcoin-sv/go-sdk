@@ -270,6 +270,9 @@ func (p *PublicKey) DeriveChild(privateKey *PrivateKey, invoiceNumber string) (*
 
 }
 
+// TODO: refactor to have 1 function for both private and public key
+// call it multiply point with scalar or something and pass in private key
+// and public key
 func (p *PublicKey) deriveSharedSecret(priv *PrivateKey) (*PublicKey, error) {
 	if !p.IsOnCurve(p.X, p.Y) {
 		return nil, errors.New("public key not valid for ECDH secret derivation")
