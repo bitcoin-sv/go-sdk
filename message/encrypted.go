@@ -11,6 +11,7 @@ import (
 )
 
 // BRC-78: https://github.com/bitcoin-sv/BRCs/blob/master/peer-to-peer/0078.md
+// TODO: According to spec this should be 0x10334242
 const VERSION = "42421033"
 
 // Encrypt encrypts a message using the sender's private key and the recipient's public key.
@@ -33,15 +34,12 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 	if err != nil {
 		return nil, err
 	}
-	// FIXME - nonce is not being set correctly
-	nonce := make([]byte, 12)
+
+	nonce := make([]byte, 0)
 	cyphertext, _, err := aesgcm.EncryptGCM(message, nonce, sharedSecret.SerialiseCompressed(), keyID[:])
 	if err != nil {
 		return nil, err
 	}
-
-	// derive a shared secret
-	// sharedSecret, err := signingPriv.ECDH(recipientPub)
 
 	// const symmetricKey = new SymmetricKey(sharedSecret.encode(true).slice(1))
 	// const encrypted = symmetricKey.encrypt(message) as number[]

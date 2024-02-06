@@ -1,0 +1,45 @@
+package ec
+
+import (
+	"crypto/rand"
+
+	"github.com/bitcoin-sv/go-sdk/aesgcm"
+)
+
+// FIXME: Incomplete implementation
+type SymmetricKey struct {
+	key []byte
+}
+
+func (s *SymmetricKey) Encrypt(message []byte) (ciphertext []byte, err error) {
+	iv := make([]byte, 32)
+	rand.Read(iv)
+	cipertext, tag, err := aesgcm.EncryptGCM(message, iv, s.ToBytes(), []byte{})
+	if err != nil {
+		return nil, err
+	}
+	return append(append(iv, cipertext...), tag...), nil
+}
+
+func (s *SymmetricKey) Decrypt(message []byte) (plaintext []byte, err error) {
+	iv := message[:32]
+	ciphertext := message[32 : len(message)-16]
+	tag := message[len(message)-16:]
+	plaintext, err = aesgcm.DecryptGCM(ciphertext, iv, s.ToBytes(), tag, []byte{})
+	if err != nil {
+		return nil, err
+	}
+	return plaintext, nil
+}
+
+func (s *SymmetricKey) ToBytes() []byte {
+	return s.key
+}
+
+func (s *SymmetricKey) FromBytes(b []byte) *SymmetricKey {
+	return &SymmetricKey{key: b}
+}
+
+func NewSymmetricKey(key []byte) *SymmetricKey {
+	return &SymmetricKey{key: key}
+}
