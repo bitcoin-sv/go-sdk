@@ -2,6 +2,8 @@ package ec
 
 import (
 	"crypto/rand"
+	"encoding/base64"
+	"log"
 
 	"github.com/bitcoin-sv/go-sdk/aesgcm"
 )
@@ -42,4 +44,13 @@ func (s *SymmetricKey) FromBytes(b []byte) *SymmetricKey {
 
 func NewSymmetricKey(key []byte) *SymmetricKey {
 	return &SymmetricKey{key: key}
+}
+
+func NewSymmetricKeyFromString(keyBase64String string) *SymmetricKey {
+	// Decode the Base64 string to bytes
+	keyBytes, err := base64.StdEncoding.DecodeString(keyBase64String)
+	if err != nil {
+		log.Fatalf("Failed to decode Base64 symmetric key string: %v", err)
+	}
+	return &SymmetricKey{key: keyBytes}
 }
