@@ -5,12 +5,11 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/ec"
+	"github.com/bitcoin-sv/go-sdk/ec/wif"
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
-
-	"github.com/libsv/go-bk/wif"
 
 	"github.com/stretchr/testify/assert"
 )
