@@ -10,7 +10,6 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/crypto"
 	"github.com/bitcoin-sv/go-sdk/script"
-	// "github.com/libsv/go-bt/bscript"
 )
 
 type Transaction struct {
@@ -326,7 +325,7 @@ func (tx *Transaction) Clone() *Transaction {
 //	tx := bt.NewTx()
 //	if err := json.Unmarshal(bb, tx.NodeJSON()); err != nil {}
 func (tx *Transaction) NodeJSON() interface{} {
-	return &nodeTxWrapper{Tx: tx}
+	return &nodeTxWrapper{Transaction: tx}
 }
 
 // NodeJSON returns a wrapped bt.Txs for marshalling/unmarshalling into a node tx format.

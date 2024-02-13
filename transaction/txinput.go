@@ -9,9 +9,8 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/crypto"
 	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/pkg/errors"
-
-	"github.com/libsv/go-bt/v2/sighash"
 )
 
 // UTXOGetterFunc is used for tx.Fund(...). It provides the amount of satoshis required

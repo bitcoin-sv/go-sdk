@@ -7,8 +7,8 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 	"github.com/libsv/go-bk/wif"
-	"github.com/libsv/go-bt/v2/unlocker"
 	"github.com/stretchr/testify/assert"
 )
 
