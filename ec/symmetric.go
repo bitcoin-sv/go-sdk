@@ -46,6 +46,12 @@ func NewSymmetricKey(key []byte) *SymmetricKey {
 	return &SymmetricKey{key: key}
 }
 
+func NewSymmetricKeyFromRandom() *SymmetricKey {
+	key := make([]byte, 32)
+	rand.Read(key)
+	return &SymmetricKey{key: key}
+}
+
 func NewSymmetricKeyFromString(keyBase64String string) *SymmetricKey {
 	// Decode the Base64 string to bytes
 	keyBytes, err := base64.StdEncoding.DecodeString(keyBase64String)
