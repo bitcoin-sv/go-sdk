@@ -60,7 +60,7 @@ type ArcOptions struct {
 }
 
 func (t *Transaction) BroadcastToArc(arcUrl string, options *ArcOptions) (response *ArcResponse, err error) {
-	buf := bytes.NewBuffer(t.ToEF())
+	buf := bytes.NewBuffer(t.ExtendedBytes())
 	req, err := http.NewRequest(
 		"POST",
 		arcUrl,
