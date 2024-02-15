@@ -66,7 +66,8 @@ func DecryptGCM(ciphertext, key, nonce, additionalData, tag []byte) (plaintext [
 		return nil, err
 	}
 
-	gcm, err := cipher.NewGCM(block)
+	// Automatically adjust GCM to the nonce size
+	gcm, err := cipher.NewGCMWithNonceSize(block, len(nonce))
 	if err != nil {
 		return nil, err
 	}
