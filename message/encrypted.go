@@ -5,14 +5,15 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"io"
 
-	"github.com/bitcoin-sv/go-sdk/aesgcm"
 	"github.com/bitcoin-sv/go-sdk/ec"
 )
 
 // BRC-78: https://github.com/bitcoin-sv/BRCs/blob/master/peer-to-peer/0078.md
 // TODO: According to spec this should be 0x10334242
-const VERSION = "42421033"
+// const VERSION = "42421033"
+const VERSION = "10334242"
 
 // Encrypt encrypts a message using the sender's private key and the recipient's public key.
 func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]byte, error) {
@@ -35,8 +36,9 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 		return nil, err
 	}
 
-	nonce := make([]byte, 0)
-	cyphertext, _, err := aesgcm.EncryptGCM(message, nonce, sharedSecret.SerialiseCompressed(), keyID[:])
+	priv := ec.NewSymmetricKey(sharedSecret.SerialiseCompressed()[1:])
+	skey := ec.NewSymmetricKey(priv.ToBytes())
+	ciphertext, err := skey.Encrypt(message)
 	if err != nil {
 		return nil, err
 	}
@@ -64,7 +66,7 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 	encryptedMessage := append(version, senderPublicKey...)
 	encryptedMessage = append(encryptedMessage, recipientDER...)
 	encryptedMessage = append(encryptedMessage, keyID[:8]...)
-	encryptedMessage = append(encryptedMessage, cyphertext...)
+	encryptedMessage = append(encryptedMessage, ciphertext...)
 	return encryptedMessage, nil
 }
 
@@ -77,13 +79,16 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 //     */
 func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 	messageVersion := message[:4]
-	if string(messageVersion) != VERSION {
-		return nil, fmt.Errorf("Message version mismatch: Expected %s, received %s", VERSION, messageVersion)
+	if hex.EncodeToString(messageVersion) != VERSION {
+		return nil, fmt.Errorf("message version mismatch: Expected %s, received %s", VERSION, hex.EncodeToString(messageVersion))
 	}
 	reader := bytes.NewReader(message)
-	reader.Seek(4, 0)
+	_, err := reader.Seek(4, io.SeekStart)
+	if err != nil {
+		return nil, err
+	}
 	senderPublicKey := make([]byte, 33)
-	_, err := reader.Read(senderPublicKey)
+	_, err = io.ReadFull(reader, senderPublicKey)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +98,7 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 	}
 
 	expectedRecipientDER := make([]byte, 33)
-	_, err = reader.Read(expectedRecipientDER)
+	_, err = io.ReadFull(reader, expectedRecipientDER)
 	if err != nil {
 		return nil, err
 	}
@@ -101,13 +106,13 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 	if !bytes.Equal(expectedRecipientDER, actualRecipientDER) {
 		return nil, fmt.Errorf("the encrypted message expects a recipient public key of %x, but the provided key is %x", expectedRecipientDER, actualRecipientDER)
 	}
-	keyID := make([]byte, 32)
-	_, err = reader.Read(keyID)
+	keyID := make([]byte, 8)
+	_, err = io.ReadFull(reader, keyID)
 	if err != nil {
 		return nil, err
 	}
 	encrypted := make([]byte, reader.Len())
-	_, err = reader.Read(encrypted)
+	_, err = io.ReadFull(reader, encrypted)
 	if err != nil {
 		return nil, err
 	}
@@ -124,5 +129,9 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return aesgcm.DecryptGCM(encrypted, sharedSecret.SerialiseCompressed(), keyID, nil, nil)
+
+	priv := ec.NewSymmetricKey(sharedSecret.SerialiseCompressed()[1:])
+	skey := ec.NewSymmetricKey(priv.ToBytes())
+	skey.Decrypt(encrypted)
+	return skey.Decrypt(encrypted)
 }
