@@ -27,7 +27,7 @@ func (s *SymmetricKey) Decrypt(message []byte) (plaintext []byte, err error) {
 	iv := message[:32]
 	ciphertext := message[32 : len(message)-16]
 	tag := message[len(message)-16:]
-	plaintext, err = aesgcm.DecryptGCM(ciphertext, iv, s.ToBytes(), tag, []byte{})
+	plaintext, err = aesgcm.DecryptGCM(ciphertext, s.ToBytes(), iv, []byte{}, tag)
 	if err != nil {
 		return nil, err
 	}
@@ -43,6 +43,12 @@ func (s *SymmetricKey) FromBytes(b []byte) *SymmetricKey {
 }
 
 func NewSymmetricKey(key []byte) *SymmetricKey {
+	return &SymmetricKey{key: key}
+}
+
+func NewSymmetricKeyFromRandom() *SymmetricKey {
+	key := make([]byte, 32)
+	rand.Read(key)
 	return &SymmetricKey{key: key}
 }
 

@@ -12,13 +12,31 @@ import (
 	"github.com/bitcoin-sv/go-sdk/ec"
 )
 
+func TestSymmetricKeyEncryptionAndDecryption(t *testing.T) {
+	t.Logf("Running encryption and decryption without errors")
+	symmetricKey := ec.NewSymmetricKeyFromRandom()
+	cipherText, err := symmetricKey.Encrypt([]byte("a thing to encrypt"))
+	if err != nil {
+		t.Errorf("Error encrypting: %v", err)
+	}
+
+	decrypted, err := symmetricKey.Decrypt(cipherText)
+	if err != nil {
+		t.Errorf("Error decrypting: %v", err)
+	}
+
+	if string(decrypted) != "a thing to encrypt" {
+		t.Errorf("Decrypted value does not match original plaintext")
+	}
+}
+
 type symmetricTestVector struct {
 	Key        string `json:"key"`
 	Plaintext  string `json:"plaintext"`
 	Ciphertext string `json:"ciphertext"`
 }
 
-func TestSymmetricKeyEncryptionAndDecryption(t *testing.T) {
+func TestSymmetricKeyDecryption(t *testing.T) {
 	_, currentFile, _, _ := runtime.Caller(0)
 	testdataPath := filepath.Join(filepath.Dir(currentFile), "testdata", "SymmetricKey.vectors.json")
 
@@ -35,53 +53,22 @@ func TestSymmetricKeyEncryptionAndDecryption(t *testing.T) {
 	}
 
 	for i, v := range testVectors {
-		expectedPlaintext, err := base64.StdEncoding.DecodeString(v.Plaintext)
-		if err != nil {
-			log.Fatalf("Failed to decode plaintext: %v", err)
-		}
-		expectedCiphertext, err := base64.StdEncoding.DecodeString(v.Ciphertext)
+		t.Logf("Running decryption test vector %d", i+1)
+
+		vectorCiphertext, err := base64.StdEncoding.DecodeString(v.Ciphertext)
 		if err != nil {
 			log.Fatalf("Failed to decode ciphertext: %v", err)
 		}
 
-		t.Run("Encryption", func(t *testing.T) {
-			t.Logf("Running encryption test vector %d", i+1)
-			symmetricKey := ec.NewSymmetricKeyFromString(v.Key)
-			cipherText, err := symmetricKey.Encrypt(expectedPlaintext)
-			if err != nil {
-				t.Errorf("Error encrypting: %v", err)
-			}
+		symmetricKey := ec.NewSymmetricKeyFromString(v.Key)
+		decrypted, err := symmetricKey.Decrypt(vectorCiphertext)
+		if err != nil {
+			t.Errorf("Error decrypting: %v", err)
+		}
 
-			if string(cipherText) != v.Ciphertext {
-				t.Errorf("Encrypted value does not match expected ciphertext")
-			}
-		})
+		if string(decrypted) != v.Plaintext {
+			t.Errorf("Decrypted value does not match expected plaintext")
+		}
 
-		t.Run("Decryption", func(t *testing.T) {
-			t.Logf("Running decryption test vector %d", i+1)
-			symmetricKey := ec.NewSymmetricKeyFromString(v.Key)
-			decrypted, err := symmetricKey.Decrypt(expectedCiphertext)
-			if err != nil {
-				t.Errorf("Error decrypting: %v", err)
-			}
-
-			if string(decrypted) != v.Plaintext {
-				t.Errorf("Decrypted value does not match expected plaintext")
-			}
-		})
-
-		t.Run("End to end", func(t *testing.T) {
-			t.Logf("Running encryption and decryption without errors %d", i+1)
-			symmetricKey := ec.NewSymmetricKeyFromString(v.Key)
-			cipherText, err := symmetricKey.Encrypt(expectedPlaintext)
-			if err != nil {
-				t.Errorf("Error encrypting: %v", err)
-			}
-
-			_, err = symmetricKey.Decrypt(cipherText)
-			if err != nil {
-				t.Errorf("Error decrypting: %v", err)
-			}
-		})
 	}
 }
