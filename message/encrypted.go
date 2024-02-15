@@ -116,7 +116,6 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	// TODO: This is weird from ts library - its called recipientPub but its a private key
 	recipientPub, err := recipient.DeriveChild(recipient.PubKey(), invoiceNumber)
 	if err != nil {
 		return nil, err

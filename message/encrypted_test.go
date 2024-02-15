@@ -1,6 +1,10 @@
 package message
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/bitcoin-sv/go-sdk/ec"
+)
 
 // TODO - implement go version
 // import { encrypt, decrypt } from '../../../dist/cjs/src/messages/EncryptedMessage'
@@ -41,5 +45,26 @@ import "testing"
 // })
 
 func TestEncryptedMessage(t *testing.T) {
-	t.Skip("TODO - implement go version")
+	sender, err := ec.PrivateKeyFromBytes(ec.S256(), []byte{15})
+	if err != nil {
+		t.Fatalf("Error creating sender private key: %v", err)
+	}
+	recipient, err := ec.PrivateKeyFromBytes(ec.S256(), []byte{21})
+	if err != nil {
+		t.Fatalf("Error creating recipient private key: %v", err)
+	}
+	recipientPub := recipient.PubKey()
+	msg := []byte{1, 2, 4, 8, 16, 32}
+
+	encrypted, err := Encrypt(msg, sender, recipientPub)
+	if err != nil {
+		t.Fatalf("Error encrypting message: %v", err)
+	}
+	decrypted, err := Decrypt(encrypted, recipient)
+	if err != nil {
+		t.Fatalf("Error decrypting message: %v", err)
+	}
+	if string(decrypted) != string(msg) {
+		t.Errorf("Decrypted message does not match original message")
+	}
 }
