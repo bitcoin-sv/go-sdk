@@ -117,21 +117,20 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 		return nil, err
 	}
 	invoiceNumber := "2-message encryption-" + hex.EncodeToString(keyID)
-	signingPriv, err := sender.DeriveChild(recipient, invoiceNumber)
+	signingPub, err := sender.DeriveChild(recipient, invoiceNumber)
 	if err != nil {
 		return nil, err
 	}
-	recipientPub, err := recipient.DeriveChild(recipient.PubKey(), invoiceNumber)
+	recipientPub, err := recipient.DeriveChild(sender, invoiceNumber)
 	if err != nil {
 		return nil, err
 	}
-	sharedSecret, err := signingPriv.DeriveSharedSecret(recipientPub)
+	sharedSecret, err := signingPub.DeriveSharedSecret(recipientPub)
 	if err != nil {
 		return nil, err
 	}
 
 	priv := ec.NewSymmetricKey(sharedSecret.SerialiseCompressed()[1:])
 	skey := ec.NewSymmetricKey(priv.ToBytes())
-	skey.Decrypt(encrypted)
 	return skey.Decrypt(encrypted)
 }
