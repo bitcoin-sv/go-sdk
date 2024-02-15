@@ -45,15 +45,9 @@ import (
 // })
 
 func TestEncryptedMessage(t *testing.T) {
-	sender, err := ec.PrivateKeyFromBytes(ec.S256(), []byte{15})
-	if err != nil {
-		t.Fatalf("Error creating sender private key: %v", err)
-	}
-	recipient, err := ec.PrivateKeyFromBytes(ec.S256(), []byte{21})
-	if err != nil {
-		t.Fatalf("Error creating recipient private key: %v", err)
-	}
-	recipientPub := recipient.PubKey()
+	sender, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{15})
+	recipient, recipientPub := ec.PrivateKeyFromBytes(ec.S256(), []byte{21})
+
 	msg := []byte{1, 2, 4, 8, 16, 32}
 
 	encrypted, err := Encrypt(msg, sender, recipientPub)
