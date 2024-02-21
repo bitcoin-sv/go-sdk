@@ -20,10 +20,7 @@ type SignedMessage struct {
 func Sign(message []byte, signer *ec.PrivateKey, verifier *ec.PublicKey) ([]byte, error) {
 	recipientAnyone := verifier == nil
 	if recipientAnyone {
-		anyone, err := ec.NewPrivateKey(ec.S256())
-		if err != nil {
-			return nil, err
-		}
+		anyone, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{1})
 		anyonePointX, anyonePointY := ec.S256().ScalarMult(anyone.X, anyone.Y, anyone.Serialise())
 		verifier = &ec.PublicKey{X: anyonePointX, Y: anyonePointY}
 	}
@@ -57,24 +54,20 @@ func Sign(message []byte, signer *ec.PrivateKey, verifier *ec.PublicKey) ([]byte
 }
 
 func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) {
-	messageVersion := sig[:4]
+	messageVersion := sig[:8]
 	if string(messageVersion) != VERSION {
 		return false, nil
 	}
-	pubKeyBytes := sig[4:37]
+	pubKeyBytes := sig[8:41]
 	signer, err := ec.ParsePubKey(pubKeyBytes, ec.S256())
 	if err != nil {
 		return false, err
 	}
-	verifierFirst := sig[37]
-	var recipientPub *ec.PrivateKey
+	verifierFirst := sig[41]
 	if verifierFirst == 0 {
-		recipientPub, err = ec.NewPrivateKey(ec.S256())
-		if err != nil {
-			return false, err
-		}
+		recipient, _ = ec.PrivateKeyFromBytes(ec.S256(), []byte{1})
 	} else {
-		verifierRest := sig[38:70]
+		verifierRest := sig[42:74]
 		verifierDER := append([]byte{verifierFirst}, verifierRest...)
 		if recipient == nil {
 			return false, nil
@@ -85,15 +78,15 @@ func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) 
 			return false, err
 		}
 	}
-	keyID := sig[70:102]
-	signatureDER := sig[102:]
+	keyID := sig[74:106]
+	signatureDER := sig[106:]
 	signature, err := ec.ParseSignature(signatureDER, ec.S256())
 	if err != nil {
 		return false, err
 	}
 	keyIDBase64 := base64.StdEncoding.EncodeToString(keyID)
 	invoiceNumber := "2-message signing-" + keyIDBase64
-	signingKey, err := signer.DeriveChild(recipientPub, invoiceNumber)
+	signingKey, err := signer.DeriveChild(recipient, invoiceNumber)
 	if err != nil {
 		return false, err
 	}
