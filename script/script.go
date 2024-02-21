@@ -338,25 +338,6 @@ func (s *Script) ScriptType() string {
 	return ScriptTypeNonStandard
 }
 
-// Addresses will return all addresses found in the script, if any.
-func (s *Script) Addresses() ([]string, error) {
-	addresses := make([]string, 0)
-	if s.IsP2PKH() {
-		pkh, err := s.PublicKeyHash()
-		if err != nil {
-			return nil, err
-		}
-		a, err := NewAddressFromPublicKeyHash(pkh, true)
-		if err != nil {
-			return nil, err
-		}
-		addresses = []string{a.AddressString}
-	}
-	// TODO: handle multisig, and other outputs
-	// https://github.com/libsv/go-bt/issues/6
-	return addresses, nil
-}
-
 // Equals will compare the script to b and return true if they match.
 func (s *Script) Equals(b *Script) bool {
 	return bytes.Equal(*s, *b)
