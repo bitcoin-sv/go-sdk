@@ -1,4 +1,4 @@
-package transaction
+package util
 
 import "encoding/binary"
 
