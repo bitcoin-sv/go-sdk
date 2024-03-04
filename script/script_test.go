@@ -726,7 +726,7 @@ func TestScriptValid(t *testing.T) {
 					if err != nil {
 						t.Error(err)
 					}
-					assert.Equal(t, asm, asm2)
+					assert.Equal(t, asm, asm2, v[2])
 				}
 			}
 
@@ -746,7 +746,7 @@ func scriptFromVector(str string) (s *script.Script, error error) {
 			if err != nil {
 				panic(err)
 			}
-			s.AppendPushData(b)
+			s.AppendOpcodes(b...)
 		} else if strings.HasPrefix(token, "'") {
 			log.Panicln("Not implemented")
 		} else if op, ok := script.OpCodeStrings["OP_"+token]; ok {

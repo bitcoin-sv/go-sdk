@@ -221,7 +221,7 @@ func TestLocalUnlocker_NonSignature(t *testing.T) {
 //
 // func TestBareMultiSigValidation(t *testing.T) {
 // 	txHex := "0100000001cfb38c76cadeb5b96c3863d9e298fe96e24e594b75f69c37aa709f45b76d1b25000000009200483045022100d83dc84d3ea3fb36b006f6887e1e16811c59fe9a9b79b84142874a90d5b834160220052967be98c26270de0082b0fecab5a40d5bc48d5034b6cdfc2b8e47210e1469414730440220099ffa89363f9a05f23a4fa318ddbefeeeec4b41f6abde7083a3be6696ed904902201722110a488df3780a260ba09b7de6363bfce7f6beec9819e9b9f47f6e978d8141ffffffff01a8840100000000001976a91432b996f742e774b0241be9007f831558ba06d20b88ac00000000"
-// 	tx, err := transaction.NewTransactionFromString(txHex)
+// 	tx, err := transaction.NewTransactionFromHex(txHex)
 // 	if err != nil {
 // 		t.Error(err)
 // 		return
@@ -297,7 +297,7 @@ func TestLocalUnlocker_NonSignature(t *testing.T) {
 //
 // func TestP2SHMultiSigValidation(t *testing.T) { // NOT working properly!
 // 	txHex := "0100000001d0219010e1f74ec8dd264a63ef01b5c72aab49a74c9bffd464c7f7f2b193b34700000000fdfd0000483045022100c2ffae14c7cfae5c1b45776f4b2d497b0d10a9e3be55b1386c555f90acd022af022025d5d1d33429fabd60c41763f9cda5c4b64adbddbd90023febc005be431b97b641473044022013f65e41abd6be856e7c7dd7527edc65231e027c42e8db7358759fc9ccd77b7d02206e024137ee54d2fac9f1dce858a85cb03fb7ba93b8e015d82e8a959b631f91ac414c695221021db57ae3de17143cb6c314fb206b56956e8ed45e2f1cbad3947411228b8d17f1210308b00cf7dfbb64604475e8b18e8450ac6ec04655cfa5c6d4d8a0f3f141ee419421030c7f9342ff6583599db8ee8b52383cadb4cf6fee3650c1ad8f66158a4ff0ebd953aefeffffff01b70f0000000000001976a91415067448220971206e6b4d90733d70fe9610631688ac56750900"
-// 	tx, err := transaction.NewTransactionFromString(txHex)
+// 	tx, err := transaction.NewTransactionFromHex(txHex)
 // 	if err != nil {
 // 		t.Error(err)
 // 		return

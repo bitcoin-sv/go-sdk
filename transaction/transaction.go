@@ -14,10 +14,11 @@ import (
 )
 
 type Transaction struct {
-	Inputs   []*Input  `json:"inputs"`
-	Outputs  []*Output `json:"outputs"`
-	Version  uint32    `json:"version"`
-	LockTime uint32    `json:"locktime"`
+	Version    uint32      `json:"version"`
+	Inputs     []*Input    `json:"inputs"`
+	Outputs    []*Output   `json:"outputs"`
+	LockTime   uint32      `json:"locktime"`
+	MerklePath *MerklePath `json:"merklePath"`
 }
 
 // Transactions a collection of *bt.Tx.
