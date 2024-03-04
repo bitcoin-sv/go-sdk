@@ -2,7 +2,6 @@ package script
 
 import (
 	"bytes"
-	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"math/big"
@@ -94,12 +93,18 @@ func (s *Script) AppendPushDataString(str string) error {
 // AppendPushDataArray takes an array of data bytes and appends them
 // to the script with proper PUSHDATA prefixes
 func (s *Script) AppendPushDataArray(d [][]byte) error {
-	p, err := EncodeParts(d)
-	if err != nil {
-		return err
+	for _, part := range d {
+		err := s.AppendPushData(part)
+		if err != nil {
+			return err
+		}
 	}
+	// p, err := EncodeParts(d)
+	// if err != nil {
+	// 	return err
+	// }
 
-	*s = append(*s, p...)
+	// *s = append(*s, p...)
 	return nil
 }
 
@@ -180,40 +185,20 @@ func (s *Script) ToASM() (string, error) {
 		return "", nil
 	}
 
-	parts, err := DecodeParts(*s)
-	// if err != nil, we will append [error] to the ASM script below (as done in the node).
-
-	data := false
-	if len(*s) > 1 && ((*s)[0] == OpRETURN || ((*s)[0] == OpFALSE && (*s)[1] == OpRETURN)) {
-		data = true
-	}
-
 	var asm strings.Builder
-
-	for _, p := range parts {
-		asm.WriteRune(' ')
-		if len(p) == 1 {
-			if data && p[0] != 0x6a {
-				asm.WriteString(fmt.Sprintf("%d", p[0]))
-			} else {
-				asm.WriteString(OpCodeValues[p[0]])
-			}
-		} else {
-			if data && len(p) <= 4 {
-				b := make([]byte, 0)
-				b = append(b, p...)
-				for i := 0; i < 4-len(p); i++ {
-					b = append(b, 0)
-				}
-				asm.WriteString(fmt.Sprintf("%d", binary.LittleEndian.Uint32(b)))
-			} else {
-				asm.WriteString(hex.EncodeToString(p))
-			}
+	pos := 0
+	for pos < len(*s) {
+		op, err := s.ReadOp(&pos)
+		if err != nil {
+			return "", err
 		}
-	}
+		asm.WriteRune(' ')
 
-	if err != nil {
-		asm.WriteString(" [error]")
+		if len(op.Data) > 0 {
+			asm.WriteString(hex.EncodeToString(op.Data))
+		} else {
+			asm.WriteString(OpCodeValues[op.OpCode])
+		}
 	}
 
 	return asm.String()[1:], nil
