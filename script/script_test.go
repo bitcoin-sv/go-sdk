@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -681,52 +680,54 @@ func TestScriptInvalid(t *testing.T) {
 // Test vectors from testdata/script.valid.vectors.json
 func TestScriptValid(t *testing.T) {
 
-	// Determine the directory of the current test file
-	_, currentFile, _, _ := runtime.Caller(0)
-	testdataPath := filepath.Join(filepath.Dir(currentFile), "testdata", "script.valid.vectors.json")
+	for _, file := range []string{"script.valid.vectors.json", "script.invalid.vectors.json"} {
+		// Determine the directory of the current test file
+		_, currentFile, _, _ := runtime.Caller(0)
+		testdataPath := filepath.Join(filepath.Dir(currentFile), "testdata", file)
 
-	// Read in the file
-	vectors, err := os.ReadFile(testdataPath)
-	if err != nil {
-		t.Fatalf("Could not read test vectors: %v", err)
-	}
-
-	// Unmarshal the json
-	var testVectors []publicTestVector
-	err = json.Unmarshal(vectors, &testVectors)
-	if err != nil {
-		t.Errorf("Could not unmarshal test vectors: %v", err)
-	}
-
-	for i, v := range testVectors {
-		if len(v) == 1 {
-			continue
+		// Read in the file
+		vectors, err := os.ReadFile(testdataPath)
+		if err != nil {
+			t.Fatalf("Could not read test vectors: %v", err)
 		}
 
-		t.Run(fmt.Sprintf("Test vector %d", i), func(t *testing.T) {
-			for i := 0; i < 2; i++ {
-				s, err := scriptFromVector(v[i])
-				if err != nil {
-					t.Error(err)
-					t.FailNow()
-				}
-				// Test that no errors are thrown for the first item
-				if asm, err := s.ToASM(); err != nil {
-					t.Error(err)
-				} else {
-					s, err := script.NewFromASM(asm)
-					if err != nil {
-						t.Error(err)
-					}
-					asm2, err := s.ToASM()
-					if err != nil {
-						t.Error(err)
-					}
-					assert.Equal(t, asm, asm2, v[2])
-				}
+		// Unmarshal the json
+		var testVectors []publicTestVector
+		err = json.Unmarshal(vectors, &testVectors)
+		if err != nil {
+			t.Errorf("Could not unmarshal test vectors: %v", err)
+		}
+
+		for i, v := range testVectors {
+			if len(v) == 1 {
+				continue
 			}
 
-		})
+			t.Run(fmt.Sprintf("Test vector %d", i), func(t *testing.T) {
+				for i := 0; i < 2; i++ {
+					s, err := scriptFromVector(v[i])
+					if err != nil {
+						t.Error(err)
+						t.FailNow()
+					}
+					// Test that no errors are thrown for the first item
+					if asm, err := s.ToASM(); err != nil {
+						t.Error(err)
+					} else {
+						s, err := script.NewFromASM(asm)
+						if err != nil {
+							t.Error(err)
+						}
+						asm2, err := s.ToASM()
+						if err != nil {
+							t.Error(err)
+						}
+						assert.Equal(t, asm, asm2, v[2])
+					}
+				}
+
+			})
+		}
 	}
 }
 
@@ -743,8 +744,13 @@ func scriptFromVector(str string) (s *script.Script, error error) {
 				panic(err)
 			}
 			s.AppendOpcodes(b...)
+			// This is not understood and is failing
+			// TODO: Figure out intended opertion and fix
 		} else if strings.HasPrefix(token, "'") {
-			log.Panicln("Not implemented")
+			str := token[1 : len(token)-1]
+			sbuf := append(*s, []byte(str)...)
+			newS := script.Script(sbuf)
+			s = &newS
 		} else if op, ok := script.OpCodeStrings["OP_"+token]; ok {
 			s.AppendOpcodes(op)
 		} else if op, ok := script.OpCodeStrings[token]; ok {
