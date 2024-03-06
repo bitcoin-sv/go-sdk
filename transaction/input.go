@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/bscript"
 	"github.com/pkg/errors"
 )
 
@@ -31,8 +31,8 @@ const DefaultSequenceNumber uint32 = 0xFFFFFFFF
 type Input struct {
 	previousTxID       []byte
 	PreviousTxSatoshis uint64
-	PreviousTxScript   *script.Script
-	UnlockingScript    *script.Script
+	PreviousTxScript   *bscript.Script
+	UnlockingScript    *bscript.Script
 	PreviousTxOutIndex uint32
 	SequenceNumber     uint32
 }
@@ -89,12 +89,12 @@ func (i *Input) readFrom(r io.Reader, extended bool) (int64, error) {
 
 	i.previousTxID = ReverseBytes(previousTxID)
 	i.PreviousTxOutIndex = binary.LittleEndian.Uint32(prevIndex)
-	i.UnlockingScript = script.NewFromBytes(scriptBytes)
+	i.UnlockingScript = bscript.NewFromBytes(scriptBytes)
 	i.SequenceNumber = binary.LittleEndian.Uint32(sequence)
 
 	if extended {
 		prevSatoshis := make([]byte, 8)
-		var prevTxLockingScript script.Script
+		var prevTxLockingScript bscript.Script
 
 		n, err = io.ReadFull(r, prevSatoshis)
 		bytesRead += int64(n)
@@ -117,10 +117,10 @@ func (i *Input) readFrom(r io.Reader, extended bool) (int64, error) {
 			return bytesRead, errors.Wrapf(err, "script(%d): got %d bytes", scriptLen.Length(), n)
 		}
 
-		prevTxLockingScript = *script.NewFromBytes(scriptBytes)
+		prevTxLockingScript = *bscript.NewFromBytes(scriptBytes)
 
 		i.PreviousTxSatoshis = binary.LittleEndian.Uint64(prevSatoshis)
-		i.PreviousTxScript = script.NewFromBytes(prevTxLockingScript)
+		i.PreviousTxScript = bscript.NewFromBytes(prevTxLockingScript)
 	}
 
 	return bytesRead, nil

@@ -63,7 +63,7 @@ func (f *ArcResponse) Scan(value interface{}) error {
 	return json.Unmarshal(b, &f)
 }
 
-func (a *Arc) Broadcast(t *transaction.Transaction) (interface{}, error) {
+func (a *Arc) Broadcast(t *transaction.Tx) (interface{}, error) {
 	var buf *bytes.Buffer
 	for _, input := range t.Inputs {
 		if input.PreviousTxScript == nil {

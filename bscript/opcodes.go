@@ -1,4 +1,4 @@
-package script
+package bscript
 
 // BitCoin Script constants.
 // See https://wiki.bitcoinsv.io/index.php/Opcodes_used_in_Bitcoin_Script
@@ -268,7 +268,7 @@ const (
 	OpINVALIDOPCODE       byte = 0xff // 255 - bitcoin core
 )
 
-var OpCodeStrings = map[string]byte{
+var opCodeStrings = map[string]byte{
 	"OP_0":                   Op0,
 	"OP_ZERO":                OpZERO,
 	"OP_FALSE":               OpFALSE,
@@ -532,7 +532,7 @@ var OpCodeStrings = map[string]byte{
 	"OP_INVALIDOPCODE":       OpINVALIDOPCODE,
 }
 
-var OpCodeValues = map[byte]string{
+var opCodeValues = map[byte]string{
 	OpFALSE:               "OP_FALSE",
 	OpDATA1:               "OP_DATA_1",
 	OpDATA2:               "OP_DATA_2",

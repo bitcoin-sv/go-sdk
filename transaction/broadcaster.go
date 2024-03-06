@@ -20,9 +20,9 @@ type BroadcastFailure struct {
 }
 
 type Broadcaster interface {
-	Broadcast(tx *Transaction) (interface{}, error)
+	Broadcast(tx *Tx) (interface{}, error)
 }
 
-func (t *Transaction) Broadcast(b Broadcaster) (interface{}, error) {
+func (t *Tx) Broadcast(b Broadcaster) (interface{}, error) {
 	return b.Broadcast(t)
 }

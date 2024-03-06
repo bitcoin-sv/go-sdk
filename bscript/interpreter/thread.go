@@ -3,10 +3,10 @@ package interpreter
 import (
 	"math/big"
 
+	"github.com/bitcoin-sv/go-sdk/bscript"
+	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/errs"
+	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/scriptflag"
 	"github.com/bitcoin-sv/go-sdk/ec"
-	"github.com/bitcoin-sv/go-sdk/script"
-	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
-	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
 	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 )
@@ -34,7 +34,7 @@ type thread struct {
 	scriptOff    int
 	lastCodeSep  int
 
-	tx         *transaction.Transaction
+	tx         *transaction.Tx
 	inputIdx   int
 	prevOutput *transaction.Output
 
@@ -64,16 +64,16 @@ func createThread(opts *execOpts) (*thread, error) {
 
 // execOpts are the params required for building an Engine
 //
-// Raw *script.Scripts can be supplied as LockingScript and UnlockingScript, or
+// Raw *bscript.Scripts can be supplied as LockingScript and UnlockingScript, or
 // a Tx, an input index, and a previous output.
 //
 // If checksig operaitons are to be executed without a Tx or a PreviousTxOut supplied,
 // the engine will return an ErrInvalidParams on execute.
 type execOpts struct {
-	lockingScript   *script.Script
-	unlockingScript *script.Script
+	lockingScript   *bscript.Script
+	unlockingScript *bscript.Script
 	previousTxOut   *transaction.Output
-	tx              *transaction.Transaction
+	tx              *transaction.Tx
 	inputIdx        int
 	flags           scriptflag.Flag
 	debugger        Debugger
@@ -168,7 +168,7 @@ func (t *thread) executeOpcode(pop ParsedOpcode) error {
 	}
 
 	// Note that this includes OP_RESERVED which counts as a push operation.
-	if pop.op.val > script.Op16 {
+	if pop.op.val > bscript.Op16 {
 		t.numOps++
 		if t.numOps > t.cfg.MaxOps() {
 			return errs.NewError(errs.ErrTooManyOperations, "exceeded max operation limit of %d", t.cfg.MaxOps())
@@ -189,7 +189,7 @@ func (t *thread) executeOpcode(pop ParsedOpcode) error {
 
 	// Ensure all executed data push opcodes use the minimal encoding when
 	// the minimal data verification flag is set.
-	if t.dstack.verifyMinimalData && t.isBranchExecuting() && pop.op.val <= script.OpPUSHDATA4 && exec {
+	if t.dstack.verifyMinimalData && t.isBranchExecuting() && pop.op.val <= bscript.OpPUSHDATA4 && exec {
 		if err := pop.enforceMinimumDataPush(); err != nil {
 			return err
 		}
@@ -318,7 +318,7 @@ func (t *thread) apply(opts *execOpts) error {
 	// with a pay-to-script-hash transaction, there will be ultimately be
 	// a third script to execute.
 	t.scripts = make([]ParsedScript, 2)
-	for i, script := range []*script.Script{uscript, lscript} {
+	for i, script := range []*bscript.Script{uscript, lscript} {
 		pscript, err := t.scriptParser.Parse(script)
 		if err != nil {
 			return err
@@ -465,7 +465,7 @@ func (t *thread) Step() (bool, error) {
 			}
 
 			script := t.savedFirstStack[len(t.savedFirstStack)-1]
-			pops, err := t.scriptParser.Parse(script.NewFromBytes(script))
+			pops, err := t.scriptParser.Parse(bscript.NewFromBytes(script))
 			if err != nil {
 				return false, err
 			}
@@ -779,7 +779,7 @@ func (t *thread) shouldExec(pop ParsedOpcode) bool {
 		}
 	}
 
-	return cf && (!t.earlyReturnAfterGenesis || pop.op.val == script.OpRETURN)
+	return cf && (!t.earlyReturnAfterGenesis || pop.op.val == bscript.OpRETURN)
 }
 
 func (t *thread) shiftScript() {

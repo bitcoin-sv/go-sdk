@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/bscript"
 	"github.com/pkg/errors"
 )
 
@@ -30,7 +30,7 @@ type outputJSON struct {
 }
 
 // MarshalJSON will serialise a transaction to json.
-func (tx *Transaction) MarshalJSON() ([]byte, error) {
+func (tx *Tx) MarshalJSON() ([]byte, error) {
 	if tx == nil {
 		return nil, errors.Wrap(ErrTxNil, "cannot marshal tx")
 	}
@@ -45,14 +45,14 @@ func (tx *Transaction) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON will unmarshall a transaction that has been marshalled with this library.
-func (tx *Transaction) UnmarshalJSON(b []byte) error {
+func (tx *Tx) UnmarshalJSON(b []byte) error {
 	var txj txJSON
 	if err := json.Unmarshal(b, &txj); err != nil {
 		return err
 	}
 	// quick convert
 	if txj.Hex != "" {
-		t, err := NewTransactionFromHex(txj.Hex)
+		t, err := NewTxFromHex(txj.Hex)
 		if err != nil {
 			return err
 		}
@@ -85,7 +85,7 @@ func (i *Input) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	s, err := script.NewFromHexString(ij.UnlockingScript)
+	s, err := bscript.NewFromHexString(ij.UnlockingScript)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (o *Output) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &oj); err != nil {
 		return err
 	}
-	s, err := script.NewFromHexString(oj.LockingScript)
+	s, err := bscript.NewFromHexString(oj.LockingScript)
 	if err != nil {
 		return err
 	}

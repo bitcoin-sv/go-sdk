@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/bip32"
+	"github.com/bitcoin-sv/go-sdk/bscript"
 	"github.com/bitcoin-sv/go-sdk/chaincfg"
-	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/stretchr/testify/assert"
 )
@@ -18,7 +18,7 @@ func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 	t.Parallel()
 
 	t.Run("empty pubkey hash", func(t *testing.T) {
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 		err := tx.AddP2PKHOutputFromPubKeyHashStr(
 			"",
 			uint64(5000),
@@ -31,7 +31,7 @@ func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 	})
 
 	t.Run("invalid pubkey hash", func(t *testing.T) {
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 		err := tx.AddP2PKHOutputFromPubKeyHashStr(
 			"0",
 			uint64(5000),
@@ -41,7 +41,7 @@ func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 
 	t.Run("valid output", func(t *testing.T) {
 		// This is the PKH for address mtdruWYVEV1wz5yL7GvpBj4MgifCB7yhPd
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 		err := tx.AddP2PKHOutputFromPubKeyHashStr(
 			"8fe80c75c9560e8b56ed64ea3c26e18d2c52211b",
 			uint64(5000),
@@ -58,13 +58,13 @@ func TestNewHashPuzzleOutput(t *testing.T) {
 	t.Parallel()
 
 	t.Run("invalid public key", func(t *testing.T) {
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 		err := tx.AddHashPuzzleOutput("", "0", uint64(5000))
 		assert.Error(t, err)
 	})
 
 	t.Run("missing secret and public key", func(t *testing.T) {
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 		err := tx.AddHashPuzzleOutput("", "", uint64(5000))
 
 		assert.NoError(t, err)
@@ -75,11 +75,11 @@ func TestNewHashPuzzleOutput(t *testing.T) {
 	})
 
 	t.Run("valid puzzle output", func(t *testing.T) {
-		addr, err := script.NewAddressFromString("myFhJggmsaA2S8Qe6ZQDEcVCwC4wLkvC4e")
+		addr, err := bscript.NewAddressFromString("myFhJggmsaA2S8Qe6ZQDEcVCwC4wLkvC4e")
 		assert.NoError(t, err)
 		assert.NotNil(t, addr)
 
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 		err = tx.AddHashPuzzleOutput("secret1", addr.PublicKeyHash, uint64(5000))
 
 		assert.NoError(t, err)
@@ -98,7 +98,7 @@ func TestNewOpReturnOutput(t *testing.T) {
 		"continue to write the Chronicle of everything. Thank you and goodnight from team SV."
 	dataBytes := []byte(data)
 
-	tx := transaction.NewTransaction()
+	tx := transaction.NewTx()
 	err := tx.AddOpReturnOutput(dataBytes)
 	assert.NoError(t, err)
 
@@ -113,7 +113,7 @@ func TestNewOpReturnPartsOutput(t *testing.T) {
 	t.Parallel()
 
 	dataBytes := [][]byte{[]byte("hi"), []byte("how"), []byte("are"), []byte("you")}
-	tx := transaction.NewTransaction()
+	tx := transaction.NewTx()
 	err := tx.AddOpReturnPartsOutput(dataBytes)
 	assert.NoError(t, err)
 
@@ -124,14 +124,14 @@ func TestTx_TotalOutputSatoshis(t *testing.T) {
 	t.Parallel()
 
 	t.Run("greater than zero", func(t *testing.T) {
-		tx, err := transaction.NewTransactionFromHex("020000000180f1ada3ad8e861441d9ceab40b68ed98f13695b185cc516226a46697cc01f80010000006b483045022100fa3a0f8fa9fbf09c372b7a318fa6175d022c1d782f7b8bc5949a7c8f59ce3f35022005e0e84c26f26d892b484ff738d803a57626679389c8b302939460dab29a5308412103e46b62eea5db5898fb65f7dc840e8a1dbd8f08a19781a23f1f55914f9bedcd49feffffff02dec537b2000000001976a914ba11bcc46ecf8d88e0828ddbe87997bf759ca85988ac00943577000000001976a91418392a59fc1f76ad6a3c7ffcea20cfcb17bda9eb88ac6e000000")
+		tx, err := transaction.NewTxFromHex("020000000180f1ada3ad8e861441d9ceab40b68ed98f13695b185cc516226a46697cc01f80010000006b483045022100fa3a0f8fa9fbf09c372b7a318fa6175d022c1d782f7b8bc5949a7c8f59ce3f35022005e0e84c26f26d892b484ff738d803a57626679389c8b302939460dab29a5308412103e46b62eea5db5898fb65f7dc840e8a1dbd8f08a19781a23f1f55914f9bedcd49feffffff02dec537b2000000001976a914ba11bcc46ecf8d88e0828ddbe87997bf759ca85988ac00943577000000001976a91418392a59fc1f76ad6a3c7ffcea20cfcb17bda9eb88ac6e000000")
 		assert.NoError(t, err)
 		assert.NotNil(t, tx)
 		assert.Equal(t, uint64((29.89999582+20.00)*1e8), tx.TotalOutputSatoshis())
 	})
 
 	t.Run("zero Outputs", func(t *testing.T) {
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 		assert.NotNil(t, tx)
 		assert.Equal(t, uint64(0), tx.TotalOutputSatoshis())
 	})
@@ -139,7 +139,7 @@ func TestTx_TotalOutputSatoshis(t *testing.T) {
 
 func TestTx_PayToAddress(t *testing.T) {
 	t.Run("missing pay to address", func(t *testing.T) {
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 		assert.NotNil(t, tx)
 		err := tx.From(
 			"07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b",
@@ -153,7 +153,7 @@ func TestTx_PayToAddress(t *testing.T) {
 	})
 
 	t.Run("invalid pay to address", func(t *testing.T) {
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 		assert.NotNil(t, tx)
 		err := tx.From(
 			"07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b",
@@ -167,7 +167,7 @@ func TestTx_PayToAddress(t *testing.T) {
 	})
 
 	t.Run("valid pay to address", func(t *testing.T) {
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 		assert.NotNil(t, tx)
 		err := tx.From(
 			"07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b",
@@ -185,27 +185,27 @@ func TestTx_PayToAddress(t *testing.T) {
 func TestTx_PayTo(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		script *script.Script
+		script *bscript.Script
 		err    error
 	}{
 		"valid p2pkh script should create valid output": {
-			script: func() *script.Script {
-				s, err := script.NewP2PKHFromAddress("1GHMW7ABrFma2NSwiVe9b9bZxkMB7tuPZi")
+			script: func() *bscript.Script {
+				s, err := bscript.NewP2PKHFromAddress("1GHMW7ABrFma2NSwiVe9b9bZxkMB7tuPZi")
 				assert.NoError(t, err)
 				return s
 			}(),
 			err: nil,
 		}, "empty p2pkh script should return error": {
-			script: &script.Script{},
+			script: &bscript.Script{},
 			err:    errors.New("'empty' is not a valid P2PKH script: invalid script type"),
 		}, "non p2pkh script should return error": {
-			script: script.NewFromBytes([]byte("test")),
+			script: bscript.NewFromBytes([]byte("test")),
 			err:    errors.New("'nonstandard' is not a valid P2PKH script: invalid script type"),
 		},
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			tx := transaction.NewTransaction()
+			tx := transaction.NewTx()
 			assert.NotNil(t, tx)
 			err := tx.From(
 				"07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b",
@@ -227,7 +227,7 @@ func TestTx_PayTo(t *testing.T) {
 
 func TestTx_AddP2PKHOutputFromBip32ExtKey(t *testing.T) {
 	t.Run("output is added", func(t *testing.T) {
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 
 		var b [64]byte
 		_, err := rand.Read(b[:])
@@ -245,7 +245,7 @@ func TestTx_AddP2PKHOutputFromBip32ExtKey(t *testing.T) {
 	})
 
 	t.Run("invalid private key errors", func(t *testing.T) {
-		tx := transaction.NewTransaction()
+		tx := transaction.NewTx()
 		derivationPath, err := tx.AddP2PKHOutputFromBip32ExtKey(&bip32.ExtendedKey{}, 6000)
 
 		assert.Error(t, err)

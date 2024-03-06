@@ -1,12 +1,17 @@
-package script
+package bscript
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"math/bits"
 	"strings"
+
+	"github.com/bitcoin-sv/go-sdk/bip32"
+	"github.com/bitcoin-sv/go-sdk/crypto"
+	"github.com/bitcoin-sv/go-sdk/ec"
 )
 
 // ScriptKey types.
@@ -44,7 +49,7 @@ func NewFromASM(str string) (*Script, error) {
 	s := Script{}
 
 	for _, section := range strings.Split(str, " ") {
-		if val, ok := OpCodeStrings[section]; ok {
+		if val, ok := opCodeStrings[section]; ok {
 			_ = s.AppendOpcodes(val)
 		} else {
 			if err := s.AppendPushDataHexString(section); err != nil {
@@ -54,6 +59,103 @@ func NewFromASM(str string) (*Script, error) {
 	}
 
 	return &s, nil
+}
+
+// NewP2PKHFromPubKeyEC takes a public key hex string (in
+// compressed format) and creates a P2PKH script from it.
+func NewP2PKHFromPubKeyEC(pubKey *ec.PublicKey) (*Script, error) {
+	return NewP2PKHFromPubKeyBytes(pubKey.SerialiseCompressed())
+}
+
+// NewP2PKHFromPubKeyStr takes a public key hex string (in
+// compressed format) and creates a P2PKH script from it.
+func NewP2PKHFromPubKeyStr(pubKey string) (*Script, error) {
+	pubKeyBytes, err := hex.DecodeString(pubKey)
+	if err != nil {
+		return nil, err
+	}
+	return NewP2PKHFromPubKeyBytes(pubKeyBytes)
+}
+
+// NewP2PKHFromPubKeyBytes takes public key bytes (in
+// compressed format) and creates a P2PKH script from it.
+func NewP2PKHFromPubKeyBytes(pubKeyBytes []byte) (*Script, error) {
+	if len(pubKeyBytes) != 33 {
+		return nil, ErrInvalidPKLen
+	}
+	return NewP2PKHFromPubKeyHash(crypto.Hash160(pubKeyBytes))
+}
+
+// NewP2PKHFromPubKeyHash takes a public key hex string (in
+// compressed format) and creates a P2PKH script from it.
+func NewP2PKHFromPubKeyHash(pubKeyHash []byte) (*Script, error) {
+	b := []byte{
+		OpDUP,
+		OpHASH160,
+		OpDATA20,
+	}
+	b = append(b, pubKeyHash...)
+	b = append(b, OpEQUALVERIFY)
+	b = append(b, OpCHECKSIG)
+
+	s := Script(b)
+	return &s, nil
+}
+
+// NewP2PKHFromPubKeyHashStr takes a public key hex string (in
+// compressed format) and creates a P2PKH script from it.
+func NewP2PKHFromPubKeyHashStr(pubKeyHash string) (*Script, error) {
+	hash, err := hex.DecodeString(pubKeyHash)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewP2PKHFromPubKeyHash(hash)
+}
+
+// NewP2PKHFromAddress takes an address
+// and creates a P2PKH script from it.
+func NewP2PKHFromAddress(addr string) (*Script, error) {
+	a, err := NewAddressFromString(addr)
+	if err != nil {
+		return nil, err
+	}
+
+	var publicKeyHashBytes []byte
+	if publicKeyHashBytes, err = hex.DecodeString(a.PublicKeyHash); err != nil {
+		return nil, err
+	}
+
+	s := new(Script)
+	_ = s.AppendOpcodes(OpDUP, OpHASH160)
+	if err = s.AppendPushData(publicKeyHashBytes); err != nil {
+		return nil, err
+	}
+	_ = s.AppendOpcodes(OpEQUALVERIFY, OpCHECKSIG)
+
+	return s, nil
+}
+
+// NewP2PKHFromBip32ExtKey takes a *bip32.ExtendedKey and creates a P2PKH script from it,
+// using an internally random generated seed, returning the script and derivation path used.
+func NewP2PKHFromBip32ExtKey(privKey *bip32.ExtendedKey) (*Script, string, error) {
+	var b [8]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return nil, "", err
+	}
+
+	derivationPath := bip32.DerivePath(binary.LittleEndian.Uint64(b[:]))
+	pubKey, err := privKey.DerivePublicKeyFromPath(derivationPath)
+	if err != nil {
+		return nil, "", err
+	}
+
+	lockingScript, err := NewP2PKHFromPubKeyBytes(pubKey)
+	if err != nil {
+		return nil, "", err
+	}
+
+	return lockingScript, derivationPath, nil
 }
 
 // AppendPushData takes data bytes and appends them to the script
@@ -113,7 +215,7 @@ func (s *Script) AppendPushDataStrings(pushDataStrings []string) error {
 func (s *Script) AppendOpcodes(oo ...uint8) error {
 	for _, o := range oo {
 		if OpDATA1 <= o && o <= OpPUSHDATA4 {
-			return fmt.Errorf("%w: %s", ErrInvalidOpcodeType, OpCodeValues[o])
+			return fmt.Errorf("%w: %s", ErrInvalidOpcodeType, opCodeValues[o])
 		}
 	}
 	*s = append(*s, oo...)
@@ -146,7 +248,7 @@ func (s *Script) ToASM() (string, error) {
 			if data && p[0] != 0x6a {
 				asm.WriteString(fmt.Sprintf("%d", p[0]))
 			} else {
-				asm.WriteString(OpCodeValues[p[0]])
+				asm.WriteString(opCodeValues[p[0]])
 			}
 		} else {
 			if data && len(p) <= 4 {
@@ -261,6 +363,34 @@ func isP2PKHInscriptionHelper(parts [][]byte) bool {
 	return valid
 }
 
+// ParseInscription parses the script to
+// return the inscription found. Will return
+// an error if the script doesn't contain
+// any inscriptions.
+func (s *Script) ParseInscription() (*InscriptionArgs, error) {
+	p, err := DecodeParts(*s)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isP2PKHInscriptionHelper(p) {
+		return nil, ErrP2PKHInscriptionNotFound
+	}
+
+	// FIXME: make it dynamic based on order.
+	// right now if the content type and the content change order
+	// then this will fail. My understanding is that the content
+	// always needs to be last and the previous fields can be
+	// reordered - this is based on the original ordinals
+	// indexer: https://github.com/casey/ord
+	return &InscriptionArgs{
+		LockingScriptPrefix: s.Slice(0, 25),
+		Data:                p[11],
+		ContentType:         string(p[9]),
+		// EnrichedArgs: , // TODO:
+	}, nil
+}
+
 // Slice a script to get back a subset of that script.
 func (s *Script) Slice(start, end uint64) *Script {
 	ss := *s
@@ -338,6 +468,25 @@ func (s *Script) ScriptType() string {
 	return ScriptTypeNonStandard
 }
 
+// Addresses will return all addresses found in the script, if any.
+func (s *Script) Addresses() ([]string, error) {
+	addresses := make([]string, 0)
+	if s.IsP2PKH() {
+		pkh, err := s.PublicKeyHash()
+		if err != nil {
+			return nil, err
+		}
+		a, err := NewAddressFromPublicKeyHash(pkh, true)
+		if err != nil {
+			return nil, err
+		}
+		addresses = []string{a.AddressString}
+	}
+	// TODO: handle multisig, and other outputs
+	// https://github.com/libsv/go-bt/issues/6
+	return addresses, nil
+}
+
 // Equals will compare the script to b and return true if they match.
 func (s *Script) Equals(b *Script) bool {
 	return bytes.Equal(*s, *b)
@@ -400,7 +549,7 @@ func (s *Script) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, s.String())), nil
 }
 
-// UnmarshalJSON covert from json into *script.Script.
+// UnmarshalJSON covert from json into *bscript.Script.
 func (s *Script) UnmarshalJSON(bb []byte) error {
 	ss, err := NewFromHexString(string(bytes.Trim(bb, `"`)))
 	if err != nil {

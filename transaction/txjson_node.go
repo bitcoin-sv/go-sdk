@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/bscript"
 )
 
 type nodeTxWrapper struct {
-	*Transaction
+	*Tx
 }
 
 type nodeTxsWrapper Transactions
@@ -50,10 +50,10 @@ type nodeOutputJSON struct {
 }
 
 func (n *nodeTxWrapper) MarshalJSON() ([]byte, error) {
-	if n == nil || n.Transaction == nil {
+	if n == nil || n.Tx == nil {
 		return nil, errors.New("tx is nil so cannot be marshalled")
 	}
-	tx := n.Transaction
+	tx := n.Tx
 	oo := make([]*nodeOutputJSON, 0, len(tx.Outputs))
 	for i, o := range tx.Outputs {
 		out := &nodeOutputJSON{}
@@ -86,7 +86,7 @@ func (n *nodeTxWrapper) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON will unmarshall a transaction that has been marshalled with this library.
 func (n *nodeTxWrapper) UnmarshalJSON(b []byte) error {
-	tx := n.Transaction
+	tx := n.Tx
 
 	var txj nodeTxJSON
 	if err := json.Unmarshal(b, &txj); err != nil {
@@ -94,7 +94,7 @@ func (n *nodeTxWrapper) UnmarshalJSON(b []byte) error {
 	}
 	// quick convert
 	if txj.Hex != "" {
-		t, err := NewTransactionFromHex(txj.Hex)
+		t, err := NewTxFromHex(txj.Hex)
 		if err != nil {
 			return err
 		}
@@ -155,7 +155,7 @@ func (o *nodeOutputJSON) fromOutput(out *Output) error {
 
 func (o *nodeOutputJSON) toOutput() (*Output, error) {
 	out := &Output{}
-	s, err := script.NewFromHexString(o.ScriptPubKey.Hex)
+	s, err := bscript.NewFromHexString(o.ScriptPubKey.Hex)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func (o *nodeOutputJSON) toOutput() (*Output, error) {
 
 func (i *nodeInputJSON) toInput() (*Input, error) {
 	input := &Input{}
-	s, err := script.NewFromHexString(i.ScriptSig.Hex)
+	s, err := bscript.NewFromHexString(i.ScriptSig.Hex)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func (nn *nodeTxsWrapper) UnmarshalJSON(b []byte) error {
 
 	*nn = make(nodeTxsWrapper, 0)
 	for _, j := range jj {
-		tx := NewTransaction()
+		tx := NewTx()
 		if err := json.Unmarshal(j, tx.NodeJSON()); err != nil {
 			return err
 		}
