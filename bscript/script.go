@@ -49,7 +49,7 @@ func NewFromASM(str string) (*Script, error) {
 	s := Script{}
 
 	for _, section := range strings.Split(str, " ") {
-		if val, ok := opCodeStrings[section]; ok {
+		if val, ok := OpCodeStrings[section]; ok {
 			_ = s.AppendOpcodes(val)
 		} else {
 			if err := s.AppendPushDataHexString(section); err != nil {
@@ -215,7 +215,7 @@ func (s *Script) AppendPushDataStrings(pushDataStrings []string) error {
 func (s *Script) AppendOpcodes(oo ...uint8) error {
 	for _, o := range oo {
 		if OpDATA1 <= o && o <= OpPUSHDATA4 {
-			return fmt.Errorf("%w: %s", ErrInvalidOpcodeType, opCodeValues[o])
+			return fmt.Errorf("%w: %s", ErrInvalidOpcodeType, OpCodeValues[o])
 		}
 	}
 	*s = append(*s, oo...)
@@ -248,7 +248,7 @@ func (s *Script) ToASM() (string, error) {
 			if data && p[0] != 0x6a {
 				asm.WriteString(fmt.Sprintf("%d", p[0]))
 			} else {
-				asm.WriteString(opCodeValues[p[0]])
+				asm.WriteString(OpCodeValues[p[0]])
 			}
 		} else {
 			if data && len(p) <= 4 {
@@ -270,6 +270,30 @@ func (s *Script) ToASM() (string, error) {
 
 	return asm.String()[1:], nil
 }
+
+// func (s *Script) ToASM() (string, error) {
+// 	if s == nil || len(*s) == 0 {
+// 		return "", nil
+// 	}
+
+// 	var asm strings.Builder
+// 	pos := 0
+// 	for pos < len(*s) {
+// 		op, err := s.ReadOp(&pos)
+// 		if err != nil {
+// 			return "", err
+// 		}
+// 		asm.WriteRune(' ')
+
+// 		if len(op.Data) > 0 {
+// 			asm.WriteString(hex.EncodeToString(op.Data))
+// 		} else {
+// 			asm.WriteString(OpCodeValues[op.OpCode])
+// 		}
+// 	}
+
+// 	return asm.String()[1:], nil
+// }
 
 // IsP2PKH returns true if this is a pay to pubkey hash output script.
 func (s *Script) IsP2PKH() bool {

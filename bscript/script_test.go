@@ -5,7 +5,12 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
 	"reflect"
+	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -607,4 +612,91 @@ func TestIsInscription(t *testing.T) {
 			assert.True(t, inscScript.IsP2PKHInscription())
 		})
 	}
+}
+
+// Test vectors from testdata/script.valid.vectors.json
+func TestScriptValid(t *testing.T) {
+
+	for _, file := range []string{"script.valid.vectors.json", "script.invalid.vectors.json"} {
+		// Determine the directory of the current test file
+		_, currentFile, _, _ := runtime.Caller(0)
+		testdataPath := filepath.Join(filepath.Dir(currentFile), "testdata", file)
+
+		// Read in the file
+		vectors, err := os.ReadFile(testdataPath)
+		if err != nil {
+			t.Fatalf("Could not read test vectors: %v", err)
+		}
+
+		// Unmarshal the json
+		var testVectors []publicTestVector
+		err = json.Unmarshal(vectors, &testVectors)
+		if err != nil {
+			t.Errorf("Could not unmarshal test vectors: %v", err)
+		}
+
+		for i, v := range testVectors {
+			if len(v) == 1 {
+				continue
+			}
+
+			t.Run(fmt.Sprintf("Test vector %d", i), func(t *testing.T) {
+				for i := 0; i < 2; i++ {
+					s, err := scriptFromVector(v[i])
+					if err != nil {
+						t.Error(err)
+						t.FailNow()
+					}
+					// Test that no errors are thrown for the first item
+					if asm, err := s.ToASM(); err != nil {
+						t.Error(err)
+					} else {
+						s, err := bscript.NewFromASM(asm)
+						if err != nil {
+							t.Error(err)
+						}
+						asm2, err := s.ToASM()
+						if err != nil {
+							t.Error(err)
+						}
+						assert.Equal(t, asm, asm2, v[2])
+					}
+				}
+
+			})
+		}
+	}
+}
+
+func scriptFromVector(str string) (s *bscript.Script, error error) {
+	tokens := strings.Split(str, " ")
+	s = &bscript.Script{}
+	for _, token := range tokens {
+		if token == "" {
+			continue
+		}
+		if strings.HasPrefix(token, "0x") {
+			b, err := hex.DecodeString(token[2:])
+			if err != nil {
+				panic(err)
+			}
+			s.AppendOpcodes(b...)
+			// This is not understood and is failing
+			// TODO: Figure out intended opertion and fix
+		} else if strings.HasPrefix(token, "'") {
+			str := token[1 : len(token)-1]
+			sbuf := append(*s, []byte(str)...)
+			newS := bscript.Script(sbuf)
+			s = &newS
+		} else if op, ok := bscript.OpCodeStrings["OP_"+token]; ok {
+			s.AppendOpcodes(op)
+		} else if op, ok := bscript.OpCodeStrings[token]; ok {
+			s.AppendOpcodes(op)
+		} else if val, err := strconv.Atoi(token); err == nil {
+			s.AppendInt(int64(val))
+		} else {
+			error = fmt.Errorf("Could not determine type of script value")
+		}
+	}
+	return s, error
 }

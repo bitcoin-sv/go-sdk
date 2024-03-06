@@ -268,7 +268,7 @@ const (
 	OpINVALIDOPCODE       byte = 0xff // 255 - bitcoin core
 )
 
-var opCodeStrings = map[string]byte{
+var OpCodeStrings = map[string]byte{
 	"OP_0":                   Op0,
 	"OP_ZERO":                OpZERO,
 	"OP_FALSE":               OpFALSE,
@@ -403,7 +403,9 @@ var opCodeStrings = map[string]byte{
 	"OP_CAT":                 OpCAT,
 	"OP_SPLIT":               OpSPLIT,
 	"OP_NUM2BIN":             OpNUM2BIN,
+	"OP_LEFT":                OpNUM2BIN,
 	"OP_BIN2NUM":             OpBIN2NUM,
+	"OP_RIGHT":               OpBIN2NUM,
 	"OP_SIZE":                OpSIZE,
 	"OP_INVERT":              OpINVERT,
 	"OP_AND":                 OpAND,
@@ -532,7 +534,7 @@ var opCodeStrings = map[string]byte{
 	"OP_INVALIDOPCODE":       OpINVALIDOPCODE,
 }
 
-var opCodeValues = map[byte]string{
+var OpCodeValues = map[byte]string{
 	OpFALSE:               "OP_FALSE",
 	OpDATA1:               "OP_DATA_1",
 	OpDATA2:               "OP_DATA_2",
