@@ -47,6 +47,9 @@ func NewFromBytes(b []byte) *Script {
 // NewFromASM creates a new script from a BitCoin ASM formatted string.
 func NewFromASM(str string) (*Script, error) {
 	s := Script{}
+	if len(str) == 0 {
+		return &s, nil
+	}
 
 	for _, section := range strings.Split(str, " ") {
 		if val, ok := OpCodeStrings[section]; ok {
@@ -228,72 +231,70 @@ func (s *Script) String() string {
 }
 
 // ToASM returns the string ASM opcodes of the script.
-func (s *Script) ToASM() (string, error) {
-	if s == nil || len(*s) == 0 {
-		return "", nil
-	}
-	parts, err := DecodeParts(*s)
-	// if err != nil, we will append [error] to the ASM script below (as done in the node).
-
-	data := false
-	if len(*s) > 1 && ((*s)[0] == OpRETURN || ((*s)[0] == OpFALSE && (*s)[1] == OpRETURN)) {
-		data = true
-	}
-
-	var asm strings.Builder
-
-	for _, p := range parts {
-		asm.WriteRune(' ')
-		if len(p) == 1 {
-			if data && p[0] != 0x6a {
-				asm.WriteString(fmt.Sprintf("%d", p[0]))
-			} else {
-				asm.WriteString(OpCodeValues[p[0]])
-			}
-		} else {
-			if data && len(p) <= 4 {
-				b := make([]byte, 0)
-				b = append(b, p...)
-				for i := 0; i < 4-len(p); i++ {
-					b = append(b, 0)
-				}
-				asm.WriteString(fmt.Sprintf("%d", binary.LittleEndian.Uint32(b)))
-			} else {
-				asm.WriteString(hex.EncodeToString(p))
-			}
-		}
-	}
-
-	if err != nil {
-		asm.WriteString(" [error]")
-	}
-
-	return asm.String()[1:], nil
-}
-
 // func (s *Script) ToASM() (string, error) {
 // 	if s == nil || len(*s) == 0 {
 // 		return "", nil
 // 	}
+// 	parts, err := DecodeParts(*s)
+// 	// if err != nil, we will append [error] to the ASM script below (as done in the node).
+
+// 	data := false
+// 	if len(*s) > 1 && ((*s)[0] == OpRETURN || ((*s)[0] == OpFALSE && (*s)[1] == OpRETURN)) {
+// 		data = true
+// 	}
 
 // 	var asm strings.Builder
-// 	pos := 0
-// 	for pos < len(*s) {
-// 		op, err := s.ReadOp(&pos)
-// 		if err != nil {
-// 			return "", err
-// 		}
-// 		asm.WriteRune(' ')
 
-// 		if len(op.Data) > 0 {
-// 			asm.WriteString(hex.EncodeToString(op.Data))
+// 	for _, p := range parts {
+// 		asm.WriteRune(' ')
+// 		if len(p) == 1 {
+// 			if data && p[0] != 0x6a {
+// 				asm.WriteString(fmt.Sprintf("%d", p[0]))
+// 			} else {
+// 				asm.WriteString(OpCodeValues[p[0]])
+// 			}
 // 		} else {
-// 			asm.WriteString(OpCodeValues[op.OpCode])
+// 			if data && len(p) <= 4 {
+// 				b := make([]byte, 0)
+// 				b = append(b, p...)
+// 				for i := 0; i < 4-len(p); i++ {
+// 					b = append(b, 0)
+// 				}
+// 				asm.WriteString(fmt.Sprintf("%d", binary.LittleEndian.Uint32(b)))
+// 			} else {
+// 				asm.WriteString(hex.EncodeToString(p))
+// 			}
 // 		}
+// 	}
+
+// 	if err != nil {
+// 		asm.WriteString(" [error]")
 // 	}
 
 // 	return asm.String()[1:], nil
 // }
+
+func (s *Script) ToASM() (string, error) {
+	if s == nil || len(*s) == 0 {
+		return "", nil
+	}
+
+	asm := make([]string, 0, len(*s))
+	pos := 0
+	for pos < len(*s) {
+		op, err := s.ReadOp(&pos)
+		if err != nil {
+			return "", err
+		}
+
+		opStr := op.String()
+		if len(opStr) > 0 {
+			asm = append(asm, opStr)
+		}
+	}
+
+	return strings.Join(asm, " "), nil
+}
 
 // IsP2PKH returns true if this is a pay to pubkey hash output script.
 func (s *Script) IsP2PKH() bool {

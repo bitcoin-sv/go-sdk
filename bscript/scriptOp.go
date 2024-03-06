@@ -2,12 +2,20 @@ package bscript
 
 import (
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 )
 
 type ScriptOp struct {
 	OpCode byte
 	Data   []byte
+}
+
+func (op *ScriptOp) String() string {
+	if op.OpCode > Op0 && op.OpCode <= OpPUSHDATA4 {
+		return hex.EncodeToString(op.Data)
+	}
+	return OpCodeValues[op.OpCode]
 }
 
 // ReadOp reads the next script operation from the Script starting at the given position.
