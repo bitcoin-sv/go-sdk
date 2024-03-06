@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/libsv/go-bt/v2/bscript"
-	"github.com/libsv/go-bt/v2/bscript/interpreter"
-	"github.com/libsv/go-bt/v2/bscript/interpreter/debug"
+	"github.com/bitcoin-sv/go-sdk/bscript"
+	"github.com/bitcoin-sv/go-sdk/bscript/interpreter"
+	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/debug"
 )
 
 func ExampleDebugger_AfterStep() {
