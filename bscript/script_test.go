@@ -613,36 +613,37 @@ func TestIsInscription(t *testing.T) {
 
 // Test vectors from testdata/script.valid.vectors.json
 func TestScriptValid(t *testing.T) {
-
-	for i, v := range testdata.ValidVectors {
-		if len(v) == 1 {
-			continue
-		}
-
-		t.Run(fmt.Sprintf("Test vector %d", i), func(t *testing.T) {
-			// log.Println("Test vector", i, v[0], v[1], v[2])
-			for j := 0; j < 2; j++ {
-				s, err := bscript.NewFromHexString(v[j])
-				if err != nil {
-					t.Error(err)
-					t.FailNow()
-				}
-				// Test that no errors are thrown for the first item
-				if asm, err := s.ToASM(); err != nil {
-					t.Error(err)
-				} else {
-					s, err := bscript.NewFromASM(asm)
-					if err != nil {
-						t.Error(err)
-					}
-					asm2, err := s.ToASM()
-					if err != nil {
-						t.Error(err)
-					}
-					assert.Equal(t, asm, asm2, v[2])
-				}
+	for k, vectors := range [][][]string{testdata.ValidVectors, testdata.InvalidVectors} {
+		for i, v := range vectors {
+			if len(v) == 1 {
+				continue
 			}
 
-		})
+			t.Run(fmt.Sprintf("Test vector %d %d", k, i), func(t *testing.T) {
+				// log.Println("Test vector", i, v[0], v[1], v[2])
+				for j := 0; j < 2; j++ {
+					s, err := bscript.NewFromHexString(v[j])
+					if err != nil {
+						t.Error(err)
+						t.FailNow()
+					}
+					// Test that no errors are thrown for the first item
+					if asm, err := s.ToASM(); err != nil {
+						t.Error(err)
+					} else {
+						s, err := bscript.NewFromASM(asm)
+						if err != nil {
+							t.Error(err)
+						}
+						asm2, err := s.ToASM()
+						if err != nil {
+							t.Error(err)
+						}
+						assert.Equal(t, asm, asm2, v[2])
+					}
+				}
+
+			})
+		}
 	}
 }
