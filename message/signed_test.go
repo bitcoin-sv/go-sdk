@@ -43,7 +43,7 @@ func TestSignedMessage(t *testing.T) {
 
 		_, err := Verify(message, signature, recipientPriv)
 		assert.NotNil(t, err)
-		assert.Equal(t, "Message version mismatch: Expected 10334242, received 01334242", err.Error())
+		assert.Equal(t, "message version mismatch: Expected 10334242, received 01334242", err.Error())
 	})
 
 }
