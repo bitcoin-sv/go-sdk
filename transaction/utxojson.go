@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/bscript"
 )
 
 type nodeUTXOWrapper struct {
@@ -39,7 +39,7 @@ func (u *UTXO) UnmarshalJSON(body []byte) error {
 		return err
 	}
 
-	lscript, err := script.NewFromHexString(j.LockingScript)
+	lscript, err := bscript.NewFromHexString(j.LockingScript)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func (n *nodeUTXOWrapper) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	lscript, err := script.NewFromHexString(uj.ScriptPubKey)
+	lscript, err := bscript.NewFromHexString(uj.ScriptPubKey)
 	if err != nil {
 		return err
 	}

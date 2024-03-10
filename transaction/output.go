@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/bscript"
 	"github.com/pkg/errors"
 )
 
@@ -24,8 +24,8 @@ Txout-script / scriptPubKey   Script                                      <out-s
 
 // Output is a representation of a transaction output
 type Output struct {
-	Satoshis      uint64         `json:"satoshis"`
-	LockingScript *script.Script `json:"locking_script"`
+	Satoshis      uint64          `json:"satoshis"`
+	LockingScript *bscript.Script `json:"locking_script"`
 }
 
 // ReadFrom reads from the `io.Reader` into the `bt.Output`.
@@ -55,7 +55,7 @@ func (o *Output) ReadFrom(r io.Reader) (int64, error) {
 	}
 
 	o.Satoshis = binary.LittleEndian.Uint64(satoshis)
-	o.LockingScript = script.NewFromBytes(scriptBytes)
+	o.LockingScript = bscript.NewFromBytes(scriptBytes)
 
 	return bytesRead, nil
 }

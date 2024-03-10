@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/bscript"
 	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/stretchr/testify/assert"
@@ -56,13 +56,13 @@ func TestTx_CalcInputPreimage(t *testing.T) {
 
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
-			tx, err := transaction.NewTransactionFromHex(test.unsignedTx)
+			tx, err := transaction.NewTxFromHex(test.unsignedTx)
 			assert.NoError(t, err)
 			assert.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
 			tx.InputIdx(test.index).PreviousTxSatoshis = test.previousTxSatoshis
-			tx.InputIdx(test.index).PreviousTxScript, err = script.NewFromHexString(test.previousTxScript)
+			tx.InputIdx(test.index).PreviousTxScript, err = bscript.NewFromHexString(test.previousTxScript)
 			assert.NoError(t, err)
 
 			var actualSigHash []byte
@@ -146,13 +146,13 @@ func TestTx_CalcInputSignatureHash(t *testing.T) {
 
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
-			tx, err := transaction.NewTransactionFromHex(test.unsignedTx)
+			tx, err := transaction.NewTxFromHex(test.unsignedTx)
 			assert.NoError(t, err)
 			assert.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
 			tx.Inputs[test.index].PreviousTxSatoshis = test.previousTxSatoshis
-			tx.Inputs[test.index].PreviousTxScript, err = script.NewFromHexString(test.previousTxScript)
+			tx.Inputs[test.index].PreviousTxScript, err = bscript.NewFromHexString(test.previousTxScript)
 			assert.NoError(t, err)
 
 			var actualSigHash []byte
@@ -209,13 +209,13 @@ func TestTx_CalcInputPreimageLegacy(t *testing.T) {
 
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
-			tx, err := transaction.NewTransactionFromHex(test.unsignedTx)
+			tx, err := transaction.NewTxFromHex(test.unsignedTx)
 			assert.NoError(t, err)
 			assert.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
 			tx.InputIdx(test.index).PreviousTxSatoshis = test.previousTxSatoshis
-			tx.InputIdx(test.index).PreviousTxScript, err = script.NewFromHexString(test.previousTxScript)
+			tx.InputIdx(test.index).PreviousTxScript, err = bscript.NewFromHexString(test.previousTxScript)
 			assert.NoError(t, err)
 
 			var actualSigHash []byte

@@ -1,4 +1,4 @@
-package script
+package bscript
 
 // BitCoin Script constants.
 // See https://wiki.bitcoinsv.io/index.php/Opcodes_used_in_Bitcoin_Script
@@ -403,7 +403,9 @@ var OpCodeStrings = map[string]byte{
 	"OP_CAT":                 OpCAT,
 	"OP_SPLIT":               OpSPLIT,
 	"OP_NUM2BIN":             OpNUM2BIN,
+	"OP_LEFT":                OpNUM2BIN,
 	"OP_BIN2NUM":             OpBIN2NUM,
+	"OP_RIGHT":               OpBIN2NUM,
 	"OP_SIZE":                OpSIZE,
 	"OP_INVERT":              OpINVERT,
 	"OP_AND":                 OpAND,

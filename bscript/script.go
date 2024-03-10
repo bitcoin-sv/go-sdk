@@ -1,4 +1,4 @@
-package script
+package bscript
 
 import (
 	"bytes"
@@ -47,6 +47,9 @@ func NewFromBytes(b []byte) *Script {
 // NewFromASM creates a new script from a BitCoin ASM formatted string.
 func NewFromASM(str string) (*Script, error) {
 	s := Script{}
+	if len(str) == 0 {
+		return &s, nil
+	}
 
 	for _, section := range strings.Split(str, " ") {
 		if val, ok := OpCodeStrings[section]; ok {
@@ -228,47 +231,69 @@ func (s *Script) String() string {
 }
 
 // ToASM returns the string ASM opcodes of the script.
+// func (s *Script) ToASM() (string, error) {
+// 	if s == nil || len(*s) == 0 {
+// 		return "", nil
+// 	}
+// 	parts, err := DecodeParts(*s)
+// 	// if err != nil, we will append [error] to the ASM script below (as done in the node).
+
+// 	data := false
+// 	if len(*s) > 1 && ((*s)[0] == OpRETURN || ((*s)[0] == OpFALSE && (*s)[1] == OpRETURN)) {
+// 		data = true
+// 	}
+
+// 	var asm strings.Builder
+
+// 	for _, p := range parts {
+// 		asm.WriteRune(' ')
+// 		if len(p) == 1 {
+// 			if data && p[0] != 0x6a {
+// 				asm.WriteString(fmt.Sprintf("%d", p[0]))
+// 			} else {
+// 				asm.WriteString(OpCodeValues[p[0]])
+// 			}
+// 		} else {
+// 			if data && len(p) <= 4 {
+// 				b := make([]byte, 0)
+// 				b = append(b, p...)
+// 				for i := 0; i < 4-len(p); i++ {
+// 					b = append(b, 0)
+// 				}
+// 				asm.WriteString(fmt.Sprintf("%d", binary.LittleEndian.Uint32(b)))
+// 			} else {
+// 				asm.WriteString(hex.EncodeToString(p))
+// 			}
+// 		}
+// 	}
+
+// 	if err != nil {
+// 		asm.WriteString(" [error]")
+// 	}
+
+// 	return asm.String()[1:], nil
+// }
+
 func (s *Script) ToASM() (string, error) {
 	if s == nil || len(*s) == 0 {
 		return "", nil
 	}
-	parts, err := DecodeParts(*s)
-	// if err != nil, we will append [error] to the ASM script below (as done in the node).
 
-	data := false
-	if len(*s) > 1 && ((*s)[0] == OpRETURN || ((*s)[0] == OpFALSE && (*s)[1] == OpRETURN)) {
-		data = true
-	}
+	asm := make([]string, 0, len(*s))
+	pos := 0
+	for pos < len(*s) {
+		op, err := s.ReadOp(&pos)
+		if err != nil {
+			return "", err
+		}
 
-	var asm strings.Builder
-
-	for _, p := range parts {
-		asm.WriteRune(' ')
-		if len(p) == 1 {
-			if data && p[0] != 0x6a {
-				asm.WriteString(fmt.Sprintf("%d", p[0]))
-			} else {
-				asm.WriteString(OpCodeValues[p[0]])
-			}
-		} else {
-			if data && len(p) <= 4 {
-				b := make([]byte, 0)
-				b = append(b, p...)
-				for i := 0; i < 4-len(p); i++ {
-					b = append(b, 0)
-				}
-				asm.WriteString(fmt.Sprintf("%d", binary.LittleEndian.Uint32(b)))
-			} else {
-				asm.WriteString(hex.EncodeToString(p))
-			}
+		opStr := op.String()
+		if len(opStr) > 0 {
+			asm = append(asm, opStr)
 		}
 	}
 
-	if err != nil {
-		asm.WriteString(" [error]")
-	}
-
-	return asm.String()[1:], nil
+	return strings.Join(asm, " "), nil
 }
 
 // IsP2PKH returns true if this is a pay to pubkey hash output script.
@@ -361,6 +386,34 @@ func isP2PKHInscriptionHelper(parts [][]byte) bool {
 		return parts[13][0] == OpRETURN && valid
 	}
 	return valid
+}
+
+// ParseInscription parses the script to
+// return the inscription found. Will return
+// an error if the script doesn't contain
+// any inscriptions.
+func (s *Script) ParseInscription() (*InscriptionArgs, error) {
+	p, err := DecodeParts(*s)
+	if err != nil {
+		return nil, err
+	}
+
+	if !isP2PKHInscriptionHelper(p) {
+		return nil, ErrP2PKHInscriptionNotFound
+	}
+
+	// FIXME: make it dynamic based on order.
+	// right now if the content type and the content change order
+	// then this will fail. My understanding is that the content
+	// always needs to be last and the previous fields can be
+	// reordered - this is based on the original ordinals
+	// indexer: https://github.com/casey/ord
+	return &InscriptionArgs{
+		LockingScriptPrefix: s.Slice(0, 25),
+		Data:                p[11],
+		ContentType:         string(p[9]),
+		// EnrichedArgs: , // TODO:
+	}, nil
 }
 
 // Slice a script to get back a subset of that script.

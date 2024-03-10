@@ -5,8 +5,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/bitcoin-sv/go-sdk/bscript"
 	"github.com/bitcoin-sv/go-sdk/ec"
-	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 )
@@ -21,7 +21,7 @@ type Getter struct {
 // as the calling `*local.Getter`.
 //
 // For an example implementation, see `examples/unlocker_getter/`.
-func (g *Getter) Unlocker(ctx context.Context, lockingScript *script.Script) (transaction.Unlocker, error) {
+func (g *Getter) Unlocker(ctx context.Context, lockingScript *bscript.Script) (transaction.Unlocker, error) {
 	return &Simple{PrivateKey: g.PrivateKey}, nil
 }
 
@@ -40,7 +40,7 @@ type Simple struct {
 // canonical in accordance with RFC6979 and BIP0062.
 //
 // For example usage, see `examples/create_tx/create_tx.go`
-func (l *Simple) UnlockingScript(ctx context.Context, tx *transaction.Transaction, params transaction.UnlockerParams) (*script.Script, error) {
+func (l *Simple) UnlockingScript(ctx context.Context, tx *transaction.Tx, params transaction.UnlockerParams) (*bscript.Script, error) {
 	if params.SigHashFlags == 0 {
 		params.SigHashFlags = sighash.AllForkID
 	}
@@ -49,7 +49,7 @@ func (l *Simple) UnlockingScript(ctx context.Context, tx *transaction.Transactio
 		return nil, transaction.ErrEmptyPreviousTxScript
 	}
 	switch tx.Inputs[params.InputIdx].PreviousTxScript.ScriptType() {
-	case script.ScriptTypePubKeyHash, script.ScriptTypePubKeyHashInscription:
+	case bscript.ScriptTypePubKeyHash, bscript.ScriptTypePubKeyHashInscription:
 		sh, err := tx.CalcInputSignatureHash(params.InputIdx, params.SigHashFlags)
 		if err != nil {
 			return nil, err
@@ -63,7 +63,7 @@ func (l *Simple) UnlockingScript(ctx context.Context, tx *transaction.Transactio
 		pubKey := l.PrivateKey.PubKey().SerialiseCompressed()
 		signature := sig.Serialise()
 
-		uscript, err := script.NewP2PKHUnlockingScript(pubKey, signature, params.SigHashFlags)
+		uscript, err := bscript.NewP2PKHUnlockingScript(pubKey, signature, params.SigHashFlags)
 		if err != nil {
 			return nil, err
 		}

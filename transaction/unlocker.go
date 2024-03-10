@@ -3,7 +3,7 @@ package transaction
 import (
 	"context"
 
-	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/bscript"
 	"github.com/bitcoin-sv/go-sdk/sighash"
 )
 
@@ -20,10 +20,10 @@ type UnlockerParams struct {
 // Unlocker interface to allow custom implementations of different unlocking mechanisms.
 // Implement the Unlocker function as shown in LocalUnlocker, for example.
 type Unlocker interface {
-	UnlockingScript(ctx context.Context, tx *Transaction, up UnlockerParams) (uscript *script.Script, err error)
+	UnlockingScript(ctx context.Context, tx *Tx, up UnlockerParams) (uscript *bscript.Script, err error)
 }
 
 // UnlockerGetter interfaces getting an unlocker for a given output/locking script.
 type UnlockerGetter interface {
-	Unlocker(ctx context.Context, lockingScript *script.Script) (Unlocker, error)
+	Unlocker(ctx context.Context, lockingScript *bscript.Script) (Unlocker, error)
 }

@@ -1,4 +1,4 @@
-package script
+package bscript
 
 import "github.com/bitcoin-sv/go-sdk/sighash"
 

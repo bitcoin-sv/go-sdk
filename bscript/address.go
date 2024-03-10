@@ -1,4 +1,5 @@
-package script
+// Package bscript comment
+package bscript
 
 import (
 	"encoding/hex"
@@ -92,7 +93,7 @@ func NewAddressFromPublicKeyHash(hash []byte, mainnet bool) (*Address, error) {
 	}, nil
 }
 
-// NewAddressFromPublicKey takes a ec public key and returns an Address struct pointer.
+// NewAddressFromPublicKey takes a bec public key and returns an Address struct pointer.
 // If mainnet parameter is true it will return a mainnet address (starting with a 1).
 // Otherwise, (mainnet is false) it will return a testnet address (starting with an m or n).
 func NewAddressFromPublicKey(pubKey *ec.PublicKey, mainnet bool) (*Address, error) {
