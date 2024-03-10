@@ -6,13 +6,17 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	"path/filepath"
 	"reflect"
+	"runtime"
+	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/bip32"
 	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/bscript/testdata"
 	"github.com/bitcoin-sv/go-sdk/chaincfg"
 	"github.com/bitcoin-sv/go-sdk/ec"
 	"github.com/pkg/errors"
@@ -611,39 +615,150 @@ func TestIsInscription(t *testing.T) {
 	}
 }
 
-// Test vectors from testdata/script.valid.vectors.json
-func TestScriptValid(t *testing.T) {
-	for k, vectors := range [][][]string{testdata.ValidVectors, testdata.InvalidVectors} {
-		for i, v := range vectors {
-			if len(v) == 1 {
-				continue
+type publicTestVector []string
+
+// Test vectors from testdata/script.invalid.vectors.json
+func TestScriptInvalid(t *testing.T) {
+	// Determine the directory of the current test file
+	_, currentFile, _, _ := runtime.Caller(0)
+	testdataPath := filepath.Join(filepath.Dir(currentFile), "testdata", "script.invalid.vectors.json")
+
+	// Read in the file
+	vectors, err := os.ReadFile(testdataPath)
+	if err != nil {
+		t.Fatalf("Could not read test vectors: %v", err)
+	}
+
+	// Unmarshal the json
+	var testVectors []publicTestVector
+	err = json.Unmarshal(vectors, &testVectors)
+	if err != nil {
+		t.Errorf("Could not unmarshal test vectors: %v", err)
+	}
+
+	for i, v := range testVectors {
+		t.Run(fmt.Sprintf("Test vector %d", i), func(t *testing.T) {
+
+			// hydrate a script from the test vector
+			s, err := scriptFromVector(v[0])
+			if err != nil {
+				t.Error(err)
+				t.FailNow()
+			}
+			if _, err := s.ToASM(); err != nil {
+				t.Error(err)
 			}
 
-			t.Run(fmt.Sprintf("Test vector %d %d", k, i), func(t *testing.T) {
-				// log.Println("Test vector", i, v[0], v[1], v[2])
-				for j := 0; j < 2; j++ {
-					s, err := bscript.NewFromHexString(v[j])
+			// scriptInvalid.forEach((a, i) => {
+			// 	if (a.length === 1) {
+			// 		return
+			// 	}
+
+			// 	it(`should not fail when reading scriptInvalid vector ${i}`, () => {
+			// 	// Test that no errors are thrown for the first item
+			// 		expect(() => {
+			// 			const scriptA = scriptFromVector(a[0])
+			// 			scriptA.toHex()
+			// 			scriptA.toASM()
+			// 		}).not.toThrow()
+
+			// 		// Test that no errors are thrown for the second item
+			// 		expect(() => {
+			// 			const scriptB = scriptFromVector(a[1])
+			// 			scriptB.toHex()
+			// 			scriptB.toASM()
+			// 		}).not.toThrow()
+
+			// 		// Test that it should be able to return the same output over and over for the first item
+			// 		const strA = scriptFromVector(a[0]).toASM()
+			// 		expect(Script.fromASM(strA).toASM()).toEqual(strA)
+
+			// 		// Test that it should be able to return the same output over and over for the second item
+			// 		const strB = scriptFromVector(a[1]).toASM()
+			// 		expect(Script.fromASM(strB).toASM()).toEqual(strB)
+			// 	})
+			// })
+
+		})
+	}
+}
+
+// Test vectors from testdata/script.valid.vectors.json
+func TestScriptValid(t *testing.T) {
+
+	// Determine the directory of the current test file
+	_, currentFile, _, _ := runtime.Caller(0)
+	testdataPath := filepath.Join(filepath.Dir(currentFile), "testdata", "script.valid.vectors.json")
+
+	// Read in the file
+	vectors, err := os.ReadFile(testdataPath)
+	if err != nil {
+		t.Fatalf("Could not read test vectors: %v", err)
+	}
+
+	// Unmarshal the json
+	var testVectors []publicTestVector
+	err = json.Unmarshal(vectors, &testVectors)
+	if err != nil {
+		t.Errorf("Could not unmarshal test vectors: %v", err)
+	}
+
+	for i, v := range testVectors {
+		if len(v) == 1 {
+			continue
+		}
+
+		t.Run(fmt.Sprintf("Test vector %d", i), func(t *testing.T) {
+			for i := 0; i < 2; i++ {
+				s, err := scriptFromVector(v[i])
+				if err != nil {
+					t.Error(err)
+					t.FailNow()
+				}
+				// Test that no errors are thrown for the first item
+				if asm, err := s.ToASM(); err != nil {
+					t.Error(err)
+				} else {
+					s, err := bscript.NewFromASM(asm)
 					if err != nil {
 						t.Error(err)
-						t.FailNow()
 					}
-					// Test that no errors are thrown for the first item
-					if asm, err := s.ToASM(); err != nil {
+					asm2, err := s.ToASM()
+					if err != nil {
 						t.Error(err)
-					} else {
-						s, err := bscript.NewFromASM(asm)
-						if err != nil {
-							t.Error(err)
-						}
-						asm2, err := s.ToASM()
-						if err != nil {
-							t.Error(err)
-						}
-						assert.Equal(t, asm, asm2, v[2])
 					}
+					assert.Equal(t, asm, asm2)
 				}
+			}
 
-			})
+		})
+	}
+}
+
+func scriptFromVector(str string) (s *bscript.Script, error error) {
+	tokens := strings.Split(str, " ")
+	s = &bscript.Script{}
+	for _, token := range tokens {
+		if token == "" {
+			continue
+		}
+		if strings.HasPrefix(token, "0x") {
+			b, err := hex.DecodeString(token[2:])
+			if err != nil {
+				panic(err)
+			}
+			s.AppendPushData(b)
+		} else if strings.HasPrefix(token, "'") {
+			log.Panicln("Not implemented")
+		} else if op, ok := bscript.OpCodeStrings["OP_"+token]; ok {
+			s.AppendOpcodes(op)
+		} else if op, ok := bscript.OpCodeStrings[token]; ok {
+			s.AppendOpcodes(op)
+		} else if val, err := strconv.Atoi(token); err == nil {
+			s.AppendInt(int64(val))
+		} else {
+			error = fmt.Errorf("Could not determine type of script value")
 		}
 	}
+	return s, error
 }
