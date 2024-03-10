@@ -20,9 +20,7 @@ type SignedMessage struct {
 func Sign(message []byte, signer *ec.PrivateKey, verifier *ec.PublicKey) ([]byte, error) {
 	recipientAnyone := verifier == nil
 	if recipientAnyone {
-		anyone, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{1})
-		anyonePointX, anyonePointY := ec.S256().ScalarMult(anyone.X, anyone.Y, anyone.Serialise())
-		verifier = &ec.PublicKey{X: anyonePointX, Y: anyonePointY, Curve: ec.S256()}
+		_, verifier = ec.PrivateKeyFromBytes(ec.S256(), []byte{1})
 	}
 
 	keyID := make([]byte, 32)
@@ -58,20 +56,25 @@ func Sign(message []byte, signer *ec.PrivateKey, verifier *ec.PublicKey) ([]byte
 }
 
 func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) {
-	messageVersion := sig[:4]
+	counter := 4
+	messageVersion := sig[:counter]
 	if !bytes.Equal(messageVersion, VERSION_BYTES) {
-		return false, fmt.Errorf("Message version mismatch: Expected %x, received %x", VERSION_BYTES, messageVersion)
+		return false, fmt.Errorf("message version mismatch: Expected %x, received %x", VERSION_BYTES, messageVersion)
 	}
-	pubKeyBytes := sig[4:37]
+	pubKeyBytes := sig[counter : counter+33]
+	counter += 33
 	signer, err := ec.ParsePubKey(pubKeyBytes, ec.S256())
 	if err != nil {
 		return false, err
 	}
-	verifierFirst := sig[37]
+	verifierFirst := sig[counter]
 	if verifierFirst == 0 {
 		recipient, _ = ec.PrivateKeyFromBytes(ec.S256(), []byte{1})
+		counter++
 	} else {
-		verifierRest := sig[38:70]
+		counter++
+		verifierRest := sig[counter : counter+32]
+		counter += 32
 		verifierDER := append([]byte{verifierFirst}, verifierRest...)
 		if recipient == nil {
 			return false, nil
@@ -82,8 +85,9 @@ func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) 
 			return false, err
 		}
 	}
-	keyID := sig[70:102]
-	signatureDER := sig[102:]
+	keyID := sig[counter : counter+32]
+	counter += 32
+	signatureDER := sig[counter:]
 	signature, err := ec.FromDER(signatureDER)
 	if err != nil {
 		return false, err
