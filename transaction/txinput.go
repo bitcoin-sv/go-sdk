@@ -10,7 +10,6 @@ import (
 	"github.com/bitcoin-sv/go-sdk/crypto"
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/sighash"
-	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/pkg/errors"
 )
 
@@ -174,7 +173,7 @@ func (tx *Transaction) PreviousOutHash() []byte {
 	buf := make([]byte, 0)
 
 	for _, in := range tx.Inputs {
-		buf = append(buf, util.ReverseBytes(in.PreviousTxID())...)
+		buf = append(buf, ReverseBytes(in.PreviousTxID())...)
 		oi := make([]byte, 4)
 		binary.LittleEndian.PutUint32(oi, in.PreviousTxOutIndex)
 		buf = append(buf, oi...)

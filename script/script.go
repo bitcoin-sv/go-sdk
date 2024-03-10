@@ -6,14 +6,12 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"math/big"
 	"math/bits"
 	"strings"
 
 	"github.com/bitcoin-sv/go-sdk/bip32"
 	"github.com/bitcoin-sv/go-sdk/crypto"
 	"github.com/bitcoin-sv/go-sdk/ec"
-	"github.com/bitcoin-sv/go-sdk/util"
 )
 
 // ScriptKey types.
@@ -222,49 +220,6 @@ func (s *Script) AppendOpcodes(oo ...uint8) error {
 	}
 	*s = append(*s, oo...)
 	return nil
-}
-
-func (s *Script) AppendBigInt(bigInt *big.Int) error {
-	if bigInt.Cmp(big.NewInt(0)) == 0 {
-		_ = s.AppendOpcodes(OpZERO)
-		return nil
-	}
-
-	if bigInt.Cmp(big.NewInt(-1)) == 0 {
-		_ = s.AppendOpcodes(Op1NEGATE)
-		return nil
-	}
-
-	if bigInt.Cmp(big.NewInt(1)) >= 0 && bigInt.Cmp(big.NewInt(16)) <= 0 {
-		_ = s.AppendOpcodes(uint8(bigInt.Int64()) + OpONE - 1)
-		return nil
-	}
-
-	var num []byte
-	if bigInt.Cmp(big.NewInt(0)) == -1 {
-		num = bigInt.Neg(bigInt).Bytes()
-		if (num[0] & 0x80) != 0 {
-			num = append([]byte{0x80}, num...)
-		} else {
-			num[0] = num[0] | 0x80
-		}
-	} else {
-		num = bigInt.Bytes()
-		if (num[0] & 0x80) != 0 {
-			num = append([]byte{0x00}, num...)
-		}
-	}
-
-	if len(num) == 1 && num[0] == 0 {
-		num = []byte{}
-	}
-
-	return s.AppendPushData(util.ReverseBytes(num))
-}
-
-func (s *Script) AppendInt(i int64) error {
-	bigInt := big.NewInt(i)
-	return s.AppendBigInt(bigInt)
 }
 
 // String implements the stringer interface and returns the hex string of script.

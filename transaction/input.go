@@ -7,7 +7,6 @@ import (
 	"io"
 
 	"github.com/bitcoin-sv/go-sdk/script"
-	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/pkg/errors"
 )
 
@@ -88,7 +87,7 @@ func (i *Input) readFrom(r io.Reader, extended bool) (int64, error) {
 		return bytesRead, errors.Wrapf(err, "sequence(4): got %d bytes", n)
 	}
 
-	i.previousTxID = util.ReverseBytes(previousTxID)
+	i.previousTxID = ReverseBytes(previousTxID)
 	i.PreviousTxOutIndex = binary.LittleEndian.Uint32(prevIndex)
 	i.UnlockingScript = script.NewFromBytes(scriptBytes)
 	i.SequenceNumber = binary.LittleEndian.Uint32(sequence)
@@ -179,8 +178,8 @@ sequence:     %x
 func (i *Input) Bytes(clear bool) []byte {
 	h := make([]byte, 0)
 
-	h = append(h, util.ReverseBytes(i.previousTxID)...)
-	h = append(h, util.LittleEndianBytes(i.PreviousTxOutIndex, 4)...)
+	h = append(h, ReverseBytes(i.previousTxID)...)
+	h = append(h, LittleEndianBytes(i.PreviousTxOutIndex, 4)...)
 	if clear {
 		h = append(h, 0x00)
 	} else {
@@ -192,5 +191,5 @@ func (i *Input) Bytes(clear bool) []byte {
 		}
 	}
 
-	return append(h, util.LittleEndianBytes(i.SequenceNumber, 4)...)
+	return append(h, LittleEndianBytes(i.SequenceNumber, 4)...)
 }

@@ -10,7 +10,6 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/crypto"
 	"github.com/bitcoin-sv/go-sdk/script"
-	"github.com/bitcoin-sv/go-sdk/util"
 )
 
 type Transaction struct {
@@ -260,13 +259,13 @@ func (tx *Transaction) IsCoinbase() bool {
 // TxIDBytes returns the transaction ID of the transaction as bytes
 // (which is also the transaction hash).
 func (tx *Transaction) TxIDBytes() []byte {
-	return util.ReverseBytes(crypto.Sha256d(tx.Bytes()))
+	return ReverseBytes(crypto.Sha256d(tx.Bytes()))
 }
 
 // TxID returns the transaction ID of the transaction
 // (which is also the transaction hash).
 func (tx *Transaction) TxID() string {
-	return hex.EncodeToString(util.ReverseBytes(crypto.Sha256d(tx.Bytes())))
+	return hex.EncodeToString(ReverseBytes(crypto.Sha256d(tx.Bytes())))
 }
 
 // String encodes the transaction into a hex string.
@@ -346,7 +345,7 @@ func (tt *Transactions) NodeJSON() interface{} {
 func (tx *Transaction) toBytesHelper(index int, lockingScript []byte, extended bool) []byte {
 	h := make([]byte, 0)
 
-	h = append(h, util.LittleEndianBytes(tx.Version, 4)...)
+	h = append(h, LittleEndianBytes(tx.Version, 4)...)
 
 	if extended {
 		h = append(h, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0xEF}...)
