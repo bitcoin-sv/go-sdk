@@ -22,8 +22,9 @@ func Sign(message []byte, signer *ec.PrivateKey, verifier *ec.PublicKey) ([]byte
 	if recipientAnyone {
 		anyone, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{1})
 		anyonePointX, anyonePointY := ec.S256().ScalarMult(anyone.X, anyone.Y, anyone.Serialise())
-		verifier = &ec.PublicKey{X: anyonePointX, Y: anyonePointY}
+		verifier = &ec.PublicKey{X: anyonePointX, Y: anyonePointY, Curve: ec.S256()}
 	}
+
 	keyID := make([]byte, 32)
 	_, err := rand.Read(keyID)
 	if err != nil {
@@ -40,34 +41,37 @@ func Sign(message []byte, signer *ec.PrivateKey, verifier *ec.PublicKey) ([]byte
 		return nil, err
 	}
 	senderPublicKey := signer.PubKey()
-	version := []byte(VERSION)
 
-	sig := append(version, senderPublicKey.SerialiseCompressed()...)
+	sig := append(VERSION_BYTES, senderPublicKey.SerialiseCompressed()...)
 	if recipientAnyone {
 		sig = append(sig, 0)
 	} else {
 		sig = append(sig, verifier.SerialiseCompressed()...)
 	}
 	sig = append(sig, keyID...)
-	sig = append(sig, signature.Serialise()...)
+	signatureDER, err := signature.ToDER()
+	if err != nil {
+		return nil, err
+	}
+	sig = append(sig, signatureDER...)
 	return sig, nil
 }
 
 func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) {
-	messageVersion := sig[:8]
-	if string(messageVersion) != VERSION {
-		return false, nil
+	messageVersion := sig[:4]
+	if !bytes.Equal(messageVersion, VERSION_BYTES) {
+		return false, fmt.Errorf("Message version mismatch: Expected %x, received %x", VERSION_BYTES, messageVersion)
 	}
-	pubKeyBytes := sig[8:41]
+	pubKeyBytes := sig[4:37]
 	signer, err := ec.ParsePubKey(pubKeyBytes, ec.S256())
 	if err != nil {
 		return false, err
 	}
-	verifierFirst := sig[41]
+	verifierFirst := sig[37]
 	if verifierFirst == 0 {
 		recipient, _ = ec.PrivateKeyFromBytes(ec.S256(), []byte{1})
 	} else {
-		verifierRest := sig[42:74]
+		verifierRest := sig[38:70]
 		verifierDER := append([]byte{verifierFirst}, verifierRest...)
 		if recipient == nil {
 			return false, nil
@@ -78,9 +82,9 @@ func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) 
 			return false, err
 		}
 	}
-	keyID := sig[74:106]
-	signatureDER := sig[106:]
-	signature, err := ec.ParseSignature(signatureDER, ec.S256())
+	keyID := sig[70:102]
+	signatureDER := sig[102:]
+	signature, err := ec.FromDER(signatureDER)
 	if err != nil {
 		return false, err
 	}
@@ -90,7 +94,7 @@ func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) 
 	if err != nil {
 		return false, err
 	}
-	verified := signingKey.Verify(message, signature)
+	verified := signature.Verify(message, signingKey)
 	return verified, nil
 
 }
