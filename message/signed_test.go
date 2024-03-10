@@ -4,77 +4,46 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/ec"
+	"github.com/stretchr/testify/assert" // Using testify for assertions similar to JavaScript's expect
 )
 
-// TODO: Implement go version
-// import { sign, verify } from '../../../dist/cjs/src/messages/SignedMessage'
-// import PrivateKey from '../../../dist/cjs/src/primitives/PrivateKey'
+func TestSignedMessage(t *testing.T) {
+	t.Run("Signs a message for a recipient", func(t *testing.T) {
+		senderPriv, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{15})
+		recipientPriv, recipientPub := ec.PrivateKeyFromBytes(ec.S256(), []byte{21})
 
-// describe('SignedMessage', () => {
-//   it('Signs a message for a recipient', () => {
-//     const sender = new PrivateKey(15)
-//     const recipient = new PrivateKey(21)
-//     const recipientPub = recipient.toPublicKey()
-//     const message = [1, 2, 4, 8, 16, 32]
-//     const signature = sign(message, sender, recipientPub)
-//     const verified = verify(message, signature, recipient)
-//     expect(verified).toEqual(true)
-//   })
-//   it('Signs a message for anyone', () => {
-//     const sender = new PrivateKey(15)
-//     const message = [1, 2, 4, 8, 16, 32]
-//     const signature = sign(message, sender)
-//     const verified = verify(message, signature)
-//     expect(verified).toEqual(true)
-//   })
-//   it('Fails to verify a message with a wrong version', () => {
-//     const sender = new PrivateKey(15)
-//     const recipient = new PrivateKey(21)
-//     const recipientPub = recipient.toPublicKey()
-//     const message = [1, 2, 4, 8, 16, 32]
-//     const signature = sign(message, sender, recipientPub)
-//     signature[0] = 1
-//     expect(() => verify(message, signature, recipient)).toThrow(new Error(
-//       'Message version mismatch: Expected 42423301, received 01423301'
-//     ))
-//   })
-//   it('Fails to verify a message with no verifier when required', () => {
-//     const sender = new PrivateKey(15)
-//     const recipient = new PrivateKey(21)
-//     const recipientPub = recipient.toPublicKey()
-//     const message = [1, 2, 4, 8, 16, 32]
-//     const signature = sign(message, sender, recipientPub)
-//     expect(() => verify(message, signature)).toThrow(new Error(
-//       'This signature can only be verified with knowledge of a specific private key. The associated public key is: 02352bbf4a4cdd12564f93fa332ce333301d9ad40271f8107181340aef25be59d5'
-//     ))
-//   })
-//   it('Fails to verify a message with a wrong verifier', () => {
-//     const sender = new PrivateKey(15)
-//     const recipient = new PrivateKey(21)
-//     const wrongRecipient = new PrivateKey(22)
-//     const recipientPub = recipient.toPublicKey()
-//     const message = [1, 2, 4, 8, 16, 32]
-//     const signature = sign(message, sender, recipientPub)
-//     expect(() => verify(message, signature, wrongRecipient)).toThrow(new Error(
-//       'The recipient public key is 03421f5fc9a21065445c96fdb91c0c1e2f2431741c72713b4b99ddcb316f31e9fc but the signature requres the recipient to have public key 02352bbf4a4cdd12564f93fa332ce333301d9ad40271f8107181340aef25be59d5'
-//     ))
-//   })
-// })
+		message := []byte{1, 2, 4, 8, 16, 32}
+		signature, err := Sign(message, senderPriv, recipientPub)
+		assert.Nil(t, err)
 
-func TestSignMessage(t *testing.T) {
-	senderPriv, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{15})
-	recipientPriv, recipientPub := ec.PrivateKeyFromBytes(ec.S256(), []byte{21})
+		verified, err := Verify(message, signature, recipientPriv)
+		assert.Nil(t, err)
+		assert.True(t, verified)
+	})
 
-	message := []byte{1, 2, 4, 8, 16, 32}
-	signature, err := Sign(message, senderPriv, recipientPub)
-	if err != nil {
-		t.Error(err)
-	}
-	verified, err := Verify(message, signature, recipientPriv)
-	if err != nil {
-		t.Error(err)
-	}
-	if !verified {
-		t.Error("expected verified to be true")
-	}
+	t.Run("Signs a message for anyone", func(t *testing.T) {
+		senderPriv, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{15})
+
+		message := []byte{1, 2, 4, 8, 16, 32}
+		signature, err := Sign(message, senderPriv, nil)
+		assert.Nil(t, err)
+
+		verified, err := Verify(message, signature, nil)
+		assert.Nil(t, err)
+		assert.True(t, verified)
+	})
+
+	t.Run("Fails to verify a message with a wrong version", func(t *testing.T) {
+		senderPriv, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{15})
+		recipientPriv, recipientPub := ec.PrivateKeyFromBytes(ec.S256(), []byte{21})
+
+		message := []byte{1, 2, 4, 8, 16, 32}
+		signature, _ := Sign(message, senderPriv, recipientPub)
+		signature[0] = 1 // Alter the signature to simulate version mismatch
+
+		_, err := Verify(message, signature, recipientPriv)
+		assert.NotNil(t, err)
+		assert.Equal(t, "Message version mismatch: Expected 10334242, received 01334242", err.Error())
+	})
+
 }
