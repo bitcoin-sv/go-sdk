@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"math/big"
 	"math/bits"
 	"strings"
 
@@ -202,6 +203,10 @@ func (s *Script) AppendPushDataArray(d [][]byte) error {
 	return nil
 }
 
+func (s *Script) AppendBigInt(bInt big.Int) error {
+	return s.AppendPushData(bInt.Bytes())
+}
+
 // AppendPushDataStrings takes an array of strings and appends their
 // UTF-8 encoding to the script with proper PUSHDATA prefixes
 func (s *Script) AppendPushDataStrings(pushDataStrings []string) error {
@@ -224,6 +229,11 @@ func (s *Script) AppendOpcodes(oo ...uint8) error {
 	*s = append(*s, oo...)
 	return nil
 }
+
+// func (s *Script) AppendBigInt(bInt big.Int) error {
+// 	err := s.AppendPushData(bInt.Bytes())
+// 	return err
+// }
 
 // String implements the stringer interface and returns the hex string of script.
 func (s *Script) String() string {
