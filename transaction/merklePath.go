@@ -5,6 +5,8 @@ import (
 	"encoding/hex"
 	"io"
 	"sort"
+
+	"github.com/pkg/errors"
 )
 
 type PathElement struct {
@@ -127,20 +129,20 @@ func (mp *MerklePath) ReadFrom(r io.Reader) (int64, error) {
 	return 0, nil
 }
 
-// // ToHex converts the MerklePath to a hexadecimal string representation
-// func (mp *MerklePath) ToHex() string {
-// 	// This function should implement the conversion of the MerklePath to its binary representation first,
-// 	// then convert that binary representation to a hexadecimal string.
-// 	// Placeholder implementation below - you'll need to replace this with actual logic.
-// 	return "hexadecimal_representation_here"
-// }
+// ToHex converts the MerklePath to a hexadecimal string representation
+func (mp *MerklePath) ToHex() string {
+	// This function should implement the conversion of the MerklePath to its binary representation first,
+	// then convert that binary representation to a hexadecimal string.
+	// Placeholder implementation below - you'll need to replace this with actual logic.
+	return "hexadecimal_representation_here"
+}
 
-// // ComputeRoot computes the Merkle root from a given transaction ID
-// func (mp *MerklePath) ComputeRoot(txid string) (string, error) {
-// 	// Placeholder implementation. You need to implement the actual Merkle root computation based on the path and the given txid.
-// 	// The actual computation would be significantly complex and is dependent on your specific Merkle tree structure and hashing function.
-// 	return "", errors.New("computeRoot not implemented")
-// }
+// ComputeRoot computes the Merkle root from a given transaction ID
+func (mp *MerklePath) ComputeRoot(txid string) (string, error) {
+	// Placeholder implementation. You need to implement the actual Merkle root computation based on the path and the given txid.
+	// The actual computation would be significantly complex and is dependent on your specific Merkle tree structure and hashing function.
+	return "", errors.New("computeRoot not implemented")
+}
 
 // // Verify checks if a given transaction ID is part of the Merkle tree at the specified block height using a chain tracker
 // func (mp *MerklePath) Verify(txid string, chainTracker *ChainTracker) (bool, error) {
