@@ -61,6 +61,9 @@ func NewMerklePathFromBinary(bytes []byte) (*MerklePath, error) {
 
 	for lv := uint(0); lv < treeHeight; lv++ {
 		// For each level we parse a bunch of nLeaves.
+		if len(bytes) <= skip {
+			return nil, errors.New("Malformed BUMP")
+		}
 		n, size := NewVarIntFromBytes(bytes[skip:])
 		skip += size
 		nLeavesAtThisHeight := uint64(n)
@@ -85,8 +88,7 @@ func NewMerklePathFromBinary(bytes []byte) (*MerklePath, error) {
 				if len(bytes) < skip+32 {
 					return nil, errors.New("BUMP bytes do not contain enough data to be valid")
 				}
-				h := bytes[skip : skip+32]
-				l.Hash = h
+				l.Hash = ReverseBytes(bytes[skip : skip+32])
 				skip += 32
 			}
 			if txid {
@@ -139,11 +141,12 @@ func (mp *MerklePath) ToHex() string {
 }
 
 // ComputeRoot computes the Merkle root from a given transaction ID
-func (mp *MerklePath) ComputeRoot(txid string) (string, error) {
-	if len(txid) == 0 {
+func (mp *MerklePath) ComputeRoot(txid *string) (string, error) {
+	if txid == nil {
 		for _, l := range mp.Path[0] {
 			if len(l.Hash) > 0 {
-				txid = hex.EncodeToString(l.Hash)
+				hexid := hex.EncodeToString(l.Hash)
+				txid = &hexid
 				break
 			}
 		}
@@ -151,25 +154,25 @@ func (mp *MerklePath) ComputeRoot(txid string) (string, error) {
 	if len(mp.Path) == 1 {
 		// if there is only one txid in the block then the root is the txid.
 		if len(mp.Path[0]) == 1 {
-			return txid, nil
+			return *txid, nil
 		}
 	}
 	// Find the index of the txid at the lowest level of the Merkle tree
 	var index uint64
 	txidFound := false
 	for _, l := range mp.Path[0] {
-		if hex.EncodeToString(l.Hash) == txid {
+		if hex.EncodeToString(l.Hash) == *txid {
 			txidFound = true
 			index = l.Offset
 			break
 		}
 	}
 	if !txidFound {
-		return "", errors.New("the BUMP does not contain the txid: " + txid)
+		return "", errors.New("the BUMP does not contain the txid: " + *txid)
 	}
 
 	// Calculate the root using the index as a way to determine which direction to concatenate.
-	workingHash, err := hex.DecodeString(txid)
+	workingHash, err := hex.DecodeString(*txid)
 	if err != nil {
 		return "", err
 	}
@@ -207,7 +210,7 @@ func (mp *MerklePath) ComputeRoot(txid string) (string, error) {
 
 // Verify checks if a given transaction ID is part of the Merkle tree at the specified block height using a chain tracker
 func (mp *MerklePath) Verify(txid string, ct chaintracker.ChainTracker) (bool, error) {
-	root, err := mp.ComputeRoot(txid)
+	root, err := mp.ComputeRoot(&txid)
 	if err != nil {
 		return false, err
 	}
@@ -243,10 +246,57 @@ func (mp *MerklePath) Verify(txid string, ct chaintracker.ChainTracker) (bool, e
 //	  }
 //	}
 //	this.path = combinedPath
-func (mp *MerklePath) Combine(other *MerklePath) error {
-	if mp.BlockHeight != other.BlockHeight {
+// func (mp *MerklePath) Combine(other *MerklePath) error {
+// 	if mp.BlockHeight != other.BlockHeight {
+// 		return errors.New("cannot combine MerklePaths with different block heights")
+// 	}
+
+// 	root1, err := mp.ComputeRoot("")
+// }
+
+func (m *MerklePath) Combine(other *MerklePath) (err error) {
+	if m.BlockHeight != other.BlockHeight {
 		return errors.New("cannot combine MerklePaths with different block heights")
 	}
 
-	root1, err := mp.ComputeRoot("")
+	root1, err := m.ComputeRoot(nil)
+	if err != nil {
+		return err
+	}
+	root2, err := other.ComputeRoot(nil)
+	if err != nil {
+		return err
+	}
+
+	if root1 != root2 {
+		return errors.New("cannot combine MerklePaths with different roots")
+	}
+
+	combinedPath := make([][]PathElement, len(m.Path))
+	for h := 0; h < len(m.Path); h++ {
+		for l := 0; l < len(m.Path[h]); l++ {
+			combinedPath[h] = append(combinedPath[h], m.Path[h][l])
+		}
+		for l := 0; l < len(other.Path[h]); l++ {
+			var found *PathElement
+			for _, leaf := range combinedPath[h] {
+				if leaf.Offset == other.Path[h][l].Offset {
+					found = &other.Path[h][l]
+					break
+				}
+			}
+			if found == nil {
+				combinedPath[h] = append(combinedPath[h], other.Path[h][l])
+			} else {
+				for _, leaf := range combinedPath[h] {
+					if leaf.Offset == other.Path[h][l].Offset {
+						leaf.Txid = true
+						break
+					}
+				}
+			}
+		}
+	}
+	m.Path = combinedPath
+	return
 }
