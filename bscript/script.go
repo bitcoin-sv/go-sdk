@@ -294,7 +294,11 @@ func (s *Script) ToASM() (string, error) {
 	for pos < len(*s) {
 		op, err := s.ReadOp(&pos)
 		if err != nil {
-			return "", err
+			// if err == ErrDataTooSmall {
+			// 	asm = append(asm, "[error]")
+			// 	break
+			// }
+			return "", nil
 		}
 
 		opStr := op.String()
