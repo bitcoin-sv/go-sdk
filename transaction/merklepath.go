@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/bitcoin-sv/go-sdk/crypto"
 	"github.com/bitcoin-sv/go-sdk/transaction/chaintracker"
 	"github.com/pkg/errors"
 )
@@ -139,9 +140,61 @@ func (mp *MerklePath) ToHex() string {
 
 // ComputeRoot computes the Merkle root from a given transaction ID
 func (mp *MerklePath) ComputeRoot(txid string) (string, error) {
-	// Placeholder implementation. You need to implement the actual Merkle root computation based on the path and the given txid.
-	// The actual computation would be significantly complex and is dependent on your specific Merkle tree structure and hashing function.
-	return "", errors.New("computeRoot not implemented")
+	if len(mp.Path) == 1 {
+		// if there is only one txid in the block then the root is the txid.
+		if len(mp.Path[0]) == 1 {
+			return txid, nil
+		}
+	}
+	// Find the index of the txid at the lowest level of the Merkle tree
+	var index uint64
+	txidFound := false
+	for _, l := range mp.Path[0] {
+		if hex.EncodeToString(l.Hash) == txid {
+			txidFound = true
+			index = l.Offset
+			break
+		}
+	}
+	if !txidFound {
+		return "", errors.New("the BUMP does not contain the txid: " + txid)
+	}
+
+	// Calculate the root using the index as a way to determine which direction to concatenate.
+	workingHash, err := hex.DecodeString(txid)
+	if err != nil {
+		return "", err
+	}
+	workingHash = ReverseBytes(workingHash)
+	for height, leaves := range mp.Path {
+		offset := (index >> height) ^ 1
+		var leafAtThisLevel PathElement
+		offsetFound := false
+		for _, l := range leaves {
+			if l.Offset == offset {
+				offsetFound = true
+				leafAtThisLevel = l
+				break
+			}
+		}
+		if !offsetFound {
+			return "", fmt.Errorf("we do not have a hash for this index at height: %v", height)
+		}
+
+		var digest []byte
+		if leafAtThisLevel.Duplicate {
+			digest = append(workingHash, workingHash...)
+		} else {
+			leafBytes := ReverseBytes(leafAtThisLevel.Hash)
+			if (offset % 2) != 0 {
+				digest = append(workingHash, leafBytes...)
+			} else {
+				digest = append(leafBytes, workingHash...)
+			}
+		}
+		workingHash = crypto.Sha256d(digest)
+	}
+	return hex.EncodeToString(ReverseBytes(workingHash)), nil
 }
 
 // Verify checks if a given transaction ID is part of the Merkle tree at the specified block height using a chain tracker
