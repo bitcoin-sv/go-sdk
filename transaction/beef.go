@@ -1,9 +1,5 @@
 package transaction
 
-func (t *Tx) BEEF() string {
-	return "beef"
-}
-
 // TODO: Port typescript to go
 // /**
 //    * Creates a new transaction, linked to its inputs and their associated merkle paths, from a BEEF (BRC-62) structure.
@@ -69,7 +65,10 @@ func (t *Tx) BEEF() string {
 //	  addPathOrInputs(transactions[lastTXID])
 //	  return transactions[lastTXID].tx
 //	}
-func (t *Tx) FromBEEF(beef []byte) *Tx {
-
+func NewTxFromBEEF(beef []byte) *Tx {
 	return nil
+}
+
+func (t *Tx) BEEF() []byte {
+	return []byte{}
 }
