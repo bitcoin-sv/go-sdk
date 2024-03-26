@@ -143,11 +143,11 @@ func TestMerklePath_ComputeRoot(t *testing.T) {
 type MyChainTracker struct{}
 
 // Implement the IsValidRootForHeight method on MyChainTracker.
-func (mct MyChainTracker) IsValidRootForHeight(root []byte, height uint32) bool {
+func (mct MyChainTracker) IsValidRootForHeight(root []byte, height uint64) bool {
 	// Convert BRC74Root hex string to a byte slice for comparison
 	expectedRoot, _ := hex.DecodeString(BRC74Root)
-	// Assuming BRC74JSON.BlockHeight is of type uint64, and needs to be cast to uint32
-	return string(root) == string(expectedRoot) && uint32(height) == uint32(813706) // FIXME: change 813706 to get from json instead
+	// Assuming BRC74JSON.BlockHeight is of type uint64, and needs to be cast to uint64
+	return string(root) == string(expectedRoot) && uint64(height) == uint64(813706) // FIXME: change 813706 to get from json instead
 }
 
 func TestMerklePath_Verify(t *testing.T) {

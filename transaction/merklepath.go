@@ -198,10 +198,16 @@ func (mp *MerklePath) ComputeRoot(txid string) (string, error) {
 }
 
 // Verify checks if a given transaction ID is part of the Merkle tree at the specified block height using a chain tracker
-func (mp *MerklePath) Verify(txid string, chainTracker chaintracker.ChainTracker) (bool, error) {
-	// Placeholder for chain tracker interaction. You need to implement the verification logic here, possibly interacting with a chain tracker.
-	// This involves computing the Merkle root and verifying it against the chain tracker's data.
-	return false, errors.New("verify not implemented")
+func (mp *MerklePath) Verify(txid string, ct chaintracker.ChainTracker) (bool, error) {
+	root, err := mp.ComputeRoot(txid)
+	if err != nil {
+		return false, err
+	}
+	rootBytes, err := hex.DecodeString(root)
+	if err != nil {
+		return false, err
+	}
+	return ct.IsValidRootForHeight(rootBytes, mp.BlockHeight), nil
 }
 
 // Combine combines this MerklePath with another to create a compound proof
