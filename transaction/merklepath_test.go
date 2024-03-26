@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,70 +25,44 @@ func hexToByte(hexStr string) []byte {
 	return bytes
 }
 
+var BRC74JSON = MerklePath{
+	BlockHeight: 813706,
+	Path: [][]PathElement{
+		{
+			{Offset: 3048, Hash: hexToByte("304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711")},
+			{Offset: 3049, Txid: true, Hash: hexToByte("d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00")},
+			{Offset: 3050, Txid: true, Hash: hexToByte("98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e")},
+			{Offset: 3051, Duplicate: true},
+		},
+		{
+			{Offset: 1524, Hash: hexToByte("811ae75c80fecd27efff5ef272c2adf7edb6e535447f27a4087d23724f397106")},
+			{Offset: 1525, Hash: hexToByte("82520a4501a06061dd2386fb92fa5e9ceaed14747acc00edf34a6cecabcc2b26")},
+		},
+		{{Offset: 763, Duplicate: true}},
+		{{Offset: 380, Hash: hexToByte("858e41febe934b4cbc1cb80a1dc8e254cb1e69acff8e4f91ecdd779bcaefb393")}},
+		{{Offset: 191, Duplicate: true}},
+		{{Offset: 94, Hash: hexToByte("f80263e813c644cd71bcc88126d0463df070e28f11023a00543c97b66e828158")}},
+		{{Offset: 46, Hash: hexToByte("f36f792fa2b42acfadfa043a946d4d7b6e5e1e2e0266f2cface575bbb82b7ae0")}},
+		{{Offset: 22, Hash: hexToByte("7d5051f0d4ceb7d2e27a49e448aedca2b3865283ceffe0b00b9c3017faca2081")}},
+		{{Offset: 10, Hash: hexToByte("43aeeb9b6a9e94a5a787fbf04380645e6fd955f8bf0630c24365f492ac592e50")}},
+		{{Offset: 4, Hash: hexToByte("45be5d16ac41430e3589a579ad780e5e42cf515381cc309b48d0f4648f9fcd1c")}},
+		{{Offset: 3, Duplicate: true}},
+		{{Offset: 0, Hash: hexToByte("d40cb31af3ef53dd910f5ce15e9a1c20875c009a22d25eab32c11c7ece6487af")}},
+	},
+}
+
 func TestMerklePath_ParseHex(t *testing.T) {
 	t.Parallel()
-
-	BRC74JSON := MerklePath{
-		BlockHeight: 813706,
-		Path: [][]PathElement{
-			{
-				{Offset: 3048, Hash: hexToByte("304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711")},
-				{Offset: 3049, Txid: true, Hash: hexToByte("d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00")},
-				{Offset: 3050, Txid: true, Hash: hexToByte("98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e")},
-				{Offset: 3051, Duplicate: true},
-			},
-			{
-				{Offset: 1524, Hash: hexToByte("811ae75c80fecd27efff5ef272c2adf7edb6e535447f27a4087d23724f397106")},
-				{Offset: 1525, Hash: hexToByte("82520a4501a06061dd2386fb92fa5e9ceaed14747acc00edf34a6cecabcc2b26")},
-			},
-			{{Offset: 763, Duplicate: true}},
-			{{Offset: 380, Hash: hexToByte("858e41febe934b4cbc1cb80a1dc8e254cb1e69acff8e4f91ecdd779bcaefb393")}},
-			{{Offset: 191, Duplicate: true}},
-			{{Offset: 94, Hash: hexToByte("f80263e813c644cd71bcc88126d0463df070e28f11023a00543c97b66e828158")}},
-			{{Offset: 46, Hash: hexToByte("f36f792fa2b42acfadfa043a946d4d7b6e5e1e2e0266f2cface575bbb82b7ae0")}},
-			{{Offset: 22, Hash: hexToByte("7d5051f0d4ceb7d2e27a49e448aedca2b3865283ceffe0b00b9c3017faca2081")}},
-			{{Offset: 10, Hash: hexToByte("43aeeb9b6a9e94a5a787fbf04380645e6fd955f8bf0630c24365f492ac592e50")}},
-			{{Offset: 4, Hash: hexToByte("45be5d16ac41430e3589a579ad780e5e42cf515381cc309b48d0f4648f9fcd1c")}},
-			{{Offset: 3, Duplicate: true}},
-			{{Offset: 0, Hash: hexToByte("d40cb31af3ef53dd910f5ce15e9a1c20875c009a22d25eab32c11c7ece6487af")}},
-		},
-	}
 
 	t.Run("parses from hex", func(t *testing.T) {
 		mp, err := NewMerklePathFromHex(BRC74Hex)
 		assert.NoError(t, err)
-		assert.Equal(t, BRC74JSON.Path, mp.Path)
+		assert.True(t, cmp.Equal(BRC74JSON, mp))
 	})
 }
 
 func TestMerklePath_ToHex(t *testing.T) {
 	t.Parallel()
-
-	BRC74JSON := MerklePath{
-		BlockHeight: 813706,
-		Path: [][]PathElement{
-			{
-				{Offset: 3048, Hash: hexToByte("304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711")},
-				{Offset: 3049, Txid: true, Hash: hexToByte("d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00")},
-				{Offset: 3050, Txid: true, Hash: hexToByte("98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e")},
-				{Offset: 3051, Duplicate: true},
-			},
-			{
-				{Offset: 1524, Hash: hexToByte("811ae75c80fecd27efff5ef272c2adf7edb6e535447f27a4087d23724f397106")},
-				{Offset: 1525, Hash: hexToByte("82520a4501a06061dd2386fb92fa5e9ceaed14747acc00edf34a6cecabcc2b26")},
-			},
-			{{Offset: 763, Duplicate: true}},
-			{{Offset: 380, Hash: hexToByte("858e41febe934b4cbc1cb80a1dc8e254cb1e69acff8e4f91ecdd779bcaefb393")}},
-			{{Offset: 191, Duplicate: true}},
-			{{Offset: 94, Hash: hexToByte("f80263e813c644cd71bcc88126d0463df070e28f11023a00543c97b66e828158")}},
-			{{Offset: 46, Hash: hexToByte("f36f792fa2b42acfadfa043a946d4d7b6e5e1e2e0266f2cface575bbb82b7ae0")}},
-			{{Offset: 22, Hash: hexToByte("7d5051f0d4ceb7d2e27a49e448aedca2b3865283ceffe0b00b9c3017faca2081")}},
-			{{Offset: 10, Hash: hexToByte("43aeeb9b6a9e94a5a787fbf04380645e6fd955f8bf0630c24365f492ac592e50")}},
-			{{Offset: 4, Hash: hexToByte("45be5d16ac41430e3589a579ad780e5e42cf515381cc309b48d0f4648f9fcd1c")}},
-			{{Offset: 3, Duplicate: true}},
-			{{Offset: 0, Hash: hexToByte("d40cb31af3ef53dd910f5ce15e9a1c20875c009a22d25eab32c11c7ece6487af")}},
-		},
-	}
 
 	t.Run("serializes to hex", func(t *testing.T) {
 		path := MerklePath{
@@ -101,32 +76,6 @@ func TestMerklePath_ToHex(t *testing.T) {
 
 func TestMerklePath_ComputeRoot(t *testing.T) {
 	t.Parallel()
-
-	BRC74JSON := MerklePath{
-		BlockHeight: 813706,
-		Path: [][]PathElement{
-			{
-				{Offset: 3048, Hash: hexToByte("304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711")},
-				{Offset: 3049, Txid: true, Hash: hexToByte("d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00")},
-				{Offset: 3050, Txid: true, Hash: hexToByte("98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e")},
-				{Offset: 3051, Duplicate: true},
-			},
-			{
-				{Offset: 1524, Hash: hexToByte("811ae75c80fecd27efff5ef272c2adf7edb6e535447f27a4087d23724f397106")},
-				{Offset: 1525, Hash: hexToByte("82520a4501a06061dd2386fb92fa5e9ceaed14747acc00edf34a6cecabcc2b26")},
-			},
-			{{Offset: 763, Duplicate: true}},
-			{{Offset: 380, Hash: hexToByte("858e41febe934b4cbc1cb80a1dc8e254cb1e69acff8e4f91ecdd779bcaefb393")}},
-			{{Offset: 191, Duplicate: true}},
-			{{Offset: 94, Hash: hexToByte("f80263e813c644cd71bcc88126d0463df070e28f11023a00543c97b66e828158")}},
-			{{Offset: 46, Hash: hexToByte("f36f792fa2b42acfadfa043a946d4d7b6e5e1e2e0266f2cface575bbb82b7ae0")}},
-			{{Offset: 22, Hash: hexToByte("7d5051f0d4ceb7d2e27a49e448aedca2b3865283ceffe0b00b9c3017faca2081")}},
-			{{Offset: 10, Hash: hexToByte("43aeeb9b6a9e94a5a787fbf04380645e6fd955f8bf0630c24365f492ac592e50")}},
-			{{Offset: 4, Hash: hexToByte("45be5d16ac41430e3589a579ad780e5e42cf515381cc309b48d0f4648f9fcd1c")}},
-			{{Offset: 3, Duplicate: true}},
-			{{Offset: 0, Hash: hexToByte("d40cb31af3ef53dd910f5ce15e9a1c20875c009a22d25eab32c11c7ece6487af")}},
-		},
-	}
 
 	t.Run("computes a root", func(t *testing.T) {
 		path := MerklePath{
@@ -151,32 +100,7 @@ func (mct MyChainTracker) IsValidRootForHeight(root []byte, height uint64) bool 
 }
 
 func TestMerklePath_Verify(t *testing.T) {
-
-	BRC74JSON := MerklePath{
-		BlockHeight: 813706,
-		Path: [][]PathElement{
-			{
-				{Offset: 3048, Hash: hexToByte("304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711")},
-				{Offset: 3049, Txid: true, Hash: hexToByte("d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00")},
-				{Offset: 3050, Txid: true, Hash: hexToByte("98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e")},
-				{Offset: 3051, Duplicate: true},
-			},
-			{
-				{Offset: 1524, Hash: hexToByte("811ae75c80fecd27efff5ef272c2adf7edb6e535447f27a4087d23724f397106")},
-				{Offset: 1525, Hash: hexToByte("82520a4501a06061dd2386fb92fa5e9ceaed14747acc00edf34a6cecabcc2b26")},
-			},
-			{{Offset: 763, Duplicate: true}},
-			{{Offset: 380, Hash: hexToByte("858e41febe934b4cbc1cb80a1dc8e254cb1e69acff8e4f91ecdd779bcaefb393")}},
-			{{Offset: 191, Duplicate: true}},
-			{{Offset: 94, Hash: hexToByte("f80263e813c644cd71bcc88126d0463df070e28f11023a00543c97b66e828158")}},
-			{{Offset: 46, Hash: hexToByte("f36f792fa2b42acfadfa043a946d4d7b6e5e1e2e0266f2cface575bbb82b7ae0")}},
-			{{Offset: 22, Hash: hexToByte("7d5051f0d4ceb7d2e27a49e448aedca2b3865283ceffe0b00b9c3017faca2081")}},
-			{{Offset: 10, Hash: hexToByte("43aeeb9b6a9e94a5a787fbf04380645e6fd955f8bf0630c24365f492ac592e50")}},
-			{{Offset: 4, Hash: hexToByte("45be5d16ac41430e3589a579ad780e5e42cf515381cc309b48d0f4648f9fcd1c")}},
-			{{Offset: 3, Duplicate: true}},
-			{{Offset: 0, Hash: hexToByte("d40cb31af3ef53dd910f5ce15e9a1c20875c009a22d25eab32c11c7ece6487af")}},
-		},
-	}
+	t.Parallel()
 
 	t.Run("verifies using a ChainTracker", func(t *testing.T) {
 		path := MerklePath{
