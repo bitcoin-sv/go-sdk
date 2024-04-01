@@ -1983,7 +1983,7 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	pubKey, err := ec.ParsePubKey(pkBytes, ec.S256())
+	pubKey, err := ec.ParsePubKey(pkBytes)
 	if err != nil {
 		t.dstack.PushBool(false)
 		return nil //nolint:nilerr // only need a false push in this case
@@ -1991,9 +1991,9 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 
 	var signature *ec.Signature
 	if t.hasAny(scriptflag.VerifyStrictEncoding, scriptflag.VerifyDERSignatures) {
-		signature, err = ec.ParseDERSignature(sigBytes, ec.S256())
+		signature, err = ec.ParseDERSignature(sigBytes)
 	} else {
-		signature, err = ec.ParseSignature(sigBytes, ec.S256())
+		signature, err = ec.ParseSignature(sigBytes)
 	}
 	if err != nil {
 		t.dstack.PushBool(false)
@@ -2177,11 +2177,9 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 			// Parse the signature.
 			var err error
 			if t.hasAny(scriptflag.VerifyStrictEncoding, scriptflag.VerifyDERSignatures) {
-				parsedSig, err = ec.ParseDERSignature(signature,
-					ec.S256())
+				parsedSig, err = ec.ParseDERSignature(signature)
 			} else {
-				parsedSig, err = ec.ParseSignature(signature,
-					ec.S256())
+				parsedSig, err = ec.ParseSignature(signature)
 			}
 			sigInfo.parsed = true
 			if err != nil {
@@ -2203,7 +2201,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 		}
 
 		// Parse the pubkey.
-		parsedPubKey, err := ec.ParsePubKey(pubKey, ec.S256())
+		parsedPubKey, err := ec.ParsePubKey(pubKey)
 		if err != nil {
 			continue
 		}

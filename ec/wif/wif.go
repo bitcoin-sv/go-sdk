@@ -123,7 +123,7 @@ func DecodeWIF(wif string) (*WIF, error) {
 
 	netID := decoded[0]
 	privKeyBytes := decoded[1 : 1+ec.PrivateKeyBytesLen]
-	privKey, _ := ec.PrivateKeyFromBytes(ec.S256(), privKeyBytes)
+	privKey, _ := ec.PrivateKeyFromBytes(privKeyBytes)
 	return &WIF{privKey, compress, netID}, nil
 }
 

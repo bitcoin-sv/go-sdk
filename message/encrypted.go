@@ -93,7 +93,7 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	sender, err := ec.ParsePubKey(senderPublicKey, ec.S256())
+	sender, err := ec.ParsePubKey(senderPublicKey)
 	if err != nil {
 		return nil, err
 	}
