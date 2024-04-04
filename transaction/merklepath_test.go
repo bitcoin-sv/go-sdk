@@ -27,7 +27,7 @@ func hexToByte(hexStr string) []byte {
 
 var BRC74JSON = MerklePath{
 	BlockHeight: 813706,
-	Path: [][]PathElement{
+	Path: [][]*PathElement{
 		{
 			{Offset: 3048, Hash: hexToByte("304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711")},
 			{Offset: 3049, Txid: true, Hash: hexToByte("d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00")},
@@ -127,12 +127,12 @@ func TestMerklePath_Combine(t *testing.T) {
 
 		pathA := MerklePath{
 			BlockHeight: BRC74JSON.BlockHeight,
-			Path:        append([][]PathElement{path0A, path1A}, pathRest...),
+			Path:        append([][]*PathElement{path0A, path1A}, pathRest...),
 		}
 
 		pathB := MerklePath{
 			BlockHeight: BRC74JSON.BlockHeight,
-			Path:        append([][]PathElement{path0B, path1B}, pathRest...),
+			Path:        append([][]*PathElement{path0B, path1B}, pathRest...),
 		}
 		pathARoot, err := pathA.ComputeRoot(&BRC74TXID2)
 		assert.NoError(t, err)

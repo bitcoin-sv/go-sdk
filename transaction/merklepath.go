@@ -56,7 +56,7 @@ func NewMerklePathFromBinary(bytes []byte) (*MerklePath, error) {
 	skip++
 
 	// We expect tree height levels.
-	bump.Path = make([][]PathElement, treeHeight)
+	bump.Path = make([][]*PathElement, treeHeight)
 
 	for lv := uint(0); lv < treeHeight; lv++ {
 		// For each level we parse a bunch of nLeaves.
@@ -69,7 +69,7 @@ func NewMerklePathFromBinary(bytes []byte) (*MerklePath, error) {
 		if nLeavesAtThisHeight == 0 {
 			return nil, errors.New("There are no leaves at height: " + fmt.Sprint(lv) + " which makes this invalid")
 		}
-		bump.Path[lv] = make([]PathElement, nLeavesAtThisHeight)
+		bump.Path[lv] = make([]*PathElement, nLeavesAtThisHeight)
 		for lf := uint64(0); lf < nLeavesAtThisHeight; lf++ {
 			// For each leaf we parse the offset, hash, txid and duplicate.
 			offset, size := NewVarIntFromBytes(bytes[skip:])
@@ -93,7 +93,7 @@ func NewMerklePathFromBinary(bytes []byte) (*MerklePath, error) {
 			if txid {
 				l.Txid = txid
 			}
-			bump.Path[lv][lf] = l
+			bump.Path[lv][lf] = &l
 		}
 	}
 
@@ -182,7 +182,7 @@ func (mp *MerklePath) ComputeRoot(txid *string) (string, error) {
 		for _, l := range leaves {
 			if l.Offset == offset {
 				offsetFound = true
-				leafAtThisLevel = l
+				leafAtThisLevel = *l
 				break
 			}
 		}
@@ -270,7 +270,7 @@ func (m *MerklePath) Combine(other *MerklePath) (err error) {
 		return errors.New("cannot combine MerklePaths with different roots")
 	}
 
-	combinedPath := make([][]PathElement, len(m.Path))
+	combinedPath := make([][]*PathElement, len(m.Path))
 	for h := 0; h < len(m.Path); h++ {
 		for l := 0; l < len(m.Path[h]); l++ {
 			combinedPath[h] = append(combinedPath[h], m.Path[h][l])
@@ -279,7 +279,7 @@ func (m *MerklePath) Combine(other *MerklePath) (err error) {
 			var found *PathElement
 			for _, leaf := range combinedPath[h] {
 				if leaf.Offset == other.Path[h][l].Offset {
-					found = &other.Path[h][l]
+					found = other.Path[h][l]
 					break
 				}
 			}
