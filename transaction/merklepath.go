@@ -19,11 +19,11 @@ type PathElement struct {
 
 type MerklePath struct {
 	BlockHeight uint64
-	Path        [][]PathElement
+	Path        [][]*PathElement
 }
 
 // NewMerklePath creates a new MerklePath with the given block height and path
-func NewMerklePath(blockHeight uint64, path [][]PathElement) *MerklePath {
+func NewMerklePath(blockHeight uint64, path [][]*PathElement) *MerklePath {
 	return &MerklePath{
 		BlockHeight: blockHeight,
 		Path:        path,
@@ -46,7 +46,6 @@ func NewMerklePathFromBinary(bytes []byte) (*MerklePath, error) {
 	}
 	bump := &MerklePath{}
 
-	// first bytes are the block height.
 	var skip int
 	index, size := NewVarIntFromBytes(bytes[skip:])
 	skip += size
@@ -110,8 +109,7 @@ func NewMerklePathFromBinary(bytes []byte) (*MerklePath, error) {
 
 // Bytes encodes a BUMP as a slice of bytes. BUMP Binary Format according to BRC-74 https://brc.dev/74
 func (mp *MerklePath) Bytes() []byte {
-	bytes := []byte{}
-	bytes = append(bytes, VarInt(mp.BlockHeight).Bytes()...)
+	bytes := VarInt(mp.BlockHeight).Bytes()
 	treeHeight := len(mp.Path)
 	bytes = append(bytes, byte(treeHeight))
 	for level := 0; level < treeHeight; level++ {
