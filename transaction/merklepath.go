@@ -12,19 +12,19 @@ import (
 )
 
 type PathElement struct {
-	Offset    uint32
+	Offset    uint64
 	Hash      []byte
 	Txid      bool
 	Duplicate bool
 }
 
 type MerklePath struct {
-	BlockHeight uint64
+	BlockHeight uint32
 	Path        [][]*PathElement
 }
 
 // NewMerklePath creates a new MerklePath with the given block height and path
-func NewMerklePath(blockHeight uint64, path [][]*PathElement) *MerklePath {
+func NewMerklePath(blockHeight uint32, path [][]*PathElement) *MerklePath {
 	return &MerklePath{
 		BlockHeight: blockHeight,
 		Path:        path,
@@ -50,7 +50,7 @@ func NewMerklePathFromBinary(bytes []byte) (*MerklePath, error) {
 	var skip int
 	index, size := NewVarIntFromBytes(bytes[skip:])
 	skip += size
-	bump.BlockHeight = uint64(index)
+	bump.BlockHeight = uint32(index)
 
 	// Next byte is the tree height.
 	treeHeight := uint(bytes[skip])
