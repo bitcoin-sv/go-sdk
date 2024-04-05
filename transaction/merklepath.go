@@ -12,7 +12,7 @@ import (
 )
 
 type PathElement struct {
-	Offset    uint64
+	Offset    uint32
 	Hash      []byte
 	Txid      bool
 	Duplicate bool
