@@ -1,6 +1,7 @@
 package transaction
 
 import (
+	"bytes"
 	"encoding/hex"
 	"fmt"
 	"sort"
@@ -87,7 +88,7 @@ func NewMerklePathFromBinary(bytes []byte) (*MerklePath, error) {
 				if len(bytes) < skip+32 {
 					return nil, errors.New("BUMP bytes do not contain enough data to be valid")
 				}
-				l.Hash = ReverseBytes(bytes[skip : skip+32])
+				l.Hash = bytes[skip : skip+32]
 				skip += 32
 			}
 			if txid {
@@ -126,7 +127,7 @@ func (mp *MerklePath) Bytes() []byte {
 			}
 			bytes = append(bytes, flags)
 			if (flags & 1) == 0 {
-				bytes = append(bytes, ReverseBytes(leaf.Hash)...)
+				bytes = append(bytes, leaf.Hash...)
 			}
 		}
 	}
@@ -143,7 +144,7 @@ func (mp *MerklePath) ComputeRoot(txid *string) (string, error) {
 	if txid == nil {
 		for _, l := range mp.Path[0] {
 			if len(l.Hash) > 0 {
-				hexid := hex.EncodeToString(l.Hash)
+				hexid := hex.EncodeToString(ReverseBytes(l.Hash))
 				txid = &hexid
 				break
 			}
@@ -155,26 +156,28 @@ func (mp *MerklePath) ComputeRoot(txid *string) (string, error) {
 			return *txid, nil
 		}
 	}
+
+	txidBytes, err := hex.DecodeString(*txid)
+	if err != nil {
+		return "", err
+	}
+	txidBytes = ReverseBytes(txidBytes)
 	// Find the index of the txid at the lowest level of the Merkle tree
-	var index uint64
-	txidFound := false
+	var txLeaf *PathElement
 	for _, l := range mp.Path[0] {
-		if hex.EncodeToString(l.Hash) == *txid {
-			txidFound = true
-			index = l.Offset
+		if bytes.Equal(l.Hash, txidBytes) {
+			txLeaf = l
 			break
 		}
 	}
-	if !txidFound {
+	if txLeaf == nil {
 		return "", errors.New("the BUMP does not contain the txid: " + *txid)
 	}
 
 	// Calculate the root using the index as a way to determine which direction to concatenate.
-	workingHash, err := hex.DecodeString(*txid)
-	if err != nil {
-		return "", err
-	}
-	workingHash = ReverseBytes(workingHash)
+	workingHash := txLeaf.Hash
+	index := txLeaf.Offset
+
 	for height, leaves := range mp.Path {
 		offset := (index >> height) ^ 1
 		var leafAtThisLevel PathElement
@@ -194,7 +197,7 @@ func (mp *MerklePath) ComputeRoot(txid *string) (string, error) {
 		if leafAtThisLevel.Duplicate {
 			digest = append(workingHash, workingHash...)
 		} else {
-			leafBytes := ReverseBytes(leafAtThisLevel.Hash)
+			leafBytes := leafAtThisLevel.Hash
 			if (offset % 2) != 0 {
 				digest = append(workingHash, leafBytes...)
 			} else {
@@ -216,41 +219,9 @@ func (mp *MerklePath) Verify(txid string, ct chaintracker.ChainTracker) (bool, e
 	if err != nil {
 		return false, err
 	}
+	rootBytes = ReverseBytes(rootBytes)
 	return ct.IsValidRootForHeight(rootBytes, mp.BlockHeight), nil
 }
-
-// Combine combines this MerklePath with another to create a compound proof
-// const root1 = this.computeRoot()
-//
-//	const root2 = other.computeRoot()
-//	if (root1 !== root2) {
-//	  throw Error('You cannot combine paths which do not have the same root.')
-//	}
-//	const combinedPath = []
-//	for (let h = 0; h < this.path.length; h++) {
-//	  combinedPath.push([])
-//	  for (let l = 0; l < this.path[h].length; l++) {
-//	    combinedPath[h].push(this.path[h][l])
-//	  }
-//	  for (let l = 0; l < other.path[h].length; l++) {
-//	    if (!(combinedPath[h].find(leaf => leaf.offset === other.path[h][l].offset) as boolean)) {
-//	      combinedPath[h].push(other.path[h][l])
-//	    } else {
-//	      // Ensure that any elements which appear in both are not downgraded to a non txid.
-//	      if (other.path[h][l]?.txid) {
-//	        combinedPath[h].find(leaf => leaf.offset === other.path[h][l]).txid = true
-//	      }
-//	    }
-//	  }
-//	}
-//	this.path = combinedPath
-// func (mp *MerklePath) Combine(other *MerklePath) error {
-// 	if mp.BlockHeight != other.BlockHeight {
-// 		return errors.New("cannot combine MerklePaths with different block heights")
-// 	}
-
-// 	root1, err := mp.ComputeRoot("")
-// }
 
 func (m *MerklePath) Combine(other *MerklePath) (err error) {
 	if m.BlockHeight != other.BlockHeight {
