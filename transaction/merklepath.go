@@ -139,13 +139,29 @@ func (mp *MerklePath) ToHex() string {
 	return hex.EncodeToString(mp.Bytes())
 }
 
-// ComputeRoot computes the Merkle root from a given transaction ID
 func (mp *MerklePath) ComputeRoot(txid *string) (string, error) {
-	if txid == nil {
+	var txidLE *[]byte
+	if txid != nil {
+		txidBytes, err := hex.DecodeString(*txid)
+		if err != nil {
+			return "", err
+		}
+		txidBytes = ReverseBytes(txidBytes)
+		txidLE = &txidBytes
+	}
+	root, err := mp.ComputeRootBin(txidLE)
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(ReverseBytes(root)), nil
+}
+
+// ComputeRoot computes the Merkle root from a given transaction ID
+func (mp *MerklePath) ComputeRootBin(txidLE *[]byte) ([]byte, error) {
+	if txidLE == nil {
 		for _, l := range mp.Path[0] {
 			if len(l.Hash) > 0 {
-				hexid := hex.EncodeToString(ReverseBytes(l.Hash))
-				txid = &hexid
+				txidLE = &l.Hash
 				break
 			}
 		}
@@ -153,25 +169,20 @@ func (mp *MerklePath) ComputeRoot(txid *string) (string, error) {
 	if len(mp.Path) == 1 {
 		// if there is only one txid in the block then the root is the txid.
 		if len(mp.Path[0]) == 1 {
-			return *txid, nil
+			return *txidLE, nil
 		}
 	}
 
-	txidBytes, err := hex.DecodeString(*txid)
-	if err != nil {
-		return "", err
-	}
-	txidBytes = ReverseBytes(txidBytes)
 	// Find the index of the txid at the lowest level of the Merkle tree
 	var txLeaf *PathElement
 	for _, l := range mp.Path[0] {
-		if bytes.Equal(l.Hash, txidBytes) {
+		if bytes.Equal(l.Hash, *txidLE) {
 			txLeaf = l
 			break
 		}
 	}
 	if txLeaf == nil {
-		return "", errors.New("the BUMP does not contain the txid: " + *txid)
+		return nil, fmt.Errorf("the BUMP does not contain the txid: %x", *txidLE)
 	}
 
 	// Calculate the root using the index as a way to determine which direction to concatenate.
@@ -190,7 +201,7 @@ func (mp *MerklePath) ComputeRoot(txid *string) (string, error) {
 			}
 		}
 		if !offsetFound {
-			return "", fmt.Errorf("we do not have a hash for this index at height: %v", height)
+			return nil, fmt.Errorf("we do not have a hash for this index at height: %v", height)
 		}
 
 		var digest []byte
@@ -206,7 +217,7 @@ func (mp *MerklePath) ComputeRoot(txid *string) (string, error) {
 		}
 		workingHash = crypto.Sha256d(digest)
 	}
-	return hex.EncodeToString(ReverseBytes(workingHash)), nil
+	return workingHash, nil
 }
 
 // Verify checks if a given transaction ID is part of the Merkle tree at the specified block height using a chain tracker
