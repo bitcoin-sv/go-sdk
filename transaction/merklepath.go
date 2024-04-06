@@ -13,15 +13,15 @@ import (
 )
 
 type PathElement struct {
-	Offset    uint64
-	Hash      util.ByteStringLE
-	Txid      bool
-	Duplicate bool
+	Offset    uint64            `json:"offset"`
+	Hash      util.ByteStringLE `json:"hash"`
+	Txid      bool              `json:"txid"`
+	Duplicate bool              `json:"duplicate"`
 }
 
 type MerklePath struct {
-	BlockHeight uint32
-	Path        [][]*PathElement
+	BlockHeight uint32           `json:"blockHeight"`
+	Path        [][]*PathElement `json:"path"`
 }
 
 // NewMerklePath creates a new MerklePath with the given block height and path
