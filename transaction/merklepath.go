@@ -8,12 +8,13 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/crypto"
 	"github.com/bitcoin-sv/go-sdk/transaction/chaintracker"
+	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/pkg/errors"
 )
 
 type PathElement struct {
 	Offset    uint64
-	Hash      []byte
+	Hash      util.ByteStringLE
 	Txid      bool
 	Duplicate bool
 }
@@ -146,14 +147,14 @@ func (mp *MerklePath) ComputeRoot(txid *string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		txidBytes = ReverseBytes(txidBytes)
+		txidBytes = util.ReverseBytes(txidBytes)
 		txidLE = &txidBytes
 	}
 	root, err := mp.ComputeRootBin(txidLE)
 	if err != nil {
 		return "", err
 	}
-	return hex.EncodeToString(ReverseBytes(root)), nil
+	return hex.EncodeToString(util.ReverseBytes(root)), nil
 }
 
 // ComputeRoot computes the Merkle root from a given transaction ID
@@ -161,7 +162,8 @@ func (mp *MerklePath) ComputeRootBin(txidLE *[]byte) ([]byte, error) {
 	if txidLE == nil {
 		for _, l := range mp.Path[0] {
 			if len(l.Hash) > 0 {
-				txidLE = &l.Hash
+				t := []byte(l.Hash)
+				txidLE = &t
 				break
 			}
 		}
@@ -230,7 +232,7 @@ func (mp *MerklePath) Verify(txid string, ct chaintracker.ChainTracker) (bool, e
 	if err != nil {
 		return false, err
 	}
-	rootBytes = ReverseBytes(rootBytes)
+	rootBytes = util.ReverseBytes(rootBytes)
 	return ct.IsValidRootForHeight(rootBytes, mp.BlockHeight), nil
 }
 

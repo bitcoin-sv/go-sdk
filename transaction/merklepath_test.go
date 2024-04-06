@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/transaction/testdata"
+	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -22,7 +23,7 @@ func hexToRevByte(hexStr string) []byte {
 		fmt.Println("Error decoding hex string:", err)
 		return nil
 	}
-	return ReverseBytes(bytes)
+	return util.ReverseBytes(bytes)
 }
 
 var BRC74JSON = MerklePath{
@@ -97,7 +98,7 @@ func (mct MyChainTracker) IsValidRootForHeight(root []byte, height uint32) bool 
 	// expectedRoot, _ := hex.DecodeString(BRC74Root)
 
 	// Assuming BRC74JSON.BlockHeight is of type uint64, and needs to be cast to uint64
-	return hex.EncodeToString(ReverseBytes(root)) == BRC74Root && height == BRC74JSON.BlockHeight
+	return hex.EncodeToString(util.ReverseBytes(root)) == BRC74Root && height == BRC74JSON.BlockHeight
 }
 
 func TestMerklePath_Verify(t *testing.T) {

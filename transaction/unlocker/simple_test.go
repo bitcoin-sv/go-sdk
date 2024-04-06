@@ -286,7 +286,7 @@ func TestLocalUnlocker_NonSignature(t *testing.T) {
 // 			return
 // 		}
 // 		for j, pk := range publicKeys {
-// 			valid := sig.Verify(ReverseBytes(h), pk)
+// 			valid := sig.Verify(util.ReverseBytes(h), pk)
 // 			t.Logf("signature %d against pulbic key %d => %v\n", i, j, valid)
 // 		}
 //
@@ -362,7 +362,7 @@ func TestLocalUnlocker_NonSignature(t *testing.T) {
 // 			return
 // 		}
 // 		for j, pk := range publicKeys {
-// 			valid := sig.Verify(ReverseBytes(h), pk)
+// 			valid := sig.Verify(util.ReverseBytes(h), pk)
 // 			t.Logf("signature %d against pulbic key %d => %v\n", i, j, valid)
 // 		}
 //

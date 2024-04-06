@@ -1,4 +1,4 @@
-package transaction_test
+package util_test
 
 import (
 	"encoding/hex"
