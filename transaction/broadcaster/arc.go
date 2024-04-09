@@ -133,15 +133,13 @@ func (a *Arc) Broadcast(t *transaction.Tx) (interface{}, error) {
 
 	if response.Status == 200 {
 		return &transaction.BroadcastSuccess{
-			Status:  transaction.Success,
 			Txid:    response.Txid,
 			Message: response.Title,
 		}, nil
 	}
 
-	return &transaction.BroadcastFailure{
-		Status:      transaction.Error,
+	return nil, &transaction.BroadcastFailure{
 		Code:        fmt.Sprintf("%d", response.Status),
 		Description: response.Title,
-	}, nil
+	}
 }
