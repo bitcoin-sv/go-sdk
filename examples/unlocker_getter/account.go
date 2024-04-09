@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
-	"encoding/binary"
 	"errors"
 
 	"github.com/bitcoin-sv/go-sdk/bip32"
@@ -87,13 +85,4 @@ func (a *account) Unlocker(ctx context.Context, lockingScript *bscript.Script) (
 	return &unlocker.Simple{
 		PrivateKey: privKey,
 	}, nil
-}
-
-func randUint64() uint64 {
-	var bb [8]byte
-	if _, err := rand.Read(bb[:]); err != nil {
-		panic(err)
-	}
-
-	return binary.LittleEndian.Uint64(bb[:])
 }
