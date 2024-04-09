@@ -230,59 +230,10 @@ func (s *Script) AppendOpcodes(oo ...uint8) error {
 	return nil
 }
 
-// func (s *Script) AppendBigInt(bInt big.Int) error {
-// 	err := s.AppendPushData(bInt.Bytes())
-// 	return err
-// }
-
 // String implements the stringer interface and returns the hex string of script.
 func (s *Script) String() string {
 	return hex.EncodeToString(*s)
 }
-
-// ToASM returns the string ASM opcodes of the script.
-// func (s *Script) ToASM() (string, error) {
-// 	if s == nil || len(*s) == 0 {
-// 		return "", nil
-// 	}
-// 	parts, err := DecodeParts(*s)
-// 	// if err != nil, we will append [error] to the ASM script below (as done in the node).
-
-// 	data := false
-// 	if len(*s) > 1 && ((*s)[0] == OpRETURN || ((*s)[0] == OpFALSE && (*s)[1] == OpRETURN)) {
-// 		data = true
-// 	}
-
-// 	var asm strings.Builder
-
-// 	for _, p := range parts {
-// 		asm.WriteRune(' ')
-// 		if len(p) == 1 {
-// 			if data && p[0] != 0x6a {
-// 				asm.WriteString(fmt.Sprintf("%d", p[0]))
-// 			} else {
-// 				asm.WriteString(OpCodeValues[p[0]])
-// 			}
-// 		} else {
-// 			if data && len(p) <= 4 {
-// 				b := make([]byte, 0)
-// 				b = append(b, p...)
-// 				for i := 0; i < 4-len(p); i++ {
-// 					b = append(b, 0)
-// 				}
-// 				asm.WriteString(fmt.Sprintf("%d", binary.LittleEndian.Uint32(b)))
-// 			} else {
-// 				asm.WriteString(hex.EncodeToString(p))
-// 			}
-// 		}
-// 	}
-
-// 	if err != nil {
-// 		asm.WriteString(" [error]")
-// 	}
-
-// 	return asm.String()[1:], nil
-// }
 
 func (s *Script) ToASM() (string, error) {
 	if s == nil || len(*s) == 0 {
