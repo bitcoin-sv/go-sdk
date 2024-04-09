@@ -89,7 +89,7 @@ func TestNewAddressFromPublicKey(t *testing.T) {
 	assert.NoError(t, err)
 
 	var pubKey *ec.PublicKey
-	pubKey, err = ec.ParsePubKey(pubKeyBytes, ec.S256())
+	pubKey, err = ec.ParsePubKey(pubKeyBytes)
 	assert.NoError(t, err)
 	assert.NotNil(t, pubKey)
 

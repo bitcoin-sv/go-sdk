@@ -1,4 +1,4 @@
-# BSV BLOCKCHAIN | Standard Development Kit for Go
+# BSV BLOCKCHAIN | Software Development Kit for Go
 
 Welcome to the BSV Blockchain Libraries Project, the comprehensive Go SDK designed to provide an updated and unified layer for developing scalable applications on the BSV Blockchain. This SDK addresses the limitations of previous tools by offering a fresh, peer-to-peer approach, adhering to SPV, and ensuring privacy and scalability.
 

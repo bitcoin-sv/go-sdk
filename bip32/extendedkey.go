@@ -313,7 +313,7 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 		// Convert the serialised compressed parent public key into X
 		// and Y coordinates so it can be added to the intermediate
 		// public key.
-		pubKey, err := ec.ParsePubKey(k.key, ec.S256())
+		pubKey, err := ec.ParsePubKey(k.key)
 		if err != nil {
 			return nil, err
 		}
@@ -364,7 +364,7 @@ func (k *ExtendedKey) Neuter() (*ExtendedKey, error) {
 
 // ECPubKey converts the extended key to a bec public key and returns it.
 func (k *ExtendedKey) ECPubKey() (*ec.PublicKey, error) {
-	return ec.ParsePubKey(k.pubKeyBytes(), ec.S256())
+	return ec.ParsePubKey(k.pubKeyBytes())
 }
 
 // ECPrivKey converts the extended key to a bec private key and returns it.
@@ -376,7 +376,7 @@ func (k *ExtendedKey) ECPrivKey() (*ec.PrivateKey, error) {
 		return nil, ErrNotPrivExtKey
 	}
 
-	privKey, _ := ec.PrivateKeyFromBytes(ec.S256(), k.key)
+	privKey, _ := ec.PrivateKeyFromBytes(k.key)
 	return privKey, nil
 }
 
@@ -576,7 +576,7 @@ func NewKeyFromString(key string) (*ExtendedKey, error) {
 	} else {
 		// Ensure the public key parses correctly and is actually on the
 		// secp256k1 curve.
-		if _, err := ec.ParsePubKey(keyData, ec.S256()); err != nil {
+		if _, err := ec.ParsePubKey(keyData); err != nil {
 			return nil, err
 		}
 	}
