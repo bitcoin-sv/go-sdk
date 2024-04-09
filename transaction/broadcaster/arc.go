@@ -27,7 +27,7 @@ const (
 
 type Arc struct {
 	ApiUrl               string
-	ApiKey               *string
+	ApiKey               string
 	CallbackUrl          *string
 	CallbackToken        *string
 	FullStatusUpdates    bool
@@ -86,8 +86,8 @@ func (a *Arc) Broadcast(t *transaction.Tx) (interface{}, error) {
 
 	req.Header.Set("Content-Type", "application/octet-stream")
 
-	if a.ApiKey != nil {
-		req.Header.Set("Authorization", "Bearer "+*a.ApiKey)
+	if a.ApiKey != "" {
+		req.Header.Set("Authorization", "Bearer "+a.ApiKey)
 	}
 	if a.CallbackUrl != nil {
 		req.Header.Set("X-CallbackUrl", *a.CallbackUrl)
