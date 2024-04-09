@@ -20,7 +20,7 @@ func NewTxFromBEEF(beef []byte) (*Tx, error) {
 		return nil, err
 	}
 	if version != 4022206465 {
-		return nil, fmt.Errorf("Invalid BEEF version. Expected 4022206465, received %d", version)
+		return nil, fmt.Errorf("invalid BEEF version. expected 4022206465, received %d", version)
 	}
 
 	// Read the BUMPs
@@ -106,7 +106,7 @@ func (t *Tx) BEEF() []byte {
 	bumps := make([]*MerklePath, 0)
 	txs := make(map[string]*BeefTx, 0)
 
-	addPathsAndInputs(t, &bumps, txs)
+	addPathsAndInputs(t, &bumps)
 	b.Write(VarInt(len(bumps)).Bytes())
 	for _, bump := range bumps {
 		b.Write(bump.Bytes())
