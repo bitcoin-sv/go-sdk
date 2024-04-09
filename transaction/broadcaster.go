@@ -1,12 +1,5 @@
 package transaction
 
-type BroadcastStatus string
-
-var (
-	Success BroadcastStatus = "success"
-	Error   BroadcastStatus = "error"
-)
-
 type BroadcastSuccess struct {
 	Txid    string `json:"txid"`
 	Message string `json:"message"`
