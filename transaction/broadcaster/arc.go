@@ -63,7 +63,7 @@ func (f *ArcResponse) Scan(value interface{}) error {
 	return json.Unmarshal(b, &f)
 }
 
-func (a *Arc) Broadcast(t *transaction.Tx) (interface{}, error) {
+func (a *Arc) Broadcast(t *transaction.Tx) (*transaction.BroadcastSuccess, *transaction.BroadcastFailure) {
 	var buf *bytes.Buffer
 	for _, input := range t.Inputs {
 		if input.PreviousTxScript == nil {
@@ -81,7 +81,10 @@ func (a *Arc) Broadcast(t *transaction.Tx) (interface{}, error) {
 		buf,
 	)
 	if err != nil {
-		return nil, err
+		return nil, &transaction.BroadcastFailure{
+			Code:        "500",
+			Description: err.Error(),
+		}
 	}
 
 	req.Header.Set("Content-Type", "application/octet-stream")
@@ -116,19 +119,28 @@ func (a *Arc) Broadcast(t *transaction.Tx) (interface{}, error) {
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, &transaction.BroadcastFailure{
+			Code:        "500",
+			Description: err.Error(),
+		}
 	}
 	defer resp.Body.Close()
 
 	msg, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return nil, &transaction.BroadcastFailure{
+			Code:        "500",
+			Description: err.Error(),
+		}
 	}
 
 	response := &ArcResponse{}
 	err = json.Unmarshal(msg, &response)
 	if err != nil {
-		return nil, err
+		return nil, &transaction.BroadcastFailure{
+			Code:        "500",
+			Description: err.Error(),
+		}
 	}
 
 	if response.Status == 200 {
