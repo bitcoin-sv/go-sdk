@@ -68,7 +68,7 @@ func main() {
 
 ```
 
-For a more detailed tutorial and advanced examples, check our [Documentation](#documentation).
+Check out the [examples folder](https://github.com/bitcoin-sv/go-sdk/tree/master/examples) for a more advanced examples. See the [Go Doc](https://pkg.go.dev/github.com/bitcoin-sv/go-sdk) for a complete list of available modules and functions.
 
 ## Features & Deliverables
 
