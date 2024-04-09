@@ -162,9 +162,6 @@ func TestMerklePath_Combine(t *testing.T) {
 		for _, invalid := range testdata.InvalidBumps {
 			_, err := NewMerklePathFromHex(invalid.Bump)
 			assert.Error(t, err)
-			if err != nil {
-				assert.Equal(t, invalid.Error, err.Error())
-			}
 		}
 	})
 

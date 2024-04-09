@@ -2,8 +2,10 @@ package transaction
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"sort"
 
 	"github.com/bitcoin-sv/go-sdk/crypto"
@@ -42,55 +44,72 @@ func NewMerklePathFromHex(hexData string) (*MerklePath, error) {
 }
 
 // NewMerklePathFromBinary creates a new MerklePath with the given binary
-func NewMerklePathFromBinary(bytes []byte) (*MerklePath, error) {
-	if len(bytes) < 37 {
+func NewMerklePathFromBinary(b []byte) (*MerklePath, error) {
+	if len(b) < 37 {
 		return nil, errors.New("BUMP bytes do not contain enough data to be valid")
 	}
+	return NewMerklePathFromReader(bytes.NewReader(b))
+}
+
+func NewMerklePathFromReader(reader io.Reader) (*MerklePath, error) {
 	bump := &MerklePath{}
 
-	var skip int
-	index, size := NewVarIntFromBytes(bytes[skip:])
-	skip += size
+	var index VarInt
+	_, err := index.ReadFrom(reader)
+	if err != nil {
+		return nil, err
+	}
+	// index, size := NewVarIntFromBytes(bytes[skip:])
+	// skip += size
 	bump.BlockHeight = uint32(index)
 
-	// Next byte is the tree height.
-	treeHeight := uint(bytes[skip])
-	skip++
+	var treeHeight uint8
+	err = binary.Read(reader, binary.LittleEndian, &treeHeight)
+	if err != nil {
+		return nil, err
+	}
 
 	// We expect tree height levels.
 	bump.Path = make([][]*PathElement, treeHeight)
 
-	for lv := uint(0); lv < treeHeight; lv++ {
-		// For each level we parse a bunch of nLeaves.
-		if len(bytes) <= skip {
-			return nil, errors.New("Malformed BUMP")
+	for lv := uint8(0); lv < treeHeight; lv++ {
+		var nLeavesAtThisHeight VarInt
+		_, err = nLeavesAtThisHeight.ReadFrom(reader)
+		if err != nil {
+			return nil, err
 		}
-		n, size := NewVarIntFromBytes(bytes[skip:])
-		skip += size
-		nLeavesAtThisHeight := uint64(n)
+
 		if nLeavesAtThisHeight == 0 {
 			return nil, errors.New("There are no leaves at height: " + fmt.Sprint(lv) + " which makes this invalid")
 		}
 		bump.Path[lv] = make([]*PathElement, nLeavesAtThisHeight)
-		for lf := uint64(0); lf < nLeavesAtThisHeight; lf++ {
+		for lf := uint64(0); lf < uint64(nLeavesAtThisHeight); lf++ {
 			// For each leaf we parse the offset, hash, txid and duplicate.
-			offset, size := NewVarIntFromBytes(bytes[skip:])
-			skip += size
+			var offset VarInt
+			_, err = offset.ReadFrom(reader)
+			if err != nil {
+				return nil, err
+			}
 			var l PathElement
 			o := uint64(offset)
 			l.Offset = o
-			flags := bytes[skip]
-			skip++
+
+			var flags byte
+			err = binary.Read(reader, binary.LittleEndian, &flags)
+			if err != nil {
+				return nil, err
+			}
+
 			dup := flags&1 > 0
 			txid := flags&2 > 0
 			if dup {
 				l.Duplicate = dup
 			} else {
-				if len(bytes) < skip+32 {
-					return nil, errors.New("BUMP bytes do not contain enough data to be valid")
+				l.Hash = make([]byte, 32)
+				_, err = reader.Read(l.Hash)
+				if err != nil {
+					return nil, err
 				}
-				l.Hash = bytes[skip : skip+32]
-				skip += 32
 			}
 			if txid {
 				l.Txid = txid
