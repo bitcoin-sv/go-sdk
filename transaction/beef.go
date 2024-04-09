@@ -124,7 +124,7 @@ func (t *Tx) BEEF() []byte {
 	return b.Bytes()
 }
 
-func addPathsAndInputs(tx *Tx, bumps *[]*MerklePath, txs map[string]*BeefTx) {
+func addPathsAndInputs(tx *Tx, bumps *[]*MerklePath) {
 	beefTx := &BeefTx{tx: tx}
 	hasProof := tx.MerklePath != nil
 
