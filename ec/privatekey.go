@@ -2,7 +2,6 @@ package ec
 
 import (
 	e "crypto/ecdsa"
-	"crypto/elliptic"
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
@@ -18,11 +17,11 @@ type PrivateKey e.PrivateKey
 
 // PrivateKeyFromBytes returns a private and public key for `curve' based on the
 // private key passed as an argument as a byte slice.
-func PrivateKeyFromBytes(curve elliptic.Curve, pk []byte) (*PrivateKey, *PublicKey) {
-	x, y := curve.ScalarBaseMult(pk)
+func PrivateKeyFromBytes(pk []byte) (*PrivateKey, *PublicKey) {
+	x, y := S256().ScalarBaseMult(pk)
 	priv := &e.PrivateKey{
 		PublicKey: e.PublicKey{
-			Curve: curve,
+			Curve: S256(),
 			X:     x,
 			Y:     y,
 		},
@@ -33,8 +32,8 @@ func PrivateKeyFromBytes(curve elliptic.Curve, pk []byte) (*PrivateKey, *PublicK
 
 // NewPrivateKey is a wrapper for ecdsa.GenerateKey that returns a PrivateKey
 // instead of the normal ecdsa.PrivateKey.
-func NewPrivateKey(curve elliptic.Curve) (*PrivateKey, error) {
-	key, err := e.GenerateKey(curve, rand.Reader)
+func NewPrivateKey() (*PrivateKey, error) {
+	key, err := e.GenerateKey(S256(), rand.Reader)
 	if err != nil {
 		return nil, err
 	}
@@ -44,18 +43,13 @@ func NewPrivateKey(curve elliptic.Curve) (*PrivateKey, error) {
 // PrivateKey is an ecdsa.PrivateKey with additional functions to
 func PrivateKeyFromString(privKeyHex string) (*PrivateKey, error) {
 	privKeyBytes, _ := hex.DecodeString(privKeyHex)
-	privKey, _ := PrivateKeyFromBytes(S256(), privKeyBytes)
+	privKey, _ := PrivateKeyFromBytes(privKeyBytes)
 	return privKey, nil
 }
 
 // PubKey returns the PublicKey corresponding to this private key.
 func (p *PrivateKey) PubKey() *PublicKey {
 	return (*PublicKey)(&p.PublicKey)
-}
-
-// ToECDSA returns the private key as a *ecdsa.PrivateKey.
-func (p *PrivateKey) ToECDSA() *PrivateKey {
-	return (*PrivateKey)(p)
 }
 
 // Sign generates an ECDSA signature for the provided hash (which should be the result
@@ -73,7 +67,7 @@ const PrivateKeyBytesLen = 32
 // number, padded to a length of 32 bytes.
 func (p *PrivateKey) Serialise() []byte {
 	b := make([]byte, 0, PrivateKeyBytesLen)
-	return paddedAppend(PrivateKeyBytesLen, b, p.ToECDSA().D.Bytes())
+	return paddedAppend(PrivateKeyBytesLen, b, p.D.Bytes())
 }
 
 func (p *PrivateKey) DeriveSharedSecret(key *PublicKey) (*PublicKey, error) {
@@ -92,15 +86,12 @@ func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*Private
 	if err != nil {
 		return nil, err
 	}
-	pubKeyEncoded, err := sharedSecret.encode(true)
-	if err != nil {
-		return nil, err
-	}
+	pubKeyEncoded := sharedSecret.encode(true)
 	hmac := crypto.Sha256HMAC(invoiceNumberBin, pubKeyEncoded)
 
 	newPrivKey := new(big.Int)
 	newPrivKey.Add(p.D, new(big.Int).SetBytes(hmac))
 	newPrivKey.Mod(newPrivKey, S256().N)
-	privKey, _ := PrivateKeyFromBytes(S256(), newPrivKey.Bytes())
+	privKey, _ := PrivateKeyFromBytes(newPrivKey.Bytes())
 	return privKey, nil
 }

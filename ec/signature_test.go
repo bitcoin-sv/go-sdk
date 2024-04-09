@@ -13,6 +13,8 @@ import (
 	"math/big"
 	"reflect"
 	"testing"
+
+	"github.com/bitcoin-sv/go-sdk/crypto"
 )
 
 type signatureTest struct {
@@ -337,9 +339,9 @@ func TestSignatures(t *testing.T) {
 	for _, test := range signatureTests {
 		var err error
 		if test.der {
-			_, err = ParseDERSignature(test.sig, S256())
+			_, err = ParseDERSignature(test.sig)
 		} else {
-			_, err = ParseSignature(test.sig, S256())
+			_, err = ParseSignature(test.sig)
 		}
 		if err != nil {
 			if test.isValid {
@@ -462,17 +464,17 @@ func TestSignatureSerialise(t *testing.T) {
 	}
 }
 
-func testSignCompact(t *testing.T, tag string, curve *KoblitzCurve, data []byte, isCompressed bool) { //nolint:unparam // only a test
-	priv, _ := NewPrivateKey(curve)
+func testSignCompact(t *testing.T, tag string, data []byte, isCompressed bool) {
+	priv, _ := NewPrivateKey()
 
-	hashed := []byte("testing")
-	sig, err := SignCompact(curve, priv, hashed, isCompressed)
+	hashed := crypto.Sha256d(data)
+	sig, err := SignCompact(S256(), priv, hashed, isCompressed)
 	if err != nil {
 		t.Errorf("%s: error signing: %s", tag, err)
 		return
 	}
 
-	pk, wasCompressed, err := RecoverCompact(curve, sig, hashed)
+	pk, wasCompressed, err := RecoverCompact(sig, hashed)
 	if err != nil {
 		t.Errorf("%s: error recovering: %s", tag, err)
 		return
@@ -496,7 +498,7 @@ func testSignCompact(t *testing.T, tag string, curve *KoblitzCurve, data []byte,
 		sig[0] += 4
 	}
 
-	pk, wasCompressed, err = RecoverCompact(curve, sig, hashed)
+	pk, wasCompressed, err = RecoverCompact(sig, hashed)
 	if err != nil {
 		t.Errorf("%s: error recovering (2): %s", tag, err)
 		return
@@ -524,7 +526,7 @@ func TestSignCompact(t *testing.T) {
 			continue
 		}
 		compressed := i%2 != 0
-		testSignCompact(t, name, S256(), data, compressed)
+		testSignCompact(t, name, data, compressed)
 	}
 }
 
@@ -598,7 +600,7 @@ func TestRecoverCompact(t *testing.T) {
 		// Magic DER constant.
 		sig[0] += 27
 
-		pub, _, err := RecoverCompact(S256(), sig, msg)
+		pub, _, err := RecoverCompact(sig, msg)
 
 		// Verify that returned error matches as expected.
 		if !reflect.DeepEqual(test.err, err) {
@@ -615,7 +617,7 @@ func TestRecoverCompact(t *testing.T) {
 		}
 
 		// Otherwise, ensure the correct public key was recovered.
-		exPub, _ := ParsePubKey(decodeHex(test.pub), S256())
+		exPub, _ := ParsePubKey(decodeHex(test.pub))
 		if !exPub.IsEqual(pub) {
 			t.Errorf("unexpected recovered public key #%d: "+
 				"want %v, got %v", i, exPub, pub)
@@ -674,7 +676,7 @@ func TestRFC6979(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		privKey, _ := PrivateKeyFromBytes(S256(), decodeHex(test.key))
+		privKey, _ := PrivateKeyFromBytes(decodeHex(test.key))
 		hash := sha256.Sum256([]byte(test.msg))
 
 		// Ensure deterministically generated nonce is the expected value.

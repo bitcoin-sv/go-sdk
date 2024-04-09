@@ -106,10 +106,10 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 			sigBytes := parts[0]
 			publicKeyBytes := parts[1]
 
-			publicKey, err := ec.ParsePubKey(publicKeyBytes, ec.S256())
+			publicKey, err := ec.ParsePubKey(publicKeyBytes)
 			assert.NoError(t, err)
 
-			sig, err := ec.ParseDERSignature(sigBytes, ec.S256())
+			sig, err := ec.ParseDERSignature(sigBytes)
 			assert.NoError(t, err)
 
 			sh, err := tx.CalcInputSignatureHash(0, sighash.AllForkID)

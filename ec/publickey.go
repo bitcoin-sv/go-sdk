@@ -23,14 +23,14 @@ func isOdd(a *big.Int) bool {
 
 // decompressPoint decompresses a point on the secp256k1 curve given the X point and
 // the solution to use.
-func decompressPoint(curve *KoblitzCurve, bigX *big.Int, ybit bool) (*big.Int, error) {
+func decompressPoint(bigX *big.Int, ybit bool) (*big.Int, error) {
 	var x fieldVal
 	x.SetByteSlice(bigX.Bytes())
 
 	// Compute x^3 + B mod p.
 	var x3 fieldVal
 	x3.SquareVal(&x).Mul(&x)
-	x3.Add(curve.fieldB).Normalise()
+	x3.Add(S256().fieldB).Normalise()
 
 	// Now calculate sqrt mod p of x^3 + B
 	// This code used to do a full sqrt based on tonelli/shanks,
@@ -75,9 +75,9 @@ func IsCompressedPubKey(pubKey []byte) bool {
 // ParsePubKey parses a public key for a koblitz curve from a bytestring into a
 // ecdsa.Publickey, verifying that it is valid. It supports compressed,
 // uncompressed and hybrid signature formats.
-func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err error) {
+func ParsePubKey(pubKeyStr []byte) (key *PublicKey, err error) {
 	pubkey := PublicKey{}
-	pubkey.Curve = curve
+	pubkey.Curve = S256()
 
 	if len(pubKeyStr) == 0 {
 		return nil, errors.New("pubkey string is empty")
@@ -120,7 +120,7 @@ func ParsePubKey(pubKeyStr []byte, curve *KoblitzCurve) (key *PublicKey, err err
 				"pubkey string: %d", pubKeyStr[0])
 		}
 		pubkey.X = new(big.Int).SetBytes(pubKeyStr[1:33])
-		pubkey.Y, err = decompressPoint(curve, pubkey.X, ybit)
+		pubkey.Y, err = decompressPoint(pubkey.X, ybit)
 		if err != nil {
 			return nil, err
 		}
@@ -185,7 +185,7 @@ func (p *PublicKey) IsEqual(otherPubKey *PublicKey) bool {
 // paddedAppend appends the src byte slice to dst, returning the new slice.
 // If the length of the source is smaller than the passed size, leading zero
 // bytes are appended to the dst slice before appending src.
-func paddedAppend(size uint, dst, src []byte) []byte { //nolint:unparam //
+func paddedAppend(size uint, dst, src []byte) []byte { //nolint:unparam // reasons
 	for i := 0; i < int(size)-len(src); i++ {
 		dst = append(dst, 0)
 	}
@@ -198,7 +198,7 @@ func PublicKeyFromString(pubKeyHex string) (*PublicKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	pubKey, err := ParsePubKey(pubKeyBytes, S256())
+	pubKey, err := ParsePubKey(pubKeyBytes)
 	if err != nil {
 		return nil, err
 	}
@@ -220,7 +220,7 @@ func (p *PublicKey) Mul(k *big.Int) *PublicKey {
 	}
 }
 
-func (p *PublicKey) encode(compact bool) ([]byte, error) {
+func (p *PublicKey) encode(compact bool) []byte {
 	byteLen := (p.Curve.Params().BitSize + 7) >> 3
 
 	xBytes := p.X.Bytes()
@@ -239,15 +239,15 @@ func (p *PublicKey) encode(compact bool) ([]byte, error) {
 		if new(big.Int).And(p.Y, big.NewInt(1)).Cmp(big.NewInt(0)) != 0 {
 			prefix = 0x03
 		}
-		return append([]byte{prefix}, xBytes...), nil
+		return append([]byte{prefix}, xBytes...)
 	}
 
 	// Non-compact format
-	return append(append([]byte{0x04}, xBytes...), yBytes...), nil
+	return append(append([]byte{0x04}, xBytes...), yBytes...)
 }
 
 func (p *PublicKey) ToDER() string {
-	encoded, _ := p.encode(true)
+	encoded := p.encode(true)
 	return hex.EncodeToString(encoded)
 }
 
@@ -257,7 +257,7 @@ func (p *PublicKey) DeriveChild(privateKey *PrivateKey, invoiceNumber string) (*
 	if err != nil {
 		return nil, err
 	}
-	pubKeyEncoded, _ := sharedSecret.encode(true)
+	pubKeyEncoded := sharedSecret.encode(true)
 	hmac := crypto.Sha256HMAC(invoiceNumberBin, pubKeyEncoded)
 
 	newPointX, newPointY := S256().ScalarBaseMult(hmac)

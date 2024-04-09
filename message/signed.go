@@ -20,7 +20,7 @@ type SignedMessage struct {
 func Sign(message []byte, signer *ec.PrivateKey, verifier *ec.PublicKey) ([]byte, error) {
 	recipientAnyone := verifier == nil
 	if recipientAnyone {
-		_, verifier = ec.PrivateKeyFromBytes(ec.S256(), []byte{1})
+		_, verifier = ec.PrivateKeyFromBytes([]byte{1})
 	}
 
 	keyID := make([]byte, 32)
@@ -63,13 +63,13 @@ func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) 
 	}
 	pubKeyBytes := sig[counter : counter+33]
 	counter += 33
-	signer, err := ec.ParsePubKey(pubKeyBytes, ec.S256())
+	signer, err := ec.ParsePubKey(pubKeyBytes)
 	if err != nil {
 		return false, err
 	}
 	verifierFirst := sig[counter]
 	if verifierFirst == 0 {
-		recipient, _ = ec.PrivateKeyFromBytes(ec.S256(), []byte{1})
+		recipient, _ = ec.PrivateKeyFromBytes([]byte{1})
 		counter++
 	} else {
 		counter++

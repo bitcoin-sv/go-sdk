@@ -9,8 +9,8 @@ import (
 
 func TestSignedMessage(t *testing.T) {
 	t.Run("Signs a message for a recipient", func(t *testing.T) {
-		senderPriv, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{15})
-		recipientPriv, recipientPub := ec.PrivateKeyFromBytes(ec.S256(), []byte{21})
+		senderPriv, _ := ec.PrivateKeyFromBytes([]byte{15})
+		recipientPriv, recipientPub := ec.PrivateKeyFromBytes([]byte{21})
 
 		message := []byte{1, 2, 4, 8, 16, 32}
 		signature, err := Sign(message, senderPriv, recipientPub)
@@ -22,7 +22,7 @@ func TestSignedMessage(t *testing.T) {
 	})
 
 	t.Run("Signs a message for anyone", func(t *testing.T) {
-		senderPriv, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{15})
+		senderPriv, _ := ec.PrivateKeyFromBytes([]byte{15})
 
 		message := []byte{1, 2, 4, 8, 16, 32}
 		signature, err := Sign(message, senderPriv, nil)
@@ -34,8 +34,8 @@ func TestSignedMessage(t *testing.T) {
 	})
 
 	t.Run("Fails to verify a message with a wrong version", func(t *testing.T) {
-		senderPriv, _ := ec.PrivateKeyFromBytes(ec.S256(), []byte{15})
-		recipientPriv, recipientPub := ec.PrivateKeyFromBytes(ec.S256(), []byte{21})
+		senderPriv, _ := ec.PrivateKeyFromBytes([]byte{15})
+		recipientPriv, recipientPub := ec.PrivateKeyFromBytes([]byte{21})
 
 		message := []byte{1, 2, 4, 8, 16, 32}
 		signature, _ := Sign(message, senderPriv, recipientPub)

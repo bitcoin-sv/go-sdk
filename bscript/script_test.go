@@ -38,7 +38,7 @@ func TestNewP2PKHFromPubKey(t *testing.T) {
 
 	pk, _ := hex.DecodeString("023717efaec6761e457f55c8417815505b695209d0bbfed8c3265be425b373c2d6")
 
-	pubkey, err := ec.ParsePubKey(pk, ec.S256())
+	pubkey, err := ec.ParsePubKey(pk)
 	assert.NoError(t, err)
 
 	scriptP2PKH, err := bscript.NewP2PKHFromPubKeyEC(pubkey)
