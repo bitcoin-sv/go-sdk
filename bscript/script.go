@@ -521,8 +521,6 @@ func (s *Script) Addresses() ([]string, error) {
 		}
 		addresses = []string{a.AddressString}
 	}
-	// TODO: handle multisig, and other outputs
-	// https://github.com/libsv/go-bt/issues/6
 	return addresses, nil
 }
 

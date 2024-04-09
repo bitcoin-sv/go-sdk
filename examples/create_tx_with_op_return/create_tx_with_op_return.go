@@ -21,7 +21,7 @@ func main() {
 
 	_ = tx.PayToAddress("1C8bzHM8XFBHZ2ZZVvFy2NSoAZbwCXAicL", 900)
 
-	_ = tx.AddOpReturnOutput([]byte("You are using go-bt!"))
+	_ = tx.AddOpReturnOutput([]byte("You are using go-sdk!"))
 
 	decodedWif, _ := wif.DecodeWIF("L3VJH2hcRGYYG6YrbWGmsxQC1zyYixA82YjgEyrEUWDs4ALgk8Vu")
 
