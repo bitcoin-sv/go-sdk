@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"slices"
 	"sort"
 
 	"github.com/bitcoin-sv/go-sdk/crypto"
@@ -24,6 +25,35 @@ type PathElement struct {
 type MerklePath struct {
 	BlockHeight uint32           `json:"blockHeight"`
 	Path        [][]*PathElement `json:"path"`
+}
+
+type IndexedPath []map[uint64]*PathElement
+
+func (ip IndexedPath) GetOffsetLeaf(layer int, offset uint64) *PathElement {
+	if leaf, ok := ip[layer][offset]; ok {
+		return leaf
+	}
+	if layer == 0 {
+		return nil
+	}
+
+	prevOffset := offset * 2
+	left := ip.GetOffsetLeaf(layer-1, prevOffset)
+	right := ip.GetOffsetLeaf(layer-1, prevOffset+1)
+	if left != nil && right != nil {
+		var digest []byte
+		if right.Duplicate {
+			digest = append(left.Hash, left.Hash...)
+		} else {
+			digest = append(left.Hash, right.Hash...)
+		}
+
+		return &PathElement{
+			Offset: offset,
+			Hash:   crypto.Sha256d(digest),
+		}
+	}
+	return nil
 }
 
 // NewMerklePath creates a new MerklePath with the given block height and path
@@ -193,6 +223,14 @@ func (mp *MerklePath) ComputeRootBin(txidLE *[]byte) ([]byte, error) {
 			return *txidLE, nil
 		}
 	}
+	indexedPath := make(IndexedPath, len(mp.Path))
+	for h := 0; h < len(mp.Path); h++ {
+		path := map[uint64]*PathElement{}
+		for l := 0; l < len(mp.Path[h]); l++ {
+			path[mp.Path[h][l].Offset] = mp.Path[h][l]
+		}
+		indexedPath[h] = path
+	}
 
 	// Find the index of the txid at the lowest level of the Merkle tree
 	var txLeaf *PathElement
@@ -210,32 +248,25 @@ func (mp *MerklePath) ComputeRootBin(txidLE *[]byte) ([]byte, error) {
 	workingHash := txLeaf.Hash
 	index := txLeaf.Offset
 
-	for height, leaves := range mp.Path {
+	for height := range mp.Path {
 		offset := (index >> height) ^ 1
-		var leafAtThisLevel PathElement
-		offsetFound := false
-		for _, l := range leaves {
-			if l.Offset == offset {
-				offsetFound = true
-				leafAtThisLevel = *l
-				break
-			}
-		}
-		if !offsetFound {
+		leaf := indexedPath.GetOffsetLeaf(height, offset)
+		if leaf == nil {
 			return nil, fmt.Errorf("we do not have a hash for this index at height: %v", height)
 		}
-
 		var digest []byte
-		if leafAtThisLevel.Duplicate {
+
+		if leaf.Duplicate {
 			digest = append(workingHash, workingHash...)
 		} else {
-			leafBytes := leafAtThisLevel.Hash
+			leafBytes := leaf.Hash
 			if (offset % 2) != 0 {
 				digest = append(workingHash, leafBytes...)
 			} else {
 				digest = append(leafBytes, workingHash...)
 			}
 		}
+
 		workingHash = crypto.Sha256d(digest)
 	}
 	return workingHash, nil
@@ -273,31 +304,39 @@ func (m *MerklePath) Combine(other *MerklePath) (err error) {
 		return errors.New("cannot combine MerklePaths with different roots")
 	}
 
-	combinedPath := make([][]*PathElement, len(m.Path))
+	combinedPath := make([]map[uint64]*PathElement, len(m.Path))
 	for h := 0; h < len(m.Path); h++ {
+		path := map[uint64]*PathElement{}
 		for l := 0; l < len(m.Path[h]); l++ {
-			combinedPath[h] = append(combinedPath[h], m.Path[h][l])
+			path[m.Path[h][l].Offset] = m.Path[h][l]
 		}
+		combinedPath[h] = path
+	}
+
+	for h := 0; h < len(other.Path); h++ {
 		for l := 0; l < len(other.Path[h]); l++ {
-			var found *PathElement
-			for _, leaf := range combinedPath[h] {
-				if leaf.Offset == other.Path[h][l].Offset {
-					found = other.Path[h][l]
-					break
-				}
-			}
-			if found == nil {
-				combinedPath[h] = append(combinedPath[h], other.Path[h][l])
-			} else {
-				for _, leaf := range combinedPath[h] {
-					if leaf.Offset == other.Path[h][l].Offset {
-						leaf.Txid = true
-						break
-					}
-				}
-			}
+			combinedPath[h][other.Path[h][l].Offset] = other.Path[h][l]
 		}
 	}
-	m.Path = combinedPath
+
+	m.Path = make([][]*PathElement, len(combinedPath))
+	for h := len(m.Path) - 1; h >= 0; h-- {
+		m.Path[h] = make([]*PathElement, 0, len(combinedPath[h]))
+		for offset := range combinedPath[h] {
+			if h > 0 {
+				childOffset := offset * 2
+				_, hasLeft := combinedPath[h-1][childOffset]
+				_, hasRight := combinedPath[h-1][childOffset+1]
+				if hasLeft && hasRight {
+					continue
+				}
+			}
+			m.Path[h] = append(m.Path[h], combinedPath[h][offset])
+		}
+		slices.SortFunc(m.Path[h], func(a, b *PathElement) int {
+			return int(a.Offset) - int(b.Offset)
+		})
+	}
+
 	return
 }
