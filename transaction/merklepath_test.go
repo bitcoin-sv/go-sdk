@@ -2,6 +2,7 @@ package transaction
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -51,6 +52,8 @@ var BRC74JSON = MerklePath{
 		{{Offset: 0, Hash: hexToRevByte("d40cb31af3ef53dd910f5ce15e9a1c20875c009a22d25eab32c11c7ece6487af")}},
 	},
 }
+
+var BRC74JSONTrimmed = `{"blockHeight":813706,"path":[[{"offset":3048,"hash":"304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711","txid":false,"duplicate":false},{"offset":3049,"hash":"d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00","txid":true,"duplicate":false},{"offset":3050,"hash":"98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e","txid":true,"duplicate":false},{"offset":3051,"hash":"","txid":false,"duplicate":true}],[],[{"offset":763,"hash":"","txid":false,"duplicate":true}],[{"offset":380,"hash":"858e41febe934b4cbc1cb80a1dc8e254cb1e69acff8e4f91ecdd779bcaefb393","txid":false,"duplicate":false}],[{"offset":191,"hash":"","txid":false,"duplicate":true}],[{"offset":94,"hash":"f80263e813c644cd71bcc88126d0463df070e28f11023a00543c97b66e828158","txid":false,"duplicate":false}],[{"offset":46,"hash":"f36f792fa2b42acfadfa043a946d4d7b6e5e1e2e0266f2cface575bbb82b7ae0","txid":false,"duplicate":false}],[{"offset":22,"hash":"7d5051f0d4ceb7d2e27a49e448aedca2b3865283ceffe0b00b9c3017faca2081","txid":false,"duplicate":false}],[{"offset":10,"hash":"43aeeb9b6a9e94a5a787fbf04380645e6fd955f8bf0630c24365f492ac592e50","txid":false,"duplicate":false}],[{"offset":4,"hash":"45be5d16ac41430e3589a579ad780e5e42cf515381cc309b48d0f4648f9fcd1c","txid":false,"duplicate":false}],[{"offset":3,"hash":"","txid":false,"duplicate":true}],[{"offset":0,"hash":"d40cb31af3ef53dd910f5ce15e9a1c20875c009a22d25eab32c11c7ece6487af","txid":false,"duplicate":false}]]}`
 
 func TestMerklePath_ParseHex(t *testing.T) {
 	t.Parallel()
@@ -156,6 +159,16 @@ func TestMerklePath_Combine(t *testing.T) {
 		pathARoot, err = pathA.ComputeRoot(&BRC74TXID3)
 		assert.NoError(t, err)
 		assert.Equal(t, pathARoot, BRC74Root)
+
+		err = BRC74JSON.Combine(&BRC74JSON)
+		assert.NoError(t, err)
+		out, err := json.Marshal(BRC74JSON)
+		assert.NoError(t, err)
+		assert.Equal(t, string(out), BRC74JSONTrimmed)
+		root, err := BRC74JSON.ComputeRoot(nil)
+		assert.NoError(t, err)
+		assert.Equal(t, root, BRC74Root)
+
 	})
 
 	t.Run("rejects invalid bumps", func(t *testing.T) {
