@@ -10,6 +10,7 @@ Welcome to the BSV Blockchain Libraries Project, the comprehensive Go SDK design
   - [Getting Started](#getting-started)
     - [Installation](#installation)
     - [Basic Usage](#basic-usage)
+    - [Examples](#examples)
   - [Features \& Deliverables](#features--deliverables)
   - [Documentation](#documentation)
   - [Contribution Guidelines](#contribution-guidelines)
@@ -68,7 +69,11 @@ func main() {
 
 ```
 
-Check out the [examples folder](https://github.com/bitcoin-sv/go-sdk/tree/master/examples) for more advanced examples. See the [Go Doc](https://pkg.go.dev/github.com/bitcoin-sv/go-sdk) for a complete list of available modules and functions.
+See the [Go Doc](https://pkg.go.dev/github.com/bitcoin-sv/go-sdk) for a complete list of available modules and functions.
+
+### Examples
+
+Check out the [examples folder](https://github.com/bitcoin-sv/go-sdk/tree/master/examples) for more advanced examples.
 
 ## Features & Deliverables
 
