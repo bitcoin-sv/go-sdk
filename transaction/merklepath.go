@@ -17,9 +17,9 @@ import (
 
 type PathElement struct {
 	Offset    uint64            `json:"offset"`
-	Hash      util.ByteStringLE `json:"hash"`
-	Txid      bool              `json:"txid"`
-	Duplicate bool              `json:"duplicate"`
+	Hash      util.ByteStringLE `json:"hash,omitempty"`
+	Txid      *bool             `json:"txid,omitempty"`
+	Duplicate *bool             `json:"duplicate,omitempty"`
 }
 
 type MerklePath struct {
@@ -42,7 +42,7 @@ func (ip IndexedPath) GetOffsetLeaf(layer int, offset uint64) *PathElement {
 	right := ip.GetOffsetLeaf(layer-1, prevOffset+1)
 	if left != nil && right != nil {
 		var digest []byte
-		if right.Duplicate {
+		if right.Duplicate != nil && *right.Duplicate {
 			digest = append(left.Hash, left.Hash...)
 		} else {
 			digest = append(left.Hash, right.Hash...)
@@ -133,7 +133,7 @@ func NewMerklePathFromReader(reader io.Reader) (*MerklePath, error) {
 			dup := flags&1 > 0
 			txid := flags&2 > 0
 			if dup {
-				l.Duplicate = dup
+				l.Duplicate = &dup
 			} else {
 				l.Hash = make([]byte, 32)
 				_, err = reader.Read(l.Hash)
@@ -142,7 +142,7 @@ func NewMerklePathFromReader(reader io.Reader) (*MerklePath, error) {
 				}
 			}
 			if txid {
-				l.Txid = txid
+				l.Txid = &txid
 			}
 			bump.Path[lv][lf] = &l
 		}
@@ -169,10 +169,10 @@ func (mp *MerklePath) Bytes() []byte {
 		for _, leaf := range mp.Path[level] {
 			bytes = append(bytes, VarInt(leaf.Offset).Bytes()...)
 			flags := byte(0)
-			if leaf.Duplicate {
+			if leaf.Duplicate != nil && *leaf.Duplicate {
 				flags |= 1
 			}
-			if leaf.Txid {
+			if leaf.Txid != nil && *leaf.Txid {
 				flags |= 2
 			}
 			bytes = append(bytes, flags)
@@ -256,7 +256,7 @@ func (mp *MerklePath) ComputeRootBin(txidLE *[]byte) ([]byte, error) {
 		}
 		var digest []byte
 
-		if leaf.Duplicate {
+		if leaf.Duplicate != nil && *leaf.Duplicate {
 			digest = append(workingHash, workingHash...)
 		} else {
 			leafBytes := leaf.Hash
