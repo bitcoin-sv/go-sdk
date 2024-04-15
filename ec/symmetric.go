@@ -8,11 +8,11 @@ import (
 	"github.com/bitcoin-sv/go-sdk/aesgcm"
 )
 
-// FIXME: Incomplete implementation
 type SymmetricKey struct {
 	key []byte
 }
 
+// Encrypt encrypts the given message using the symmetric key using AES-GCM
 func (s *SymmetricKey) Encrypt(message []byte) (ciphertext []byte, err error) {
 	iv := make([]byte, 32)
 	rand.Read(iv)
@@ -23,6 +23,7 @@ func (s *SymmetricKey) Encrypt(message []byte) (ciphertext []byte, err error) {
 	return append(append(iv, cipertext...), tag...), nil
 }
 
+// Decrypt decrypts the given message using the symmetric key using AES-GCM
 func (s *SymmetricKey) Decrypt(message []byte) (plaintext []byte, err error) {
 	iv := message[:32]
 	ciphertext := message[32 : len(message)-16]
