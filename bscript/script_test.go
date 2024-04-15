@@ -12,9 +12,11 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/bip32"
 	"github.com/bitcoin-sv/go-sdk/bscript"
+	"github.com/bitcoin-sv/go-sdk/bscript/interpreter"
 	"github.com/bitcoin-sv/go-sdk/bscript/testdata"
 	"github.com/bitcoin-sv/go-sdk/chaincfg"
 	"github.com/bitcoin-sv/go-sdk/ec"
+	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
@@ -640,7 +642,6 @@ func TestScriptInvalid(t *testing.T) {
 
 // Test vectors from testdata/script.valid.vectors.json
 func TestScriptValid(t *testing.T) {
-
 	for i, v := range testdata.ValidVectors {
 		if len(v) == 1 {
 			continue
@@ -673,31 +674,43 @@ func TestScriptValid(t *testing.T) {
 	}
 }
 
-// func scriptFromVector(str string) (s *bscript.Script, error error) {
-// 	tokens := strings.Split(str, " ")
-// 	s = &bscript.Script{}
-// 	for _, token := range tokens {
-// 		if token == "" {
-// 			continue
-// 		}
-// 		if strings.HasPrefix(token, "0x") {
-// 			b, err := hex.DecodeString(token[2:])
-// 			if err != nil {
-// 				panic(err)
-// 			}
-// 			s.AppendPushData(b)
-// 			// } else if strings.HasPrefix(token, "'") {
-// 			// 	log.Panicln("Not implemented")
-// 		} else if op, ok := bscript.OpCodeStrings["OP_"+token]; ok {
-// 			s.AppendOpcodes(op)
-// 		} else if op, ok := bscript.OpCodeStrings[token]; ok {
-// 			s.AppendOpcodes(op)
-// 		} else if val, err := strconv.Atoi(token); err == nil {
-// 			bInt := big.NewInt(int64(val))
-// 			s.AppendBigInt(*bInt)
-// 		} else {
-// 			error = fmt.Errorf("Could not determine type of script value")
-// 		}
-// 	}
-// 	return s, error
-// }
+func TestSpendValid(t *testing.T) {
+	prevTxid, _ := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000000")
+	prevIndex := uint32(0)
+	for i, v := range testdata.ValidSpends {
+		if len(v) == 1 {
+			continue
+		}
+
+		t.Run(fmt.Sprintf("Spend vector %d", i), func(t *testing.T) {
+			tx := transaction.NewTx()
+			lockingScript, err := bscript.NewFromHexString(v[1])
+			if err != nil {
+				t.Error(err)
+			}
+			tx.FromUTXOs(&transaction.UTXO{
+				TxID:          prevTxid,
+				Vout:          prevIndex,
+				Satoshis:      1,
+				LockingScript: lockingScript,
+			})
+			unlockingScript, err := bscript.NewFromHexString(v[0])
+			if err != nil {
+				t.Error(err)
+			}
+			tx.Inputs[0].UnlockingScript = unlockingScript
+
+			err = interpreter.NewEngine().Execute(
+				interpreter.WithTx(tx, 0, &transaction.Output{
+					Satoshis:      1,
+					LockingScript: lockingScript,
+				}),
+				// interpreter.WithAfterGenesis(),
+				interpreter.WithForkID(),
+			)
+			if err != nil {
+				t.Error(err)
+			}
+		})
+	}
+}
