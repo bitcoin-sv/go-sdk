@@ -10,27 +10,14 @@ import (
 // Example of using ECIES to encrypt and decrypt data
 func main() {
 	// user 1
-	user1Pk, err := ec.NewPrivateKey()
-	if err != nil {
-		panic(err)
-	}
+	user1Pk, _ := ec.NewPrivateKey()
 
 	// user 2
-	user2Pk, err := ec.PublicKeyFromString("03121a7afe56fc8e25bca4bb2c94f35eb67ebe5b84df2e149d65b9423ee65b8b4b")
-	if err != nil {
-		panic(err)
-	}
+	user2Pk, _ := ec.PublicKeyFromString("03121a7afe56fc8e25bca4bb2c94f35eb67ebe5b84df2e149d65b9423ee65b8b4b")
 
-	priv, _, encryptedData, err := ec.EncryptShared(user1Pk, user2Pk, []byte("this is a test"))
-	if err != nil {
-		panic(err)
-	}
+	priv, _, encryptedData, _ := ec.EncryptShared(user1Pk, user2Pk, []byte("this is a test"))
 
-	decryptedData, err := ec.DecryptWithPrivateKey(priv, hex.EncodeToString(encryptedData))
-	if err != nil {
-		panic(err)
-	}
+	decryptedData, _ := ec.DecryptWithPrivateKey(priv, hex.EncodeToString(encryptedData))
 
 	fmt.Printf("decryptedData: %s\n", decryptedData)
-
 }
