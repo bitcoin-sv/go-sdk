@@ -27,33 +27,34 @@ func hexToRevByte(hexStr string) []byte {
 	return util.ReverseBytes(bytes)
 }
 
+var TRUE = true
 var BRC74JSON = MerklePath{
 	BlockHeight: 813706,
 	Path: [][]*PathElement{
 		{
 			{Offset: 3048, Hash: hexToRevByte("304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711")},
-			{Offset: 3049, Txid: true, Hash: hexToRevByte("d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00")},
-			{Offset: 3050, Txid: true, Hash: hexToRevByte("98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e")},
-			{Offset: 3051, Duplicate: true},
+			{Offset: 3049, Txid: &TRUE, Hash: hexToRevByte("d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00")},
+			{Offset: 3050, Txid: &TRUE, Hash: hexToRevByte("98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e")},
+			{Offset: 3051, Duplicate: &TRUE},
 		},
 		{
 			{Offset: 1524, Hash: hexToRevByte("811ae75c80fecd27efff5ef272c2adf7edb6e535447f27a4087d23724f397106")},
 			{Offset: 1525, Hash: hexToRevByte("82520a4501a06061dd2386fb92fa5e9ceaed14747acc00edf34a6cecabcc2b26")},
 		},
-		{{Offset: 763, Duplicate: true}},
+		{{Offset: 763, Duplicate: &TRUE}},
 		{{Offset: 380, Hash: hexToRevByte("858e41febe934b4cbc1cb80a1dc8e254cb1e69acff8e4f91ecdd779bcaefb393")}},
-		{{Offset: 191, Duplicate: true}},
+		{{Offset: 191, Duplicate: &TRUE}},
 		{{Offset: 94, Hash: hexToRevByte("f80263e813c644cd71bcc88126d0463df070e28f11023a00543c97b66e828158")}},
 		{{Offset: 46, Hash: hexToRevByte("f36f792fa2b42acfadfa043a946d4d7b6e5e1e2e0266f2cface575bbb82b7ae0")}},
 		{{Offset: 22, Hash: hexToRevByte("7d5051f0d4ceb7d2e27a49e448aedca2b3865283ceffe0b00b9c3017faca2081")}},
 		{{Offset: 10, Hash: hexToRevByte("43aeeb9b6a9e94a5a787fbf04380645e6fd955f8bf0630c24365f492ac592e50")}},
 		{{Offset: 4, Hash: hexToRevByte("45be5d16ac41430e3589a579ad780e5e42cf515381cc309b48d0f4648f9fcd1c")}},
-		{{Offset: 3, Duplicate: true}},
+		{{Offset: 3, Duplicate: &TRUE}},
 		{{Offset: 0, Hash: hexToRevByte("d40cb31af3ef53dd910f5ce15e9a1c20875c009a22d25eab32c11c7ece6487af")}},
 	},
 }
 
-var BRC74JSONTrimmed = `{"blockHeight":813706,"path":[[{"offset":3048,"hash":"304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711","txid":false,"duplicate":false},{"offset":3049,"hash":"d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00","txid":true,"duplicate":false},{"offset":3050,"hash":"98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e","txid":true,"duplicate":false},{"offset":3051,"hash":"","txid":false,"duplicate":true}],[],[{"offset":763,"hash":"","txid":false,"duplicate":true}],[{"offset":380,"hash":"858e41febe934b4cbc1cb80a1dc8e254cb1e69acff8e4f91ecdd779bcaefb393","txid":false,"duplicate":false}],[{"offset":191,"hash":"","txid":false,"duplicate":true}],[{"offset":94,"hash":"f80263e813c644cd71bcc88126d0463df070e28f11023a00543c97b66e828158","txid":false,"duplicate":false}],[{"offset":46,"hash":"f36f792fa2b42acfadfa043a946d4d7b6e5e1e2e0266f2cface575bbb82b7ae0","txid":false,"duplicate":false}],[{"offset":22,"hash":"7d5051f0d4ceb7d2e27a49e448aedca2b3865283ceffe0b00b9c3017faca2081","txid":false,"duplicate":false}],[{"offset":10,"hash":"43aeeb9b6a9e94a5a787fbf04380645e6fd955f8bf0630c24365f492ac592e50","txid":false,"duplicate":false}],[{"offset":4,"hash":"45be5d16ac41430e3589a579ad780e5e42cf515381cc309b48d0f4648f9fcd1c","txid":false,"duplicate":false}],[{"offset":3,"hash":"","txid":false,"duplicate":true}],[{"offset":0,"hash":"d40cb31af3ef53dd910f5ce15e9a1c20875c009a22d25eab32c11c7ece6487af","txid":false,"duplicate":false}]]}`
+var BRC74JSONTrimmed = `{"blockHeight":813706,"path":[[{"offset":3048,"hash":"304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711"},{"offset":3049,"hash":"d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00","txid":true},{"offset":3050,"hash":"98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e","txid":true},{"offset":3051,"duplicate":true}],[],[{"offset":763,"duplicate":true}],[{"offset":380,"hash":"858e41febe934b4cbc1cb80a1dc8e254cb1e69acff8e4f91ecdd779bcaefb393"}],[{"offset":191,"duplicate":true}],[{"offset":94,"hash":"f80263e813c644cd71bcc88126d0463df070e28f11023a00543c97b66e828158"}],[{"offset":46,"hash":"f36f792fa2b42acfadfa043a946d4d7b6e5e1e2e0266f2cface575bbb82b7ae0"}],[{"offset":22,"hash":"7d5051f0d4ceb7d2e27a49e448aedca2b3865283ceffe0b00b9c3017faca2081"}],[{"offset":10,"hash":"43aeeb9b6a9e94a5a787fbf04380645e6fd955f8bf0630c24365f492ac592e50"}],[{"offset":4,"hash":"45be5d16ac41430e3589a579ad780e5e42cf515381cc309b48d0f4648f9fcd1c"}],[{"offset":3,"duplicate":true}],[{"offset":0,"hash":"d40cb31af3ef53dd910f5ce15e9a1c20875c009a22d25eab32c11c7ece6487af"}]]}`
 
 func TestMerklePath_ParseHex(t *testing.T) {
 	t.Parallel()
