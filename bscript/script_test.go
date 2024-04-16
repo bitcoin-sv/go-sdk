@@ -49,7 +49,7 @@ func TestNewP2PKHFromPubKey(t *testing.T) {
 	)
 }
 
-func TestNewFromHexString(t *testing.T) {
+func TestNewFromHex(t *testing.T) {
 	t.Parallel()
 
 	s, err := bscript.NewFromHex("76a914e2a623699e81b291c0327f408fea765d534baa2a88ac")
@@ -581,7 +581,7 @@ func TestScriptInvalid(t *testing.T) {
 			for i := 0; i < 2; i++ {
 				s, err := bscript.NewFromHex(v[i])
 				if err != nil {
-					log.Println("Faied NewFromHexString:", v[0], v[1], v[2])
+					log.Println("Faied NewFromHex:", v[0], v[1], v[2])
 					t.Error(err)
 					t.FailNow()
 				}

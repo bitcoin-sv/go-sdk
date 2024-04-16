@@ -144,7 +144,7 @@ func (o *nodeOutputJSON) fromOutput(out *Output) error {
 			Type    string `json:"type"`
 		}{
 			Asm:     asm,
-			Hex:     out.LockingScriptHexString(),
+			Hex:     out.LockingScriptHex(),
 			ReqSigs: len(addresses),
 			Type:    out.LockingScript.ScriptType(),
 		},

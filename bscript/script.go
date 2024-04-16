@@ -53,7 +53,7 @@ func NewFromASM(str string) (*Script, error) {
 		if val, ok := OpCodeStrings[section]; ok {
 			_ = s.AppendOpcodes(val)
 		} else {
-			if err := s.AppendPushDataHexString(section); err != nil {
+			if err := s.AppendPushDataHex(section); err != nil {
 				return nil, ErrInvalidOpCode
 			}
 		}
@@ -149,9 +149,9 @@ func (s *Script) AppendPushData(d []byte) error {
 	return nil
 }
 
-// AppendPushDataHexString takes a hex string and appends them to the
+// AppendPushDataHex takes a hex string and appends them to the
 // script with proper PUSHDATA prefixes
-func (s *Script) AppendPushDataHexString(str string) error {
+func (s *Script) AppendPushDataHex(str string) error {
 	h, err := hex.DecodeString(str)
 	if err != nil {
 		return err

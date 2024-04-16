@@ -58,7 +58,7 @@ func (u *UTXO) MarshalJSON() ([]byte, error) {
 		TxID:          u.TxIDStr(),
 		Satoshis:      u.Satoshis,
 		Vout:          u.Vout,
-		LockingScript: u.LockingScriptHexString(),
+		LockingScript: u.LockingScriptHex(),
 	})
 }
 
@@ -67,7 +67,7 @@ func (n *nodeUTXOWrapper) MarshalJSON() ([]byte, error) {
 	return json.Marshal(utxoNodeJSON{
 		TxID:         utxo.TxIDStr(),
 		Amount:       float64(utxo.Satoshis) / 100000000,
-		ScriptPubKey: utxo.LockingScriptHexString(),
+		ScriptPubKey: utxo.LockingScriptHex(),
 		Vout:         utxo.Vout,
 	})
 }

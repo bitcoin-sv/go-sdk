@@ -39,7 +39,7 @@ func TestNewOutputFromBytes(t *testing.T) {
 		assert.Equal(t, 34, s)
 		assert.Equal(t, uint64(1252788362), o.Satoshis)
 		assert.Equal(t, 25, len(*o.LockingScript))
-		assert.Equal(t, "76a9148bf10d323ac757268eb715e613cb8e8e1d1793aa88ac", o.LockingScriptHexString())
+		assert.Equal(t, "76a9148bf10d323ac757268eb715e613cb8e8e1d1793aa88ac", o.LockingScriptHex())
 	})
 }
 

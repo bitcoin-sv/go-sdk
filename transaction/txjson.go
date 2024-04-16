@@ -100,7 +100,7 @@ func (i *Input) UnmarshalJSON(b []byte) error {
 func (o *Output) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&outputJSON{
 		Satoshis:      o.Satoshis,
-		LockingScript: o.LockingScriptHexString(),
+		LockingScript: o.LockingScriptHex(),
 	})
 }
 
