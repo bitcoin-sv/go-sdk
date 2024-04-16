@@ -82,7 +82,7 @@ func (a *account) Unlocker(ctx context.Context, lockingScript *bscript.Script) (
 		panic(err)
 	}
 
-	return &unlocker.Simple{
+	return &unlocker.P2PKH{
 		PrivateKey: privKey,
 	}, nil
 }

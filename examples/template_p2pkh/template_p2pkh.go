@@ -1,14 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/hex"
-	"fmt"
 
 	"github.com/bitcoin-sv/go-sdk/bscript"
 	"github.com/bitcoin-sv/go-sdk/ec/wif"
-	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
-	"github.com/bitcoin-sv/go-sdk/txbuilder"
+	"github.com/bitcoin-sv/go-sdk/transaction/locker"
+	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )
 
 const wifStr = "KycyNGiqoePhCPjGZ5m2LgpQHEMnqnd8ev4k6xueSkErtTQM2pJy"
@@ -18,24 +18,15 @@ func main() {
 
 	tx := transaction.NewTx()
 
-	out := &txbuilder.P2PKH{
-		PubKey: key.PrivKey.PubKey(),
-	}
-
-	scr, _ := out.LockingScript()
+	script, _ := locker.P2PKH{PubKey: key.PrivKey.PubKey()}.LockingScript()
 
 	tx.AddOutput(&transaction.Output{
 		Satoshis:      1000,
-		LockingScript: scr,
+		LockingScript: script,
 	})
 
 	prevTx, _ := hex.DecodeString("11b476ad8e0a48fcd40807a111a050af51114877e09283bfa7f3505081a1819d")
-	script, _ := bscript.NewFromHex("76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac6a0568656c6c6f")
-	scriptP2pkh := &txbuilder.P2PKH{
-		Script: *script,
-	}
-
-	fmt.Println(scriptP2pkh.IsLockingScript())
+	script, _ = bscript.NewFromHex("76a9145c171f2511f5f93ac8aed7c61c676842eee4283988ac")
 
 	p2pkhUtxo := transaction.UTXO{
 		TxID:          prevTx,
@@ -46,11 +37,9 @@ func main() {
 
 	tx.FromUTXOs(&p2pkhUtxo)
 
-	unlock, _ := scriptP2pkh.UnlockingScript(*tx, transaction.UnlockerParams{
-		InputIdx:     0,
-		SigHashFlags: sighash.AllForkID,
-	})
-
-	tx.Inputs[0].UnlockingScript = unlock
-
+	tx.FillInput(
+		context.Background(),
+		&unlocker.P2PKH{PrivateKey: key.PrivKey},
+		transaction.UnlockerParams{},
+	)
 }

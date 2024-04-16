@@ -72,7 +72,7 @@ func main() {
 
 	if err = baseTx.FillInput(
 		context.Background(),
-		&unlocker.Simple{PrivateKey: decodedWif.PrivKey},
+		&unlocker.P2PKH{PrivateKey: decodedWif.PrivKey},
 		transaction.UnlockerParams{},
 	); err != nil {
 		panic(err)

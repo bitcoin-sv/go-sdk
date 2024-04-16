@@ -22,12 +22,12 @@ type Getter struct {
 //
 // For an example implementation, see `examples/unlocker_getter/`.
 func (g *Getter) Unlocker(ctx context.Context, lockingScript *bscript.Script) (transaction.Unlocker, error) {
-	return &Simple{PrivateKey: g.PrivateKey}, nil
+	return &P2PKH{PrivateKey: g.PrivateKey}, nil
 }
 
-// Simple implements the a simple `bt.Unlocker` interface. It is used to build an unlocking script
+// P2PKH implements the a simple `bt.Unlocker` interface. It is used to build an unlocking script
 // using a bec Private Key.
-type Simple struct {
+type P2PKH struct {
 	PrivateKey *ec.PrivateKey
 }
 
@@ -40,7 +40,7 @@ type Simple struct {
 // canonical in accordance with RFC6979 and BIP0062.
 //
 // For example usage, see `examples/create_tx/create_tx.go`
-func (l *Simple) UnlockingScript(ctx context.Context, tx *transaction.Tx, params transaction.UnlockerParams) (*bscript.Script, error) {
+func (l *P2PKH) UnlockingScript(ctx context.Context, tx *transaction.Tx, params transaction.UnlockerParams) (*bscript.Script, error) {
 	if params.SigHashFlags == 0 {
 		params.SigHashFlags = sighash.AllForkID
 	}

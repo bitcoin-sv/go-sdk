@@ -3,7 +3,6 @@ package bscript
 import (
 	"encoding/binary"
 	"encoding/hex"
-	"fmt"
 )
 
 type ScriptOp struct {
@@ -24,7 +23,7 @@ func (op *ScriptOp) String() string {
 func (s *Script) ReadOp(pos *int) (op *ScriptOp, err error) {
 	b := *s
 	if len(b) <= *pos {
-		err = fmt.Errorf("ReadOp: %d %d", len(b), *pos)
+		err = ErrScriptIndexOutOfRange
 		return
 	}
 	switch b[*pos] {
