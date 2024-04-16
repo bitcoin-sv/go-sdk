@@ -56,3 +56,22 @@ func (u *UTXO) TxIDStr() string {
 func (u *UTXO) LockingScriptHex() string {
 	return u.LockingScript.String()
 }
+
+// NewUTXO creates a new UTXO.
+func NewUTXO(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64) (*UTXO, error) {
+	pts, err := bscript.NewFromHex(prevTxLockingScript)
+	if err != nil {
+		return nil, err
+	}
+	pti, err := hex.DecodeString(prevTxID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &UTXO{
+		TxID:          pti,
+		Vout:          vout,
+		LockingScript: pts,
+		Satoshis:      satoshis,
+	}, nil
+}
