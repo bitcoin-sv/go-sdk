@@ -39,7 +39,7 @@ func (u *UTXO) UnmarshalJSON(body []byte) error {
 		return err
 	}
 
-	lscript, err := bscript.NewFromHexString(j.LockingScript)
+	lscript, err := bscript.NewFromHex(j.LockingScript)
 	if err != nil {
 		return err
 	}
@@ -83,7 +83,7 @@ func (n *nodeUTXOWrapper) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	lscript, err := bscript.NewFromHexString(uj.ScriptPubKey)
+	lscript, err := bscript.NewFromHex(uj.ScriptPubKey)
 	if err != nil {
 		return err
 	}

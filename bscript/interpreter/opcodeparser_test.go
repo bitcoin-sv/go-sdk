@@ -83,7 +83,7 @@ func TestParse(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			s, err := bscript.NewFromHexString(tc.scriptHexString)
+			s, err := bscript.NewFromHex(tc.scriptHexString)
 			require.NoError(t, err)
 
 			codeParser := DefaultOpcodeParser{}

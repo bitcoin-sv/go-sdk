@@ -27,8 +27,8 @@ const (
 // Script type
 type Script []byte
 
-// NewFromHexString creates a new script from a hex encoded string.
-func NewFromHexString(s string) (*Script, error) {
+// NewFromHex creates a new script from a hex encoded string.
+func NewFromHex(s string) (*Script, error) {
 	b, err := hex.DecodeString(s)
 	if err != nil {
 		return nil, err
@@ -514,7 +514,7 @@ func (s *Script) MarshalJSON() ([]byte, error) {
 
 // UnmarshalJSON covert from json into *bscript.Script.
 func (s *Script) UnmarshalJSON(bb []byte) error {
-	ss, err := NewFromHexString(string(bytes.Trim(bb, `"`)))
+	ss, err := NewFromHex(string(bytes.Trim(bb, `"`)))
 	if err != nil {
 		return err
 	}

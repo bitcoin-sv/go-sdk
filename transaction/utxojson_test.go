@@ -18,7 +18,7 @@ func TestUTXO_JSON(t *testing.T) {
 			utxo: func() *transaction.UTXO {
 				txID, err := hex.DecodeString("31ad4b5ef1d0d48340e063087cbfa6a3f3dea3cd5d34c983e0028c18daf3d2a7")
 				assert.NoError(t, err)
-				script, err := bscript.NewFromHexString("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
+				script, err := bscript.NewFromHex("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
 				assert.NoError(t, err)
 				return &transaction.UTXO{
 					TxID:          txID,
@@ -54,7 +54,7 @@ func TestUTXO_MarshalJSON(t *testing.T) {
 			utxo: func() *transaction.UTXO {
 				txID, err := hex.DecodeString("31ad4b5ef1d0d48340e063087cbfa6a3f3dea3cd5d34c983e0028c18daf3d2a7")
 				assert.NoError(t, err)
-				script, err := bscript.NewFromHexString("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
+				script, err := bscript.NewFromHex("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
 				assert.NoError(t, err)
 				return &transaction.UTXO{
 					TxID:          txID,
@@ -89,7 +89,7 @@ func TestUTXO_Node_JSON(t *testing.T) {
 			utxo: func() *transaction.UTXO {
 				txID, err := hex.DecodeString("31ad4b5ef1d0d48340e063087cbfa6a3f3dea3cd5d34c983e0028c18daf3d2a7")
 				assert.NoError(t, err)
-				script, err := bscript.NewFromHexString("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
+				script, err := bscript.NewFromHex("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
 				assert.NoError(t, err)
 				return &transaction.UTXO{
 					TxID:          txID,
@@ -125,7 +125,7 @@ func TestUTXO_Node_MarshalJSON(t *testing.T) {
 			utxo: func() *transaction.UTXO {
 				txID, err := hex.DecodeString("31ad4b5ef1d0d48340e063087cbfa6a3f3dea3cd5d34c983e0028c18daf3d2a7")
 				assert.NoError(t, err)
-				script, err := bscript.NewFromHexString("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
+				script, err := bscript.NewFromHex("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
 				assert.NoError(t, err)
 				return &transaction.UTXO{
 					TxID:          txID,
@@ -167,7 +167,7 @@ func TestUTXO_Node_UnmarshalJSON(t *testing.T) {
 			expUTXO: func() *transaction.UTXO {
 				txID, err := hex.DecodeString("31ad4b5ef1d0d48340e063087cbfa6a3f3dea3cd5d34c983e0028c18daf3d2a7")
 				assert.NoError(t, err)
-				script, err := bscript.NewFromHexString("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
+				script, err := bscript.NewFromHex("2102076ad7c107f82ae973fbdaa1d84532c8d69e3838bcbee1570efe0fa30b3cb25bac")
 				assert.NoError(t, err)
 				return &transaction.UTXO{
 					TxID:          txID,
