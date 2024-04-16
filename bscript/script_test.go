@@ -49,10 +49,10 @@ func TestNewP2PKHFromPubKey(t *testing.T) {
 	)
 }
 
-func TestNewFromHexString(t *testing.T) {
+func TestNewFromHex(t *testing.T) {
 	t.Parallel()
 
-	s, err := bscript.NewFromHexString("76a914e2a623699e81b291c0327f408fea765d534baa2a88ac")
+	s, err := bscript.NewFromHex("76a914e2a623699e81b291c0327f408fea765d534baa2a88ac")
 	assert.NoError(t, err)
 	assert.NotNil(t, s)
 	assert.Equal(t,
@@ -80,7 +80,7 @@ func TestScript_ToASM(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			s, err := bscript.NewFromHexString(test.script)
+			s, err := bscript.NewFromHex(test.script)
 			assert.NoError(t, err)
 
 			asm, err := s.ToASM()
@@ -188,7 +188,7 @@ func TestScript_PublicKeyHash(t *testing.T) {
 	})
 
 	t.Run("get as string", func(t *testing.T) {
-		s, err := bscript.NewFromHexString("76a91404d03f746652cfcb6cb55119ab473a045137d26588ac")
+		s, err := bscript.NewFromHex("76a91404d03f746652cfcb6cb55119ab473a045137d26588ac")
 		assert.NoError(t, err)
 		assert.NotNil(t, s)
 
@@ -208,7 +208,7 @@ func TestScript_PublicKeyHash(t *testing.T) {
 
 	t.Run("nonstandard script", func(t *testing.T) {
 		// example tx 37d4cc9f8a3b62e7f2e7c97c07a3282bfa924739c0e174733ff1b764ef8e3ebc
-		s, err := bscript.NewFromHexString("76")
+		s, err := bscript.NewFromHex("76")
 		assert.NoError(t, err)
 		assert.NotNil(t, s)
 
@@ -296,13 +296,13 @@ func TestScript_Equals(t *testing.T) {
 			exp: true,
 		}, "scripts from hex, equal should return true": {
 			script1: func() *bscript.Script {
-				s, err := bscript.NewFromHexString("76a91404d03f746652cfcb6cb55119ab473a045137d26588ac")
+				s, err := bscript.NewFromHex("76a91404d03f746652cfcb6cb55119ab473a045137d26588ac")
 				assert.NoError(t, err)
 				assert.NotNil(t, s)
 				return s
 			}(),
 			script2: func() *bscript.Script {
-				s, err := bscript.NewFromHexString("76a91404d03f746652cfcb6cb55119ab473a045137d26588ac")
+				s, err := bscript.NewFromHex("76a91404d03f746652cfcb6cb55119ab473a045137d26588ac")
 				assert.NoError(t, err)
 				assert.NotNil(t, s)
 				return s
@@ -310,13 +310,13 @@ func TestScript_Equals(t *testing.T) {
 			exp: true,
 		}, "scripts from hex, not equal should return false": {
 			script1: func() *bscript.Script {
-				s, err := bscript.NewFromHexString("76a91404d03f746652cfcb6cb55119ab473a045137d26566ac")
+				s, err := bscript.NewFromHex("76a91404d03f746652cfcb6cb55119ab473a045137d26566ac")
 				assert.NoError(t, err)
 				assert.NotNil(t, s)
 				return s
 			}(),
 			script2: func() *bscript.Script {
-				s, err := bscript.NewFromHexString("76a91404d03f746652cfcb6cb55119ab473a045137d26588ac")
+				s, err := bscript.NewFromHex("76a91404d03f746652cfcb6cb55119ab473a045137d26588ac")
 				assert.NoError(t, err)
 				assert.NotNil(t, s)
 				return s
@@ -558,7 +558,7 @@ func TestIsInscription(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			inscScript, err := bscript.NewFromHexString(test.script)
+			inscScript, err := bscript.NewFromHex(test.script)
 			if err != nil {
 				t.Error(err)
 				t.FailNow()
@@ -579,9 +579,9 @@ func TestScriptInvalid(t *testing.T) {
 			// log.Println("Testing", i, v)
 			// hydrate a script from the test vector
 			for i := 0; i < 2; i++ {
-				s, err := bscript.NewFromHexString(v[i])
+				s, err := bscript.NewFromHex(v[i])
 				if err != nil {
-					log.Println("Faied NewFromHexString:", v[0], v[1], v[2])
+					log.Println("Faied NewFromHex:", v[0], v[1], v[2])
 					t.Error(err)
 					t.FailNow()
 				}
@@ -614,7 +614,7 @@ func TestScriptValid(t *testing.T) {
 
 		t.Run(fmt.Sprintf("Test vector %d", i), func(t *testing.T) {
 			for i := 0; i < 2; i++ {
-				s, err := bscript.NewFromHexString(v[i])
+				s, err := bscript.NewFromHex(v[i])
 				if err != nil {
 					t.Error(err)
 					t.FailNow()
@@ -649,7 +649,7 @@ func TestSpendValid(t *testing.T) {
 
 		t.Run(fmt.Sprintf("Spend vector %d", i), func(t *testing.T) {
 			tx := transaction.NewTx()
-			lockingScript, err := bscript.NewFromHexString(v[1])
+			lockingScript, err := bscript.NewFromHex(v[1])
 			if err != nil {
 				t.Error(err)
 			}
@@ -659,7 +659,7 @@ func TestSpendValid(t *testing.T) {
 				Satoshis:      1,
 				LockingScript: lockingScript,
 			})
-			unlockingScript, err := bscript.NewFromHexString(v[0])
+			unlockingScript, err := bscript.NewFromHex(v[0])
 			if err != nil {
 				t.Error(err)
 			}

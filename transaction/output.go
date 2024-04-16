@@ -60,9 +60,9 @@ func (o *Output) ReadFrom(r io.Reader) (int64, error) {
 	return bytesRead, nil
 }
 
-// LockingScriptHexString returns the locking script
+// LockingScriptHex returns the locking script
 // of an output encoded as a hex string.
-func (o *Output) LockingScriptHexString() string {
+func (o *Output) LockingScriptHex() string {
 	return hex.EncodeToString(*o.LockingScript)
 }
 

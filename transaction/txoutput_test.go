@@ -23,7 +23,7 @@ func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t,
 			"76a91488ac",
-			tx.Outputs[0].LockingScriptHexString(),
+			tx.Outputs[0].LockingScriptHex(),
 		)
 	})
 
@@ -46,7 +46,7 @@ func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t,
 			"76a9148fe80c75c9560e8b56ed64ea3c26e18d2c52211b88ac",
-			tx.Outputs[0].LockingScriptHexString(),
+			tx.Outputs[0].LockingScriptHex(),
 		)
 	})
 }
@@ -67,7 +67,7 @@ func TestNewHashPuzzleOutput(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t,
 			"a914b472a266d0bd89c13706a4132ccfb16f7c3b9fcb8876a90088ac",
-			tx.Outputs[0].LockingScriptHexString(),
+			tx.Outputs[0].LockingScriptHex(),
 		)
 	})
 
@@ -82,7 +82,7 @@ func TestNewHashPuzzleOutput(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t,
 			"a914d3f9e3d971764be5838307b175ee4e08ba427b908876a914c28f832c3d539933e0c719297340b34eee0f4c3488ac",
-			tx.Outputs[0].LockingScriptHexString(),
+			tx.Outputs[0].LockingScriptHex(),
 		)
 	})
 }
@@ -99,7 +99,7 @@ func TestNewOpReturnOutput(t *testing.T) {
 	err := tx.AddOpReturnOutput(dataBytes)
 	assert.NoError(t, err)
 
-	script := tx.Outputs[0].LockingScriptHexString()
+	script := tx.Outputs[0].LockingScriptHex()
 	dataLength := transaction.VarInt(uint64(len(dataBytes))).Bytes()
 
 	assert.Equal(t, "006a4d2201"+hex.EncodeToString(dataBytes), script)
@@ -114,7 +114,7 @@ func TestNewOpReturnPartsOutput(t *testing.T) {
 	err := tx.AddOpReturnPartsOutput(dataBytes)
 	assert.NoError(t, err)
 
-	assert.Equal(t, "006a02686903686f770361726503796f75", tx.Outputs[0].LockingScriptHexString())
+	assert.Equal(t, "006a02686903686f770361726503796f75", tx.Outputs[0].LockingScriptHex())
 }
 
 func TestTx_TotalOutputSatoshis(t *testing.T) {

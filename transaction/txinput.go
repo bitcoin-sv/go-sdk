@@ -65,7 +65,7 @@ func (tx *Tx) AddP2PKHInputsFromTx(pvsTx *Tx, matchPK []byte) error {
 // finalised sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
 // afterwards.
 func (tx *Tx) From(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64) error {
-	pts, err := bscript.NewFromHexString(prevTxLockingScript)
+	pts, err := bscript.NewFromHex(prevTxLockingScript)
 	if err != nil {
 		return err
 	}
