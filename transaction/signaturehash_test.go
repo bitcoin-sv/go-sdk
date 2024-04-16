@@ -62,7 +62,7 @@ func TestTx_CalcInputPreimage(t *testing.T) {
 
 			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
 			tx.InputIdx(test.index).PreviousTxSatoshis = test.previousTxSatoshis
-			tx.InputIdx(test.index).PreviousTxScript, err = bscript.NewFromHexString(test.previousTxScript)
+			tx.InputIdx(test.index).PreviousTxScript, err = bscript.NewFromHex(test.previousTxScript)
 			assert.NoError(t, err)
 
 			var actualSigHash []byte
@@ -152,7 +152,7 @@ func TestTx_CalcInputSignatureHash(t *testing.T) {
 
 			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
 			tx.Inputs[test.index].PreviousTxSatoshis = test.previousTxSatoshis
-			tx.Inputs[test.index].PreviousTxScript, err = bscript.NewFromHexString(test.previousTxScript)
+			tx.Inputs[test.index].PreviousTxScript, err = bscript.NewFromHex(test.previousTxScript)
 			assert.NoError(t, err)
 
 			var actualSigHash []byte
@@ -215,7 +215,7 @@ func TestTx_CalcInputPreimageLegacy(t *testing.T) {
 
 			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
 			tx.InputIdx(test.index).PreviousTxSatoshis = test.previousTxSatoshis
-			tx.InputIdx(test.index).PreviousTxScript, err = bscript.NewFromHexString(test.previousTxScript)
+			tx.InputIdx(test.index).PreviousTxScript, err = bscript.NewFromHex(test.previousTxScript)
 			assert.NoError(t, err)
 
 			var actualSigHash []byte

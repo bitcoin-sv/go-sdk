@@ -39,7 +39,7 @@ func (u *UTXO) UnmarshalJSON(body []byte) error {
 		return err
 	}
 
-	lscript, err := bscript.NewFromHexString(j.LockingScript)
+	lscript, err := bscript.NewFromHex(j.LockingScript)
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (u *UTXO) MarshalJSON() ([]byte, error) {
 		TxID:          u.TxIDStr(),
 		Satoshis:      u.Satoshis,
 		Vout:          u.Vout,
-		LockingScript: u.LockingScriptHexString(),
+		LockingScript: u.LockingScriptHex(),
 	})
 }
 
@@ -67,7 +67,7 @@ func (n *nodeUTXOWrapper) MarshalJSON() ([]byte, error) {
 	return json.Marshal(utxoNodeJSON{
 		TxID:         utxo.TxIDStr(),
 		Amount:       float64(utxo.Satoshis) / 100000000,
-		ScriptPubKey: utxo.LockingScriptHexString(),
+		ScriptPubKey: utxo.LockingScriptHex(),
 		Vout:         utxo.Vout,
 	})
 }
@@ -83,7 +83,7 @@ func (n *nodeUTXOWrapper) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	lscript, err := bscript.NewFromHexString(uj.ScriptPubKey)
+	lscript, err := bscript.NewFromHex(uj.ScriptPubKey)
 	if err != nil {
 		return err
 	}

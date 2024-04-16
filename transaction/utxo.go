@@ -52,7 +52,7 @@ func (u *UTXO) TxIDStr() string {
 	return hex.EncodeToString(u.TxID)
 }
 
-// LockingScriptHexString retur nthe locking script in hex format.
-func (u *UTXO) LockingScriptHexString() string {
+// LockingScriptHex retur nthe locking script in hex format.
+func (u *UTXO) LockingScriptHex() string {
 	return u.LockingScript.String()
 }
