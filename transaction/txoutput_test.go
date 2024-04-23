@@ -77,7 +77,7 @@ func TestNewHashPuzzleOutput(t *testing.T) {
 		assert.NotNil(t, addr)
 
 		tx := transaction.NewTx()
-		err = tx.AddHashPuzzleOutput("secret1", hex.EncodeToString(addr.PublicKeyHash), uint64(5000))
+		err = tx.AddHashPuzzleOutput("secret1", addr.PublicKeyHash.String(), uint64(5000))
 
 		assert.NoError(t, err)
 		assert.Equal(t,
