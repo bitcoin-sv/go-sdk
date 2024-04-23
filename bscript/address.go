@@ -8,6 +8,7 @@ import (
 	"github.com/bitcoin-sv/go-sdk/base58"
 	"github.com/bitcoin-sv/go-sdk/crypto"
 	"github.com/bitcoin-sv/go-sdk/ec"
+	"github.com/bitcoin-sv/go-sdk/util"
 )
 
 const (
@@ -22,7 +23,7 @@ const (
 // is useful because it stays the same regardless of the network type (mainnet, testnet).
 type Address struct {
 	AddressString string
-	PublicKeyHash string
+	PublicKeyHash util.ByteString
 }
 
 // NewAddressFromString takes a string address (P2PKH) and returns a pointer to an Address
@@ -38,26 +39,26 @@ func NewAddressFromString(addr string) (*Address, error) {
 	}, nil
 }
 
-func addressToPubKeyHashStr(address string) (string, error) {
+func addressToPubKeyHashStr(address string) ([]byte, error) {
 	decoded := base58.Decode(address)
 
 	if len(decoded) != 25 {
-		return "", fmt.Errorf("%w for '%s'", ErrInvalidAddressLength, address)
+		return []byte{}, fmt.Errorf("%w for '%s'", ErrInvalidAddressLength, address)
 	}
 
 	switch decoded[0] {
 	case hashP2PKH: // Pubkey hash (P2PKH address)
-		return hex.EncodeToString(decoded[1 : len(decoded)-4]), nil
+		return decoded[1 : len(decoded)-4], nil
 
 	case hashTestNetP2PKH: // Testnet pubkey hash (P2PKH address)
-		return hex.EncodeToString(decoded[1 : len(decoded)-4]), nil
+		return decoded[1 : len(decoded)-4], nil
 
 	case hashP2SH: // Script hash (P2SH address)
 		fallthrough
 	case hashTestNetP2SH: // Testnet script hash (P2SH address)
 		fallthrough
 	default:
-		return "", fmt.Errorf("%w %s", ErrUnsupportedAddress, address)
+		return []byte{}, fmt.Errorf("%w %s", ErrUnsupportedAddress, address)
 	}
 }
 
@@ -89,7 +90,7 @@ func NewAddressFromPublicKeyHash(hash []byte, mainnet bool) (*Address, error) {
 
 	return &Address{
 		AddressString: Base58EncodeMissingChecksum(bb),
-		PublicKeyHash: hex.EncodeToString(hash),
+		PublicKeyHash: hash,
 	}, nil
 }
 
@@ -111,7 +112,7 @@ func NewAddressFromPublicKey(pubKey *ec.PublicKey, mainnet bool) (*Address, erro
 
 	return &Address{
 		AddressString: Base58EncodeMissingChecksum(bb),
-		PublicKeyHash: hex.EncodeToString(hash),
+		PublicKeyHash: hash,
 	}, nil
 }
 
