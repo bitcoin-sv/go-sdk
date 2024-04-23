@@ -122,14 +122,9 @@ func NewP2PKHFromAddress(addr string) (*Script, error) {
 		return nil, err
 	}
 
-	var publicKeyHashBytes []byte
-	if publicKeyHashBytes, err = hex.DecodeString(a.PublicKeyHash); err != nil {
-		return nil, err
-	}
-
 	s := new(Script)
 	_ = s.AppendOpcodes(OpDUP, OpHASH160)
-	if err = s.AppendPushData(publicKeyHashBytes); err != nil {
+	if err = s.AppendPushData(a.PublicKeyHash); err != nil {
 		return nil, err
 	}
 	_ = s.AppendOpcodes(OpEQUALVERIFY, OpCHECKSIG)

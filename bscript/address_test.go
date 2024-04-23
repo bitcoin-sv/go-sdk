@@ -21,7 +21,7 @@ func TestNewAddressFromString(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, addr)
 
-		assert.Equal(t, "8fe80c75c9560e8b56ed64ea3c26e18d2c52211b", addr.PublicKeyHash, addressMain)
+		assert.Equal(t, "8fe80c75c9560e8b56ed64ea3c26e18d2c52211b", addr.PublicKeyHash.String(), addressMain)
 		assert.Equal(t, addressMain, addr.AddressString)
 	})
 
@@ -32,7 +32,7 @@ func TestNewAddressFromString(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, addr)
 
-		assert.Equal(t, "8fe80c75c9560e8b56ed64ea3c26e18d2c52211b", addr.PublicKeyHash, addressTestnet)
+		assert.Equal(t, "8fe80c75c9560e8b56ed64ea3c26e18d2c52211b", addr.PublicKeyHash.String(), addressTestnet)
 		assert.Equal(t, addressTestnet, addr.AddressString)
 	})
 
@@ -65,7 +65,7 @@ func TestNewAddressFromPublicKeyString(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, addr)
 
-		assert.Equal(t, testPublicKeyHash, addr.PublicKeyHash)
+		assert.Equal(t, testPublicKeyHash, addr.PublicKeyHash.String())
 		assert.Equal(t, "114ZWApV4EEU8frr7zygqQcB1V2BodGZuS", addr.AddressString)
 	})
 
@@ -77,7 +77,7 @@ func TestNewAddressFromPublicKeyString(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, addr)
 
-		assert.Equal(t, testPublicKeyHash, addr.PublicKeyHash)
+		assert.Equal(t, testPublicKeyHash, addr.PublicKeyHash.String())
 		assert.Equal(t, "mfaWoDuTsFfiunLTqZx4fKpVsUctiDV9jk", addr.AddressString)
 	})
 }
@@ -98,7 +98,7 @@ func TestNewAddressFromPublicKey(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, addr)
 
-	assert.Equal(t, testPublicKeyHash, addr.PublicKeyHash)
+	assert.Equal(t, testPublicKeyHash, addr.PublicKeyHash.String())
 	assert.Equal(t, "114ZWApV4EEU8frr7zygqQcB1V2BodGZuS", addr.AddressString)
 }
 
