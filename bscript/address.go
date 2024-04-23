@@ -29,7 +29,7 @@ type Address struct {
 // NewAddressFromString takes a string address (P2PKH) and returns a pointer to an Address
 // which contains the address string as well as the public key hash string.
 func NewAddressFromString(addr string) (*Address, error) {
-	pkh, err := addressToPubKeyHashStr(addr)
+	pkh, err := addressToPubKeyHash(addr)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func NewAddressFromString(addr string) (*Address, error) {
 	}, nil
 }
 
-func addressToPubKeyHashStr(address string) ([]byte, error) {
+func addressToPubKeyHash(address string) ([]byte, error) {
 	decoded := base58.Decode(address)
 
 	if len(decoded) != 25 {
