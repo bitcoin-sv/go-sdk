@@ -33,7 +33,7 @@ go install github.com/bitcoin-sv/go-sdk
 
 ### Basic Usage
 
-Here's a [simple example](https://goplay.tools/snippet/uFtQua2P5-0) of using the SDK to create and sign a transaction:
+Here's a [simple example](https://goplay.tools/snippet/bnsS-pA56ob) of using the SDK to create and sign a transaction:
 
 ```go
 package main

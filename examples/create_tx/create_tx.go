@@ -9,7 +9,7 @@ import (
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )
 
-// https://goplay.tools/snippet/uFtQua2P5-0
+// https://goplay.tools/snippet/bnsS-pA56ob
 func main() {
 	tx := transaction.NewTx()
 
