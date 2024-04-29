@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bitcoin-sv/go-sdk/src/src/crypto"
+	"github.com/bitcoin-sv/go-sdk/src/crypto"
 )
 
 type a25 [25]byte

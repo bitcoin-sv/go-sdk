@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/bitcoin-sv/go-sdk/src/src/bscript"
-	"github.com/bitcoin-sv/go-sdk/src/src/ec/wif"
+	"github.com/bitcoin-sv/go-sdk/src/bscript"
+	"github.com/bitcoin-sv/go-sdk/src/ec/wif"
 )
 
 func main() {

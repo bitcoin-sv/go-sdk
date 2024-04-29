@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/bitcoin-sv/go-sdk/src/src/ec/wif"
-	"github.com/bitcoin-sv/go-sdk/src/src/transaction"
-	"github.com/bitcoin-sv/go-sdk/src/src/transaction/unlocker"
+	"github.com/bitcoin-sv/go-sdk/src/ec/wif"
+	"github.com/bitcoin-sv/go-sdk/src/transaction"
+	"github.com/bitcoin-sv/go-sdk/src/transaction/unlocker"
 )
 
 // https://goplay.tools/snippet/uFtQua2P5-0

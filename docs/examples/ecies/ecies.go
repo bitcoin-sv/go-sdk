@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/bitcoin-sv/go-sdk/src/src/ec"
+	"github.com/bitcoin-sv/go-sdk/src/ec"
 )
 
 // Example of using ECIES to encrypt and decrypt data

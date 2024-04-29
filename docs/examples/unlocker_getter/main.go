@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 
-	"github.com/bitcoin-sv/go-sdk/src/src/bscript"
-	"github.com/bitcoin-sv/go-sdk/src/src/ec/wif"
-	"github.com/bitcoin-sv/go-sdk/src/src/transaction"
-	"github.com/bitcoin-sv/go-sdk/src/src/transaction/unlocker"
+	"github.com/bitcoin-sv/go-sdk/src/bscript"
+	"github.com/bitcoin-sv/go-sdk/src/ec/wif"
+	"github.com/bitcoin-sv/go-sdk/src/transaction"
+	"github.com/bitcoin-sv/go-sdk/src/transaction/unlocker"
 )
 
 // This example gives a simple in-memory based example of how to implement and use a `transaction.UnlockerGetter`

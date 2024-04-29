@@ -4,9 +4,9 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/src/src/bscript"
-	"github.com/bitcoin-sv/go-sdk/src/src/bscript/interpreter"
-	"github.com/bitcoin-sv/go-sdk/src/src/bscript/interpreter/debug"
+	"github.com/bitcoin-sv/go-sdk/src/bscript"
+	"github.com/bitcoin-sv/go-sdk/src/bscript/interpreter"
+	"github.com/bitcoin-sv/go-sdk/src/bscript/interpreter/debug"
 	"github.com/stretchr/testify/assert"
 )
 

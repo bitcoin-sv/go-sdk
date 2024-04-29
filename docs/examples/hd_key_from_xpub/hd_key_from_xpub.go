@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/bitcoin-sv/go-sdk/src/src/bip32"
+	"github.com/bitcoin-sv/go-sdk/src/bip32"
 )
 
 func main() {

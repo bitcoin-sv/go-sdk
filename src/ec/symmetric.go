@@ -5,7 +5,7 @@ import (
 	"encoding/base64"
 	"log"
 
-	"github.com/bitcoin-sv/go-sdk/src/src/aesgcm"
+	"github.com/bitcoin-sv/go-sdk/src/aesgcm"
 )
 
 type SymmetricKey struct {

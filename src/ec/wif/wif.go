@@ -8,10 +8,10 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/bitcoin-sv/go-sdk/src/src/base58"
-	"github.com/bitcoin-sv/go-sdk/src/src/chaincfg"
-	"github.com/bitcoin-sv/go-sdk/src/src/crypto"
-	"github.com/bitcoin-sv/go-sdk/src/src/ec"
+	"github.com/bitcoin-sv/go-sdk/src/base58"
+	"github.com/bitcoin-sv/go-sdk/src/chaincfg"
+	"github.com/bitcoin-sv/go-sdk/src/crypto"
+	"github.com/bitcoin-sv/go-sdk/src/ec"
 )
 
 var (

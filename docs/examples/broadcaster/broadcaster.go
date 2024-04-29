@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/bitcoin-sv/go-sdk/src/src/transaction"
-	"github.com/bitcoin-sv/go-sdk/src/src/transaction/broadcaster"
+	"github.com/bitcoin-sv/go-sdk/src/transaction"
+	"github.com/bitcoin-sv/go-sdk/src/transaction/broadcaster"
 )
 
 func main() {

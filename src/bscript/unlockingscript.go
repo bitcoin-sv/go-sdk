@@ -1,6 +1,6 @@
 package bscript
 
-import "github.com/bitcoin-sv/go-sdk/src/src/sighash"
+import "github.com/bitcoin-sv/go-sdk/src/sighash"
 
 // NewP2PKHUnlockingScript creates a new unlocking script which spends
 // a P2PKH locking script from a public key, a signature, and

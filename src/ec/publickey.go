@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/bitcoin-sv/go-sdk/src/src/crypto"
+	"github.com/bitcoin-sv/go-sdk/src/crypto"
 )
 
 // These constants define the lengths of serialised public keys.
