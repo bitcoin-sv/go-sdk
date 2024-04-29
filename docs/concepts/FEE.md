@@ -32,4 +32,4 @@ While the satoshis per kilobyte model is predominant, there are opportunities wi
 
 ### Implementing Custom Fee Models
 
-The BSV SDK allows developers to create and use custom fee models. These models can consider various factors beyond simple transaction size, enabling a flexible approach to transaction fee calculation. For instance, you can see a tutorial building a custom fee model [here](../examples/EXAMPLE_FEE_MODELING.md).
+The BSV SDK allows developers to create and use custom fee models. These models can consider various factors beyond simple transaction size, enabling a flexible approach to transaction fee calculation.

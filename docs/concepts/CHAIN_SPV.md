@@ -35,4 +35,4 @@ To illustrate the role of chain trackers, consider a scenario where an SPV clien
 
 ## Conclusion
 
-Chain trackers are indispensable in the SPV ecosystem, providing a balance between efficiency and security. By managing blockchain headers and verifying Merkle proofs, they ensure that participants can trust and validate transactions with confidence. Their role is foundational in enabling scalable, secure, and efficient transaction verification across the network. You can see a tutorial on integrating a chain tracker with the TypeScript BSV SDK [here](../examples/EXAMPLE_VERIFYING_ROOTS.md).
+Chain trackers are indispensable in the SPV ecosystem, providing a balance between efficiency and security. By managing blockchain headers and verifying Merkle proofs, they ensure that participants can trust and validate transactions with confidence. Their role is foundational in enabling scalable, secure, and efficient transaction verification across the network.

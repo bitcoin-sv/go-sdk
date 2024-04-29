@@ -31,5 +31,3 @@ Validating a Bitcoin transaction involves several critical steps that confirm it
 4. **Checking Locktime and Sequence:**
    - Transactions may include locktime and sequence numbers that impose conditions on the earliest time or block height at which a transaction can be added to the blockchain.
    - Proper handling of these parameters ensures that transactions are processed in a timely and orderly manner.
-
-You can check out an example using the TypeScript SDK where a transaction is verified according to these rules [here](../examples/EXAMPLE_VERIFYING_BEEF.md).
