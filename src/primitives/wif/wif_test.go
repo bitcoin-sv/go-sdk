@@ -9,7 +9,7 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/src/chaincfg"
 	"github.com/bitcoin-sv/go-sdk/src/ec"
-	"github.com/bitcoin-sv/go-sdk/src/ec/wif"
+	"github.com/bitcoin-sv/go-sdk/src/primitiveswif"
 )
 
 func TestEncodeDecodeWIF(t *testing.T) {

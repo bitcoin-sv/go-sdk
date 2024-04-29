@@ -6,7 +6,7 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/src/bscript"
 	"github.com/bitcoin-sv/go-sdk/src/ec"
-	"github.com/bitcoin-sv/go-sdk/src/ec/wif"
+	"github.com/bitcoin-sv/go-sdk/src/primitiveswif"
 	"github.com/bitcoin-sv/go-sdk/src/sighash"
 	"github.com/bitcoin-sv/go-sdk/src/transaction"
 	"github.com/bitcoin-sv/go-sdk/src/transaction/unlocker"
