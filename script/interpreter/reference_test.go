@@ -15,10 +15,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jonesjBSV/go-sdk/script"
-	"github.com/jonesjBSV/go-sdk/script/interpreter/errs"
-	"github.com/jonesjBSV/go-sdk/script/interpreter/scriptflag"
-	"github.com/jonesjBSV/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
+	"github.com/bitcoin-sv/go-sdk/transaction"
 )
 
 var opcodeByName = make(map[string]byte)

@@ -4,7 +4,7 @@ import (
 	"math"
 	"math/big"
 
-	"github.com/jonesjBSV/go-sdk/script/interpreter/errs"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 )
 
 // scriptNumber represents a numeric value used in the scripting engine with

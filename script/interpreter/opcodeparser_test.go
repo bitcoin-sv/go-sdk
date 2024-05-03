@@ -7,8 +7,8 @@ package interpreter
 import (
 	"testing"
 
-	"github.com/jonesjBSV/go-sdk/script"
-	"github.com/jonesjBSV/go-sdk/script/interpreter/errs"
+	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 	"github.com/stretchr/testify/require"
 )
 

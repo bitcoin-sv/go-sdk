@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/jonesjBSV/go-sdk/primitives/wif"
-	"github.com/jonesjBSV/go-sdk/transaction"
-	"github.com/jonesjBSV/go-sdk/transaction/unlocker"
+	"github.com/bitcoin-sv/go-sdk/primitives/wif"
+	"github.com/bitcoin-sv/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )
 
 func main() {

@@ -79,7 +79,7 @@ func (p *PrivateKey) DeriveSharedSecret(key *PublicKey) (*PublicKey, error) {
 
 // Derives a child key with BRC-42
 //
-// See BRC-42 spec here: https://github.com/jonesjBSV/BRCs/blob/master/key-derivation/0042.md
+// See BRC-42 spec here: https://github.com/bitcoin-sv/BRCs/blob/master/key-derivation/0042.md
 func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*PrivateKey, error) {
 	invoiceNumberBin := []byte(invoiceNumber)
 	sharedSecret, err := p.DeriveSharedSecret(pub)

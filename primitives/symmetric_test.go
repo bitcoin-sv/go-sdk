@@ -9,7 +9,7 @@ import (
 	"runtime"
 	"testing"
 
-	"github.com/jonesjBSV/go-sdk/primitives"
+	"github.com/bitcoin-sv/go-sdk/primitives"
 )
 
 func TestSymmetricKeyEncryptionAndDecryption(t *testing.T) {

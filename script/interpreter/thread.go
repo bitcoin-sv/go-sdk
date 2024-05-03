@@ -3,12 +3,12 @@ package interpreter
 import (
 	"math/big"
 
-	"github.com/jonesjBSV/go-sdk/script"
-	"github.com/jonesjBSV/go-sdk/script/interpreter/errs"
-	"github.com/jonesjBSV/go-sdk/script/interpreter/scriptflag"
-	"github.com/jonesjBSV/go-sdk/primitives"
-	"github.com/jonesjBSV/go-sdk/transaction/sighash"
-	"github.com/jonesjBSV/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
+	"github.com/bitcoin-sv/go-sdk/primitives"
+	"github.com/bitcoin-sv/go-sdk/transaction/sighash"
+	"github.com/bitcoin-sv/go-sdk/transaction"
 )
 
 // halfOrder is used to tame ECDSA malleability (see BIP0062).

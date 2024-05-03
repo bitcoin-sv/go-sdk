@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	 
-	"github.com/jonesjBSV/go-sdk/primitives"
+	"github.com/bitcoin-sv/go-sdk/primitives"
 )
 
 // ScriptKey types.

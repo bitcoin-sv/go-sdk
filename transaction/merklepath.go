@@ -10,8 +10,8 @@ import (
 	"sort"
 
 	 
-	"github.com/jonesjBSV/go-sdk/transaction/chaintracker"
-	"github.com/jonesjBSV/go-sdk/util"
+	"github.com/bitcoin-sv/go-sdk/transaction/chaintracker"
+	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/pkg/errors"
 )
 

@@ -1,8 +1,8 @@
 package docs
 
 import (
-	"github.com/jonesjBSV/go-sdk/script"
-	"github.com/jonesjBSV/go-sdk/primitives/wif"
+	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/primitives/wif"
 )
 
 func main() {

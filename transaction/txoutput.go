@@ -5,7 +5,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/jonesjBSV/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script"
 	 
 	"github.com/pkg/errors"
 )

@@ -135,7 +135,7 @@ type FeeQuote struct {
 // fetch a new set of fees from a MAPI server. This means the first check
 // will always fetch the latest fees. If you want to just use default fees
 // always, you can ignore the expired method and simply call the fq.Fee() method.
-// https://github.com/jonesjBSV-specs/brfc-merchantapi#payload
+// https://github.com/bitcoin-sv-specs/brfc-merchantapi#payload
 //
 // A basic example of usage is shown below:
 //
@@ -274,7 +274,7 @@ func (f *FeeQuote) UnmarshalJSON(body []byte) error {
 
 // FeeUnit displays the amount of Satoshis needed
 // for a specific amount of Bytes in a transaction
-// see https://github.com/jonesjBSV-specs/brfc-misc/tree/master/feespec
+// see https://github.com/bitcoin-sv-specs/brfc-misc/tree/master/feespec
 type FeeUnit struct {
 	Satoshis int `json:"satoshis"` // Fee in satoshis of the amount of Bytes
 	Bytes    int `json:"bytes"`    // Number of bytes that the Fee covers
@@ -282,7 +282,7 @@ type FeeUnit struct {
 
 // Fee displays the MiningFee as well as the RelayFee for a specific
 // FeeType, for example 'standard' or 'data'
-// see https://github.com/jonesjBSV-specs/brfc-misc/tree/master/feespec
+// see https://github.com/bitcoin-sv-specs/brfc-misc/tree/master/feespec
 type Fee struct {
 	FeeType   FeeType `json:"-"` // standard || data
 	MiningFee FeeUnit `json:"miningFee"`

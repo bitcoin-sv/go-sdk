@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 	"testing"
 
-	"github.com/jonesjBSV/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/stretchr/testify/assert"
 )
 

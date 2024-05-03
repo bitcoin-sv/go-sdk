@@ -5,10 +5,10 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/jonesjBSV/go-sdk/compat/base58"
+	"github.com/bitcoin-sv/go-sdk/compat/base58"
 	 
-	"github.com/jonesjBSV/go-sdk/primitives"
-	"github.com/jonesjBSV/go-sdk/util"
+	"github.com/bitcoin-sv/go-sdk/primitives"
+	"github.com/bitcoin-sv/go-sdk/util"
 )
 
 const (

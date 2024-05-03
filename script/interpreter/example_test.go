@@ -5,8 +5,8 @@ import (
 
 	"context"
 
-	"github.com/jonesjBSV/go-sdk/script/interpreter"
-	"github.com/jonesjBSV/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter"
+	"github.com/bitcoin-sv/go-sdk/transaction"
 	"golang.org/x/sync/errgroup"
 )
 

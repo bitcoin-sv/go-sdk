@@ -9,11 +9,11 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/jonesjBSV/go-sdk/script"
-	"github.com/jonesjBSV/go-sdk/script/interpreter"
-	"github.com/jonesjBSV/go-sdk/script/testdata"
-	"github.com/jonesjBSV/go-sdk/primitives"
-	"github.com/jonesjBSV/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter"
+	"github.com/bitcoin-sv/go-sdk/script/testdata"
+	"github.com/bitcoin-sv/go-sdk/primitives"
+	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )

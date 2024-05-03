@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 
-	"github.com/jonesjBSV/go-sdk/compat/bip32"
-	"github.com/jonesjBSV/go-sdk/script"
-	"github.com/jonesjBSV/go-sdk/transaction/chaincfg"
-	"github.com/jonesjBSV/go-sdk/transaction"
-	"github.com/jonesjBSV/go-sdk/transaction/unlocker"
+	"github.com/bitcoin-sv/go-sdk/compat/bip32"
+	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
+	"github.com/bitcoin-sv/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )
 
 // account for creating destination scripts and stores these scripts with their derivations.
