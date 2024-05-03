@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/crypto"
-	"github.com/bitcoin-sv/go-sdk/sighash"
+	"github.com/bitcoin-sv/go-sdk/script"
+	 
+	"github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"github.com/bitcoin-sv/go-sdk/util"
 )
 

@@ -1,9 +1,9 @@
-package bscript
+package script
 
 import (
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/ec/wif"
+	"github.com/bitcoin-sv/go-sdk/primitives/wif"
 	"github.com/stretchr/testify/assert"
 )
 

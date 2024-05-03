@@ -3,7 +3,7 @@ package message
 import (
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/ec"
+	"github.com/bitcoin-sv/go-sdk/primitives"
 )
 
 // TODO - implement go version

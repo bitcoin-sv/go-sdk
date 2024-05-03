@@ -1,13 +1,13 @@
-// Package bscript comment
-package bscript
+// package script comment
+package script
 
 import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/bitcoin-sv/go-sdk/base58"
-	"github.com/bitcoin-sv/go-sdk/crypto"
-	"github.com/bitcoin-sv/go-sdk/ec"
+	"github.com/bitcoin-sv/go-sdk/compat/base58"
+	 
+	"github.com/bitcoin-sv/go-sdk/primitives"
 	"github.com/bitcoin-sv/go-sdk/util"
 )
 

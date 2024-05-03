@@ -1,4 +1,4 @@
-package bscript
+package script
 
 // InscriptionArgs contains the Ordinal inscription data.
 type InscriptionArgs struct {

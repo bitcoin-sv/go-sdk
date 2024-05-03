@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/crypto"
+	 
 
 	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/stretchr/testify/assert"

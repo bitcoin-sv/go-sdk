@@ -1,10 +1,10 @@
-package main
+package docs
 
 import (
 	"context"
 	"log"
 
-	"github.com/bitcoin-sv/go-sdk/ec/wif"
+	"github.com/bitcoin-sv/go-sdk/primitives/wif"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )

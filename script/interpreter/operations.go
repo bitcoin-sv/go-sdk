@@ -7,12 +7,12 @@ import (
 	"hash"
 	"math/big"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/errs"
-	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/scriptflag"
-	"github.com/bitcoin-sv/go-sdk/crypto"
-	"github.com/bitcoin-sv/go-sdk/ec"
-	"github.com/bitcoin-sv/go-sdk/sighash"
+	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
+	 
+	"github.com/bitcoin-sv/go-sdk/primitives"
+	"github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"golang.org/x/crypto/ripemd160"
 )

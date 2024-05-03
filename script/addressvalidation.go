@@ -1,11 +1,11 @@
-package bscript
+package script
 
 import (
 	"bytes"
 	"fmt"
 	"strings"
 
-	"github.com/bitcoin-sv/go-sdk/crypto"
+	 
 )
 
 type a25 [25]byte

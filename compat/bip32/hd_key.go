@@ -3,9 +3,9 @@ package bip32
 import (
 	"encoding/hex"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/chaincfg"
-	"github.com/bitcoin-sv/go-sdk/ec"
+	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
+	"github.com/bitcoin-sv/go-sdk/primitives"
 )
 
 const (

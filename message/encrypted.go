@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/bitcoin-sv/go-sdk/ec"
+	"github.com/bitcoin-sv/go-sdk/primitives"
 )
 
 // BRC-78: https://github.com/bitcoin-sv/BRCs/blob/master/peer-to-peer/0078.md

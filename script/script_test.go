@@ -1,4 +1,4 @@
-package bscript_test
+package script_test
 
 import (
 	"bytes"
@@ -9,10 +9,10 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/bscript/interpreter"
-	"github.com/bitcoin-sv/go-sdk/bscript/testdata"
-	"github.com/bitcoin-sv/go-sdk/ec"
+	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter"
+	"github.com/bitcoin-sv/go-sdk/script/testdata"
+	"github.com/bitcoin-sv/go-sdk/primitives"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

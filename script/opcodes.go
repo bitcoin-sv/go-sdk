@@ -1,4 +1,4 @@
-package bscript
+package script
 
 // BitCoin Script constants.
 // See https://wiki.bitcoinsv.io/index.php/Opcodes_used_in_Bitcoin_Script

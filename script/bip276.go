@@ -1,4 +1,4 @@
-package bscript
+package script
 
 import (
 	"encoding/hex"
@@ -6,7 +6,7 @@ import (
 	"regexp"
 	"strconv"
 
-	"github.com/bitcoin-sv/go-sdk/crypto"
+	 
 )
 
 // BIP276 proposes a scheme for encoding typed bitcoin related data in a user-friendly way

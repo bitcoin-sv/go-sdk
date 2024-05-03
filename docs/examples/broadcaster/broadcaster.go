@@ -1,4 +1,4 @@
-package main
+package docs
 
 import (
 	"github.com/bitcoin-sv/go-sdk/transaction"

@@ -1,9 +1,9 @@
-package main
+package docs
 
 import (
 	"fmt"
 
-	"github.com/bitcoin-sv/go-sdk/ec"
+	"github.com/bitcoin-sv/go-sdk/primitives"
 )
 
 func main() {

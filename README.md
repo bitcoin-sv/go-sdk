@@ -36,13 +36,13 @@ go install github.com/bitcoin-sv/go-sdk
 Here's a [simple example](https://goplay.tools/snippet/bnsS-pA56ob) of using the SDK to create and sign a transaction:
 
 ```go
-package main
+package docs
 
 import (
 	"context"
 	"log"
 
-	"github.com/bitcoin-sv/go-sdk/ec/wif"
+	"github.com/bitcoin-sv/go-sdk/primitives/wif"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )

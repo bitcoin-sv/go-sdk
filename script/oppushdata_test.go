@@ -1,10 +1,10 @@
-package bscript_test
+package script_test
 
 import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
+	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/stretchr/testify/assert"
 )
 

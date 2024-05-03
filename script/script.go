@@ -1,4 +1,4 @@
-package bscript
+package script
 
 import (
 	"bytes"
@@ -8,8 +8,8 @@ import (
 	"math/bits"
 	"strings"
 
-	"github.com/bitcoin-sv/go-sdk/crypto"
-	"github.com/bitcoin-sv/go-sdk/ec"
+	 
+	"github.com/bitcoin-sv/go-sdk/primitives"
 )
 
 // ScriptKey types.

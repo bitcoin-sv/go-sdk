@@ -14,7 +14,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/crypto"
+	 
 )
 
 type signatureTest struct {

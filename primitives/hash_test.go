@@ -1,4 +1,4 @@
-package crypto
+package primitives
 
 import (
 	"bytes"

@@ -1,10 +1,10 @@
-package main
+package docs
 
 import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/bitcoin-sv/go-sdk/ec"
+	"github.com/bitcoin-sv/go-sdk/primitives"
 )
 
 // Example of using ECIES to encrypt and decrypt data
