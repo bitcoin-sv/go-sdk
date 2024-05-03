@@ -87,7 +87,7 @@ func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*Private
 		return nil, err
 	}
 	pubKeyEncoded := sharedSecret.encode(true)
-	hmac := crypto.Sha256HMAC(invoiceNumberBin, pubKeyEncoded)
+	hmac := Sha256HMAC(invoiceNumberBin, pubKeyEncoded)
 
 	newPrivKey := new(big.Int)
 	newPrivKey.Add(p.D, new(big.Int).SetBytes(hmac))

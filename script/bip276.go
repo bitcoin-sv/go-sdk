@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"github.com/bitcoin-sv/go-sdk/primitives"
 
 	 
 )
@@ -55,7 +56,7 @@ func EncodeBIP276(script BIP276) string {
 
 func createBIP276(script BIP276) (string, string) {
 	payload := fmt.Sprintf("%s:%.2x%.2x%x", script.Prefix, script.Network, script.Version, script.Data)
-	return payload, hex.EncodeToString(crypto.Sha256d([]byte(payload))[:4])
+	return payload, hex.EncodeToString(primitives.Sha256d([]byte(payload))[:4])
 }
 
 // DecodeBIP276 is used to decode BIP276 formatted data into specific (non-standard) scripts.

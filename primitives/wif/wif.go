@@ -38,7 +38,7 @@ const compressMagic byte = 0x01
 // by calling NewWIF.
 type WIF struct {
 	// PrivKey is the private key being imported or exported.
-	PrivKey *ec.PrivateKey
+	PrivKey *primitives.PrivateKey
 
 	// CompressPubKey specifies whether the address controlled by the
 	// imported or exported private key was created by hashing a
@@ -55,7 +55,7 @@ type WIF struct {
 // as a string encoded in the Wallet Import Format.  The compress argument
 // specifies whether the address intended to be imported or exported was created
 // by serialising the public key compressed rather than uncompressed.
-func NewWIF(privKey *ec.PrivateKey, net *chaincfg.Params, compress bool) (*WIF, error) {
+func NewWIF(privKey *primitives.PrivateKey, net *chaincfg.Params, compress bool) (*WIF, error) {
 	if net == nil {
 		return nil, errors.New("no network")
 	}
@@ -96,12 +96,12 @@ func DecodeWIF(wif string) (*WIF, error) {
 	// Length of base58 decoded WIF must be 32 bytes + an optional 1 byte
 	// (0x01) if compressed, plus 1 byte for netID + 4 bytes of checksum.
 	switch decodedLen {
-	case 1 + ec.PrivateKeyBytesLen + 1 + 4:
+	case 1 + primitives.PrivateKeyBytesLen + 1 + 4:
 		if decoded[33] != compressMagic {
 			return nil, ErrMalformedPrivateKey
 		}
 		compress = true
-	case 1 + ec.PrivateKeyBytesLen + 4:
+	case 1 + primitives.PrivateKeyBytesLen + 4:
 		compress = false
 	default:
 		return nil, ErrMalformedPrivateKey
@@ -112,18 +112,18 @@ func DecodeWIF(wif string) (*WIF, error) {
 	// private key.
 	var tosum []byte
 	if compress {
-		tosum = decoded[:1+ec.PrivateKeyBytesLen+1]
+		tosum = decoded[:1+primitives.PrivateKeyBytesLen+1]
 	} else {
-		tosum = decoded[:1+ec.PrivateKeyBytesLen]
+		tosum = decoded[:1+primitives.PrivateKeyBytesLen]
 	}
-	cksum := crypto.Sha256d(tosum)[:4]
+	cksum := primitives.Sha256d(tosum)[:4]
 	if !bytes.Equal(cksum, decoded[decodedLen-4:]) {
 		return nil, ErrChecksumMismatch
 	}
 
 	netID := decoded[0]
-	privKeyBytes := decoded[1 : 1+ec.PrivateKeyBytesLen]
-	privKey, _ := ec.PrivateKeyFromBytes(privKeyBytes)
+	privKeyBytes := decoded[1 : 1+primitives.PrivateKeyBytesLen]
+	privKey, _ := primitives.PrivateKeyFromBytes(privKeyBytes)
 	return &WIF{privKey, compress, netID}, nil
 }
 
@@ -135,7 +135,7 @@ func (w *WIF) String() string {
 	// is one byte for the network, 32 bytes of private key, possibly one
 	// extra byte if the pubkey is to be compressed, and finally four
 	// bytes of checksum.
-	encodeLen := 1 + ec.PrivateKeyBytesLen + 4
+	encodeLen := 1 + primitives.PrivateKeyBytesLen + 4
 	if w.CompressPubKey {
 		encodeLen++
 	}
@@ -144,11 +144,11 @@ func (w *WIF) String() string {
 	a = append(a, w.netID)
 	// Pad and append bytes manually, instead of using Serialise, to
 	// avoid another call to make.
-	a = paddedAppend(ec.PrivateKeyBytesLen, a, w.PrivKey.D.Bytes())
+	a = paddedAppend(primitives.PrivateKeyBytesLen, a, w.PrivKey.D.Bytes())
 	if w.CompressPubKey {
 		a = append(a, compressMagic)
 	}
-	cksum := crypto.Sha256d(a)[:4]
+	cksum := primitives.Sha256d(a)[:4]
 	a = append(a, cksum...)
 	return base58.Encode(a)
 }
@@ -157,7 +157,7 @@ func (w *WIF) String() string {
 // exported private key in either a compressed or uncompressed format.  The
 // serialisation format chosen depends on the value of w.CompressPubKey.
 func (w *WIF) SerialisePubKey() []byte {
-	pk := (*ec.PublicKey)(&w.PrivKey.PublicKey)
+	pk := (*primitives.PublicKey)(&w.PrivKey.PublicKey)
 	if w.CompressPubKey {
 		return pk.SerialiseCompressed()
 	}

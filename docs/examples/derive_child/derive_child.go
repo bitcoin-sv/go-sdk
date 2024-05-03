@@ -14,7 +14,7 @@ func main() {
 	invoiceNum := "test invoice number"
 
 	customerPubKeyStr := "03121a7afe56fc8e25bca4bb2c94f35eb67ebe5b84df2e149d65b9423ee65b8b4b"
-	customerPubKey, _ := ec.PublicKeyFromString(customerPubKeyStr)
+	customerPubKey, _ := primitives.PublicKeyFromString(customerPubKeyStr)
 
 	child, _ := merchantPrivKey.PrivKey.DeriveChild(customerPubKey, invoiceNum)
 

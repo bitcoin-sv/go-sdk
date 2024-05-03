@@ -155,7 +155,7 @@ func (o *nodeOutputJSON) fromOutput(out *Output) error {
 
 func (o *nodeOutputJSON) toOutput() (*Output, error) {
 	out := &Output{}
-	s, err := bscript.NewFromHex(o.ScriptPubKey.Hex)
+	s, err := script.NewFromHex(o.ScriptPubKey.Hex)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func (o *nodeOutputJSON) toOutput() (*Output, error) {
 
 func (i *nodeInputJSON) toInput() (*Input, error) {
 	input := &Input{}
-	s, err := bscript.NewFromHex(i.ScriptSig.Hex)
+	s, err := script.NewFromHex(i.ScriptSig.Hex)
 	if err != nil {
 		return nil, err
 	}

@@ -64,7 +64,7 @@ func NewFromASM(str string) (*Script, error) {
 
 // NewP2PKHFromPubKeyEC takes a public key hex string (in
 // compressed format) and creates a P2PKH script from it.
-func NewP2PKHFromPubKeyEC(pubKey *ec.PublicKey) (*Script, error) {
+func NewP2PKHFromPubKeyEC(pubKey *primitives.PublicKey) (*Script, error) {
 	return NewP2PKHFromPubKeyBytes(pubKey.SerialiseCompressed())
 }
 
@@ -84,7 +84,7 @@ func NewP2PKHFromPubKeyBytes(pubKeyBytes []byte) (*Script, error) {
 	if len(pubKeyBytes) != 33 {
 		return nil, ErrInvalidPKLen
 	}
-	return NewP2PKHFromPubKeyHash(crypto.Hash160(pubKeyBytes))
+	return NewP2PKHFromPubKeyHash(primitives.Hash160(pubKeyBytes))
 }
 
 // NewP2PKHFromPubKeyHash takes a public key hex string (in
@@ -92,7 +92,7 @@ func NewP2PKHFromPubKeyBytes(pubKeyBytes []byte) (*Script, error) {
 func NewP2PKHFromPubKeyHash(pubKeyHash []byte) (*Script, error) {
 	b := []byte{
 		OpDUP,
-		OpHASH160,
+		OpHash160,
 		OpDATA20,
 	}
 	b = append(b, pubKeyHash...)
@@ -123,7 +123,7 @@ func NewP2PKHFromAddress(addr string) (*Script, error) {
 	}
 
 	s := new(Script)
-	_ = s.AppendOpcodes(OpDUP, OpHASH160)
+	_ = s.AppendOpcodes(OpDUP, OpHash160)
 	if err = s.AppendPushData(a.PublicKeyHash); err != nil {
 		return nil, err
 	}
@@ -236,7 +236,7 @@ func (s *Script) IsP2PKH() bool {
 	b := []byte(*s)
 	return len(b) == 25 &&
 		b[0] == OpDUP &&
-		b[1] == OpHASH160 &&
+		b[1] == OpHash160 &&
 		b[2] == OpDATA20 &&
 		b[23] == OpEQUALVERIFY &&
 		b[24] == OpCHECKSIG
@@ -268,7 +268,7 @@ func (s *Script) IsP2SH() bool {
 	b := []byte(*s)
 
 	return len(b) == 23 &&
-		b[0] == OpHASH160 &&
+		b[0] == OpHash160 &&
 		b[1] == OpDATA20 &&
 		b[22] == OpEQUAL
 }
@@ -307,7 +307,7 @@ func isP2PKHInscriptionHelper(parts [][]byte) bool {
 		return false
 	}
 	valid := parts[0][0] == OpDUP &&
-		parts[1][0] == OpHASH160 &&
+		parts[1][0] == OpHash160 &&
 		parts[3][0] == OpEQUALVERIFY &&
 		parts[4][0] == OpCHECKSIG &&
 		parts[5][0] == OpFALSE &&
@@ -393,7 +393,7 @@ func (s *Script) PublicKeyHash() ([]byte, error) {
 		return nil, ErrEmptyScript
 	}
 
-	if (*s)[0] != OpDUP || len(*s) <= 2 || (*s)[1] != OpHASH160 {
+	if (*s)[0] != OpDUP || len(*s) <= 2 || (*s)[1] != OpHash160 {
 		return nil, ErrNotP2PKH
 	}
 
@@ -507,7 +507,7 @@ func (s *Script) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, s.String())), nil
 }
 
-// UnmarshalJSON covert from json into *bscript.Script.
+// UnmarshalJSON covert from json into *script.Script.
 func (s *Script) UnmarshalJSON(bb []byte) error {
 	ss, err := NewFromHex(string(bytes.Trim(bb, `"`)))
 	if err != nil {

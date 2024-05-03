@@ -61,7 +61,7 @@ func main() {
 		}
 	}
 
-	changeScript, err := bscript.NewP2PKHFromPubKeyEC(decodedWif.PrivKey.PubKey())
+	changeScript, err := script.NewP2PKHFromPubKeyEC(decodedWif.PrivKey.PubKey())
 	if err != nil {
 		panic(err)
 	}

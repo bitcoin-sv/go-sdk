@@ -258,7 +258,7 @@ func (p *PublicKey) DeriveChild(privateKey *PrivateKey, invoiceNumber string) (*
 		return nil, err
 	}
 	pubKeyEncoded := sharedSecret.encode(true)
-	hmac := crypto.Sha256HMAC(invoiceNumberBin, pubKeyEncoded)
+	hmac := Sha256HMAC(invoiceNumberBin, pubKeyEncoded)
 
 	newPointX, newPointY := S256().ScalarBaseMult(hmac)
 	newPubKeyX, newPubKeyY := S256().Add(newPointX, newPointY, p.X, p.Y)
@@ -281,6 +281,6 @@ func (p *PublicKey) DeriveSharedSecret(priv *PrivateKey) (*PublicKey, error) {
 
 // Verify a signature of a message using this public key.
 func (p *PublicKey) Verify(msg []byte, sig *Signature) bool {
-	msgHash := crypto.Sha256(msg)
+	msgHash := Sha256(msg)
 	return sig.Verify(msgHash, p)
 }

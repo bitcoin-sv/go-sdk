@@ -41,12 +41,12 @@ func (tx *Tx) AddP2PKHInputsFromTx(pvsTx *Tx, matchPK []byte) error {
 	// Given that the prevTxID never changes, calculate it once up front.
 	prevTxIDBytes := pvsTx.TxIDBytes()
 	for i, utxo := range pvsTx.Outputs {
-		utxoPkHASH160, err := utxo.LockingScript.PublicKeyHash()
+		utxoPkprimitives.Hash160, err := utxo.LockingScript.PublicKeyHash()
 		if err != nil {
 			return err
 		}
 
-		if bytes.Equal(utxoPkHASH160, crypto.Hash160(matchPK)) {
+		if bytes.Equal(utxoPkprimitives.Hash160, primitives.Hash160(matchPK)) {
 			if err := tx.FromUTXOs(&UTXO{
 				TxID:          prevTxIDBytes,
 				Vout:          uint32(i),
@@ -65,7 +65,7 @@ func (tx *Tx) AddP2PKHInputsFromTx(pvsTx *Tx, matchPK []byte) error {
 // finalised sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
 // afterwards.
 func (tx *Tx) From(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64) error {
-	pts, err := bscript.NewFromHex(prevTxLockingScript)
+	pts, err := script.NewFromHex(prevTxLockingScript)
 	if err != nil {
 		return err
 	}
@@ -180,7 +180,7 @@ func (tx *Tx) PreviousOutHash() []byte {
 		buf = append(buf, oi...)
 	}
 
-	return crypto.Sha256d(buf)
+	return primitives.Sha256d(buf)
 }
 
 // SequenceHash returns a byte slice of inputs SequenceNumber, for creating a signature hash
@@ -193,12 +193,12 @@ func (tx *Tx) SequenceHash() []byte {
 		buf = append(buf, oi...)
 	}
 
-	return crypto.Sha256d(buf)
+	return primitives.Sha256d(buf)
 }
 
 // InsertInputUnlockingScript applies a script to the transaction at a specific index in
 // unlocking script field.
-func (tx *Tx) InsertInputUnlockingScript(index uint32, s *bscript.Script) error {
+func (tx *Tx) InsertInputUnlockingScript(index uint32, s *script.Script) error {
 	if tx.Inputs[index] != nil {
 		tx.Inputs[index].UnlockingScript = s
 		return nil

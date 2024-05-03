@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"github.com/bitcoin-sv/go-sdk/primitives"
 
 	 
 )
@@ -18,7 +19,7 @@ func (a *a25) embeddedChecksum() (c [4]byte) {
 // computeChecksum returns a four byte checksum computed from the first 21
 // bytes of the address.  The embedded checksum is not updated.
 func (a *a25) computeChecksum() (c [4]byte) {
-	copy(c[:], crypto.Sha256d(a[:21]))
+	copy(c[:], primitives.Sha256d(a[:21]))
 	return
 }
 

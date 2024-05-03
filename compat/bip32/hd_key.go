@@ -91,7 +91,7 @@ func GetHDKeyChild(hdKey *ExtendedKey, num uint32) (*ExtendedKey, error) {
 // GetPrivateKeyByPath gets the key for a given derivation path (chain/num)
 //
 // Expects hdKey to not be nil (otherwise will panic)
-func GetPrivateKeyByPath(hdKey *ExtendedKey, chain, num uint32) (*ec.PrivateKey, error) {
+func GetPrivateKeyByPath(hdKey *ExtendedKey, chain, num uint32) (*primitives.PrivateKey, error) {
 
 	// Get the child key from the num & chain
 	childKeyNum, err := GetHDKeyByPath(hdKey, chain, num)
@@ -107,7 +107,7 @@ func GetPrivateKeyByPath(hdKey *ExtendedKey, chain, num uint32) (*ec.PrivateKey,
 // with a given hdKey
 //
 // Expects hdKey to not be nil (otherwise will panic)
-func GetPrivateKeyFromHDKey(hdKey *ExtendedKey) (*ec.PrivateKey, error) {
+func GetPrivateKeyFromHDKey(hdKey *ExtendedKey) (*primitives.PrivateKey, error) {
 	return hdKey.ECPrivKey()
 }
 
@@ -126,19 +126,19 @@ func GetPrivateKeyStringFromHDKey(hdKey *ExtendedKey) (string, error) {
 // GetPublicKeyFromHDKey is a helper function to get the Public Key associated with a given hdKey
 //
 // Expects hdKey to not be nil (otherwise will panic)
-func GetPublicKeyFromHDKey(hdKey *ExtendedKey) (*ec.PublicKey, error) {
+func GetPublicKeyFromHDKey(hdKey *ExtendedKey) (*primitives.PublicKey, error) {
 	return hdKey.ECPubKey()
 }
 
 // GetAddressFromHDKey is a helper function to get the Address associated with a given hdKey
 //
 // Expects hdKey to not be nil (otherwise will panic)
-func GetAddressFromHDKey(hdKey *ExtendedKey) (*bscript.Address, error) {
+func GetAddressFromHDKey(hdKey *ExtendedKey) (*script.Address, error) {
 	pubKey, err := GetPublicKeyFromHDKey(hdKey)
 	if err != nil {
 		return nil, err
 	}
-	return bscript.NewAddressFromPublicKey(pubKey, true)
+	return script.NewAddressFromPublicKey(pubKey, true)
 }
 
 // GetAddressStringFromHDKey is a helper function to get the Address (string) associated with a given hdKey
@@ -155,7 +155,7 @@ func GetAddressStringFromHDKey(hdKey *ExtendedKey) (string, error) {
 // GetPublicKeysForPath gets the PublicKeys for a given derivation path
 // Uses the standard m/0/0 (external) and m/0/1 (internal) paths
 // Reference: https://en.bitcoin.it/wiki/BIP_0032#The_default_wallet_layout
-func GetPublicKeysForPath(hdKey *ExtendedKey, num uint32) (pubKeys []*ec.PublicKey, err error) {
+func GetPublicKeysForPath(hdKey *ExtendedKey, num uint32) (pubKeys []*primitives.PublicKey, err error) {
 
 	//  m/0/x
 	var childM0x *ExtendedKey
@@ -164,7 +164,7 @@ func GetPublicKeysForPath(hdKey *ExtendedKey, num uint32) (pubKeys []*ec.PublicK
 	}
 
 	// Get the external pubKey from m/0/x
-	var pubKey *ec.PublicKey
+	var pubKey *primitives.PublicKey
 	if pubKey, err = childM0x.ECPubKey(); err != nil {
 		// Should never error since the previous method ensures a valid hdKey
 		return
@@ -193,15 +193,15 @@ func GetPublicKeysForPath(hdKey *ExtendedKey, num uint32) (pubKeys []*ec.PublicK
 func GetAddressesForPath(hdKey *ExtendedKey, num uint32) (addresses []string, err error) {
 
 	// Get the public keys for the corresponding chain/num (using default chain)
-	var pubKeys []*ec.PublicKey
+	var pubKeys []*primitives.PublicKey
 	if pubKeys, err = GetPublicKeysForPath(hdKey, num); err != nil {
 		return
 	}
 
 	// Loop, get address and append to results
-	var address *bscript.Address
+	var address *script.Address
 	for _, key := range pubKeys {
-		if address, err = bscript.NewAddressFromPublicKey(key, true); err != nil {
+		if address, err = script.NewAddressFromPublicKey(key, true); err != nil {
 			// Should never error if the pubKeys are valid keys
 			return
 		}

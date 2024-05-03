@@ -10,7 +10,7 @@ import (
 type UTXO struct {
 	TxID           []byte          `json:"txid"`
 	Vout           uint32          `json:"vout"`
-	LockingScript  *bscript.Script `json:"locking_script"`
+	LockingScript  *script.Script `json:"locking_script"`
 	Satoshis       uint64          `json:"satoshis"`
 	SequenceNumber uint32          `json:"sequence_number"`
 	Unlocker       *Unlocker       `json:"-"`

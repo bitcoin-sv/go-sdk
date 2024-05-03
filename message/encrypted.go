@@ -17,7 +17,7 @@ const VERSION = "10334242" // FIXME: remove later if not needed
 var VERSION_BYTES = []byte{0x10, 0x33, 0x42, 0x42}
 
 // Encrypt encrypts a message using the sender's private key and the recipient's public key.
-func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]byte, error) {
+func Encrypt(message []byte, sender *primitives.PrivateKey, recipient *primitives.PublicKey) ([]byte, error) {
 	var keyID [8]byte
 	if _, err := rand.Read(keyID[:]); err != nil {
 		return nil, err
@@ -37,8 +37,8 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 		return nil, err
 	}
 
-	priv := ec.NewSymmetricKey(sharedSecret.SerialiseCompressed()[1:])
-	skey := ec.NewSymmetricKey(priv.ToBytes())
+	priv := primitives.NewSymmetricKey(sharedSecret.SerialiseCompressed()[1:])
+	skey := primitives.NewSymmetricKey(priv.ToBytes())
 	ciphertext, err := skey.Encrypt(message)
 	if err != nil {
 		return nil, err
@@ -78,7 +78,7 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 //     *
 //   - @returns The decrypted message
 //     */
-func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
+func Decrypt(message []byte, recipient *primitives.PrivateKey) ([]byte, error) {
 	messageVersion := message[:4]
 	if hex.EncodeToString(messageVersion) != VERSION {
 		return nil, fmt.Errorf("message version mismatch: Expected %s, received %s", VERSION, hex.EncodeToString(messageVersion))
@@ -93,7 +93,7 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	sender, err := ec.ParsePubKey(senderPublicKey)
+	sender, err := primitives.ParsePubKey(senderPublicKey)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +131,7 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 		return nil, err
 	}
 
-	priv := ec.NewSymmetricKey(sharedSecret.SerialiseCompressed()[1:])
-	skey := ec.NewSymmetricKey(priv.ToBytes())
+	priv := primitives.NewSymmetricKey(sharedSecret.SerialiseCompressed()[1:])
+	skey := primitives.NewSymmetricKey(priv.ToBytes())
 	return skey.Decrypt(encrypted)
 }

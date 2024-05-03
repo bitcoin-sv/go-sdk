@@ -45,8 +45,8 @@ import (
 // })
 
 func TestEncryptedMessage(t *testing.T) {
-	sender, _ := ec.PrivateKeyFromBytes([]byte{15})
-	recipient, recipientPub := ec.PrivateKeyFromBytes([]byte{21})
+	sender, _ := primitives.PrivateKeyFromBytes([]byte{15})
+	recipient, recipientPub := primitives.PrivateKeyFromBytes([]byte{21})
 
 	msg := []byte{1, 2, 4, 8, 16, 32}
 

@@ -14,21 +14,21 @@ import (
 // Getter implements the `bt.UnlockerGetter` interface. It unlocks a Tx locally,
 // using a bec PrivateKey.
 type Getter struct {
-	PrivateKey *ec.PrivateKey
+	PrivateKey *primitives.PrivateKey
 }
 
 // Unlocker builds a new `*unlocker.Local` with the same private key
 // as the calling `*local.Getter`.
 //
 // For an example implementation, see `examples/unlocker_getter/`.
-func (g *Getter) Unlocker(ctx context.Context, lockingScript *bscript.Script) (transaction.Unlocker, error) {
+func (g *Getter) Unlocker(ctx context.Context, lockingScript *script.Script) (transaction.Unlocker, error) {
 	return &Simple{PrivateKey: g.PrivateKey}, nil
 }
 
 // Simple implements the a simple `bt.Unlocker` interface. It is used to build an unlocking script
 // using a bec Private Key.
 type Simple struct {
-	PrivateKey *ec.PrivateKey
+	PrivateKey *primitives.PrivateKey
 }
 
 // UnlockingScript create the unlocking script for a given input using the PrivateKey passed in through the
@@ -40,7 +40,7 @@ type Simple struct {
 // canonical in accordance with RFC6979 and BIP0062.
 //
 // For example usage, see `examples/create_tx/create_tx.go`
-func (l *Simple) UnlockingScript(ctx context.Context, tx *transaction.Tx, params transaction.UnlockerParams) (*bscript.Script, error) {
+func (l *Simple) UnlockingScript(ctx context.Context, tx *transaction.Tx, params transaction.UnlockerParams) (*script.Script, error) {
 	if params.SigHashFlags == 0 {
 		params.SigHashFlags = sighash.AllForkID
 	}
@@ -49,7 +49,7 @@ func (l *Simple) UnlockingScript(ctx context.Context, tx *transaction.Tx, params
 		return nil, transaction.ErrEmptyPreviousTxScript
 	}
 	switch tx.Inputs[params.InputIdx].PreviousTxScript.ScriptType() {
-	case bscript.ScriptTypePubKeyHash, bscript.ScriptTypePubKeyHashInscription:
+	case script.ScriptTypePubKeyHash, script.ScriptTypePubKeyHashInscription:
 		sh, err := tx.CalcInputSignatureHash(params.InputIdx, params.SigHashFlags)
 		if err != nil {
 			return nil, err
@@ -63,7 +63,7 @@ func (l *Simple) UnlockingScript(ctx context.Context, tx *transaction.Tx, params
 		pubKey := l.PrivateKey.PubKey().SerialiseCompressed()
 		signature := sig.Serialise()
 
-		uscript, err := bscript.NewP2PKHUnlockingScript(pubKey, signature, params.SigHashFlags)
+		uscript, err := script.NewP2PKHUnlockingScript(pubKey, signature, params.SigHashFlags)
 		if err != nil {
 			return nil, err
 		}

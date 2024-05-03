@@ -18,7 +18,7 @@ const (
 	hashTestNetP2SH  = 0xc4
 )
 
-// An Address struct contains the address string as well as the hash160 hex string of the public key.
+// An Address struct contains the address string as well as the primitives.Hash160 hex string of the public key.
 // The address string will be human-readable and specific to the network type, but the public key hash
 // is useful because it stays the same regardless of the network type (mainnet, testnet).
 type Address struct {
@@ -70,7 +70,7 @@ func NewAddressFromPublicKeyString(pubKey string, mainnet bool) (*Address, error
 	if err != nil {
 		return nil, err
 	}
-	return NewAddressFromPublicKeyHash(crypto.Hash160(pubKeyBytes), mainnet)
+	return NewAddressFromPublicKeyHash(primitives.Hash160(pubKeyBytes), mainnet)
 }
 
 // NewAddressFromPublicKeyHash takes a public key hash in bytes and returns an Address struct pointer.
@@ -97,8 +97,8 @@ func NewAddressFromPublicKeyHash(hash []byte, mainnet bool) (*Address, error) {
 // NewAddressFromPublicKey takes a bec public key and returns an Address struct pointer.
 // If mainnet parameter is true it will return a mainnet address (starting with a 1).
 // Otherwise, (mainnet is false) it will return a testnet address (starting with an m or n).
-func NewAddressFromPublicKey(pubKey *ec.PublicKey, mainnet bool) (*Address, error) {
-	hash := crypto.Hash160(pubKey.SerialiseCompressed())
+func NewAddressFromPublicKey(pubKey *primitives.PublicKey, mainnet bool) (*Address, error) {
+	hash := primitives.Hash160(pubKey.SerialiseCompressed())
 
 	// regtest := 111
 	// mainnet: 0
@@ -127,7 +127,7 @@ func Base58EncodeMissingChecksum(input []byte) string {
 }
 
 func checksum(input []byte) (ckSum [4]byte) {
-	h := crypto.Sha256d(input)
+	h := primitives.Sha256d(input)
 	copy(ckSum[:], h[:4])
 	return
 }

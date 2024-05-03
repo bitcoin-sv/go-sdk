@@ -50,7 +50,7 @@ func TestTxJSON_Node_JSON(t *testing.T) {
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, w)
-				s := &bscript.Script{}
+				s := &script.Script{}
 				assert.NoError(t, s.AppendPushDataString("test"))
 				tx.AddOutput(&transaction.Output{
 					LockingScript: s,
@@ -118,7 +118,7 @@ func TestTxJSON_Node_MarshallJSON(t *testing.T) {
 			"value": 0.00000895,
 			"n": 1,
 			"scriptPubKey": {
-				"asm": "OP_DUP OP_HASH160 b85524abf8202a961b847a3bd0bc89d3d4d41cc5 OP_EQUALVERIFY OP_CHECKSIG",
+				"asm": "OP_DUP OP_primitives.Hash160 b85524abf8202a961b847a3bd0bc89d3d4d41cc5 OP_EQUALVERIFY OP_CHECKSIG",
 				"hex": "76a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac",
 				"reqSigs": 1,
 				"type": "pubkeyhash"
@@ -197,7 +197,7 @@ func TestTxJSON_Node_MarshallJSON(t *testing.T) {
 			"value": 0.00001,
 			"n": 0,
 			"scriptPubKey": {
-				"asm": "OP_DUP OP_HASH160 eb0bd5edba389198e73f8efabddfc61666969ff7 OP_EQUALVERIFY OP_CHECKSIG",
+				"asm": "OP_DUP OP_primitives.Hash160 eb0bd5edba389198e73f8efabddfc61666969ff7 OP_EQUALVERIFY OP_CHECKSIG",
 				"hex": "76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 				"reqSigs": 1,
 				"type": "pubkeyhash"
@@ -255,7 +255,7 @@ func TestTxJSON_Node_UnmarshalJSON(t *testing.T) {
 						"value": 0.00000895,
 						"n": 1,
 						"scriptPubKey": {
-							"asm": "OP_DUP OP_HASH160 b85524abf8202a961b847a3bd0bc89d3d4d41cc5 OP_EQUALVERIFY OP_CHECKSIG",
+							"asm": "OP_DUP OP_primitives.Hash160 b85524abf8202a961b847a3bd0bc89d3d4d41cc5 OP_EQUALVERIFY OP_CHECKSIG",
 							"hex": "76a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac",
 							"reqSigs": 1,
 							"type": "pubkeyhash"
@@ -364,7 +364,7 @@ func TestTxsJSON_Node_MarshallJSON(t *testing.T) {
 				"value": 0.00000895,
 				"n": 1,
 				"scriptPubKey": {
-					"asm": "OP_DUP OP_HASH160 b85524abf8202a961b847a3bd0bc89d3d4d41cc5 OP_EQUALVERIFY OP_CHECKSIG",
+					"asm": "OP_DUP OP_primitives.Hash160 b85524abf8202a961b847a3bd0bc89d3d4d41cc5 OP_EQUALVERIFY OP_CHECKSIG",
 					"hex": "76a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac",
 					"reqSigs": 1,
 					"type": "pubkeyhash"
@@ -395,7 +395,7 @@ func TestTxsJSON_Node_MarshallJSON(t *testing.T) {
 				"value": 48.99999808,
 				"n": 0,
 				"scriptPubKey": {
-					"asm": "OP_DUP OP_HASH160 9933e4bad50e7dd4b48c1f0be98436ca7d4392a2 OP_EQUALVERIFY OP_CHECKSIG",
+					"asm": "OP_DUP OP_primitives.Hash160 9933e4bad50e7dd4b48c1f0be98436ca7d4392a2 OP_EQUALVERIFY OP_CHECKSIG",
 					"hex": "76a9149933e4bad50e7dd4b48c1f0be98436ca7d4392a288ac",
 					"reqSigs": 1,
 					"type": "pubkeyhash"
@@ -405,7 +405,7 @@ func TestTxsJSON_Node_MarshallJSON(t *testing.T) {
 				"value": 1,
 				"n": 1,
 				"scriptPubKey": {
-					"asm": "OP_DUP OP_HASH160 abbe187ad301e4326e59587e43d602edd318364e OP_EQUALVERIFY OP_CHECKSIG",
+					"asm": "OP_DUP OP_primitives.Hash160 abbe187ad301e4326e59587e43d602edd318364e OP_EQUALVERIFY OP_CHECKSIG",
 					"hex": "76a914abbe187ad301e4326e59587e43d602edd318364e88ac",
 					"reqSigs": 1,
 					"type": "pubkeyhash"
@@ -490,7 +490,7 @@ func TestTxsJSON_Node_MarshallJSON(t *testing.T) {
 				"value": 0.00001,
 				"n": 0,
 				"scriptPubKey": {
-					"asm": "OP_DUP OP_HASH160 eb0bd5edba389198e73f8efabddfc61666969ff7 OP_EQUALVERIFY OP_CHECKSIG",
+					"asm": "OP_DUP OP_primitives.Hash160 eb0bd5edba389198e73f8efabddfc61666969ff7 OP_EQUALVERIFY OP_CHECKSIG",
 					"hex": "76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					"reqSigs": 1,
 					"type": "pubkeyhash"
@@ -521,7 +521,7 @@ func TestTxsJSON_Node_MarshallJSON(t *testing.T) {
 				"value": 48.99999808,
 				"n": 0,
 				"scriptPubKey": {
-					"asm": "OP_DUP OP_HASH160 9933e4bad50e7dd4b48c1f0be98436ca7d4392a2 OP_EQUALVERIFY OP_CHECKSIG",
+					"asm": "OP_DUP OP_primitives.Hash160 9933e4bad50e7dd4b48c1f0be98436ca7d4392a2 OP_EQUALVERIFY OP_CHECKSIG",
 					"hex": "76a9149933e4bad50e7dd4b48c1f0be98436ca7d4392a288ac",
 					"reqSigs": 1,
 					"type": "pubkeyhash"
@@ -531,7 +531,7 @@ func TestTxsJSON_Node_MarshallJSON(t *testing.T) {
 				"value": 1,
 				"n": 1,
 				"scriptPubKey": {
-					"asm": "OP_DUP OP_HASH160 abbe187ad301e4326e59587e43d602edd318364e OP_EQUALVERIFY OP_CHECKSIG",
+					"asm": "OP_DUP OP_primitives.Hash160 abbe187ad301e4326e59587e43d602edd318364e OP_EQUALVERIFY OP_CHECKSIG",
 					"hex": "76a914abbe187ad301e4326e59587e43d602edd318364e88ac",
 					"reqSigs": 1,
 					"type": "pubkeyhash"
@@ -637,8 +637,8 @@ func TestOutput_Node_JSON(t *testing.T) {
 		"node json": {
 			output: &transaction.Output{
 				Satoshis: 10000,
-				LockingScript: func() *bscript.Script {
-					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
+				LockingScript: func() *script.Script {
+					s, err := script.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
 					assert.NoError(t, err)
 
 					return s
@@ -674,8 +674,8 @@ func TestOutput_JSON(t *testing.T) {
 		"standard json": {
 			output: &transaction.Output{
 				Satoshis: 10000,
-				LockingScript: func() *bscript.Script {
-					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
+				LockingScript: func() *script.Script {
+					s, err := script.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
 					assert.NoError(t, err)
 
 					return s
@@ -715,8 +715,8 @@ func TestOutput_Node_UnmarshalJSON(t *testing.T) {
 }`,
 			expOutput: &transaction.Output{
 				Satoshis: 10000,
-				LockingScript: func() *bscript.Script {
-					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
+				LockingScript: func() *script.Script {
+					s, err := script.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
 					assert.NoError(t, err)
 
 					return s
@@ -747,8 +747,8 @@ func TestOutput_UnmarshalJSON(t *testing.T) {
 }`,
 			expOutput: &transaction.Output{
 				Satoshis: 10000,
-				LockingScript: func() *bscript.Script {
-					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
+				LockingScript: func() *script.Script {
+					s, err := script.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
 					assert.NoError(t, err)
 
 					return s

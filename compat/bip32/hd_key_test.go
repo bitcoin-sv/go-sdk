@@ -158,7 +158,7 @@ func TestGetPrivateKeyByPath(t *testing.T) {
 		{validKey, 1<<32 - 1, 1<<32 - 1, false, false},
 	}
 
-	var privateKey *ec.PrivateKey
+	var privateKey *primitives.PrivateKey
 	for _, test := range tests {
 		if privateKey, err = GetPrivateKeyByPath(test.inputHDKey, test.inputChain, test.inputNum); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] [%d] inputted and error not expected but got: %s", t.Name(), test.inputHDKey, test.inputChain, test.inputNum, err.Error())
@@ -194,7 +194,7 @@ func ExampleGetPrivateKeyByPath() {
 	}
 
 	// Get a private key at the path
-	var privateKey *ec.PrivateKey
+	var privateKey *primitives.PrivateKey
 	privateKey, err = GetPrivateKeyByPath(hdKey, 0, 1)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
@@ -529,7 +529,7 @@ func ExampleGetPrivateKeyFromHDKey() {
 		return
 	}
 
-	var privateKey *ec.PrivateKey
+	var privateKey *primitives.PrivateKey
 	if privateKey, err = GetPrivateKeyFromHDKey(hdKey); err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -631,7 +631,7 @@ func TestGetPublicKeyFromHDKey(t *testing.T) {
 		{validHdKey, "02f2a2942b9d1dba033d36ab0c193e680415f5c8c1ff5d854f805c8c42ed9dd1fd", false, false},
 	}
 
-	var publicKey *ec.PublicKey
+	var publicKey *primitives.PublicKey
 	for _, test := range tests {
 		if publicKey, err = GetPublicKeyFromHDKey(test.input); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error not expected but got: %s", t.Name(), test.input, err.Error())
@@ -666,7 +666,7 @@ func ExampleGetPublicKeyFromHDKey() {
 		return
 	}
 
-	var publicKey *ec.PublicKey
+	var publicKey *primitives.PublicKey
 	if publicKey, err = GetPublicKeyFromHDKey(hdKey); err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -702,7 +702,7 @@ func TestGetAddressFromHDKey(t *testing.T) {
 		{validHdKey, "13xHrMdZuqa2gpweHf37w8hu6tfv3JrnaW", false, false},
 	}
 
-	var address *bscript.Address
+	var address *script.Address
 	for _, test := range tests {
 		if address, err = GetAddressFromHDKey(test.input); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error not expected but got: %s", t.Name(), test.input, err.Error())
@@ -737,7 +737,7 @@ func ExampleGetAddressFromHDKey() {
 		return
 	}
 
-	var address *bscript.Address
+	var address *script.Address
 	if address, err = GetAddressFromHDKey(hdKey); err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -844,7 +844,7 @@ func TestGetPublicKeysForPath(t *testing.T) {
 		{validHdKey, 4, "0366dcdebfc8abfd34bffc181ccb54f1706839a80ad4f0842ae5a43f39fdd35c1e", "03a095db29ae9ee0b22c775118b4444b59db40acdea137fd9ecd9c68dacf50a644", false, false},
 	}
 
-	var pubKeys []*ec.PublicKey
+	var pubKeys []*primitives.PublicKey
 	for _, test := range tests {
 		if pubKeys, err = GetPublicKeysForPath(test.input, test.inputNum); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] inputted and error not expected but got: %s", t.Name(), test.input, test.inputNum, err.Error())
@@ -881,7 +881,7 @@ func ExampleGetPublicKeysForPath() {
 		return
 	}
 
-	var publicKeys []*ec.PublicKey
+	var publicKeys []*primitives.PublicKey
 	publicKeys, err = GetPublicKeysForPath(hdKey, 5)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())

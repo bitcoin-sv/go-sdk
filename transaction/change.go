@@ -10,7 +10,7 @@ const (
 // ChangeToAddress calculates the amount of fees needed to cover the transaction
 // and adds the leftover change in a new P2PKH output using the address provided.
 func (tx *Tx) ChangeToAddress(addr string, f *FeeQuote) error {
-	s, err := bscript.NewP2PKHFromAddress(addr)
+	s, err := script.NewP2PKHFromAddress(addr)
 	if err != nil {
 		return err
 	}
@@ -21,7 +21,7 @@ func (tx *Tx) ChangeToAddress(addr string, f *FeeQuote) error {
 // Change calculates the amount of fees needed to cover the transaction
 //
 //	and adds the leftover change in a new output using the script provided.
-func (tx *Tx) Change(s *bscript.Script, f *FeeQuote) error {
+func (tx *Tx) Change(s *script.Script, f *FeeQuote) error {
 	if _, _, err := tx.change(f, &changeOutput{
 		lockingScript: s,
 		newOutput:     true,
@@ -48,7 +48,7 @@ func (tx *Tx) ChangeToExistingOutput(index uint, f *FeeQuote) error {
 }
 
 type changeOutput struct {
-	lockingScript *bscript.Script
+	lockingScript *script.Script
 	newOutput     bool
 }
 

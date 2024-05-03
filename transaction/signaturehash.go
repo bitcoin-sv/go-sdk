@@ -51,11 +51,11 @@ func (tx *Tx) CalcInputSignatureHash(inputNumber uint32, sigHashFlag sighash.Fla
 		return buf, nil
 	}
 
-	return crypto.Sha256d(buf), nil
+	return primitives.Sha256d(buf), nil
 }
 
 // CalcInputPreimage serialises the transaction based on the input index and the SIGHASH flag
-// and returns the preimage before double hashing (SHA256d).
+// and returns the preimage before double hashing (primitives.Sha256d).
 //
 // see https://github.com/bitcoin-sv/bitcoin-sv/blob/master/doc/abc/replay-protected-sighash.md#digest-algorithm
 func (tx *Tx) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([]byte, error) {
@@ -144,7 +144,7 @@ func (tx *Tx) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([
 }
 
 // CalcInputPreimageLegacy serialises the transaction based on the input index and the SIGHASH flag
-// and returns the preimage before double hashing (SHA256d), in the legacy format.
+// and returns the preimage before double hashing (primitives.Sha256d), in the legacy format.
 //
 // see https://wiki.bitcoinsv.io/index.php/Legacy_Sighash_Algorithm
 func (tx *Tx) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]byte, error) {
@@ -190,8 +190,8 @@ func (tx *Tx) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]b
 		if i == int(inputNumber) {
 			txCopy.Inputs[i].PreviousTxScript = tx.Inputs[inputNumber].PreviousTxScript
 		} else {
-			txCopy.Inputs[i].UnlockingScript = &bscript.Script{}
-			txCopy.Inputs[i].PreviousTxScript = &bscript.Script{}
+			txCopy.Inputs[i].UnlockingScript = &script.Script{}
+			txCopy.Inputs[i].PreviousTxScript = &script.Script{}
 		}
 	}
 
@@ -206,7 +206,7 @@ func (tx *Tx) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]b
 		txCopy.Outputs = txCopy.Outputs[:inputNumber+1]
 		for i := 0; i < int(inputNumber); i++ {
 			txCopy.Outputs[i].Satoshis = 18446744073709551615 // -1 but underflowed
-			txCopy.Outputs[i].LockingScript = &bscript.Script{}
+			txCopy.Outputs[i].LockingScript = &script.Script{}
 		}
 
 		for i := range txCopy.Inputs {
@@ -276,5 +276,5 @@ func (tx *Tx) OutputsHash(n int32) []byte {
 		buf = append(buf, tx.Outputs[n].BytesForSigHash()...)
 	}
 
-	return crypto.Sha256d(buf)
+	return primitives.Sha256d(buf)
 }

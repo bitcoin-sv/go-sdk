@@ -50,7 +50,7 @@ func (ip IndexedPath) GetOffsetLeaf(layer int, offset uint64) *PathElement {
 
 		return &PathElement{
 			Offset: offset,
-			Hash:   crypto.Sha256d(digest),
+			Hash:   primitives.Sha256d(digest),
 		}
 	}
 	return nil
@@ -267,7 +267,7 @@ func (mp *MerklePath) ComputeRootBin(txidLE *[]byte) ([]byte, error) {
 			}
 		}
 
-		workingHash = crypto.Sha256d(digest)
+		workingHash = primitives.Sha256d(digest)
 	}
 	return workingHash, nil
 }

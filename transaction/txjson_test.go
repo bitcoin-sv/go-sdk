@@ -50,7 +50,7 @@ func TestTx_JSON(t *testing.T) {
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, w)
-				s := &bscript.Script{}
+				s := &script.Script{}
 				assert.NoError(t, s.AppendPushDataString("test"))
 				tx.AddOutput(&transaction.Output{
 					LockingScript: s,

@@ -3,7 +3,7 @@ package drbg
 import (
 	"errors"
 	"fmt"
-
+	"github.com/bitcoin-sv/go-sdk/primitives"
 	 
 )
 
@@ -37,7 +37,7 @@ func NewDRBG(entropy, nonce []byte) (*DRBG, error) {
 
 // hmacSHA256 is a helper function to compute HMAC-SHA256
 func (d *DRBG) hmacSHA256(data []byte) []byte {
-	return crypto.Sha256HMAC(data, d.K)
+	return primitives.Sha256HMAC(data, d.K)
 }
 
 // update updates the internal state of the DRBG

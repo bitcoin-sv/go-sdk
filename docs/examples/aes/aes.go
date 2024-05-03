@@ -7,13 +7,13 @@ import (
 )
 
 func main() {
-	pk, _ := ec.NewPrivateKey()
+	pk, _ := primitives.NewPrivateKey()
 
 	// Encrypt using the public key of the given private key
-	encryptedData, _ := ec.EncryptWithPrivateKey(pk, "this is a test")
+	encryptedData, _ := primitives.EncryptWithPrivateKey(pk, "this is a test")
 
 	// Decrypt using the private key
-	decryptedData, _ := ec.DecryptWithPrivateKey(pk, encryptedData)
+	decryptedData, _ := primitives.DecryptWithPrivateKey(pk, encryptedData)
 
 	fmt.Printf("decryptedData: %s\n", decryptedData)
 }

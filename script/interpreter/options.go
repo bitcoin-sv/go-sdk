@@ -18,8 +18,8 @@ func WithTx(tx *transaction.Tx, inputIdx int, prevOutput *transaction.Output) Ex
 	}
 }
 
-// WithScripts configure the execution to run again a set of *bscript.Script.
-func WithScripts(lockingScript *bscript.Script, unlockingScript *bscript.Script) ExecutionOptionFunc {
+// WithScripts configure the execution to run again a set of *script.Script.
+func WithScripts(lockingScript *script.Script, unlockingScript *script.Script) ExecutionOptionFunc {
 	return func(p *execOpts) {
 		p.lockingScript = lockingScript
 		p.unlockingScript = unlockingScript

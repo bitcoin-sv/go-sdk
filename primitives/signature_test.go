@@ -467,7 +467,7 @@ func TestSignatureSerialise(t *testing.T) {
 func testSignCompact(t *testing.T, tag string, data []byte, isCompressed bool) {
 	priv, _ := NewPrivateKey()
 
-	hashed := crypto.Sha256d(data)
+	hashed := primitives.Sha256d(data)
 	sig, err := SignCompact(S256(), priv, hashed, isCompressed)
 	if err != nil {
 		t.Errorf("%s: error signing: %s", tag, err)

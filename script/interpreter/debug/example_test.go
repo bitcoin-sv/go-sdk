@@ -11,13 +11,13 @@ import (
 )
 
 func ExampleDebugger_AfterStep() {
-	lockingScript, err := bscript.NewFromASM("777f726c64 OP_SWAP OP_CAT OP_SHA256 8376118fc0230e6054e782fb31ae52ebcfd551342d8d026c209997e0127b6f74 OP_EQUAL")
+	lockingScript, err := script.NewFromASM("777f726c64 OP_SWAP OP_CAT OP_SHA256 8376118fc0230e6054e782fb31ae52ebcfd551342d8d026c209997e0127b6f74 OP_EQUAL")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	unlockingScript, err := bscript.NewFromASM(hex.EncodeToString([]byte("hello")))
+	unlockingScript, err := script.NewFromASM(hex.EncodeToString([]byte("hello")))
 	if err != nil {
 		fmt.Println(err)
 		return

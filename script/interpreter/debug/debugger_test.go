@@ -41,10 +41,10 @@ func TestDebugger_BeforeExecute(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			var timesCalled int
@@ -118,7 +118,7 @@ func TestDebugger_BeforeStep(t *testing.T) {
 				{"b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
 				{"b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "b472a266d0bd89c13706a4132ccfb16f7c3b9fcb"},
 			},
-			expOpcodes: []string{"OP_0", "OP_DUP", "OP_HASH160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL"},
+			expOpcodes: []string{"OP_0", "OP_DUP", "OP_primitives.Hash160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL"},
 		},
 		"error script": {
 			lockingScriptHex:   "5253958852529387",
@@ -137,10 +137,10 @@ func TestDebugger_BeforeStep(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -219,7 +219,7 @@ func TestDebugger_AfterStep(t *testing.T) {
 				{"b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "b472a266d0bd89c13706a4132ccfb16f7c3b9fcb"},
 				{"01"},
 			},
-			expOpcodes: []string{"OP_DUP", "OP_HASH160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL", "OP_EQUAL"},
+			expOpcodes: []string{"OP_DUP", "OP_primitives.Hash160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL", "OP_EQUAL"},
 		},
 		"error script": {
 			lockingScriptHex:   "5253958852529387",
@@ -237,10 +237,10 @@ func TestDebugger_AfterStep(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -319,7 +319,7 @@ func TestDebugger_BeforeExecuteOpcode(t *testing.T) {
 				{"b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
 				{"b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "b472a266d0bd89c13706a4132ccfb16f7c3b9fcb"},
 			},
-			expOpcodes: []string{"OP_0", "OP_DUP", "OP_HASH160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL"},
+			expOpcodes: []string{"OP_0", "OP_DUP", "OP_primitives.Hash160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL"},
 		},
 		"error script": {
 			lockingScriptHex:   "5253958852529387",
@@ -338,10 +338,10 @@ func TestDebugger_BeforeExecuteOpcode(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -420,7 +420,7 @@ func TestDebugger_AfterExecuteOpcode(t *testing.T) {
 				{"b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "b472a266d0bd89c13706a4132ccfb16f7c3b9fcb"},
 				{"01"},
 			},
-			expOpcodes: []string{"OP_0", "OP_DUP", "OP_HASH160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL"},
+			expOpcodes: []string{"OP_0", "OP_DUP", "OP_primitives.Hash160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL"},
 		},
 		"error script": {
 			lockingScriptHex:   "5253958852529387",
@@ -438,10 +438,10 @@ func TestDebugger_AfterExecuteOpcode(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -521,10 +521,10 @@ func TestDebugger_BeforeScriptChange(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -608,10 +608,10 @@ func TestDebugger_AfterScriptChange(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -677,10 +677,10 @@ func TestDebugger_AfterExecution(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			stack := make([]string, 0)
@@ -735,10 +735,10 @@ func TestDebugger_AfterError(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			stack := make([]string, 0)
@@ -801,10 +801,10 @@ func TestDebugger_AfterSuccess(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			stack := make([]string, 0)
@@ -887,7 +887,7 @@ func TestDebugger_BeforeStackPush(t *testing.T) {
 				{},
 			},
 			expPushData: []string{"", "", "b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "01"},
-			expOpcodes:  []string{"OP_0", "OP_DUP", "OP_HASH160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL"},
+			expOpcodes:  []string{"OP_0", "OP_DUP", "OP_primitives.Hash160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL"},
 		},
 		"error script": {
 			lockingScriptHex:   "5253958852529387",
@@ -907,10 +907,10 @@ func TestDebugger_BeforeStackPush(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -996,7 +996,7 @@ func TestDebugger_AfterStackPush(t *testing.T) {
 				{"01"},
 			},
 			expPushData: []string{"", "", "b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "01"},
-			expOpcodes:  []string{"OP_0", "OP_DUP", "OP_HASH160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL"},
+			expOpcodes:  []string{"OP_0", "OP_DUP", "OP_primitives.Hash160", "OP_SWAP", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL"},
 		},
 		"error script": {
 			lockingScriptHex:   "5253958852529387",
@@ -1016,10 +1016,10 @@ func TestDebugger_AfterStackPush(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -1099,7 +1099,7 @@ func TestDebugger_BeforeStackPop(t *testing.T) {
 				{"b472a266d0bd89c13706a4132ccfb16f7c3b9fcb"},
 				{"01"},
 			},
-			expOpcodes: []string{"OP_HASH160", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL", "OP_EQUAL", "OP_EQUAL"},
+			expOpcodes: []string{"OP_primitives.Hash160", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL", "OP_EQUAL", "OP_EQUAL"},
 		},
 		"error script": {
 			lockingScriptHex:   "5253958852529387",
@@ -1117,10 +1117,10 @@ func TestDebugger_BeforeStackPop(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -1200,7 +1200,7 @@ func TestDebugger_AfterStackPop(t *testing.T) {
 				{},
 				{},
 			},
-			expOpcodes: []string{"OP_HASH160", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL", "OP_EQUAL", "OP_EQUAL"},
+			expOpcodes: []string{"OP_primitives.Hash160", "OP_SHA256", "OP_RIPEMD160", "OP_EQUAL", "OP_EQUAL", "OP_EQUAL"},
 			expPopData: []string{"", "", "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855", "b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "b472a266d0bd89c13706a4132ccfb16f7c3b9fcb", "01"},
 		},
 		"error script": {
@@ -1220,10 +1220,10 @@ func TestDebugger_AfterStackPop(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{

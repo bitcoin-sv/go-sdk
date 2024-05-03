@@ -11,16 +11,16 @@ import (
 
 type SignedMessage struct {
 	Version            []byte
-	SenderPublicKey    *ec.PublicKey
-	RecipientPublicKey *ec.PublicKey
+	SenderPublicKey    *primitives.PublicKey
+	RecipientPublicKey *primitives.PublicKey
 	KeyID              []byte
-	Signature          *ec.Signature
+	Signature          *primitives.Signature
 }
 
-func Sign(message []byte, signer *ec.PrivateKey, verifier *ec.PublicKey) ([]byte, error) {
+func Sign(message []byte, signer *primitives.PrivateKey, verifier *primitives.PublicKey) ([]byte, error) {
 	recipientAnyone := verifier == nil
 	if recipientAnyone {
-		_, verifier = ec.PrivateKeyFromBytes([]byte{1})
+		_, verifier = primitives.PrivateKeyFromBytes([]byte{1})
 	}
 
 	keyID := make([]byte, 32)
@@ -55,7 +55,7 @@ func Sign(message []byte, signer *ec.PrivateKey, verifier *ec.PublicKey) ([]byte
 	return sig, nil
 }
 
-func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) {
+func Verify(message []byte, sig []byte, recipient *primitives.PrivateKey) (bool, error) {
 	counter := 4
 	messageVersion := sig[:counter]
 	if !bytes.Equal(messageVersion, VERSION_BYTES) {
@@ -63,13 +63,13 @@ func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) 
 	}
 	pubKeyBytes := sig[counter : counter+33]
 	counter += 33
-	signer, err := ec.ParsePubKey(pubKeyBytes)
+	signer, err := primitives.ParsePubKey(pubKeyBytes)
 	if err != nil {
 		return false, err
 	}
 	verifierFirst := sig[counter]
 	if verifierFirst == 0 {
-		recipient, _ = ec.PrivateKeyFromBytes([]byte{1})
+		recipient, _ = primitives.PrivateKeyFromBytes([]byte{1})
 		counter++
 	} else {
 		counter++
@@ -88,7 +88,7 @@ func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) 
 	keyID := sig[counter : counter+32]
 	counter += 32
 	signatureDER := sig[counter:]
-	signature, err := ec.FromDER(signatureDER)
+	signature, err := FromDER(signatureDER)
 	if err != nil {
 		return false, err
 	}

@@ -12,7 +12,7 @@ import (
 
 // Sign generates an ECDSA signature for a given hashed message using the provided private key.
 // If forceLowS is true, the function ensures that the 'S' value is in the lower half of the curve order.
-func Sign(msg []byte, privateKey *e.PrivateKey, forceLowS bool, customK *big.Int) (*ec.Signature, error) {
+func Sign(msg []byte, privateKey *e.PrivateKey, forceLowS bool, customK *big.Int) (*primitives.Signature, error) {
 	curve := elliptic.P256() // or another curve as needed
 
 	// Generate the signature
@@ -32,11 +32,11 @@ func Sign(msg []byte, privateKey *e.PrivateKey, forceLowS bool, customK *big.Int
 		}
 	}
 
-	return &ec.Signature{R: r, S: s}, nil
+	return &primitives.Signature{R: r, S: s}, nil
 }
 
 // SignWithCustomK generates an ECDSA signature for a given hashed message using the provided private key and custom K value.
-func SignWithCustomK(msg []byte, privateKey *e.PrivateKey, forceLowS bool, customK *big.Int) (*ec.Signature, error) {
+func SignWithCustomK(msg []byte, privateKey *e.PrivateKey, forceLowS bool, customK *big.Int) (*primitives.Signature, error) {
 	curve := privateKey.Curve
 	N := curve.Params().N
 
@@ -69,10 +69,10 @@ func SignWithCustomK(msg []byte, privateKey *e.PrivateKey, forceLowS bool, custo
 		}
 	}
 
-	return &ec.Signature{R: r, S: s}, nil
+	return &primitives.Signature{R: r, S: s}, nil
 }
 
 // Verify verifies an ECDSA signature for a given hashed message using the provided public key.
-func Verify(msg []byte, signature *ec.Signature, publicKey *e.PublicKey) bool {
+func Verify(msg []byte, signature *primitives.Signature, publicKey *e.PublicKey) bool {
 	return e.Verify(publicKey, msg, signature.R, signature.S)
 }

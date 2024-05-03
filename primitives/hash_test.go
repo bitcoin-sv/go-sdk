@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/hex"
 	"testing"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,16 +29,16 @@ func TestHashFunctions(t *testing.T) {
 			Ripemd160,
 		},
 		{
-			"Test Sha256d Empty String",
+			"Test primitives.Sha256d Empty String",
 			"",
 			"5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456",
-			Sha256d,
+			primitives.Sha256d,
 		},
 		{
 			"Test Sha256 d String",
 			"this is the data I want to hash",
 			"2209ddda5914a3fbad507ff2284c4b6e559c18a669f9fc3ad3b5826a2a999d58",
-			Sha256d,
+			primitives.Sha256d,
 		},
 		{
 			"Test Sha256 Empty String",
@@ -54,16 +53,16 @@ func TestHashFunctions(t *testing.T) {
 			Sha256,
 		},
 		{
-			"Test Hash160 Empty String",
+			"Test primitives.Hash160 Empty String",
 			"",
 			"b472a266d0bd89c13706a4132ccfb16f7c3b9fcb",
-			Hash160,
+			primitives.Hash160,
 		},
 		{
-			"Test Hash160 String",
+			"Test primitives.Hash160 String",
 			"this is the data I want to hash",
 			"e7fb13ef86fef4203f042fbfc2703fa628301e90",
-			Hash160,
+			primitives.Hash160,
 		},
 	}
 

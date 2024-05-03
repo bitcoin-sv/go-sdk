@@ -3,7 +3,6 @@ package primitives
 import (
 	"crypto/hmac"
 	"crypto/sha256"
-
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -13,7 +12,7 @@ func Sha256(b []byte) []byte {
 	return data[:]
 }
 
-// Sha256d calculates hash(hash(b)) and returns the resulting bytes.
+// primitives.Sha256d calculates hash(hash(b)) and returns the resulting bytes.
 func Sha256d(b []byte) []byte {
 	first := Sha256(b)
 	return Sha256(first[:])
@@ -33,7 +32,7 @@ func Ripemd160(b []byte) []byte {
 	return ripe.Sum(nil)
 }
 
-// Hash160 hashes with SHA256 and then hashes again with RIPEMD160.
+// primitives.Hash160 hashes with SHA256 and then hashes again with RIPEMD160.
 func Hash160(b []byte) []byte {
 	hash := Sha256(b)
 	return Ripemd160(hash[:])

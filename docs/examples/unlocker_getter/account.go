@@ -38,7 +38,7 @@ func newAccount() *account {
 	}
 }
 
-func (a *account) createDestination() *bscript.Script {
+func (a *account) createDestination() *script.Script {
 	// generate a new path until and increment the counter.
 	path := bip32.DerivePath(a.counter)
 	a.counter++
@@ -50,7 +50,7 @@ func (a *account) createDestination() *bscript.Script {
 	}
 
 	// Create a locking script from this public key.
-	s, err := bscript.NewP2PKHFromPubKeyBytes(pubKey)
+	s, err := script.NewP2PKHFromPubKeyBytes(pubKey)
 	if err != nil {
 		panic(err)
 	}
@@ -62,7 +62,7 @@ func (a *account) createDestination() *bscript.Script {
 }
 
 // Unlocker get the correct unlocker for a given locking script.
-func (a *account) Unlocker(ctx context.Context, lockingScript *bscript.Script) (transaction.Unlocker, error) {
+func (a *account) Unlocker(ctx context.Context, lockingScript *script.Script) (transaction.Unlocker, error) {
 	// Retrieve the path for the given locking script.
 	path, ok := a.scriptToPathMap[lockingScript.String()]
 	if !ok {

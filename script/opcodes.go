@@ -177,7 +177,7 @@ const (
 	OpRIPEMD160           byte = 0xa6 // 166
 	OpSHA1                byte = 0xa7 // 167
 	OpSHA256              byte = 0xa8 // 168
-	OpHASH160             byte = 0xa9 // 169
+	OpHash160             byte = 0xa9 // 169
 	OpHASH256             byte = 0xaa // 170
 	OpCODESEPARATOR       byte = 0xab // 171
 	OpCHECKSIG            byte = 0xac // 172
@@ -445,7 +445,7 @@ var OpCodeStrings = map[string]byte{
 	"OP_RIPEMD160":           OpRIPEMD160,
 	"OP_SHA1":                OpSHA1,
 	"OP_SHA256":              OpSHA256,
-	"OP_HASH160":             OpHASH160,
+	"OP_Hash160":             OpHash160,
 	"OP_HASH256":             OpHASH256,
 	"OP_CODESEPARATOR":       OpCODESEPARATOR,
 	"OP_CHECKSIG":            OpCHECKSIG,
@@ -704,7 +704,7 @@ var OpCodeValues = map[byte]string{
 	OpRIPEMD160:           "OP_RIPEMD160",
 	OpSHA1:                "OP_SHA1",
 	OpSHA256:              "OP_SHA256",
-	OpHASH160:             "OP_HASH160",
+	OpHash160:             "OP_Hash160",
 	OpHASH256:             "OP_HASH256",
 	OpCODESEPARATOR:       "OP_CODESEPARATOR",
 	OpCHECKSIG:            "OP_CHECKSIG",

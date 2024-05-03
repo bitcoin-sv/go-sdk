@@ -52,7 +52,7 @@ func ExampleEngine_Execute() {
 	}
 	// Output:
 	// 304502210086c83beb2b2663e4709a583d261d75be538aedcafa7766bd983e5c8db2f8b2fc02201a88b178624ab0ad1748b37c875f885930166237c88f5af78ee4e61d337f935f41 03e8be830d98bb3b007a0343ee5c36daa48796ae8bb57946b1e87378ad6e8a090d
-	// OP_DUP OP_HASH160 805096c5167877a5799977d46fb9dee5891dc3cb OP_EQUALVERIFY OP_CHECKSIG
+	// OP_DUP OP_primitives.Hash160 805096c5167877a5799977d46fb9dee5891dc3cb OP_EQUALVERIFY OP_CHECKSIG
 }
 
 func ExampleEngine_Execute_error() {
@@ -134,20 +134,20 @@ func ExampleEngine_Execute_concurrent() {
 	for _, e := range ee {
 		exec := e
 		errs.Go(func() error {
-			input := exec.tx.InputIdx(exec.inputIdx)
+			input := exprimitivestx.InputIdx(exprimitivesinputIdx)
 			inputASM, err := input.UnlockingScript.ToASM()
 			if err != nil {
 				return err
 			}
 
-			outputASM, err := exec.prevTxOut.LockingScript.ToASM()
+			outputASM, err := exprimitives.PrevTxOut.LockingScript.ToASM()
 			if err != nil {
 				return err
 			}
 
 			fmt.Println(inputASM)
 			fmt.Println(outputASM)
-			return vm.Execute(interpreter.WithTx(exec.tx, exec.inputIdx, exec.prevTxOut))
+			return vm.Execute(interpreter.WithTx(exprimitivestx, exprimitivesinputIdx, exprimitives.PrevTxOut))
 		})
 	}
 
@@ -158,7 +158,7 @@ func ExampleEngine_Execute_concurrent() {
 
 	// Unordered output:
 	// 304402206579610b3a845e7ffa58203c686ca86ed3f2f946454bcb5f78e960c8ec34617702206cf0f168267acbca0acdc7fe38311fd94fd821868891aa1da150fe0de6e0ff6c41 03bb0164c11476e32287120301be5aca1310b0f72579f83e88cf6e10e42f6f78f1
-	// OP_DUP OP_HASH160 a0416fb58b878bfaede66f83bb0e8c9fe0b0619c OP_EQUALVERIFY OP_CHECKSIG
+	// OP_DUP OP_primitives.Hash160 a0416fb58b878bfaede66f83bb0e8c9fe0b0619c OP_EQUALVERIFY OP_CHECKSIG
 	// 304502210086c83beb2b2663e4709a583d261d75be538aedcafa7766bd983e5c8db2f8b2fc02201a88b178624ab0ad1748b37c875f885930166237c88f5af78ee4e61d337f935f41 03e8be830d98bb3b007a0343ee5c36daa48796ae8bb57946b1e87378ad6e8a090d
-	// OP_DUP OP_HASH160 805096c5167877a5799977d46fb9dee5891dc3cb OP_EQUALVERIFY OP_CHECKSIG
+	// OP_DUP OP_primitives.Hash160 805096c5167877a5799977d46fb9dee5891dc3cb OP_EQUALVERIFY OP_CHECKSIG
 }
