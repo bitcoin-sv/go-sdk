@@ -1,4 +1,4 @@
-package ec_test
+package primitives_test
 
 import (
 	"encoding/base64"

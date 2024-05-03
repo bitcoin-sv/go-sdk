@@ -1,4 +1,4 @@
-package encryption_test
+package primitives_test
 
 import (
 	"crypto/aes"

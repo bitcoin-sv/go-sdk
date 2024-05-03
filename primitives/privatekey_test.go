@@ -1,4 +1,4 @@
-package primitives
+package primitives_test
 
 import (
 	"bytes"
