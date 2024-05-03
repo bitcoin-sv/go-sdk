@@ -1308,13 +1308,13 @@ func opcodeNot(op *ParsedOpcode, t *thread) error {
 	return nil
 }
 
-// opcode0NotEqual treats the top item on the data stack as an integer and
+// opcodeNotEqual treats the top item on the data stack as an integer and
 // replaces it with either a 0 if it is zero, or a 1 if it is not zero.
 //
 // Stack transformation (x2==0): [... x1 0] -> [... x1 0]
 // Stack transformation (x2!=0): [... x1 1] -> [... x1 1]
 // Stack transformation (x2!=0): [... x1 17] -> [... x1 1]
-func opcode0NotEqual(op *ParsedOpcode, t *thread) error {
+func opcodeNotEqual(op *ParsedOpcode, t *thread) error {
 	m, err := t.dstack.PopInt()
 	if err != nil {
 		return err
@@ -1861,11 +1861,11 @@ func opcodeSha256(op *ParsedOpcode, t *thread) error {
 	return nil
 }
 
-// opcodeprimitivesHash160 treats the top item of the data stack as raw bytes and replaces
+// opcodeHash160 treats the top item of the data stack as raw bytes and replaces
 // it with ripemd160(sha256(data)).
 //
 // Stack transformation: [... x1] -> [... ripemd160(sha256(x1))]
-func opcodeprimitivesHash160(op *ParsedOpcode, t *thread) error {
+func opcodeHash160(op *ParsedOpcode, t *thread) error {
 	buf, err := t.dstack.PopByteArray()
 	if err != nil {
 		return err
@@ -1894,7 +1894,7 @@ func opcodeHash256(op *ParsedOpcode, t *thread) error {
 // seen script.OpCODESEPARATOR which is used during signature checking.
 //
 // This opcode does not change the contents of the data stack.
-func opcodeCODESEPARATOR(op *ParsedOpcode, t *thread) error {
+func opcodeCodeSeparator(op *ParsedOpcode, t *thread) error {
 	t.lastCodeSep = t.scriptOff
 	return nil
 }
