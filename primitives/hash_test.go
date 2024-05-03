@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"testing"
 	"github.com/stretchr/testify/assert"
+	"github.com/bitcoin-sv/go-sdk/primitives"
 )
 
 func TestHashFunctions(t *testing.T) {

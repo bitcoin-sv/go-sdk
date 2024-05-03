@@ -7,8 +7,6 @@ import (
 	"math/big"
 	"math/bits"
 	"strings"
-
-	 
 	"github.com/bitcoin-sv/go-sdk/primitives"
 )
 
@@ -92,7 +90,7 @@ func NewP2PKHFromPubKeyBytes(pubKeyBytes []byte) (*Script, error) {
 func NewP2PKHFromPubKeyHash(pubKeyHash []byte) (*Script, error) {
 	b := []byte{
 		OpDUP,
-		OpHash160,
+		OpHASH160,
 		OpDATA20,
 	}
 	b = append(b, pubKeyHash...)
@@ -123,7 +121,7 @@ func NewP2PKHFromAddress(addr string) (*Script, error) {
 	}
 
 	s := new(Script)
-	_ = s.AppendOpcodes(OpDUP, OpHash160)
+	_ = s.AppendOpcodes(OpDUP, OpHASH160)
 	if err = s.AppendPushData(a.PublicKeyHash); err != nil {
 		return nil, err
 	}
@@ -236,7 +234,7 @@ func (s *Script) IsP2PKH() bool {
 	b := []byte(*s)
 	return len(b) == 25 &&
 		b[0] == OpDUP &&
-		b[1] == OpHash160 &&
+		b[1] == OpHASH160 &&
 		b[2] == OpDATA20 &&
 		b[23] == OpEQUALVERIFY &&
 		b[24] == OpCHECKSIG
@@ -268,7 +266,7 @@ func (s *Script) IsP2SH() bool {
 	b := []byte(*s)
 
 	return len(b) == 23 &&
-		b[0] == OpHash160 &&
+		b[0] == OpHASH160 &&
 		b[1] == OpDATA20 &&
 		b[22] == OpEQUAL
 }
@@ -307,7 +305,7 @@ func isP2PKHInscriptionHelper(parts [][]byte) bool {
 		return false
 	}
 	valid := parts[0][0] == OpDUP &&
-		parts[1][0] == OpHash160 &&
+		parts[1][0] == OpHASH160 &&
 		parts[3][0] == OpEQUALVERIFY &&
 		parts[4][0] == OpCHECKSIG &&
 		parts[5][0] == OpFALSE &&
@@ -393,7 +391,7 @@ func (s *Script) PublicKeyHash() ([]byte, error) {
 		return nil, ErrEmptyScript
 	}
 
-	if (*s)[0] != OpDUP || len(*s) <= 2 || (*s)[1] != OpHash160 {
+	if (*s)[0] != OpDUP || len(*s) <= 2 || (*s)[1] != OpHASH160 {
 		return nil, ErrNotP2PKH
 	}
 

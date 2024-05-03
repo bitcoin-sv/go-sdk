@@ -119,13 +119,13 @@ func (tx *Tx) AddHashPuzzleOutput(secret, publicKeyHash string, satoshis uint64)
 
 	s := &script.Script{}
 
-	_ = s.AppendOpcodes(script.OpHash160)
+	_ = s.AppendOpcodes(script.OpHASH160)
 	secretBytesHash := primitives.Hash160([]byte(secret))
 
 	if err = s.AppendPushData(secretBytesHash); err != nil {
 		return err
 	}
-	_ = s.AppendOpcodes(script.OpEQUALVERIFY, script.OpDUP, script.OpHash160)
+	_ = s.AppendOpcodes(script.OpEQUALVERIFY, script.OpDUP, script.OpHASH160)
 
 	if err = s.AppendPushData(publicKeyHashBytes); err != nil {
 		return err

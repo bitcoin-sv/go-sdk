@@ -154,7 +154,7 @@ const (
 	OpNEGATE              byte = 0x8f // 143
 	OpABS                 byte = 0x90 // 144
 	OpNOT                 byte = 0x91 // 145
-	Op0NOTEQUAL           byte = 0x92 // 146
+	OpNOTEQUAL            byte = 0x92 // 146
 	OpADD                 byte = 0x93 // 147
 	OpSUB                 byte = 0x94 // 148
 	OpMUL                 byte = 0x95 // 149
@@ -177,7 +177,7 @@ const (
 	OpRIPEMD160           byte = 0xa6 // 166
 	OpSHA1                byte = 0xa7 // 167
 	OpSHA256              byte = 0xa8 // 168
-	OpHash160             byte = 0xa9 // 169
+	OpHASH160             byte = 0xa9 // 169
 	OpHASH256             byte = 0xaa // 170
 	OpCODESEPARATOR       byte = 0xab // 171
 	OpCHECKSIG            byte = 0xac // 172
@@ -422,7 +422,7 @@ var OpCodeStrings = map[string]byte{
 	"OP_NEGATE":              OpNEGATE,
 	"OP_ABS":                 OpABS,
 	"OP_NOT":                 OpNOT,
-	"OP_0NOTEQUAL":           Op0NOTEQUAL,
+	"OP_NOTEQUAL":            OpNOTEQUAL,
 	"OP_ADD":                 OpADD,
 	"OP_SUB":                 OpSUB,
 	"OP_MUL":                 OpMUL,
@@ -445,7 +445,7 @@ var OpCodeStrings = map[string]byte{
 	"OP_RIPEMD160":           OpRIPEMD160,
 	"OP_SHA1":                OpSHA1,
 	"OP_SHA256":              OpSHA256,
-	"OP_Hash160":             OpHash160,
+	"OP_HASH160":             OpHASH160,
 	"OP_HASH256":             OpHASH256,
 	"OP_CODESEPARATOR":       OpCODESEPARATOR,
 	"OP_CHECKSIG":            OpCHECKSIG,
@@ -681,7 +681,7 @@ var OpCodeValues = map[byte]string{
 	OpNEGATE:              "OP_NEGATE",
 	OpABS:                 "OP_ABS",
 	OpNOT:                 "OP_NOT",
-	Op0NOTEQUAL:           "OP_0NOTEQUAL",
+	OpNOTEQUAL:            "OP_NOTEQUAL",
 	OpADD:                 "OP_ADD",
 	OpSUB:                 "OP_SUB",
 	OpMUL:                 "OP_MUL",
@@ -704,7 +704,7 @@ var OpCodeValues = map[byte]string{
 	OpRIPEMD160:           "OP_RIPEMD160",
 	OpSHA1:                "OP_SHA1",
 	OpSHA256:              "OP_SHA256",
-	OpHash160:             "OP_Hash160",
+	OpHASH160:             "OP_HASH160",
 	OpHASH256:             "OP_HASH256",
 	OpCODESEPARATOR:       "OP_CODESEPARATOR",
 	OpCHECKSIG:            "OP_CHECKSIG",
