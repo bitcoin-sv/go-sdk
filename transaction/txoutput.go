@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/bitcoin-sv/go-sdk/script"
-	 
+	"github.com/bitcoin-sv/go-sdk/primitives" 
 	"github.com/pkg/errors"
 )
 
@@ -119,13 +119,13 @@ func (tx *Tx) AddHashPuzzleOutput(secret, publicKeyHash string, satoshis uint64)
 
 	s := &script.Script{}
 
-	_ = s.AppendOpcodes(script.Op.Hash160)
+	_ = s.AppendOpcodes(script.OpHash160)
 	secretBytesHash := primitives.Hash160([]byte(secret))
 
 	if err = s.AppendPushData(secretBytesHash); err != nil {
 		return err
 	}
-	_ = s.AppendOpcodes(script.OpEQUALVERIFY, script.OpDUP, script.Op.Hash160)
+	_ = s.AppendOpcodes(script.OpEQUALVERIFY, script.OpDUP, script.OpHash160)
 
 	if err = s.AppendPushData(publicKeyHashBytes); err != nil {
 		return err

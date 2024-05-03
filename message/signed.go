@@ -88,7 +88,7 @@ func Verify(message []byte, sig []byte, recipient *primitives.PrivateKey) (bool,
 	keyID := sig[counter : counter+32]
 	counter += 32
 	signatureDER := sig[counter:]
-	signature, err := FromDER(signatureDER)
+	signature, err := primitives.FromDER(signatureDER)
 	if err != nil {
 		return false, err
 	}

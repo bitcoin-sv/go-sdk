@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	"github.com/bitcoin-sv/go-sdk/script"
-	 
+	"github.com/bitcoin-sv/go-sdk/primitives" 
 	"github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/pkg/errors"
@@ -41,12 +41,12 @@ func (tx *Tx) AddP2PKHInputsFromTx(pvsTx *Tx, matchPK []byte) error {
 	// Given that the prevTxID never changes, calculate it once up front.
 	prevTxIDBytes := pvsTx.TxIDBytes()
 	for i, utxo := range pvsTx.Outputs {
-		utxoPkprimitives.Hash160, err := utxo.LockingScript.PublicKeyHash()
+		Hash160, err := utxo.LockingScript.PublicKeyHash()
 		if err != nil {
 			return err
 		}
 
-		if bytes.Equal(utxoPkprimitives.Hash160, primitives.Hash160(matchPK)) {
+		if bytes.Equal(Hash160, primitives.Hash160(matchPK)) {
 			if err := tx.FromUTXOs(&UTXO{
 				TxID:          prevTxIDBytes,
 				Vout:          uint32(i),

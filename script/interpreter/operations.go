@@ -197,7 +197,7 @@ var opcodeArray = [256]opcode{
 	script.OpNEGATE:             {script.OpNEGATE, "OP_NEGATE", 1, opcodeNegate},
 	script.OpABS:                {script.OpABS, "OP_ABS", 1, opcodeAbs},
 	script.OpNOT:                {script.OpNOT, "OP_NOT", 1, opcodeNot},
-	script.Op0NOTEQUAL:          {script.Op0NOTEQUAL, "OP_0NOTEQUAL", 1, opcode0NotEqual},
+	script.OpNOTEQUAL:          {script.OpNOTEQUAL, "OP_NOTEQUAL", 1, opcodeNotEqual},
 	script.OpADD:                {script.OpADD, "OP_ADD", 1, opcodeAdd},
 	script.OpSUB:                {script.OpSUB, "OP_SUB", 1, opcodeSub},
 	script.OpMUL:                {script.OpMUL, "OP_MUL", 1, opcodeMul},
@@ -222,7 +222,7 @@ var opcodeArray = [256]opcode{
 	script.OpRIPEMD160:           {script.OpRIPEMD160, "OP_RIPEMD160", 1, opcodeRipemd160},
 	script.OpSHA1:                {script.OpSHA1, "OP_SHA1", 1, opcodeSha1},
 	script.OpSHA256:              {script.OpSHA256, "OP_SHA256", 1, opcodeSha256},
-	script.Op.Hash160:             {script.Op.Hash160, "OP_primitives.Hash160", 1, opcodeprimitives.Hash160},
+	script.OpHASH160:             {script.OpHASH160, "OP_Hash160", 1, opcodeHash160},
 	script.OpHASH256:             {script.OpHASH256, "OP_HASH256", 1, opcodeHash256},
 	script.OpCODESEPARATOR:       {script.OpCODESEPARATOR, "OP_CODESEPARATOR", 1, opcodeCodeSeparator},
 	script.OpCHECKSIG:            {script.OpCHECKSIG, "OP_CHECKSIG", 1, opcodeCheckSig},
@@ -1861,11 +1861,11 @@ func opcodeSha256(op *ParsedOpcode, t *thread) error {
 	return nil
 }
 
-// opcodeprimitives.Hash160 treats the top item of the data stack as raw bytes and replaces
+// opcodeprimitivesHash160 treats the top item of the data stack as raw bytes and replaces
 // it with ripemd160(sha256(data)).
 //
 // Stack transformation: [... x1] -> [... ripemd160(sha256(x1))]
-func opcodeprimitives.Hash160(op *ParsedOpcode, t *thread) error {
+func opcodeprimitivesHash160(op *ParsedOpcode, t *thread) error {
 	buf, err := t.dstack.PopByteArray()
 	if err != nil {
 		return err

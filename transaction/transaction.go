@@ -9,7 +9,7 @@ import (
 	"log"
 
 	"github.com/bitcoin-sv/go-sdk/script"
-	 
+	"github.com/bitcoin-sv/go-sdk/primitives" 
 	"github.com/bitcoin-sv/go-sdk/util"
 )
 
