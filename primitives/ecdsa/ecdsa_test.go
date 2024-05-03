@@ -31,7 +31,7 @@ func TestECDSA(t *testing.T) {
 			expectPass: true,
 		},
 		// TODO: This is a test from ts but not sure why this is expected to fail it seems to work fine
-		// https://github.com/bitcoin-sv/ts-sdk/blob/master/src//__tests/ECDSA.test.ts#L48
+		// https://github.com/jonesjBSV/ts-sdk/blob/master/src//__tests/ECDSA.test.ts#L48
 		// {
 		// 	name:       "Incorrect Signed Message",
 		// 	messageHex: "BA5AABBE1AA9B6EC1E2ADB2DF99699344345678901234567890ABCDEFABCDEF02",

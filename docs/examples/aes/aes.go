@@ -3,7 +3,7 @@ package docs
 import (
 	"fmt"
 
-	"github.com/bitcoin-sv/go-sdk/primitives"
+	"github.com/jonesjBSV/go-sdk/primitives"
 )
 
 func main() {

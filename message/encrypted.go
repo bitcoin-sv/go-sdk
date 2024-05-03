@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/bitcoin-sv/go-sdk/primitives"
+	"github.com/jonesjBSV/go-sdk/primitives"
 )
 
-// BRC-78: https://github.com/bitcoin-sv/BRCs/blob/master/peer-to-peer/0078.md
+// BRC-78: https://github.com/jonesjBSV/BRCs/blob/master/peer-to-peer/0078.md
 // TODO: According to spec this should be 0x10334242
 // const VERSION = "42421033"
 const VERSION = "10334242" // FIXME: remove later if not needed

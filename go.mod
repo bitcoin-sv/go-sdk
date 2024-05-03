@@ -1,4 +1,4 @@
-module github.com/bitcoin-sv/go-sdk
+module github.com/jonesjBSV/go-sdk
 
 go 1.22
 

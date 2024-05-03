@@ -6,7 +6,7 @@ import (
 
 	 
 
-	"github.com/bitcoin-sv/go-sdk/util"
+	"github.com/jonesjBSV/go-sdk/util"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -3,7 +3,7 @@ package script
 import (
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/primitives/wif"
+	"github.com/jonesjBSV/go-sdk/primitives/wif"
 	"github.com/stretchr/testify/assert"
 )
 

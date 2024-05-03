@@ -7,10 +7,10 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/jonesjBSV/go-sdk/script"
 	 
-	"github.com/bitcoin-sv/go-sdk/transaction/sighash"
-	"github.com/bitcoin-sv/go-sdk/util"
+	"github.com/jonesjBSV/go-sdk/transaction/sighash"
+	"github.com/jonesjBSV/go-sdk/util"
 	"github.com/pkg/errors"
 )
 

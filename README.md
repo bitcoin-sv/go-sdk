@@ -28,7 +28,7 @@ The BSV Blockchain Libraries Project aims to structure and maintain a middleware
 To install the SDK, run:
 
 ```bash
-go install github.com/bitcoin-sv/go-sdk
+go install github.com/jonesjBSV/go-sdk
 ```
 
 ### Basic Usage
@@ -42,9 +42,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/bitcoin-sv/go-sdk/primitives/wif"
-	"github.com/bitcoin-sv/go-sdk/transaction"
-	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
+	"github.com/jonesjBSV/go-sdk/primitives/wif"
+	"github.com/jonesjBSV/go-sdk/transaction"
+	"github.com/jonesjBSV/go-sdk/transaction/unlocker"
 )
 
 func main() {
@@ -69,11 +69,11 @@ func main() {
 
 ```
 
-See the [Go Doc](https://pkg.go.dev/github.com/bitcoin-sv/go-sdk) for a complete list of available modules and functions.
+See the [Go Doc](https://pkg.go.dev/github.com/jonesjBSV/go-sdk) for a complete list of available modules and functions.
 
 ### Examples
 
-Check out the [examples folder](https://github.com/bitcoin-sv/go-sdk/tree/master/examples) for more advanced examples.
+Check out the [examples folder](https://github.com/jonesjBSV/go-sdk/tree/master/examples) for more advanced examples.
 
 ## Features & Deliverables
 
@@ -87,14 +87,14 @@ Check out the [examples folder](https://github.com/bitcoin-sv/go-sdk/tree/master
 
 ## Documentation
 
-The SDK is richly documented with code-level annotations. This should show up well within editors like VSCode. For complete API docs, check out the [Go Doc](https://pkg.go.dev/github.com/bitcoin-sv/go-sdk). Please refer to the [Libraries Wiki](#) (link to be provided) for a deep dive into each feature, tutorials, and usage examples.
+The SDK is richly documented with code-level annotations. This should show up well within editors like VSCode. For complete API docs, check out the [Go Doc](https://pkg.go.dev/github.com/jonesjBSV/go-sdk). Please refer to the [Libraries Wiki](#) (link to be provided) for a deep dive into each feature, tutorials, and usage examples.
 
 ## Contribution Guidelines
 
 We're always looking for contributors to help us improve the SDK. Whether it's bug reports, feature requests, or pull requests - all contributions are welcome.
 
 1. **Fork & Clone**: Fork this repository and clone it to your local machine.
-2. **Set Up**: Run `go get github.com/bitcoin-sv/go-sdk` to get all the modules.
+2. **Set Up**: Run `go get github.com/jonesjBSV/go-sdk` to get all the modules.
 3. **Make Changes**: Create a new branch and make your changes.
 4. **Test**: Ensure all tests pass by running `go test ./...`.
 5. **Commit**: Commit your changes and push to your fork.

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/script"
-	"github.com/bitcoin-sv/go-sdk/transaction"
+	"github.com/jonesjBSV/go-sdk/script"
+	"github.com/jonesjBSV/go-sdk/transaction"
 	"github.com/stretchr/testify/assert"
 )
 

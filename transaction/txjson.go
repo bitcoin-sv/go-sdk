@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/jonesjBSV/go-sdk/script"
 	"github.com/pkg/errors"
 )
 

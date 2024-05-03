@@ -3,7 +3,7 @@ package message
 import (
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/primitives"
+	"github.com/jonesjBSV/go-sdk/primitives"
 	"github.com/stretchr/testify/assert" // Using testify for assertions similar to JavaScript's expect
 )
 

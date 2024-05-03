@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/binary"
 
-	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/jonesjBSV/go-sdk/script"
 	 
-	"github.com/bitcoin-sv/go-sdk/transaction/sighash"
-	"github.com/bitcoin-sv/go-sdk/util"
+	"github.com/jonesjBSV/go-sdk/transaction/sighash"
+	"github.com/jonesjBSV/go-sdk/util"
 )
 
 // defaultHex is used to fix a bug in the original client (see if statement in the CalcInputSignatureHash func)
@@ -30,7 +30,7 @@ func (tx *Tx) sigStrat(shf sighash.Flag) sigHashFunc {
 // to be signed. BitCoin (SV) uses a different signature hashing algorithm
 // after the UAHF fork for replay protection.
 //
-// see https://github.com/bitcoin-sv/bitcoin-sv/blob/master/doc/abc/replay-protected-sighash.md#digest-algorithm
+// see https://github.com/jonesjBSV/jonesjBSV/blob/master/doc/abc/replay-protected-sighash.md#digest-algorithm
 func (tx *Tx) CalcInputSignatureHash(inputNumber uint32, sigHashFlag sighash.Flag) ([]byte, error) {
 	sigHashFn := tx.sigStrat(sigHashFlag)
 	buf, err := sigHashFn(inputNumber, sigHashFlag)
@@ -57,7 +57,7 @@ func (tx *Tx) CalcInputSignatureHash(inputNumber uint32, sigHashFlag sighash.Fla
 // CalcInputPreimage serialises the transaction based on the input index and the SIGHASH flag
 // and returns the preimage before double hashing (SHA256d).
 //
-// see https://github.com/bitcoin-sv/bitcoin-sv/blob/master/doc/abc/replay-protected-sighash.md#digest-algorithm
+// see https://github.com/jonesjBSV/jonesjBSV/blob/master/doc/abc/replay-protected-sighash.md#digest-algorithm
 func (tx *Tx) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([]byte, error) {
 	if tx.InputIdx(int(inputNumber)) == nil {
 		return nil, ErrInputNoExist

@@ -19,9 +19,9 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/bitcoin-sv/go-sdk/compat/base58"
-	"github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
-	"github.com/bitcoin-sv/go-sdk/primitives"
+	"github.com/jonesjBSV/go-sdk/compat/base58"
+	"github.com/jonesjBSV/go-sdk/transaction/chaincfg"
+	"github.com/jonesjBSV/go-sdk/primitives"
 )
 
 const (

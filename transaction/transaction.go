@@ -8,9 +8,9 @@ import (
 	"io"
 	"log"
 
-	"github.com/bitcoin-sv/go-sdk/script"
+	"github.com/jonesjBSV/go-sdk/script"
 	 
-	"github.com/bitcoin-sv/go-sdk/util"
+	"github.com/jonesjBSV/go-sdk/util"
 )
 
 type Tx struct {
