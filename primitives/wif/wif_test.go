@@ -7,10 +7,9 @@ package wif_test
 import (
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
 	"github.com/bitcoin-sv/go-sdk/primitives"
 	"github.com/bitcoin-sv/go-sdk/primitives/wif"
-
+	"github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
 )
 
 func TestEncodeDecodeWIF(t *testing.T) {

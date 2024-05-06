@@ -35,8 +35,9 @@ func Sign(msg []byte, privateKey *e.PrivateKey, forceLowS bool, customK *big.Int
 	return &primitives.Signature{R: r, S: s}, nil
 }
 
-// SignWithCustomK generates an ECDSA signature for a given hashed message using the provided private key and custom K value.
-func SignWithCustomK(msg []byte, privateKey *e.PrivateKey, forceLowS bool, customK *big.Int) (*primitives.Signature, error) {
+// SignWithCustomK generates an ECDSA signature over a message using the private key and custom K value.
+func SignWithCustomK(msg []byte, privateKey *e.PrivateKey, forceLowS bool, customK *big.Int) (
+	*primitives.Signature, error) {
 	curve := privateKey.Curve
 	N := curve.Params().N
 

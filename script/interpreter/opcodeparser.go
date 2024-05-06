@@ -134,12 +134,12 @@ func (o *ParsedOpcode) enforceMinimumDataPush() error {
 
 // Parse takes a *script.Script and returns a []interpreter.ParsedOp
 func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
-	script := *s
-	parsedOps := make([]ParsedOpcode, 0, len(script))
+	prs := *s
+	parsedOps := make([]ParsedOpcode, 0, len(prs))
 	conditionalBlock := 0
 
-	for i := 0; i < len(script); {
-		instruction := script[i]
+	for i := 0; i < len(prs); {
+		instruction := prs[i]
 
 		parsedOp := ParsedOpcode{op: opcodeArray[instruction]}
 		if p.ErrorOnCheckSig && parsedOp.RequiresTx() {
@@ -157,7 +157,7 @@ func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
 			if conditionalBlock == 0 {
 				parsedOps = append(parsedOps, parsedOp)
 				// we add any remaining data as an unformatted blob so that suscript can be reconstructed
-				totalLen := len(script)
+				totalLen := len(prs)
 				if (i + 2) > totalLen {
 					// but only if there is more length to this script. If it ends in OpReturn then stop there.
 					return parsedOps, nil
@@ -166,7 +166,7 @@ func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
 					// we have a single byte of extra data
 					parsedOps = append(parsedOps, ParsedOpcode{op: opcode{
 						name:   "Unformatted Data",
-						val:    script[i+1],
+						val:    prs[i+1],
 						length: 1,
 					}})
 					return parsedOps, nil
@@ -174,9 +174,9 @@ func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
 				// we have multiple bytes of extra data
 				parsedOps = append(parsedOps, ParsedOpcode{op: opcode{
 					name:   "Unformatted Data",
-					val:    script[i+1],
-					length: len(script[i+1:]),
-				}, Data: script[i+2:]})
+					val:    prs[i+1],
+					length: len(prs[i+1:]),
+				}, Data: prs[i+2:]})
 				return parsedOps, nil
 			}
 			// If we are in an conditional block, we continue parsing the other branches,
@@ -187,42 +187,42 @@ func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
 		case parsedOp.op.length == 1:
 			i++
 		case parsedOp.op.length > 1:
-			if len(script[i:]) < parsedOp.op.length {
+			if len(prs[i:]) < parsedOp.op.length {
 				return nil, errs.NewError(errs.ErrMalformedPush, "opcode %s required %d bytes, script has %d remaining",
-					parsedOp.Name(), parsedOp.op.length, len(script[i:]))
+					parsedOp.Name(), parsedOp.op.length, len(prs[i:]))
 			}
-			parsedOp.Data = script[i+1 : i+parsedOp.op.length]
+			parsedOp.Data = prs[i+1 : i+parsedOp.op.length]
 			i += parsedOp.op.length
 		case parsedOp.op.length < 0:
 			var l uint
 			offset := i + 1
-			if len(script[offset:]) < -parsedOp.op.length {
+			if len(prs[offset:]) < -parsedOp.op.length {
 				return nil, errs.NewError(errs.ErrMalformedPush, "opcode %s required %d bytes, script has %d remaining",
-					parsedOp.Name(), parsedOp.op.length, len(script[offset:]))
+					parsedOp.Name(), parsedOp.op.length, len(prs[offset:]))
 			}
 			// Next -length bytes are little endian length of data.
 			switch parsedOp.op.length {
 			case -1:
-				l = uint(script[offset])
+				l = uint(prs[offset])
 			case -2:
-				l = ((uint(script[offset+1]) << 8) |
-					uint(script[offset]))
+				l = ((uint(prs[offset+1]) << 8) |
+					uint(prs[offset]))
 			case -4:
-				l = ((uint(script[offset+3]) << 24) |
-					(uint(script[offset+2]) << 16) |
-					(uint(script[offset+1]) << 8) |
-					uint(script[offset]))
+				l = ((uint(prs[offset+3]) << 24) |
+					(uint(prs[offset+2]) << 16) |
+					(uint(prs[offset+1]) << 8) |
+					uint(prs[offset]))
 			default:
 				return nil, errs.NewError(errs.ErrMalformedPush, "invalid opcode length %d", parsedOp.op.length)
 			}
 
 			offset += -parsedOp.op.length
-			if int(l) > len(script[offset:]) || int(l) < 0 {
+			if int(l) > len(prs[offset:]) || int(l) < 0 {
 				return nil, errs.NewError(errs.ErrMalformedPush, "opcode %s pushes %d bytes, script has %d remaining",
-					parsedOp.Name(), l, len(script[offset:]))
+					parsedOp.Name(), l, len(prs[offset:]))
 			}
 
-			parsedOp.Data = script[offset : offset+int(l)]
+			parsedOp.Data = prs[offset : offset+int(l)]
 			i += 1 - parsedOp.op.length + int(l)
 		}
 
@@ -234,15 +234,15 @@ func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
 // Unparse reverses the action of Parse and returns the
 // ParsedScript as a *script.Script
 func (p *DefaultOpcodeParser) Unparse(pscr ParsedScript) (*script.Script, error) {
-	script := make(script.Script, 0, len(pscr))
+	scr := make(script.Script, 0, len(pscr))
 	for _, pop := range pscr {
 		b, err := pop.bytes()
 		if err != nil {
 			return nil, err
 		}
-		script = append(script, b...)
+		scr = append(scr, b...)
 	}
-	return &script, nil
+	return &scr, nil
 }
 
 // IsPushOnly returns true if the ParsedScript only contains push commands

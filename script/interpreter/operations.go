@@ -10,10 +10,10 @@ import (
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
-	 
+
 	"github.com/bitcoin-sv/go-sdk/primitives"
-	"github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"golang.org/x/crypto/ripemd160"
 )
 
@@ -2125,11 +2125,11 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 	}
 
 	// Get script starting from the most recent script.OpCODESEPARATOR.
-	script := t.suscript()
+	prs := t.suscript()
 
 	for _, sigInfo := range signatures {
-		script = script.removeOpcodeByData(sigInfo.signature)
-		script = script.removeOpcode(script.OpCODESEPARATOR)
+		prs = prs.removeOpcodeByData(sigInfo.signature)
+		prs = prs.removeOpcode(script.OpCODESEPARATOR)
 	}
 
 	success := true
@@ -2206,7 +2206,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 			continue
 		}
 
-		up, err := t.scriptParser.Unparse(script)
+		up, err := t.scriptParser.Unparse(prs)
 		if err != nil {
 			t.dstack.PushBool(false)
 			return nil //nolint:nilerr // only need a false push in this case

@@ -134,13 +134,13 @@ func ExampleEngine_Execute_concurrent() {
 	for _, e := range ee {
 		exec := e
 		errs.Go(func() error {
-			input := exprimitivestx.InputIdx(exprimitivesinputIdx)
+			input := exec.tx.InputIdx(exec.inputIdx)
 			inputASM, err := input.UnlockingScript.ToASM()
 			if err != nil {
 				return err
 			}
 
-			outputASM, err := exprimitives.PrevTxOut.LockingScript.ToASM()
+			outputASM, err := exec.prevTxOut.LockingScript.ToASM()
 			if err != nil {
 				return err
 			}

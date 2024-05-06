@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"log"
+
 	"github.com/bitcoin-sv/go-sdk/primitives/aesgcm"
 )
 

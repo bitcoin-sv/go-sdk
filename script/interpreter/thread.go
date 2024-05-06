@@ -3,12 +3,12 @@ package interpreter
 import (
 	"math/big"
 
+	"github.com/bitcoin-sv/go-sdk/primitives"
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
-	"github.com/bitcoin-sv/go-sdk/primitives"
-	"github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/transaction/sighash"
 )
 
 // halfOrder is used to tame ECDSA malleability (see BIP0062).
@@ -464,8 +464,8 @@ func (t *thread) Step() (bool, error) {
 				return false, err
 			}
 
-			script := t.savedFirstStack[len(t.savedFirstStack)-1]
-			pops, err := t.scriptParser.Parse(script.NewFromBytes(script))
+			s := t.savedFirstStack[len(t.savedFirstStack)-1]
+			pops, err := t.scriptParser.Parse(script.NewFromBytes(s))
 			if err != nil {
 				return false, err
 			}

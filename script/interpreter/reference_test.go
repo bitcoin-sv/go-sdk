@@ -50,7 +50,7 @@ func init() {
 //     0x14 is OP_DATA_20)
 //   - Single quoted strings are pushed as data
 //   - Anything else is an error
-func parseShortForm(script string) (*script.Script, error) {
+func parseShortForm(s string) (*script.Script, error) {
 	// Only create the short form opcode map once.
 	if shortFormOps == nil {
 		ops := make(map[string]byte)
@@ -77,9 +77,9 @@ func parseShortForm(script string) (*script.Script, error) {
 	}
 
 	// Split only does one separator so convert all \n and tab into  space.
-	script = strings.Replace(script, "\n", " ", -1)
-	script = strings.Replace(script, "\t", " ", -1)
-	tokens := strings.Split(script, " ")
+	s = strings.Replace(s, "\n", " ", -1)
+	s = strings.Replace(s, "\t", " ", -1)
+	tokens := strings.Split(s, " ")
 
 	var scr script.Script
 	for _, tok := range tokens {
