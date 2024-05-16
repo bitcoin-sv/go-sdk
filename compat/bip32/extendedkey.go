@@ -19,8 +19,8 @@ import (
 	"math/big"
 	"sync"
 
-	"github.com/bitcoin-sv/go-sdk/base58"
 	"github.com/bitcoin-sv/go-sdk/chaincfg"
+	base58 "github.com/bitcoin-sv/go-sdk/compat/base58"
 	"github.com/bitcoin-sv/go-sdk/crypto"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 )
