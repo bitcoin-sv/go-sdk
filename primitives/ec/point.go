@@ -1,4 +1,4 @@
-package ec
+package primitives
 
 import (
 	"math/big"

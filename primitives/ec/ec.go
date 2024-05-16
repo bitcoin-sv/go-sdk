@@ -1,4 +1,4 @@
-package ec
+package primitives
 
 // Copyright 2010 The Go Authors. All rights reserved.
 // Copyright 2011 ThePiachu. All rights reserved.

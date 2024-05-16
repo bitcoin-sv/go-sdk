@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/ec"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/ec/wif"
+	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
 )
 
 func main() {

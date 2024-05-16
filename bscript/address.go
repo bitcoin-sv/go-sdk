@@ -7,7 +7,7 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/base58"
 	"github.com/bitcoin-sv/go-sdk/crypto"
-	"github.com/bitcoin-sv/go-sdk/ec"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/util"
 )
 

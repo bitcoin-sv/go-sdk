@@ -12,7 +12,7 @@ import (
 	"github.com/bitcoin-sv/go-sdk/bscript"
 	"github.com/bitcoin-sv/go-sdk/bscript/interpreter"
 	"github.com/bitcoin-sv/go-sdk/bscript/testdata"
-	"github.com/bitcoin-sv/go-sdk/ec"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

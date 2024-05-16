@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/bitcoin-sv/go-sdk/ec"
-	"github.com/bitcoin-sv/go-sdk/ec/wif"
+	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 )
 
 // example using BRC-42 method for deriving a child key
