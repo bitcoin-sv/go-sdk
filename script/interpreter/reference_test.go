@@ -15,9 +15,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/errs"
-	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/scriptflag"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 )
 

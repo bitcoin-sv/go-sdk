@@ -8,8 +8,8 @@ import (
 	"mime"
 	"os"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
 	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )

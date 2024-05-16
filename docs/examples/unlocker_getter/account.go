@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
 	bip32 "github.com/bitcoin-sv/go-sdk/compat/bip32"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	chaincfg "github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"

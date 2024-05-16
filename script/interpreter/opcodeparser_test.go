@@ -7,9 +7,10 @@ package interpreter
 import (
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/errs"
 	"github.com/stretchr/testify/require"
+
+	bscript "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 )
 
 // TestOpcodeDisabled tests the opcodeDisabled function manually because all

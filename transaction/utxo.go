@@ -3,7 +3,7 @@ package transaction
 import (
 	"encoding/hex"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
 )
 
 // UTXO an unspent transaction output, used for creating inputs
