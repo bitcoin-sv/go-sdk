@@ -9,8 +9,8 @@ import (
 	"github.com/bitcoin-sv/go-sdk/bscript"
 	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
+	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )
 

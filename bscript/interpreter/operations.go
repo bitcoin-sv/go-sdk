@@ -14,8 +14,8 @@ import (
 	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/scriptflag"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
+	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 )
 
 // Conditional execution constants.

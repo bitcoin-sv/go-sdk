@@ -1,5 +1,5 @@
 // Package sighash comment
-package sighash
+package transaction
 
 // Flag represents hash type bits at the end of a signature.
 type Flag uint8

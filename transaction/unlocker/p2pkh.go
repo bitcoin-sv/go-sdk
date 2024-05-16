@@ -7,8 +7,8 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/bscript"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
+	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 )
 
 // Getter implements the `bt.UnlockerGetter` interface. It unlocks a Tx locally,
