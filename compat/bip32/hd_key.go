@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 
 	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/chaincfg"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	chaincfg "github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
 )
 
 const (
