@@ -3,7 +3,7 @@
 // license that can be found in the LICENSE file.
 
 /*
-Package bip32 provides an API for bitcoin hierarchical deterministic
+package compat provides an API for bitcoin hierarchical deterministic
 extended keys (BIP0032).
 
 Overview
@@ -82,4 +82,4 @@ are provided to set and determine which network an extended key is associated
 with.
 */
 // nolint: lll
-package bip32
+package compat
