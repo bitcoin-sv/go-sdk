@@ -9,7 +9,7 @@ import (
 	"slices"
 	"sort"
 
-	"github.com/bitcoin-sv/go-sdk/crypto"
+	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	"github.com/bitcoin-sv/go-sdk/transaction/chaintracker"
 	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/pkg/errors"
