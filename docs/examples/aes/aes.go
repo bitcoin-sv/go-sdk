@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/bitcoin-sv/go-sdk/ec"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 )
 
 func main() {

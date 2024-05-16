@@ -7,14 +7,15 @@ import (
 	"hash"
 	"math/big"
 
+	"golang.org/x/crypto/ripemd160"
+
 	"github.com/bitcoin-sv/go-sdk/bscript"
 	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/errs"
 	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/scriptflag"
 	"github.com/bitcoin-sv/go-sdk/crypto"
-	"github.com/bitcoin-sv/go-sdk/ec"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
-	"golang.org/x/crypto/ripemd160"
 )
 
 // Conditional execution constants.

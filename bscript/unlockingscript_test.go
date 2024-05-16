@@ -3,7 +3,7 @@ package bscript
 import (
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/ec/wif"
+	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
 	"github.com/stretchr/testify/assert"
 )
 

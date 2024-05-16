@@ -1,4 +1,4 @@
-package ec_test
+package primitives
 
 import (
 	"encoding/base64"
@@ -8,13 +8,11 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
-
-	"github.com/bitcoin-sv/go-sdk/ec"
 )
 
 func TestSymmetricKeyEncryptionAndDecryption(t *testing.T) {
 	t.Logf("Running encryption and decryption without errors")
-	symmetricKey := ec.NewSymmetricKeyFromRandom()
+	symmetricKey := NewSymmetricKeyFromRandom()
 	cipherText, err := symmetricKey.Encrypt([]byte("a thing to encrypt"))
 	if err != nil {
 		t.Errorf("Error encrypting: %v", err)
@@ -60,7 +58,7 @@ func TestSymmetricKeyDecryption(t *testing.T) {
 			log.Fatalf("Failed to decode ciphertext: %v", err)
 		}
 
-		symmetricKey := ec.NewSymmetricKeyFromString(v.Key)
+		symmetricKey := NewSymmetricKeyFromString(v.Key)
 		decrypted, err := symmetricKey.Decrypt(vectorCiphertext)
 		if err != nil {
 			t.Errorf("Error decrypting: %v", err)

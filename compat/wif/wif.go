@@ -2,7 +2,7 @@
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
 
-package wif
+package compat
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 	"github.com/bitcoin-sv/go-sdk/base58"
 	"github.com/bitcoin-sv/go-sdk/chaincfg"
 	"github.com/bitcoin-sv/go-sdk/crypto"
-	"github.com/bitcoin-sv/go-sdk/ec"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 )
 
 var (

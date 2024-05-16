@@ -2,14 +2,13 @@
 // Use of this source code is governed by an ISC
 // license that can be found in the LICENSE file.
 
-package wif_test
+package compat
 
 import (
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/chaincfg"
-	"github.com/bitcoin-sv/go-sdk/ec"
-	"github.com/bitcoin-sv/go-sdk/ec/wif"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 )
 
 func TestEncodeDecodeWIF(t *testing.T) {
@@ -25,17 +24,17 @@ func TestEncodeDecodeWIF(t *testing.T) {
 		0x4e, 0x39, 0x6f, 0xb5, 0xdc, 0x29, 0x5f, 0xe9,
 		0x94, 0xb9, 0x67, 0x89, 0xb2, 0x1a, 0x03, 0x98})
 
-	wif1, err := wif.NewWIF(priv1, &chaincfg.MainNet, false)
+	wif1, err := NewWIF(priv1, &chaincfg.MainNet, false)
 	if err != nil {
 		t.Fatal(err)
 	}
-	wif2, err := wif.NewWIF(priv2, &chaincfg.TestNet, true)
+	wif2, err := NewWIF(priv2, &chaincfg.TestNet, true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	tests := []struct {
-		wif     *wif.WIF
+		wif     *WIF
 		encoded string
 	}{
 		{
@@ -59,7 +58,7 @@ func TestEncodeDecodeWIF(t *testing.T) {
 
 		// Test that decoding the expected string results in the original WIF
 		// structure.
-		w, err := wif.DecodeWIF(test.encoded)
+		w, err := DecodeWIF(test.encoded)
 		if err != nil {
 			t.Error(err)
 			continue

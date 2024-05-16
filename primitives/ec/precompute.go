@@ -1,4 +1,4 @@
-package ec
+package primitives
 
 // TODO: Move to license file
 // Copyright 2015 The btcsuite developers

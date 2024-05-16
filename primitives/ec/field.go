@@ -1,4 +1,4 @@
-package ec
+package primitives
 
 // References:
 //   [HAC]: Handbook of Applied Cryptography Menezes, van Oorschot, Vanstone.
