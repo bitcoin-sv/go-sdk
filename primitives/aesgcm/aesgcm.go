@@ -1,4 +1,4 @@
-package aesgcm
+package primitives
 
 import (
 	"crypto/aes"
