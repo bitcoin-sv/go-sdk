@@ -7,8 +7,8 @@ import (
 	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/errs"
 	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/scriptflag"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
+	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 )
 
 // halfOrder is used to tame ECDSA malleability (see BIP0062).

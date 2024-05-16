@@ -9,7 +9,7 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/bscript"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	"github.com/bitcoin-sv/go-sdk/sighash"
+	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/pkg/errors"
 )
