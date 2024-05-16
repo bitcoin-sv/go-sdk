@@ -1,4 +1,4 @@
-package chaincfg
+package transaction
 
 import (
 	"errors"
