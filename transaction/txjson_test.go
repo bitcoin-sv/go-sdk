@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
 	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 	"github.com/stretchr/testify/assert"

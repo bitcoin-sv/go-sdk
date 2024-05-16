@@ -1,6 +1,6 @@
 package transaction
 
-import "github.com/bitcoin-sv/go-sdk/bscript"
+import bscript "github.com/bitcoin-sv/go-sdk/script"
 
 const (
 	// DustLimit is the current minimum txo output accepted by miners.

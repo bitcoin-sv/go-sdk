@@ -4,10 +4,11 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/bscript/interpreter"
-	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/debug"
 	"github.com/stretchr/testify/assert"
+
+	bscript "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter/debug"
 )
 
 func TestDebugger_BeforeExecute(t *testing.T) {

@@ -9,13 +9,14 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/bscript/interpreter"
-	"github.com/bitcoin-sv/go-sdk/bscript/testdata"
-	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script/interpreter"
+	"github.com/bitcoin-sv/go-sdk/script/testdata"
+	"github.com/bitcoin-sv/go-sdk/transaction"
 )
 
 func TestNewP2PKHFromPubKeyStr(t *testing.T) {

@@ -3,7 +3,7 @@ package bscript_test
 import (
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/stretchr/testify/assert"
 )
 

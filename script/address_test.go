@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/stretchr/testify/assert"
 )
 

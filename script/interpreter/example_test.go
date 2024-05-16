@@ -2,12 +2,12 @@ package interpreter_test
 
 import (
 	"fmt"
-
 	"context"
 
-	"github.com/bitcoin-sv/go-sdk/bscript/interpreter"
-	"github.com/bitcoin-sv/go-sdk/transaction"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/bitcoin-sv/go-sdk/script/interpreter"
+	"github.com/bitcoin-sv/go-sdk/transaction"
 )
 
 func ExampleEngine_Execute() {

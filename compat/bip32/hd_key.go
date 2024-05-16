@@ -3,8 +3,8 @@ package compat
 import (
 	"encoding/hex"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
 	chaincfg "github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
 )
 
