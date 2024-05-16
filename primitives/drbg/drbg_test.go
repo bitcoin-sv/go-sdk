@@ -1,4 +1,4 @@
-package drbg
+package primitives
 
 import (
 	"encoding/hex"
