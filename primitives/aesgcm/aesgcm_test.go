@@ -1,4 +1,4 @@
-package aesgcm
+package primitives
 
 import (
 	"encoding/hex"
