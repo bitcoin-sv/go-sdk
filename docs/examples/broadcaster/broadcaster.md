@@ -6,7 +6,7 @@ This guide walks through the necessary steps for building a custom transaction b
 
 A transaction broadcast client is a crucial component in any Bitcoin SV application, allowing it to communicate with the Bitcoin SV network. Implementing a transaction broadcaster can be accomplished using the clearly defined Broadcast interface.
 
-```
+``` go
 package main
 
 import (
