@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/bitcoin-sv/go-sdk/crypto"
+	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 )
 
 // PrivateKey wraps an ecdsa.PrivateKey as a convenience mainly for signing

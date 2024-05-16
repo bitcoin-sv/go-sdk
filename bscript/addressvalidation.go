@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bitcoin-sv/go-sdk/crypto"
+	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 )
 
 type a25 [25]byte

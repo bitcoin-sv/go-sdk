@@ -12,8 +12,8 @@ import (
 	"github.com/bitcoin-sv/go-sdk/bscript"
 	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/errs"
 	"github.com/bitcoin-sv/go-sdk/bscript/interpreter/scriptflag"
-	"github.com/bitcoin-sv/go-sdk/crypto"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	"github.com/bitcoin-sv/go-sdk/sighash"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 )

@@ -8,8 +8,8 @@ import (
 	"math/bits"
 	"strings"
 
-	"github.com/bitcoin-sv/go-sdk/crypto"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 )
 
 // ScriptKey types.
