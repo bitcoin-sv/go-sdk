@@ -109,7 +109,7 @@ func (n *nodeTxWrapper) UnmarshalJSON(b []byte) error {
 		}
 		oo = append(oo, out)
 	}
-	ii := make([]*Input, 0, len(txj.Inputs))
+	ii := make([]*TransactionInput, 0, len(txj.Inputs))
 	for _, i := range txj.Inputs {
 		in, err := i.toInput()
 		if err != nil {
@@ -164,8 +164,8 @@ func (o *nodeOutputJSON) toOutput() (*Output, error) {
 	return out, nil
 }
 
-func (i *nodeInputJSON) toInput() (*Input, error) {
-	input := &Input{}
+func (i *nodeInputJSON) toInput() (*TransactionInput, error) {
+	input := &TransactionInput{}
 	s, err := bscript.NewFromHex(i.ScriptSig.Hex)
 	if err != nil {
 		return nil, err
@@ -181,7 +181,7 @@ func (i *nodeInputJSON) toInput() (*Input, error) {
 	return input, nil
 }
 
-func (i *nodeInputJSON) fromInput(input *Input) error {
+func (i *nodeInputJSON) fromInput(input *TransactionInput) error {
 	asm, err := input.UnlockingScript.ToASM()
 	if err != nil {
 		return err

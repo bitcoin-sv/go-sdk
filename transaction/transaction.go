@@ -14,11 +14,11 @@ import (
 )
 
 type Transaction struct {
-	Version    uint32      `json:"version"`
-	Inputs     []*Input    `json:"inputs"`
-	Outputs    []*Output   `json:"outputs"`
-	LockTime   uint32      `json:"locktime"`
-	MerklePath *MerklePath `json:"merklePath"`
+	Version    uint32              `json:"version"`
+	Inputs     []*TransactionInput `json:"inputs"`
+	Outputs    []*Output           `json:"outputs"`
+	LockTime   uint32              `json:"locktime"`
+	MerklePath *MerklePath         `json:"merklePath"`
 }
 
 // Transactions a collection of *bt.Tx.
@@ -26,7 +26,7 @@ type Transactions []*Transaction
 
 // NewTx creates a new transaction object with default values.
 func NewTx() *Transaction {
-	return &Transaction{Version: 1, LockTime: 0, Inputs: make([]*Input, 0)}
+	return &Transaction{Version: 1, LockTime: 0, Inputs: make([]*TransactionInput, 0)}
 }
 
 // NewTxFromHex takes a toBytesHelper string representation of a bitcoin transaction
@@ -138,7 +138,7 @@ func (tx *Transaction) ReadFrom(r io.Reader) (int64, error) {
 
 	// create Inputs
 	for i := uint64(0); i < uint64(inputCount); i++ {
-		input := &Input{}
+		input := &TransactionInput{}
 		n64, err = input.readFrom(r, extended)
 		bytesRead += n64
 		if err != nil {
@@ -220,7 +220,7 @@ func (tx *Transaction) HasDataOutputs() bool {
 //
 // This will consume an overflow error and simply return nil if the input
 // isn't found at the index.
-func (tx *Transaction) InputIdx(i int) *Input {
+func (tx *Transaction) InputIdx(i int) *TransactionInput {
 	if i > tx.InputCount()-1 {
 		return nil
 	}

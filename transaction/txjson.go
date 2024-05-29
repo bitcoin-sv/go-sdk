@@ -9,12 +9,12 @@ import (
 )
 
 type txJSON struct {
-	TxID     string    `json:"txid"`
-	Hex      string    `json:"hex"`
-	Inputs   []*Input  `json:"inputs"`
-	Outputs  []*Output `json:"outputs"`
-	Version  uint32    `json:"version"`
-	LockTime uint32    `json:"lockTime"`
+	TxID     string              `json:"txid"`
+	Hex      string              `json:"hex"`
+	Inputs   []*TransactionInput `json:"inputs"`
+	Outputs  []*Output           `json:"outputs"`
+	Version  uint32              `json:"version"`
+	LockTime uint32              `json:"lockTime"`
 }
 
 type inputJSON struct {
@@ -66,7 +66,7 @@ func (tx *Transaction) UnmarshalJSON(b []byte) error {
 
 // MarshalJSON will convert an input to json, expanding upon the
 // input struct to add additional fields.
-func (i *Input) MarshalJSON() ([]byte, error) {
+func (i *TransactionInput) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&inputJSON{
 		TxID:            hex.EncodeToString(i.previousTxID),
 		Vout:            i.PreviousTxOutIndex,
@@ -76,7 +76,7 @@ func (i *Input) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON will convert a JSON input to an input.
-func (i *Input) UnmarshalJSON(b []byte) error {
+func (i *TransactionInput) UnmarshalJSON(b []byte) error {
 	var ij inputJSON
 	if err := json.Unmarshal(b, &ij); err != nil {
 		return err

@@ -300,7 +300,7 @@ func createSpendingTx(sigScript, pkScript *bscript.Script, outputValue int64) *t
 	coinbaseTx := &transaction.Transaction{
 		Version:  1,
 		LockTime: 0,
-		Inputs: []*transaction.Input{{
+		Inputs: []*transaction.TransactionInput{{
 			PreviousTxOutIndex: ^uint32(0),
 			UnlockingScript:    bscript.NewFromBytes([]byte{bscript.Op0, bscript.Op0}),
 			SequenceNumber:     0xffffffff,
@@ -315,7 +315,7 @@ func createSpendingTx(sigScript, pkScript *bscript.Script, outputValue int64) *t
 	spendingTx := &transaction.Transaction{
 		Version:  1,
 		LockTime: 0,
-		Inputs: []*transaction.Input{{
+		Inputs: []*transaction.TransactionInput{{
 			PreviousTxOutIndex: 0,
 			PreviousTxScript:   pkScript,
 			UnlockingScript:    sigScript,

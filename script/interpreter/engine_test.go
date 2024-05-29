@@ -37,7 +37,7 @@ func TestBadPC(t *testing.T) {
 
 	tx := &transaction.Transaction{
 		Version: 1,
-		Inputs: []*transaction.Input{{
+		Inputs: []*transaction.TransactionInput{{
 			PreviousTxOutIndex: 0,
 			UnlockingScript:    uscript,
 			SequenceNumber:     4294967295,
@@ -94,7 +94,7 @@ func TestCheckErrorCondition(t *testing.T) {
 
 	tx := &transaction.Transaction{
 		Version: 1,
-		Inputs: []*transaction.Input{{
+		Inputs: []*transaction.TransactionInput{{
 			PreviousTxOutIndex: 0,
 			UnlockingScript:    &bscript.Script{},
 			SequenceNumber:     4294967295,
@@ -413,7 +413,7 @@ func TestInvalidFlagCombinations(t *testing.T) {
 
 	tx := &transaction.Transaction{
 		Version: 1,
-		Inputs: []*transaction.Input{{
+		Inputs: []*transaction.TransactionInput{{
 			PreviousTxOutIndex: 0,
 			UnlockingScript:    uscript,
 			SequenceNumber:     4294967295,

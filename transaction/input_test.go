@@ -16,7 +16,7 @@ func TestNewInputFromReader(t *testing.T) {
 		b, err := hex.DecodeString(rawHex)
 		assert.NoError(t, err)
 
-		i := &Input{}
+		i := &TransactionInput{}
 		var s int64
 		s, err = i.readFrom(bytes.NewReader(b), false)
 
@@ -29,7 +29,7 @@ func TestNewInputFromReader(t *testing.T) {
 	})
 
 	t.Run("empty bytes", func(t *testing.T) {
-		i := &Input{}
+		i := &TransactionInput{}
 
 		s, err := i.readFrom(bytes.NewReader([]byte("")), false)
 		assert.Error(t, err)
@@ -37,14 +37,14 @@ func TestNewInputFromReader(t *testing.T) {
 	})
 
 	t.Run("invalid input, too short", func(t *testing.T) {
-		i := &Input{}
+		i := &TransactionInput{}
 		s, err := i.readFrom(bytes.NewReader([]byte("invalid")), false)
 		assert.Error(t, err)
 		assert.Equal(t, int64(7), s)
 	})
 
 	t.Run("invalid input, too short + script", func(t *testing.T) {
-		i := &Input{}
+		i := &TransactionInput{}
 		s, err := i.readFrom(bytes.NewReader([]byte("000000000000000000000000000000000000000000000000000000000000000000000000")), false)
 		assert.Error(t, err)
 		assert.Equal(t, int64(72), s)
@@ -57,7 +57,7 @@ func TestInput_String(t *testing.T) {
 		b, err := hex.DecodeString(rawHex)
 		assert.NoError(t, err)
 
-		i := &Input{}
+		i := &TransactionInput{}
 		var s int64
 
 		s, err = i.readFrom(bytes.NewReader(b), false)

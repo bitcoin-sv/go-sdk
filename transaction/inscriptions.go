@@ -112,7 +112,7 @@ func (tx *Transaction) InscribeSpecificOrdinal(ia *bscript.InscriptionArgs, inpu
 // [a b] [c] [d e f] → [a b c d] [e f]
 //
 // For more info check the Ordinals Theory Handbook (https://docs.ordinals.com/faq.html).
-func rangeAbove(is []*Input, inputIdx uint32, satIdx uint64) (uint64, error) {
+func rangeAbove(is []*TransactionInput, inputIdx uint32, satIdx uint64) (uint64, error) {
 	if uint32(len(is)) < inputIdx {
 		return 0, ErrOutputNoExist
 	}

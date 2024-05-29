@@ -31,7 +31,7 @@ func (tx *Transaction) TotalInputSatoshis() (total uint64) {
 	return
 }
 
-func (tx *Transaction) addInput(input *Input) {
+func (tx *Transaction) addInput(input *TransactionInput) {
 	tx.Inputs = append(tx.Inputs, input)
 }
 
@@ -87,7 +87,7 @@ func (tx *Transaction) From(prevTxID string, vout uint32, prevTxLockingScript st
 // afterwards.
 func (tx *Transaction) FromUTXOs(utxos ...*UTXO) error {
 	for _, utxo := range utxos {
-		i := &Input{
+		i := &TransactionInput{
 			PreviousTxOutIndex: utxo.Vout,
 			PreviousTxSatoshis: utxo.Satoshis,
 			PreviousTxScript:   utxo.LockingScript,
