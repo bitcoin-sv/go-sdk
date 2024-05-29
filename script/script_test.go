@@ -667,7 +667,7 @@ func TestSpendValid(t *testing.T) {
 			tx.Inputs[0].UnlockingScript = unlockingScript
 
 			err = interpreter.NewEngine().Execute(
-				interpreter.WithTx(tx, 0, &transaction.Output{
+				interpreter.WithTx(tx, 0, &transaction.TransactionOutput{
 					Satoshis:      1,
 					LockingScript: lockingScript,
 				}),

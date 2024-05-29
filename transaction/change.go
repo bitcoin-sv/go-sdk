@@ -98,7 +98,7 @@ func (tx *Transaction) change(f *FeeQuote, output *changeOutput) (uint64, bool, 
 	// into a new output
 	available -= txFees
 	if output != nil && output.newOutput {
-		tx.AddOutput(&Output{Satoshis: available, LockingScript: output.lockingScript})
+		tx.AddOutput(&TransactionOutput{Satoshis: available, LockingScript: output.lockingScript})
 	}
 	return available, true, nil
 }

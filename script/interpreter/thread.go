@@ -36,7 +36,7 @@ type thread struct {
 
 	tx         *transaction.Transaction
 	inputIdx   int
-	prevOutput *transaction.Output
+	prevOutput *transaction.TransactionOutput
 
 	numOps int
 
@@ -72,7 +72,7 @@ func createThread(opts *execOpts) (*thread, error) {
 type execOpts struct {
 	lockingScript   *bscript.Script
 	unlockingScript *bscript.Script
-	previousTxOut   *transaction.Output
+	previousTxOut   *transaction.TransactionOutput
 	tx              *transaction.Transaction
 	inputIdx        int
 	flags           scriptflag.Flag

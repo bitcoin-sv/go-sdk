@@ -52,7 +52,7 @@ func TestTx_JSON(t *testing.T) {
 				assert.NotNil(t, w)
 				s := &bscript.Script{}
 				assert.NoError(t, s.AppendPushDataString("test"))
-				tx.AddOutput(&transaction.Output{
+				tx.AddOutput(&transaction.TransactionOutput{
 					LockingScript: s,
 				})
 				err = tx.FillAllInputs(context.Background(), &unlocker.Getter{PrivateKey: w.PrivKey})

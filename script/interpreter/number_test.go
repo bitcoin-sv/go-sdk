@@ -343,7 +343,7 @@ func TestDisasmString(t *testing.T) {
 	}
 	tx.Inputs = append(tx.Inputs, in)
 	if err := NewEngine().Execute(
-		WithTx(tx, 0, &transaction.Output{LockingScript: prev}),
+		WithTx(tx, 0, &transaction.TransactionOutput{LockingScript: prev}),
 		WithFlags(scriptflag.Bip16|scriptflag.VerifyCleanStack),
 	); err != nil {
 		t.Error(err)

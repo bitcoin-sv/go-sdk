@@ -88,7 +88,7 @@ func ExampleEngine_Execute_concurrent() {
 	type execution struct {
 		tx        *transaction.Transaction
 		inputIdx  int
-		prevTxOut *transaction.Output
+		prevTxOut *transaction.TransactionOutput
 	}
 
 	var ee []execution

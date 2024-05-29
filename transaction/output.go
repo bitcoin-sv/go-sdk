@@ -22,15 +22,15 @@ Txout-script / scriptPubKey   Script                                      <out-s
 
 */
 
-// Output is a representation of a transaction output
-type Output struct {
+// TransactionOutput is a representation of a transaction output
+type TransactionOutput struct {
 	Satoshis      uint64          `json:"satoshis"`
 	LockingScript *bscript.Script `json:"locking_script"`
 }
 
 // ReadFrom reads from the `io.Reader` into the `bt.Output`.
-func (o *Output) ReadFrom(r io.Reader) (int64, error) {
-	*o = Output{}
+func (o *TransactionOutput) ReadFrom(r io.Reader) (int64, error) {
+	*o = TransactionOutput{}
 	var bytesRead int64
 
 	satoshis := make([]byte, 8)
@@ -62,11 +62,11 @@ func (o *Output) ReadFrom(r io.Reader) (int64, error) {
 
 // LockingScriptHex returns the locking script
 // of an output encoded as a hex string.
-func (o *Output) LockingScriptHex() string {
+func (o *TransactionOutput) LockingScriptHex() string {
 	return hex.EncodeToString(*o.LockingScript)
 }
 
-func (o *Output) String() string {
+func (o *TransactionOutput) String() string {
 	return fmt.Sprintf(`value:     %d
 scriptLen: %d
 script:    %s
@@ -74,7 +74,7 @@ script:    %s
 }
 
 // Bytes encodes the Output into a byte array.
-func (o *Output) Bytes() []byte {
+func (o *TransactionOutput) Bytes() []byte {
 	b := make([]byte, 8)
 	binary.LittleEndian.PutUint64(b, o.Satoshis)
 
@@ -88,7 +88,7 @@ func (o *Output) Bytes() []byte {
 
 // BytesForSigHash returns the proper serialisation
 // of an output to be hashed and signed (sighash).
-func (o *Output) BytesForSigHash() []byte {
+func (o *TransactionOutput) BytesForSigHash() []byte {
 	buf := make([]byte, 0)
 
 	satoshis := make([]byte, 8)
@@ -111,6 +111,6 @@ func (o *Output) BytesForSigHash() []byte {
 //
 //	output := &bt.Output{}
 //	if err := json.Unmarshal(bb, output.NodeJSON()); err != nil {}
-func (o *Output) NodeJSON() interface{} {
-	return &nodeOutputWrapper{Output: o}
+func (o *TransactionOutput) NodeJSON() interface{} {
+	return &nodeOutputWrapper{TransactionOutput: o}
 }

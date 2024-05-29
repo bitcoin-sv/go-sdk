@@ -52,7 +52,7 @@ func TestTxJSON_Node_JSON(t *testing.T) {
 				assert.NotNil(t, w)
 				s := &bscript.Script{}
 				assert.NoError(t, s.AppendPushDataString("test"))
-				tx.AddOutput(&transaction.Output{
+				tx.AddOutput(&transaction.TransactionOutput{
 					LockingScript: s,
 				})
 				err = tx.FillAllInputs(context.Background(), &unlocker.Getter{PrivateKey: w.PrivKey})
@@ -631,11 +631,11 @@ func TestTxsJSON_Node_UnmarshalJSON(t *testing.T) {
 
 func TestOutput_Node_JSON(t *testing.T) {
 	tests := map[string]struct {
-		output  *transaction.Output
+		output  *transaction.TransactionOutput
 		expJSON string
 	}{
 		"node json": {
-			output: &transaction.Output{
+			output: &transaction.TransactionOutput{
 				Satoshis: 10000,
 				LockingScript: func() *bscript.Script {
 					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
@@ -668,11 +668,11 @@ func TestOutput_Node_JSON(t *testing.T) {
 
 func TestOutput_JSON(t *testing.T) {
 	tests := map[string]struct {
-		output  *transaction.Output
+		output  *transaction.TransactionOutput
 		expJSON string
 	}{
 		"standard json": {
-			output: &transaction.Output{
+			output: &transaction.TransactionOutput{
 				Satoshis: 10000,
 				LockingScript: func() *bscript.Script {
 					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
@@ -701,7 +701,7 @@ func TestOutput_JSON(t *testing.T) {
 func TestOutput_Node_UnmarshalJSON(t *testing.T) {
 	tests := map[string]struct {
 		json      string
-		expOutput *transaction.Output
+		expOutput *transaction.TransactionOutput
 	}{
 		"node json": {
 			json: `{
@@ -713,7 +713,7 @@ func TestOutput_Node_UnmarshalJSON(t *testing.T) {
 		"type": "nonstandard"
 	}
 }`,
-			expOutput: &transaction.Output{
+			expOutput: &transaction.TransactionOutput{
 				Satoshis: 10000,
 				LockingScript: func() *bscript.Script {
 					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
@@ -727,7 +727,7 @@ func TestOutput_Node_UnmarshalJSON(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			output := &transaction.Output{}
+			output := &transaction.TransactionOutput{}
 			assert.NoError(t, json.Unmarshal([]byte(test.json), output.NodeJSON()))
 
 			assert.Equal(t, *test.expOutput, *output)
@@ -738,14 +738,14 @@ func TestOutput_Node_UnmarshalJSON(t *testing.T) {
 func TestOutput_UnmarshalJSON(t *testing.T) {
 	tests := map[string]struct {
 		json      string
-		expOutput *transaction.Output
+		expOutput *transaction.TransactionOutput
 	}{
 		"node json": {
 			json: `{
 	"satoshis": 10000,
 	"lockingScript": "5452529387"
 }`,
-			expOutput: &transaction.Output{
+			expOutput: &transaction.TransactionOutput{
 				Satoshis: 10000,
 				LockingScript: func() *bscript.Script {
 					s, err := bscript.NewFromASM("OP_4 OP_2 OP_2 OP_ADD OP_EQUAL")
@@ -759,7 +759,7 @@ func TestOutput_UnmarshalJSON(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			output := &transaction.Output{}
+			output := &transaction.TransactionOutput{}
 			assert.NoError(t, json.Unmarshal([]byte(test.json), output))
 
 			assert.Equal(t, *test.expOutput, *output)

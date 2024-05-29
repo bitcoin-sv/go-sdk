@@ -61,7 +61,7 @@ func (tx *Transaction) Inscribe(ia *bscript.InscriptionArgs) error {
 		}
 	}
 
-	tx.AddOutput(&Output{
+	tx.AddOutput(&TransactionOutput{
 		Satoshis:      1,
 		LockingScript: &s,
 	})
@@ -88,7 +88,7 @@ func (tx *Transaction) InscribeSpecificOrdinal(ia *bscript.InscriptionArgs, inpu
 		return ErrOutputsNotEmpty
 	}
 
-	tx.AddOutput(&Output{
+	tx.AddOutput(&TransactionOutput{
 		Satoshis:      amount,
 		LockingScript: extraOutputScript,
 	})

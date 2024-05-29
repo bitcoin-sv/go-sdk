@@ -9,12 +9,12 @@ import (
 )
 
 type txJSON struct {
-	TxID     string              `json:"txid"`
-	Hex      string              `json:"hex"`
-	Inputs   []*TransactionInput `json:"inputs"`
-	Outputs  []*Output           `json:"outputs"`
-	Version  uint32              `json:"version"`
-	LockTime uint32              `json:"lockTime"`
+	TxID     string               `json:"txid"`
+	Hex      string               `json:"hex"`
+	Inputs   []*TransactionInput  `json:"inputs"`
+	Outputs  []*TransactionOutput `json:"outputs"`
+	Version  uint32               `json:"version"`
+	LockTime uint32               `json:"lockTime"`
 }
 
 type inputJSON struct {
@@ -97,7 +97,7 @@ func (i *TransactionInput) UnmarshalJSON(b []byte) error {
 }
 
 // MarshalJSON will serialise an output to json.
-func (o *Output) MarshalJSON() ([]byte, error) {
+func (o *TransactionOutput) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&outputJSON{
 		Satoshis:      o.Satoshis,
 		LockingScript: o.LockingScriptHex(),
@@ -105,7 +105,7 @@ func (o *Output) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON will convert a json serialised output to a bt Output.
-func (o *Output) UnmarshalJSON(b []byte) error {
+func (o *TransactionOutput) UnmarshalJSON(b []byte) error {
 	var oj outputJSON
 	if err := json.Unmarshal(b, &oj); err != nil {
 		return err

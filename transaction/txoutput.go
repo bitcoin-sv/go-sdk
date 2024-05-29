@@ -11,7 +11,7 @@ import (
 )
 
 // newOutputFromBytes returns a transaction Output from the bytes provided
-func newOutputFromBytes(bytes []byte) (*Output, int, error) {
+func newOutputFromBytes(bytes []byte) (*TransactionOutput, int, error) {
 	if len(bytes) < 8 {
 		return nil, 0, fmt.Errorf("%w < 8", ErrOutputTooShort)
 	}
@@ -28,7 +28,7 @@ func newOutputFromBytes(bytes []byte) (*Output, int, error) {
 
 	s := bscript.Script(bytes[offset:totalLength])
 
-	return &Output{
+	return &TransactionOutput{
 		Satoshis:      binary.LittleEndian.Uint64(bytes[0:8]),
 		LockingScript: &s,
 	}, totalLength, nil
@@ -49,7 +49,7 @@ func (tx *Transaction) AddP2PKHOutputFromPubKeyHashStr(publicKeyHash string, sat
 		return err
 	}
 
-	tx.AddOutput(&Output{
+	tx.AddOutput(&TransactionOutput{
 		Satoshis:      satoshis,
 		LockingScript: s,
 	})
@@ -63,7 +63,7 @@ func (tx *Transaction) AddP2PKHOutputFromPubKeyBytes(publicKeyBytes []byte, sato
 		return err
 	}
 
-	tx.AddOutput(&Output{
+	tx.AddOutput(&TransactionOutput{
 		Satoshis:      satoshis,
 		LockingScript: s,
 	})
@@ -77,7 +77,7 @@ func (tx *Transaction) AddP2PKHOutputFromPubKeyStr(publicKey string, satoshis ui
 		return err
 	}
 
-	tx.AddOutput(&Output{
+	tx.AddOutput(&TransactionOutput{
 		Satoshis:      satoshis,
 		LockingScript: s,
 	})
@@ -91,7 +91,7 @@ func (tx *Transaction) AddP2PKHOutputFromAddress(addr string, satoshis uint64) e
 		return err
 	}
 
-	tx.AddOutput(&Output{
+	tx.AddOutput(&TransactionOutput{
 		Satoshis:      satoshis,
 		LockingScript: s,
 	})
@@ -103,7 +103,7 @@ func (tx *Transaction) AddP2PKHOutputFromScript(script *bscript.Script, satoshis
 	if !script.IsP2PKH() {
 		return errors.Wrapf(ErrInvalidScriptType, "'%s' is not a valid P2PKH script", script.ScriptType())
 	}
-	tx.AddOutput(&Output{
+	tx.AddOutput(&TransactionOutput{
 		Satoshis:      satoshis,
 		LockingScript: script,
 	})
@@ -132,7 +132,7 @@ func (tx *Transaction) AddHashPuzzleOutput(secret, publicKeyHash string, satoshi
 	}
 	_ = s.AppendOpcodes(bscript.OpEQUALVERIFY, bscript.OpCHECKSIG)
 
-	tx.AddOutput(&Output{
+	tx.AddOutput(&TransactionOutput{
 		Satoshis:      satoshis,
 		LockingScript: s,
 	})
@@ -164,7 +164,7 @@ func (tx *Transaction) AddOpReturnPartsOutput(data [][]byte) error {
 
 // CreateOpReturnOutput creates a new Output with OP_FALSE OP_RETURN and then
 // uses OP_PUSHDATA format to encode the multiple byte arrays passed in.
-func CreateOpReturnOutput(data [][]byte) (*Output, error) {
+func CreateOpReturnOutput(data [][]byte) (*TransactionOutput, error) {
 	s := &bscript.Script{}
 
 	_ = s.AppendOpcodes(bscript.OpFALSE, bscript.OpRETURN)
@@ -172,7 +172,7 @@ func CreateOpReturnOutput(data [][]byte) (*Output, error) {
 		return nil, err
 	}
 
-	return &Output{LockingScript: s}, nil
+	return &TransactionOutput{LockingScript: s}, nil
 }
 
 // OutputCount returns the number of transaction Inputs.
@@ -181,7 +181,7 @@ func (tx *Transaction) OutputCount() int {
 }
 
 // AddOutput adds a new output to the transaction.
-func (tx *Transaction) AddOutput(output *Output) {
+func (tx *Transaction) AddOutput(output *TransactionOutput) {
 	tx.Outputs = append(tx.Outputs, output)
 }
 

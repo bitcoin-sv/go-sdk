@@ -14,7 +14,7 @@ type nodeTxWrapper struct {
 type nodeTxsWrapper Transactions
 
 type nodeOutputWrapper struct {
-	*Output
+	*TransactionOutput
 }
 
 type nodeTxJSON struct {
@@ -101,7 +101,7 @@ func (n *nodeTxWrapper) UnmarshalJSON(b []byte) error {
 		*tx = *t
 		return nil
 	}
-	oo := make([]*Output, 0, len(txj.Outputs))
+	oo := make([]*TransactionOutput, 0, len(txj.Outputs))
 	for _, o := range txj.Outputs {
 		out, err := o.toOutput()
 		if err != nil {
@@ -124,7 +124,7 @@ func (n *nodeTxWrapper) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (o *nodeOutputJSON) fromOutput(out *Output) error {
+func (o *nodeOutputJSON) fromOutput(out *TransactionOutput) error {
 	asm, err := out.LockingScript.ToASM()
 	if err != nil {
 		return err
@@ -153,8 +153,8 @@ func (o *nodeOutputJSON) fromOutput(out *Output) error {
 	return nil
 }
 
-func (o *nodeOutputJSON) toOutput() (*Output, error) {
-	out := &Output{}
+func (o *nodeOutputJSON) toOutput() (*TransactionOutput, error) {
+	out := &TransactionOutput{}
 	s, err := bscript.NewFromHex(o.ScriptPubKey.Hex)
 	if err != nil {
 		return nil, err
@@ -231,7 +231,7 @@ func (nn *nodeTxsWrapper) UnmarshalJSON(b []byte) error {
 
 func (n *nodeOutputWrapper) MarshalJSON() ([]byte, error) {
 	oj := &nodeOutputJSON{}
-	if err := oj.fromOutput(n.Output); err != nil {
+	if err := oj.fromOutput(n.TransactionOutput); err != nil {
 		return nil, err
 	}
 	return json.Marshal(oj)
@@ -248,7 +248,7 @@ func (n *nodeOutputWrapper) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*n.Output = *o
+	*n.TransactionOutput = *o
 
 	return nil
 }

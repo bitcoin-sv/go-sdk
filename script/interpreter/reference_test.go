@@ -305,7 +305,7 @@ func createSpendingTx(sigScript, pkScript *bscript.Script, outputValue int64) *t
 			UnlockingScript:    bscript.NewFromBytes([]byte{bscript.Op0, bscript.Op0}),
 			SequenceNumber:     0xffffffff,
 		}},
-		Outputs: []*transaction.Output{{
+		Outputs: []*transaction.TransactionOutput{{
 			Satoshis:      uint64(outputValue),
 			LockingScript: pkScript,
 		}},
@@ -321,7 +321,7 @@ func createSpendingTx(sigScript, pkScript *bscript.Script, outputValue int64) *t
 			UnlockingScript:    sigScript,
 			SequenceNumber:     0xffffffff,
 		}},
-		Outputs: []*transaction.Output{{
+		Outputs: []*transaction.TransactionOutput{{
 			Satoshis:      uint64(outputValue),
 			LockingScript: bscript.NewFromBytes([]byte{}),
 		}},
@@ -434,7 +434,7 @@ func TestScripts(t *testing.T) {
 		tx := createSpendingTx(scriptSig, scriptPubKey, inputAmt)
 
 		err = NewEngine().Execute(
-			WithTx(tx, 0, &transaction.Output{LockingScript: scriptPubKey, Satoshis: uint64(inputAmt)}),
+			WithTx(tx, 0, &transaction.TransactionOutput{LockingScript: scriptPubKey, Satoshis: uint64(inputAmt)}),
 			WithFlags(flags),
 		)
 
@@ -546,7 +546,7 @@ testloop:
 			continue
 		}
 
-		prevOuts := make(map[txIOKey]*transaction.Output)
+		prevOuts := make(map[txIOKey]*transaction.TransactionOutput)
 		for j, iinput := range inputs {
 			input, ok := iinput.([]interface{})
 			if !ok {
@@ -600,7 +600,7 @@ testloop:
 				}
 			}
 
-			v := &transaction.Output{
+			v := &transaction.TransactionOutput{
 				Satoshis:      uint64(inputValue),
 				LockingScript: script,
 			}
@@ -690,7 +690,7 @@ testloop:
 			continue
 		}
 
-		prevOuts := make(map[txIOKey]*transaction.Output)
+		prevOuts := make(map[txIOKey]*transaction.TransactionOutput)
 		for j, iinput := range inputs {
 			input, ok := iinput.([]interface{})
 			if !ok {
@@ -744,7 +744,7 @@ testloop:
 				}
 			}
 
-			v := &transaction.Output{
+			v := &transaction.TransactionOutput{
 				Satoshis:      uint64(inputValue),
 				LockingScript: script,
 			}

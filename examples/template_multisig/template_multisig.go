@@ -23,7 +23,7 @@ func main() {
 
 	script, _ := locker.Multisig{PubKeys: []*ec.PublicKey{key.PrivKey.PubKey()}}.LockingScript()
 
-	tx.AddOutput(&transaction.Output{
+	tx.AddOutput(&transaction.TransactionOutput{
 		Satoshis:      1000,
 		LockingScript: script,
 	})

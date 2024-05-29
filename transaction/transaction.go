@@ -14,11 +14,11 @@ import (
 )
 
 type Transaction struct {
-	Version    uint32              `json:"version"`
-	Inputs     []*TransactionInput `json:"inputs"`
-	Outputs    []*Output           `json:"outputs"`
-	LockTime   uint32              `json:"locktime"`
-	MerklePath *MerklePath         `json:"merklePath"`
+	Version    uint32               `json:"version"`
+	Inputs     []*TransactionInput  `json:"inputs"`
+	Outputs    []*TransactionOutput `json:"outputs"`
+	LockTime   uint32               `json:"locktime"`
+	MerklePath *MerklePath          `json:"merklePath"`
 }
 
 // Transactions a collection of *bt.Tx.
@@ -157,7 +157,7 @@ func (tx *Transaction) ReadFrom(r io.Reader) (int64, error) {
 	}
 
 	for i := uint64(0); i < uint64(outputCount); i++ {
-		output := new(Output)
+		output := new(TransactionOutput)
 		n64, err = output.ReadFrom(r)
 		bytesRead += n64
 		if err != nil {
@@ -231,7 +231,7 @@ func (tx *Transaction) InputIdx(i int) *TransactionInput {
 //
 // This will consume an overflow error and simply return nil if the output
 // isn't found at the index.
-func (tx *Transaction) OutputIdx(i int) *Output {
+func (tx *Transaction) OutputIdx(i int) *TransactionOutput {
 	if i > tx.OutputCount()-1 {
 		return nil
 	}

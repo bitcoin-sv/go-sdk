@@ -42,7 +42,7 @@ func TestBadPC(t *testing.T) {
 			UnlockingScript:    uscript,
 			SequenceNumber:     4294967295,
 		}},
-		Outputs: []*transaction.Output{{
+		Outputs: []*transaction.TransactionOutput{{
 			Satoshis: 1000000000,
 		}},
 		LockTime: 0,
@@ -52,7 +52,7 @@ func TestBadPC(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to created locking script %e", err)
 	}
-	txOut := &transaction.Output{
+	txOut := &transaction.TransactionOutput{
 		LockingScript: lscript,
 	}
 
@@ -99,7 +99,7 @@ func TestCheckErrorCondition(t *testing.T) {
 			UnlockingScript:    &bscript.Script{},
 			SequenceNumber:     4294967295,
 		}},
-		Outputs: []*transaction.Output{{
+		Outputs: []*transaction.TransactionOutput{{
 			Satoshis: 1000000000,
 		}},
 		LockTime: 0,
@@ -109,7 +109,7 @@ func TestCheckErrorCondition(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to created locking script %e", err)
 	}
-	txOut := &transaction.Output{
+	txOut := &transaction.TransactionOutput{
 		LockingScript: lscript,
 	}
 
@@ -162,11 +162,11 @@ func TestValidateParams(t *testing.T) {
 
 					return tx
 				}(),
-				previousTxOut: func() *transaction.Output {
+				previousTxOut: func() *transaction.TransactionOutput {
 					cbLockingScript, err := bscript.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
 					assert.NoError(t, err)
 
-					return &transaction.Output{LockingScript: cbLockingScript, Satoshis: 0}
+					return &transaction.TransactionOutput{LockingScript: cbLockingScript, Satoshis: 0}
 				}(),
 			},
 		},
@@ -184,11 +184,11 @@ func TestValidateParams(t *testing.T) {
 
 					return tx
 				}(),
-				previousTxOut: func() *transaction.Output {
+				previousTxOut: func() *transaction.TransactionOutput {
 					cbLockingScript, err := bscript.NewFromASM("OP_2 OP_2 OP_ADD OP_EQUAL")
 					assert.NoError(t, err)
 
-					return &transaction.Output{LockingScript: cbLockingScript, Satoshis: 0}
+					return &transaction.TransactionOutput{LockingScript: cbLockingScript, Satoshis: 0}
 				}(),
 			},
 		},
@@ -230,11 +230,11 @@ func TestValidateParams(t *testing.T) {
 
 					return tx
 				}(),
-				previousTxOut: func() *transaction.Output {
+				previousTxOut: func() *transaction.TransactionOutput {
 					script, err := bscript.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
 					assert.NoError(t, err)
 
-					return &transaction.Output{LockingScript: script, Satoshis: 0}
+					return &transaction.TransactionOutput{LockingScript: script, Satoshis: 0}
 				}(),
 			},
 		},
@@ -267,11 +267,11 @@ func TestValidateParams(t *testing.T) {
 					assert.NoError(t, err)
 					return script
 				}(),
-				previousTxOut: func() *transaction.Output {
+				previousTxOut: func() *transaction.TransactionOutput {
 					script, err := bscript.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
 					assert.NoError(t, err)
 
-					return &transaction.Output{LockingScript: script, Satoshis: 0}
+					return &transaction.TransactionOutput{LockingScript: script, Satoshis: 0}
 				}(),
 			},
 			expErr: errors.New("no unlocking script provided"),
@@ -315,11 +315,11 @@ func TestValidateParams(t *testing.T) {
 
 					return tx
 				}(),
-				previousTxOut: func() *transaction.Output {
+				previousTxOut: func() *transaction.TransactionOutput {
 					script, err := bscript.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
 					assert.NoError(t, err)
 
-					return &transaction.Output{LockingScript: script, Satoshis: 0}
+					return &transaction.TransactionOutput{LockingScript: script, Satoshis: 0}
 				}(),
 			},
 			expErr: errors.New("locking script does not match the previous outputs locking script"),
@@ -348,11 +348,11 @@ func TestValidateParams(t *testing.T) {
 
 					return tx
 				}(),
-				previousTxOut: func() *transaction.Output {
+				previousTxOut: func() *transaction.TransactionOutput {
 					script, err := bscript.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
 					assert.NoError(t, err)
 
-					return &transaction.Output{LockingScript: script, Satoshis: 0}
+					return &transaction.TransactionOutput{LockingScript: script, Satoshis: 0}
 				}(),
 			},
 			expErr: errors.New("unlocking script does not match the unlocking script of the requested input"),
@@ -371,11 +371,11 @@ func TestValidateParams(t *testing.T) {
 
 					return tx
 				}(),
-				previousTxOut: func() *transaction.Output {
+				previousTxOut: func() *transaction.TransactionOutput {
 					cbLockingScript, err := bscript.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
 					assert.NoError(t, err)
 
-					return &transaction.Output{LockingScript: cbLockingScript, Satoshis: 0}
+					return &transaction.TransactionOutput{LockingScript: cbLockingScript, Satoshis: 0}
 				}(),
 				inputIdx: 5,
 			},
@@ -418,7 +418,7 @@ func TestInvalidFlagCombinations(t *testing.T) {
 			UnlockingScript:    uscript,
 			SequenceNumber:     4294967295,
 		}},
-		Outputs: []*transaction.Output{{
+		Outputs: []*transaction.TransactionOutput{{
 			Satoshis: 1000000000,
 		}},
 		LockTime: 0,
@@ -428,7 +428,7 @@ func TestInvalidFlagCombinations(t *testing.T) {
 	if err != nil {
 		t.Errorf("failed to created locking script %e", err)
 	}
-	txOut := &transaction.Output{
+	txOut := &transaction.TransactionOutput{
 		LockingScript: lscript,
 	}
 

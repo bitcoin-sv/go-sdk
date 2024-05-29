@@ -20,7 +20,7 @@ func main() {
 
 	script, _ := locker.P2PKH{PubKey: key.PrivKey.PubKey()}.LockingScript()
 
-	tx.AddOutput(&transaction.Output{
+	tx.AddOutput(&transaction.TransactionOutput{
 		Satoshis:      1000,
 		LockingScript: script,
 	})
