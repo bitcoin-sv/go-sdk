@@ -295,9 +295,9 @@ func parseExpectedResult(expected string) ([]errs.ErrorCode, error) {
 
 // createSpendTx generates a basic spending transaction given the passed
 // signature and locking scripts.
-func createSpendingTx(sigScript, pkScript *bscript.Script, outputValue int64) *transaction.Tx {
+func createSpendingTx(sigScript, pkScript *bscript.Script, outputValue int64) *transaction.Transaction {
 
-	coinbaseTx := &transaction.Tx{
+	coinbaseTx := &transaction.Transaction{
 		Version:  1,
 		LockTime: 0,
 		Inputs: []*transaction.Input{{
@@ -312,7 +312,7 @@ func createSpendingTx(sigScript, pkScript *bscript.Script, outputValue int64) *t
 	}
 	coinbaseTx.Inputs[0].PreviousTxIDAdd(make([]byte, 32))
 
-	spendingTx := &transaction.Tx{
+	spendingTx := &transaction.Transaction{
 		Version:  1,
 		LockTime: 0,
 		Inputs: []*transaction.Input{{

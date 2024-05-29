@@ -40,7 +40,7 @@ type P2PKH struct {
 // canonical in accordance with RFC6979 and BIP0062.
 //
 // For example usage, see `examples/create_tx/create_tx.go`
-func (l *P2PKH) UnlockingScript(ctx context.Context, tx *transaction.Tx, params transaction.UnlockerParams) (*bscript.Script, error) {
+func (l *P2PKH) UnlockingScript(ctx context.Context, tx *transaction.Transaction, params transaction.UnlockerParams) (*bscript.Script, error) {
 	if params.SigHashFlags == 0 {
 		params.SigHashFlags = sighash.AllForkID
 	}

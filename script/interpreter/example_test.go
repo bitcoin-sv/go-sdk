@@ -1,8 +1,8 @@
 package interpreter_test
 
 import (
-	"fmt"
 	"context"
+	"fmt"
 
 	"golang.org/x/sync/errgroup"
 
@@ -86,7 +86,7 @@ func ExampleEngine_Execute_error() {
 
 func ExampleEngine_Execute_concurrent() {
 	type execution struct {
-		tx        *transaction.Tx
+		tx        *transaction.Transaction
 		inputIdx  int
 		prevTxOut *transaction.Output
 	}

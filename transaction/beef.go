@@ -8,10 +8,10 @@ import (
 
 type BeefTx struct {
 	pathIndex *uint64
-	tx        *Tx
+	tx        *Transaction
 }
 
-func NewTxFromBEEF(beef []byte) (*Tx, error) {
+func NewTxFromBEEF(beef []byte) (*Transaction, error) {
 	reader := bytes.NewReader(beef)
 
 	var version uint32
@@ -48,7 +48,7 @@ func NewTxFromBEEF(beef []byte) (*Tx, error) {
 	transactions := make(map[string]*BeefTx, 0)
 	lastTxid := ""
 	for i := 0; i < int(numberOfTransactions); i++ {
-		tx := &Tx{}
+		tx := &Transaction{}
 		_, err = tx.ReadFrom(reader)
 		if err != nil {
 			return nil, err
@@ -100,7 +100,7 @@ func populateInputsFromBeef(beefTx *BeefTx, bumps []*MerklePath, transactions ma
 	}
 }
 
-func (t *Tx) BEEF() []byte {
+func (t *Transaction) BEEF() []byte {
 	b := new(bytes.Buffer)
 	binary.Write(b, binary.LittleEndian, uint32(4022206465))
 	bumps := make([]*MerklePath, 0)
@@ -124,7 +124,7 @@ func (t *Tx) BEEF() []byte {
 	return b.Bytes()
 }
 
-func addPathsAndInputs(tx *Tx, bumps *[]*MerklePath) {
+func addPathsAndInputs(tx *Transaction, bumps *[]*MerklePath) {
 	beefTx := &BeefTx{tx: tx}
 	hasProof := tx.MerklePath != nil
 

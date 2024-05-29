@@ -19,7 +19,7 @@ type sigHashFunc func(inputIdx uint32, shf sighash.Flag) ([]byte, error)
 // The legacy serialisation will be used for txs pre-fork
 // whereas the new serialisation will be used for post-fork
 // txs (and they should include the sighash_forkid flag).
-func (tx *Tx) sigStrat(shf sighash.Flag) sigHashFunc {
+func (tx *Transaction) sigStrat(shf sighash.Flag) sigHashFunc {
 	if shf.Has(sighash.ForkID) {
 		return tx.CalcInputPreimage
 	}
@@ -31,7 +31,7 @@ func (tx *Tx) sigStrat(shf sighash.Flag) sigHashFunc {
 // after the UAHF fork for replay protection.
 //
 // see https://github.com/bitcoin-sv/bitcoin-sv/blob/master/doc/abc/replay-protected-sighash.md#digest-algorithm
-func (tx *Tx) CalcInputSignatureHash(inputNumber uint32, sigHashFlag sighash.Flag) ([]byte, error) {
+func (tx *Transaction) CalcInputSignatureHash(inputNumber uint32, sigHashFlag sighash.Flag) ([]byte, error) {
 	sigHashFn := tx.sigStrat(sigHashFlag)
 	buf, err := sigHashFn(inputNumber, sigHashFlag)
 	if err != nil {
@@ -58,7 +58,7 @@ func (tx *Tx) CalcInputSignatureHash(inputNumber uint32, sigHashFlag sighash.Fla
 // and returns the preimage before double hashing (SHA256d).
 //
 // see https://github.com/bitcoin-sv/bitcoin-sv/blob/master/doc/abc/replay-protected-sighash.md#digest-algorithm
-func (tx *Tx) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([]byte, error) {
+func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([]byte, error) {
 	if tx.InputIdx(int(inputNumber)) == nil {
 		return nil, ErrInputNoExist
 	}
@@ -147,7 +147,7 @@ func (tx *Tx) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([
 // and returns the preimage before double hashing (SHA256d), in the legacy format.
 //
 // see https://wiki.bitcoinsv.io/index.php/Legacy_Sighash_Algorithm
-func (tx *Tx) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]byte, error) {
+func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]byte, error) {
 	if tx.InputIdx(int(inputNumber)) == nil {
 		return nil, ErrInputNoExist
 	}
@@ -265,7 +265,7 @@ func (tx *Tx) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]b
 
 // OutputsHash returns a bytes slice of the requested output, used for generating
 // the txs signature hash. If n is -1, it will create the byte slice from all outputs.
-func (tx *Tx) OutputsHash(n int32) []byte {
+func (tx *Transaction) OutputsHash(n int32) []byte {
 	buf := make([]byte, 0)
 
 	if n == -1 {

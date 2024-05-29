@@ -24,20 +24,20 @@ import (
 type UTXOGetterFunc func(ctx context.Context, deficit uint64) ([]*UTXO, error)
 
 // TotalInputSatoshis returns the total Satoshis inputted to the transaction.
-func (tx *Tx) TotalInputSatoshis() (total uint64) {
+func (tx *Transaction) TotalInputSatoshis() (total uint64) {
 	for _, in := range tx.Inputs {
 		total += in.PreviousTxSatoshis
 	}
 	return
 }
 
-func (tx *Tx) addInput(input *Input) {
+func (tx *Transaction) addInput(input *Input) {
 	tx.Inputs = append(tx.Inputs, input)
 }
 
 // AddP2PKHInputsFromTx will add all Outputs of given previous transaction
 // that match a specific public key to your transaction.
-func (tx *Tx) AddP2PKHInputsFromTx(pvsTx *Tx, matchPK []byte) error {
+func (tx *Transaction) AddP2PKHInputsFromTx(pvsTx *Transaction, matchPK []byte) error {
 	// Given that the prevTxID never changes, calculate it once up front.
 	prevTxIDBytes := pvsTx.TxIDBytes()
 	for i, utxo := range pvsTx.Outputs {
@@ -64,7 +64,7 @@ func (tx *Tx) AddP2PKHInputsFromTx(pvsTx *Tx, matchPK []byte) error {
 // From adds a new input to the transaction from the specified UTXO fields, using the default
 // finalised sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
 // afterwards.
-func (tx *Tx) From(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64) error {
+func (tx *Transaction) From(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64) error {
 	pts, err := bscript.NewFromHex(prevTxLockingScript)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func (tx *Tx) From(prevTxID string, vout uint32, prevTxLockingScript string, sat
 // FromUTXOs adds a new input to the transaction from the specified *bt.UTXO fields, using the default
 // finalised sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
 // afterwards.
-func (tx *Tx) FromUTXOs(utxos ...*UTXO) error {
+func (tx *Transaction) FromUTXOs(utxos ...*UTXO) error {
 	for _, utxo := range utxos {
 		i := &Input{
 			PreviousTxOutIndex: utxo.Vout,
@@ -133,7 +133,7 @@ func (tx *Tx) FromUTXOs(utxos ...*UTXO) error {
 //	    if errors.Is(err, bt.ErrInsufficientFunds) { /* handle */ }
 //	    return err
 //	}
-func (tx *Tx) Fund(ctx context.Context, fq *FeeQuote, next UTXOGetterFunc) error {
+func (tx *Transaction) Fund(ctx context.Context, fq *FeeQuote, next UTXOGetterFunc) error {
 	deficit, err := tx.estimateDeficit(fq)
 	if err != nil {
 		return err
@@ -165,12 +165,12 @@ func (tx *Tx) Fund(ctx context.Context, fq *FeeQuote, next UTXOGetterFunc) error
 }
 
 // InputCount returns the number of transaction Inputs.
-func (tx *Tx) InputCount() int {
+func (tx *Transaction) InputCount() int {
 	return len(tx.Inputs)
 }
 
 // PreviousOutHash returns a byte slice of inputs outpoints, for creating a signature hash
-func (tx *Tx) PreviousOutHash() []byte {
+func (tx *Transaction) PreviousOutHash() []byte {
 	buf := make([]byte, 0)
 
 	for _, in := range tx.Inputs {
@@ -184,7 +184,7 @@ func (tx *Tx) PreviousOutHash() []byte {
 }
 
 // SequenceHash returns a byte slice of inputs SequenceNumber, for creating a signature hash
-func (tx *Tx) SequenceHash() []byte {
+func (tx *Transaction) SequenceHash() []byte {
 	buf := make([]byte, 0)
 
 	for _, in := range tx.Inputs {
@@ -198,7 +198,7 @@ func (tx *Tx) SequenceHash() []byte {
 
 // InsertInputUnlockingScript applies a script to the transaction at a specific index in
 // unlocking script field.
-func (tx *Tx) InsertInputUnlockingScript(index uint32, s *bscript.Script) error {
+func (tx *Transaction) InsertInputUnlockingScript(index uint32, s *bscript.Script) error {
 	if tx.Inputs[index] != nil {
 		tx.Inputs[index].UnlockingScript = s
 		return nil
@@ -212,7 +212,7 @@ func (tx *Tx) InsertInputUnlockingScript(index uint32, s *bscript.Script) error 
 // unlocking implementations can be used to unlock the transaction -
 // for example local or external unlocking (hardware wallet), or
 // signature / non-signature based.
-func (tx *Tx) FillInput(ctx context.Context, unlocker Unlocker, params UnlockerParams) error {
+func (tx *Transaction) FillInput(ctx context.Context, unlocker Unlocker, params UnlockerParams) error {
 	if unlocker == nil {
 		return ErrNoUnlocker
 	}
@@ -235,7 +235,7 @@ func (tx *Tx) FillInput(ctx context.Context, unlocker Unlocker, params UnlockerP
 // signing, or P2PKH/contract signing.
 //
 // Given this signs inputs and outputs, sighash `ALL|FORKID` is used.
-func (tx *Tx) FillAllInputs(ctx context.Context, ug UnlockerGetter) error {
+func (tx *Transaction) FillAllInputs(ctx context.Context, ug UnlockerGetter) error {
 	for i, in := range tx.Inputs {
 		u, err := ug.Unlocker(ctx, in.PreviousTxScript)
 		if err != nil {

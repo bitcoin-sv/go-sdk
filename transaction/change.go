@@ -9,7 +9,7 @@ const (
 
 // ChangeToAddress calculates the amount of fees needed to cover the transaction
 // and adds the leftover change in a new P2PKH output using the address provided.
-func (tx *Tx) ChangeToAddress(addr string, f *FeeQuote) error {
+func (tx *Transaction) ChangeToAddress(addr string, f *FeeQuote) error {
 	s, err := bscript.NewP2PKHFromAddress(addr)
 	if err != nil {
 		return err
@@ -21,7 +21,7 @@ func (tx *Tx) ChangeToAddress(addr string, f *FeeQuote) error {
 // Change calculates the amount of fees needed to cover the transaction
 //
 //	and adds the leftover change in a new output using the script provided.
-func (tx *Tx) Change(s *bscript.Script, f *FeeQuote) error {
+func (tx *Transaction) Change(s *bscript.Script, f *FeeQuote) error {
 	if _, _, err := tx.change(f, &changeOutput{
 		lockingScript: s,
 		newOutput:     true,
@@ -33,7 +33,7 @@ func (tx *Tx) Change(s *bscript.Script, f *FeeQuote) error {
 
 // ChangeToExistingOutput will calculate fees and add them to an output at the index specified (0 based).
 // If an invalid index is supplied and error is returned.
-func (tx *Tx) ChangeToExistingOutput(index uint, f *FeeQuote) error {
+func (tx *Transaction) ChangeToExistingOutput(index uint, f *FeeQuote) error {
 	if int(index) > tx.OutputCount()-1 {
 		return ErrOutputNoExist
 	}
@@ -54,7 +54,7 @@ type changeOutput struct {
 
 // change will return the amount of satoshis to add to an input after fees are removed.
 // True will be returned if change is required for this tx.
-func (tx *Tx) change(f *FeeQuote, output *changeOutput) (uint64, bool, error) {
+func (tx *Transaction) change(f *FeeQuote, output *changeOutput) (uint64, bool, error) {
 	inputAmount := tx.TotalInputSatoshis()
 	outputAmount := tx.TotalOutputSatoshis()
 	if inputAmount < outputAmount {

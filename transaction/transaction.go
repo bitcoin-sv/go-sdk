@@ -13,7 +13,7 @@ import (
 	"github.com/bitcoin-sv/go-sdk/util"
 )
 
-type Tx struct {
+type Transaction struct {
 	Version    uint32      `json:"version"`
 	Inputs     []*Input    `json:"inputs"`
 	Outputs    []*Output   `json:"outputs"`
@@ -22,16 +22,16 @@ type Tx struct {
 }
 
 // Transactions a collection of *bt.Tx.
-type Transactions []*Tx
+type Transactions []*Transaction
 
 // NewTx creates a new transaction object with default values.
-func NewTx() *Tx {
-	return &Tx{Version: 1, LockTime: 0, Inputs: make([]*Input, 0)}
+func NewTx() *Transaction {
+	return &Transaction{Version: 1, LockTime: 0, Inputs: make([]*Input, 0)}
 }
 
 // NewTxFromHex takes a toBytesHelper string representation of a bitcoin transaction
 // and returns a Tx object.
-func NewTxFromHex(str string) (*Tx, error) {
+func NewTxFromHex(str string) (*Transaction, error) {
 	bb, err := hex.DecodeString(str)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func NewTxFromHex(str string) (*Tx, error) {
 
 // NewTxFromBytes takes an array of bytes, constructs a Tx and returns it.
 // This function assumes that the byte slice contains exactly 1 transaction.
-func NewTxFromBytes(b []byte) (*Tx, error) {
+func NewTxFromBytes(b []byte) (*Transaction, error) {
 	tx, used, err := NewTxFromStream(b)
 	if err != nil {
 		return nil, err
@@ -58,8 +58,8 @@ func NewTxFromBytes(b []byte) (*Tx, error) {
 // NewTxFromStream takes an array of bytes and constructs a Tx from it, returning the Tx and the bytes used.
 // Despite the name, this is not actually reading a stream in the true sense: it is a byte slice that contains
 // many transactions one after another.
-func NewTxFromStream(b []byte) (*Tx, int, error) {
-	tx := Tx{}
+func NewTxFromStream(b []byte) (*Transaction, int, error) {
+	tx := Transaction{}
 
 	bytesRead, err := tx.ReadFrom(bytes.NewReader(b))
 
@@ -67,8 +67,8 @@ func NewTxFromStream(b []byte) (*Tx, int, error) {
 }
 
 // ReadFrom reads from the `io.Reader` into the `bt.Tx`.
-func (tx *Tx) ReadFrom(r io.Reader) (int64, error) {
-	*tx = Tx{}
+func (tx *Transaction) ReadFrom(r io.Reader) (int64, error) {
+	*tx = Transaction{}
 	var bytesRead int64
 
 	// Define n64 and err here to avoid linter complaining about shadowing variables.
@@ -189,10 +189,10 @@ func (tt *Transactions) ReadFrom(r io.Reader) (int64, error) {
 		return bytesRead, err
 	}
 
-	*tt = make([]*Tx, txCount)
+	*tt = make([]*Transaction, txCount)
 
 	for i := uint64(0); i < uint64(txCount); i++ {
-		tx := new(Tx)
+		tx := new(Transaction)
 		n, err := tx.ReadFrom(r)
 		bytesRead += n
 		if err != nil {
@@ -207,7 +207,7 @@ func (tt *Transactions) ReadFrom(r io.Reader) (int64, error) {
 
 // HasDataOutputs returns true if the transaction has
 // at least one data (OP_RETURN) output in it.
-func (tx *Tx) HasDataOutputs() bool {
+func (tx *Transaction) HasDataOutputs() bool {
 	for _, out := range tx.Outputs {
 		if out.LockingScript.IsData() {
 			return true
@@ -220,7 +220,7 @@ func (tx *Tx) HasDataOutputs() bool {
 //
 // This will consume an overflow error and simply return nil if the input
 // isn't found at the index.
-func (tx *Tx) InputIdx(i int) *Input {
+func (tx *Transaction) InputIdx(i int) *Input {
 	if i > tx.InputCount()-1 {
 		return nil
 	}
@@ -231,7 +231,7 @@ func (tx *Tx) InputIdx(i int) *Input {
 //
 // This will consume an overflow error and simply return nil if the output
 // isn't found at the index.
-func (tx *Tx) OutputIdx(i int) *Output {
+func (tx *Transaction) OutputIdx(i int) *Output {
 	if i > tx.OutputCount()-1 {
 		return nil
 	}
@@ -240,7 +240,7 @@ func (tx *Tx) OutputIdx(i int) *Output {
 
 // IsCoinbase determines if this transaction is a coinbase by
 // checking if the tx input is a standard coinbase input.
-func (tx *Tx) IsCoinbase() bool {
+func (tx *Transaction) IsCoinbase() bool {
 	if len(tx.Inputs) != 1 {
 		return false
 	}
@@ -260,18 +260,18 @@ func (tx *Tx) IsCoinbase() bool {
 
 // TxIDBytes returns the transaction ID of the transaction as bytes
 // (which is also the transaction hash).
-func (tx *Tx) TxIDBytes() []byte {
+func (tx *Transaction) TxIDBytes() []byte {
 	return util.ReverseBytes(crypto.Sha256d(tx.Bytes()))
 }
 
 // TxID returns the transaction ID of the transaction
 // (which is also the transaction hash).
-func (tx *Tx) TxID() string {
+func (tx *Transaction) TxID() string {
 	return hex.EncodeToString(util.ReverseBytes(crypto.Sha256d(tx.Bytes())))
 }
 
 // String encodes the transaction into a hex string.
-func (tx *Tx) String() string {
+func (tx *Transaction) String() string {
 	return hex.EncodeToString(tx.Bytes())
 }
 
@@ -284,24 +284,24 @@ func IsValidTxID(txid []byte) bool {
 
 // Bytes encodes the transaction into a byte array.
 // See https://chainquery.com/bitcoin-cli/decoderawtransaction
-func (tx *Tx) Bytes() []byte {
+func (tx *Transaction) Bytes() []byte {
 	return tx.toBytesHelper(0, nil, false)
 }
 
 // ExtendedBytes outputs the transaction into a byte array in extended format
 // (with PreviousTxSatoshis and PreviousTXScript included)
-func (tx *Tx) ExtendedBytes() []byte {
+func (tx *Transaction) ExtendedBytes() []byte {
 	return tx.toBytesHelper(0, nil, true)
 }
 
 // BytesWithClearedInputs encodes the transaction into a byte array but clears its Inputs first.
 // This is used when signing transactions.
-func (tx *Tx) BytesWithClearedInputs(index int, lockingScript []byte) []byte {
+func (tx *Transaction) BytesWithClearedInputs(index int, lockingScript []byte) []byte {
 	return tx.toBytesHelper(index, lockingScript, false)
 }
 
 // Clone returns a clone of the tx
-func (tx *Tx) Clone() *Tx {
+func (tx *Transaction) Clone() *Transaction {
 	// Ignore err as byte slice passed in is created from valid tx
 	clone, err := NewTxFromBytes(tx.Bytes())
 	if err != nil {
@@ -326,8 +326,8 @@ func (tx *Tx) Clone() *Tx {
 //
 //	tx := bt.NewTx()
 //	if err := json.Unmarshal(bb, tx.NodeJSON()); err != nil {}
-func (tx *Tx) NodeJSON() interface{} {
-	return &nodeTxWrapper{Tx: tx}
+func (tx *Transaction) NodeJSON() interface{} {
+	return &nodeTxWrapper{Transaction: tx}
 }
 
 // NodeJSON returns a wrapped bt.Txs for marshalling/unmarshalling into a node tx format.
@@ -344,7 +344,7 @@ func (tt *Transactions) NodeJSON() interface{} {
 	return (*nodeTxsWrapper)(tt)
 }
 
-func (tx *Tx) toBytesHelper(index int, lockingScript []byte, extended bool) []byte {
+func (tx *Transaction) toBytesHelper(index int, lockingScript []byte, extended bool) []byte {
 	h := make([]byte, 0)
 
 	h = append(h, util.LittleEndianBytes(tx.Version, 4)...)
@@ -403,13 +403,13 @@ type TxSize struct {
 }
 
 // Size will return the size of tx in bytes.
-func (tx *Tx) Size() int {
+func (tx *Transaction) Size() int {
 	return len(tx.Bytes())
 }
 
 // SizeWithTypes will return the size of tx in bytes
 // and include the different data types (std/data/etc.).
-func (tx *Tx) SizeWithTypes() *TxSize {
+func (tx *Transaction) SizeWithTypes() *TxSize {
 	totBytes := tx.Size()
 
 	// calculate data outputs
@@ -429,7 +429,7 @@ func (tx *Tx) SizeWithTypes() *TxSize {
 // EstimateSize will return the size of tx in bytes and will add 107 bytes
 // to the unlocking script of any unsigned inputs (only P2PKH for now) found
 // to give a final size estimate of the tx size.
-func (tx *Tx) EstimateSize() (int, error) {
+func (tx *Transaction) EstimateSize() (int, error) {
 	tempTx, err := tx.estimatedFinalTx()
 	if err != nil {
 		return 0, err
@@ -442,7 +442,7 @@ func (tx *Tx) EstimateSize() (int, error) {
 // different data types (std/data/etc.), and will add 107 bytes to the unlocking
 // script of any unsigned inputs (only P2PKH for now) found to give a final size
 // estimate of the tx size.
-func (tx *Tx) EstimateSizeWithTypes() (*TxSize, error) {
+func (tx *Transaction) EstimateSizeWithTypes() (*TxSize, error) {
 	tempTx, err := tx.estimatedFinalTx()
 	if err != nil {
 		return nil, err
@@ -451,7 +451,7 @@ func (tx *Tx) EstimateSizeWithTypes() (*TxSize, error) {
 	return tempTx.SizeWithTypes(), nil
 }
 
-func (tx *Tx) estimatedFinalTx() (*Tx, error) {
+func (tx *Transaction) estimatedFinalTx() (*Transaction, error) {
 	tempTx := tx.Clone()
 
 	for i, in := range tempTx.Inputs {
@@ -484,7 +484,7 @@ type TxFees struct {
 
 // IsFeePaidEnough will calculate the fees that this transaction is paying
 // including the individual fee types (std/data/etc.).
-func (tx *Tx) IsFeePaidEnough(fees *FeeQuote) (bool, error) {
+func (tx *Transaction) IsFeePaidEnough(fees *FeeQuote) (bool, error) {
 	expFeesPaid, err := tx.feesPaid(tx.SizeWithTypes(), fees)
 	if err != nil {
 		return false, err
@@ -504,7 +504,7 @@ func (tx *Tx) IsFeePaidEnough(fees *FeeQuote) (bool, error) {
 // including the individual fee types (std/data/etc.), and will add 107 bytes to the unlocking
 // script of any unsigned inputs (only P2PKH for now) found to give a final size
 // estimate of the tx size for fee calculation.
-func (tx *Tx) EstimateIsFeePaidEnough(fees *FeeQuote) (bool, error) {
+func (tx *Transaction) EstimateIsFeePaidEnough(fees *FeeQuote) (bool, error) {
 	tempTx, err := tx.estimatedFinalTx()
 	if err != nil {
 		return false, err
@@ -527,7 +527,7 @@ func (tx *Tx) EstimateIsFeePaidEnough(fees *FeeQuote) (bool, error) {
 // EstimateFeesPaid will estimate how big the tx will be when finalised
 // by estimating input unlocking scripts that have not yet been filled
 // including the individual fee types (std/data/etc.).
-func (tx *Tx) EstimateFeesPaid(fees *FeeQuote) (*TxFees, error) {
+func (tx *Transaction) EstimateFeesPaid(fees *FeeQuote) (*TxFees, error) {
 	size, err := tx.EstimateSizeWithTypes()
 	if err != nil {
 		return nil, err
@@ -535,7 +535,7 @@ func (tx *Tx) EstimateFeesPaid(fees *FeeQuote) (*TxFees, error) {
 	return tx.feesPaid(size, fees)
 }
 
-func (tx *Tx) feesPaid(size *TxSize, fees *FeeQuote) (*TxFees, error) {
+func (tx *Transaction) feesPaid(size *TxSize, fees *FeeQuote) (*TxFees, error) {
 	// get fees
 	stdFee, err := fees.Fee(FeeTypeStandard)
 	if err != nil {
@@ -554,7 +554,7 @@ func (tx *Tx) feesPaid(size *TxSize, fees *FeeQuote) (*TxFees, error) {
 	return txFees, nil
 }
 
-func (tx *Tx) estimateDeficit(fees *FeeQuote) (uint64, error) {
+func (tx *Transaction) estimateDeficit(fees *FeeQuote) (uint64, error) {
 	totalInputSatoshis := tx.TotalInputSatoshis()
 	totalOutputSatoshis := tx.TotalOutputSatoshis()
 

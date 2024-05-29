@@ -30,7 +30,7 @@ type outputJSON struct {
 }
 
 // MarshalJSON will serialise a transaction to json.
-func (tx *Tx) MarshalJSON() ([]byte, error) {
+func (tx *Transaction) MarshalJSON() ([]byte, error) {
 	if tx == nil {
 		return nil, errors.Wrap(ErrTxNil, "cannot marshal tx")
 	}
@@ -45,7 +45,7 @@ func (tx *Tx) MarshalJSON() ([]byte, error) {
 }
 
 // UnmarshalJSON will unmarshall a transaction that has been marshalled with this library.
-func (tx *Tx) UnmarshalJSON(b []byte) error {
+func (tx *Transaction) UnmarshalJSON(b []byte) error {
 	var txj txJSON
 	if err := json.Unmarshal(b, &txj); err != nil {
 		return err

@@ -14,11 +14,11 @@ import (
 
 func TestTx_JSON(t *testing.T) {
 	tests := map[string]struct {
-		tx  *transaction.Tx
+		tx  *transaction.Transaction
 		err error
 	}{
 		"standard tx should marshal and unmarshal correctly": {
-			tx: func() *transaction.Tx {
+			tx: func() *transaction.Transaction {
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
@@ -37,7 +37,7 @@ func TestTx_JSON(t *testing.T) {
 				return tx
 			}(),
 		}, "data tx should marshall correctly": {
-			tx: func() *transaction.Tx {
+			tx: func() *transaction.Transaction {
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
@@ -68,7 +68,7 @@ func TestTx_JSON(t *testing.T) {
 			if err != nil {
 				return
 			}
-			var tx *transaction.Tx
+			var tx *transaction.Transaction
 			assert.NoError(t, json.Unmarshal(bb, &tx))
 			assert.Equal(t, test.tx.String(), tx.String())
 		})
@@ -77,11 +77,11 @@ func TestTx_JSON(t *testing.T) {
 
 func TestTx_MarshallJSON(t *testing.T) {
 	tests := map[string]struct {
-		tx      *transaction.Tx
+		tx      *transaction.Transaction
 		expJSON string
 	}{
 		"transaction with 1 input 1 p2pksh output 1 data output should create valid json": {
-			tx: func() *transaction.Tx {
+			tx: func() *transaction.Transaction {
 				tx, err := transaction.NewTxFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
 				assert.NoError(t, err)
 				return tx
@@ -111,7 +111,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 	"lockTime": 0
 }`,
 		}, "transaction with multiple Inputs": {
-			tx: func() *transaction.Tx {
+			tx: func() *transaction.Transaction {
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
@@ -188,7 +188,7 @@ func TestTx_UnmarshalJSON(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
 		json  string
-		expTX *transaction.Tx
+		expTX *transaction.Transaction
 	}{
 		"our json with hex should map correctly": {
 			json: `{
@@ -214,7 +214,7 @@ func TestTx_UnmarshalJSON(t *testing.T) {
 					}
 				]
 			}`,
-			expTX: func() *transaction.Tx {
+			expTX: func() *transaction.Transaction {
 				tx, err := transaction.NewTxFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
 				assert.NoError(t, err)
 				return tx
@@ -223,7 +223,7 @@ func TestTx_UnmarshalJSON(t *testing.T) {
 			json: `{
 				"hex": "0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000"
 			}`,
-			expTX: func() *transaction.Tx {
+			expTX: func() *transaction.Transaction {
 				tx, err := transaction.NewTxFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
 				assert.NoError(t, err)
 				return tx
@@ -232,7 +232,7 @@ func TestTx_UnmarshalJSON(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			var tx *transaction.Tx
+			var tx *transaction.Transaction
 			err := json.Unmarshal([]byte(test.json), &tx)
 			assert.NoError(t, err)
 			assert.Equal(t, test.expTX, tx)

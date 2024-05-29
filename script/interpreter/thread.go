@@ -34,7 +34,7 @@ type thread struct {
 	scriptOff    int
 	lastCodeSep  int
 
-	tx         *transaction.Tx
+	tx         *transaction.Transaction
 	inputIdx   int
 	prevOutput *transaction.Output
 
@@ -73,7 +73,7 @@ type execOpts struct {
 	lockingScript   *bscript.Script
 	unlockingScript *bscript.Script
 	previousTxOut   *transaction.Output
-	tx              *transaction.Tx
+	tx              *transaction.Transaction
 	inputIdx        int
 	flags           scriptflag.Flag
 	debugger        Debugger

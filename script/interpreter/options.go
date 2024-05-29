@@ -10,7 +10,7 @@ import (
 type ExecutionOptionFunc func(p *execOpts)
 
 // WithTx configure the execution to run again a tx.
-func WithTx(tx *transaction.Tx, inputIdx int, prevOutput *transaction.Output) ExecutionOptionFunc {
+func WithTx(tx *transaction.Transaction, inputIdx int, prevOutput *transaction.Output) ExecutionOptionFunc {
 	return func(p *execOpts) {
 		p.tx = tx
 		p.previousTxOut = prevOutput

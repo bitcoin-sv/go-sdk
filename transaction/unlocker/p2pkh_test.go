@@ -43,10 +43,10 @@ func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {
 
 func TestLocalUnlocker_ValidSignature(t *testing.T) {
 	tests := map[string]struct {
-		tx *transaction.Tx
+		tx *transaction.Transaction
 	}{
 		"valid signature 1": {
-			tx: func() *transaction.Tx {
+			tx: func() *transaction.Transaction {
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "76a914c7c6987b6e2345a6b138e3384141520a0fbc18c588ac", 15564838601))
 
@@ -64,7 +64,7 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 			}(),
 		},
 		"valid signature 2": {
-			tx: func() *transaction.Tx {
+			tx: func() *transaction.Transaction {
 				tx := transaction.NewTx()
 
 				assert.NoError(
@@ -136,7 +136,7 @@ type mockUnlocker struct {
 	script string
 }
 
-func (m *mockUnlocker) UnlockingScript(ctx context.Context, tx *transaction.Tx, params transaction.UnlockerParams) (*bscript.Script, error) {
+func (m *mockUnlocker) UnlockingScript(ctx context.Context, tx *transaction.Transaction, params transaction.UnlockerParams) (*bscript.Script, error) {
 	uscript, err := bscript.NewFromASM(m.script)
 	assert.NoError(m.t, err)
 
@@ -146,12 +146,12 @@ func (m *mockUnlocker) UnlockingScript(ctx context.Context, tx *transaction.Tx, 
 func TestLocalUnlocker_NonSignature(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		tx                  *transaction.Tx
+		tx                  *transaction.Transaction
 		unlockerFunc        func(ctx context.Context, lockingScript *bscript.Script) (transaction.Unlocker, error)
 		expUnlockingScripts []string
 	}{
 		"simple script": {
-			tx: func() *transaction.Tx {
+			tx: func() *transaction.Transaction {
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529387", 15564838601))
 				return tx
@@ -172,7 +172,7 @@ func TestLocalUnlocker_NonSignature(t *testing.T) {
 			expUnlockingScripts: []string{"OP_4"},
 		},
 		"multiple inputs unlocked": {
-			tx: func() *transaction.Tx {
+			tx: func() *transaction.Transaction {
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529487", 15564838601))
 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52589587", 15564838601))
