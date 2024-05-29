@@ -42,7 +42,7 @@ import (
 	"context"
 	"log"
 
-	"github.com/bitcoin-sv/go-sdk/ec/wif"
+	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )

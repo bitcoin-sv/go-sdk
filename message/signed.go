@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/bitcoin-sv/go-sdk/ec"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 )
 
 type SignedMessage struct {

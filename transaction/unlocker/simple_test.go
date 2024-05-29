@@ -4,13 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/ec"
-	"github.com/bitcoin-sv/go-sdk/ec/wif"
-	"github.com/bitcoin-sv/go-sdk/sighash"
-	"github.com/bitcoin-sv/go-sdk/transaction"
-	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 	"github.com/stretchr/testify/assert"
+
+	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/transaction"
+	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
+	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )
 
 func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {

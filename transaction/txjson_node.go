@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
 )
 
 type nodeTxWrapper struct {

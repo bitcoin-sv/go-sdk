@@ -3,8 +3,8 @@ package transaction
 import (
 	"context"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/sighash"
+	bscript "github.com/bitcoin-sv/go-sdk/script"
+	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 )
 
 // UnlockerParams params used for unlocking an input with a `bt.Unlocker`.
