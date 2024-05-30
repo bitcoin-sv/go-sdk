@@ -8,6 +8,7 @@ import (
 	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/transaction/template"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 	"github.com/stretchr/testify/assert"
 )
@@ -26,6 +27,10 @@ func TestTx_JSON(t *testing.T) {
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					2000000,
 				))
+				add, err := script.NewAddressFromString("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk")
+				assert.NoError(t, err)
+				tmpl := template.NewP2PKHTemplateFromAddress(add)
+				tx.AddOutput()
 				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 				var w *wif.WIF
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")

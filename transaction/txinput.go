@@ -1,21 +1,14 @@
 package transaction
 
 import (
-	"context"
+	"bytes"
 	"encoding/binary"
+	"encoding/hex"
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/util"
 )
-
-// UTXOGetterFunc is used for tx.Fund(...). It provides the amount of satoshis required
-// for funding as `deficit`, and expects []*bt.UTXO to be returned containing
-// utxos of which *bt.Input's can be built.
-// If the returned []*bt.UTXO does not cover the deficit after fee recalculation, then
-// this UTXOGetterFunc is called again, with the newly calculated deficit passed in.
-//
-// It is expected that bt.ErrNoUTXO will be returned once the utxo source is depleted.
-type UTXOGetterFunc func(ctx context.Context, deficit uint64) ([]*UTXO, error)
 
 // TotalInputSatoshis returns the total Satoshis inputted to the transaction.
 func (tx *Transaction) TotalInputSatoshis() (total uint64) {
@@ -69,4 +62,70 @@ func (tx *Transaction) SequenceHash() []byte {
 	}
 
 	return crypto.Sha256d(buf)
+}
+
+// AddP2PKHInputsFromTx will add all Outputs of given previous transaction
+// that match a specific public key to your transaction.
+func (tx *Transaction) AddP2PKHInputsFromTx(pvsTx *Transaction, matchPK []byte) error {
+	// Given that the prevTxID never changes, calculate it once up front.
+	prevTxIDBytes := pvsTx.TxIDBytes()
+	for i, utxo := range pvsTx.Outputs {
+		utxoPkHASH160, err := utxo.LockingScript.PublicKeyHash()
+		if err != nil {
+			return err
+		}
+
+		if bytes.Equal(utxoPkHASH160, crypto.Hash160(matchPK)) {
+			if err := tx.FromUTXOs(&UTXO{
+				TxID:          prevTxIDBytes,
+				Vout:          uint32(i),
+				Satoshis:      utxo.Satoshis,
+				LockingScript: utxo.LockingScript,
+			}); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// From adds a new input to the transaction from the specified UTXO fields, using the default
+// finalised sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
+// afterwards.
+func (tx *Transaction) From(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64) error {
+	pts, err := script.NewFromHex(prevTxLockingScript)
+	if err != nil {
+		return err
+	}
+	pti, err := hex.DecodeString(prevTxID)
+	if err != nil {
+		return err
+	}
+
+	return tx.FromUTXOs(&UTXO{
+		TxID:          pti,
+		Vout:          vout,
+		LockingScript: pts,
+		Satoshis:      satoshis,
+	})
+}
+
+// FromUTXOs adds a new input to the transaction from the specified *bt.UTXO fields, using the default
+// finalised sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
+// afterwards.
+func (tx *Transaction) FromUTXOs(utxos ...*UTXO) error {
+	for _, utxo := range utxos {
+		i := &TransactionInput{
+			PreviousTxID:       utxo.TxID,
+			PreviousTxOutIndex: utxo.Vout,
+			PreviousTxSatoshis: utxo.Satoshis,
+			PreviousTxScript:   utxo.LockingScript,
+			SequenceNumber:     DefaultSequenceNumber, // use default finalised sequence number
+		}
+
+		tx.AddInput(i)
+	}
+
+	return nil
 }

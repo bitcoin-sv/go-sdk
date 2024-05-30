@@ -39,6 +39,6 @@ func main() {
 	tx.FillInput(
 		context.Background(),
 		&unlocker.P2PKH{PrivateKey: key.PrivKey},
-		transaction.UnlockerParams{},
+		transaction.UnlockParams{},
 	)
 }

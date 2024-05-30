@@ -100,34 +100,34 @@ func NewFromASM(str string) (*Script, error) {
 // 	return &s, nil
 // }
 
-// NewP2PKHFromPubKeyHashStr takes a public key hex string (in
-// compressed format) and creates a P2PKH script from it.
-func NewP2PKHFromPubKeyHashStr(pubKeyHash string) (*Script, error) {
-	hash, err := hex.DecodeString(pubKeyHash)
-	if err != nil {
-		return nil, err
-	}
+// // NewP2PKHFromPubKeyHashStr takes a public key hex string (in
+// // compressed format) and creates a P2PKH script from it.
+// func NewP2PKHFromPubKeyHashStr(pubKeyHash string) (*Script, error) {
+// 	hash, err := hex.DecodeString(pubKeyHash)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return NewP2PKHFromPubKeyHash(hash)
-}
+// 	return NewP2PKHFromPubKeyHash(hash)
+// }
 
-// NewP2PKHFromAddress takes an address
-// and creates a P2PKH script from it.
-func NewP2PKHFromAddress(addr string) (*Script, error) {
-	a, err := NewAddressFromString(addr)
-	if err != nil {
-		return nil, err
-	}
+// // NewP2PKHFromAddress takes an address
+// // and creates a P2PKH script from it.
+// func NewP2PKHFromAddress(addr string) (*Script, error) {
+// 	a, err := NewAddressFromString(addr)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	s := new(Script)
-	_ = s.AppendOpcodes(OpDUP, OpHASH160)
-	if err = s.AppendPushData(a.PublicKeyHash); err != nil {
-		return nil, err
-	}
-	_ = s.AppendOpcodes(OpEQUALVERIFY, OpCHECKSIG)
+// 	s := new(Script)
+// 	_ = s.AppendOpcodes(OpDUP, OpHASH160)
+// 	if err = s.AppendPushData(a.PublicKeyHash); err != nil {
+// 		return nil, err
+// 	}
+// 	_ = s.AppendOpcodes(OpEQUALVERIFY, OpCHECKSIG)
 
-	return s, nil
-}
+// 	return s, nil
+// }
 
 // AppendPushData takes data bytes and appends them to the script
 // with proper PUSHDATA prefixes
@@ -228,16 +228,16 @@ func (s *Script) ToASM() (string, error) {
 	return strings.Join(asm, " "), nil
 }
 
-// // IsP2PKH returns true if this is a pay to pubkey hash output script.
-// func (s *Script) IsP2PKH() bool {
-// 	b := []byte(*s)
-// 	return len(b) == 25 &&
-// 		b[0] == OpDUP &&
-// 		b[1] == OpHASH160 &&
-// 		b[2] == OpDATA20 &&
-// 		b[23] == OpEQUALVERIFY &&
-// 		b[24] == OpCHECKSIG
-// }
+// IsP2PKH returns true if this is a pay to pubkey hash output script.
+func (s *Script) IsP2PKH() bool {
+	b := []byte(*s)
+	return len(b) == 25 &&
+		b[0] == OpDUP &&
+		b[1] == OpHASH160 &&
+		b[2] == OpDATA20 &&
+		b[23] == OpEQUALVERIFY &&
+		b[24] == OpCHECKSIG
+}
 
 // IsP2PK returns true if this is a public key output script.
 func (s *Script) IsP2PK() bool {

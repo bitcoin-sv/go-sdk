@@ -7,7 +7,6 @@ import (
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	script "github.com/bitcoin-sv/go-sdk/script"
-	"github.com/pkg/errors"
 )
 
 // newOutputFromBytes returns a transaction Output from the bytes provided
@@ -42,73 +41,73 @@ func (tx *Transaction) TotalOutputSatoshis() (total uint64) {
 	return
 }
 
-// AddP2PKHOutputFromPubKeyHashStr makes an output to a PKH with a value.
-func (tx *Transaction) AddP2PKHOutputFromPubKeyHashStr(publicKeyHash string, satoshis uint64) error {
-	s, err := script.NewP2PKHFromPubKeyHashStr(publicKeyHash)
-	if err != nil {
-		return err
-	}
+// // AddP2PKHOutputFromPubKeyHashStr makes an output to a PKH with a value.
+// func (tx *Transaction) AddP2PKHOutputFromPubKeyHashStr(publicKeyHash string, satoshis uint64) error {
+// 	s, err := script.NewP2PKHFromPubKeyHashStr(publicKeyHash)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	tx.AddOutput(&TransactionOutput{
-		Satoshis:      satoshis,
-		LockingScript: s,
-	})
-	return nil
-}
+// 	tx.AddOutput(&TransactionOutput{
+// 		Satoshis:      satoshis,
+// 		LockingScript: s,
+// 	})
+// 	return nil
+// }
 
-// AddP2PKHOutputFromPubKeyBytes makes an output to a PKH with a value.
-func (tx *Transaction) AddP2PKHOutputFromPubKeyBytes(publicKeyBytes []byte, satoshis uint64) error {
-	s, err := script.NewP2PKHFromPubKeyBytes(publicKeyBytes)
-	if err != nil {
-		return err
-	}
+// // AddP2PKHOutputFromPubKeyBytes makes an output to a PKH with a value.
+// func (tx *Transaction) AddP2PKHOutputFromPubKeyBytes(publicKeyBytes []byte, satoshis uint64) error {
+// 	s, err := script.NewP2PKHFromPubKeyBytes(publicKeyBytes)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	tx.AddOutput(&TransactionOutput{
-		Satoshis:      satoshis,
-		LockingScript: s,
-	})
-	return nil
-}
+// 	tx.AddOutput(&TransactionOutput{
+// 		Satoshis:      satoshis,
+// 		LockingScript: s,
+// 	})
+// 	return nil
+// }
 
-// AddP2PKHOutputFromPubKeyStr makes an output to a PKH with a value.
-func (tx *Transaction) AddP2PKHOutputFromPubKeyStr(publicKey string, satoshis uint64) error {
-	s, err := script.NewP2PKHFromPubKeyStr(publicKey)
-	if err != nil {
-		return err
-	}
+// // AddP2PKHOutputFromPubKeyStr makes an output to a PKH with a value.
+// func (tx *Transaction) AddP2PKHOutputFromPubKeyStr(publicKey string, satoshis uint64) error {
+// 	s, err := script.NewP2PKHFromPubKeyStr(publicKey)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	tx.AddOutput(&TransactionOutput{
-		Satoshis:      satoshis,
-		LockingScript: s,
-	})
-	return nil
-}
+// 	tx.AddOutput(&TransactionOutput{
+// 		Satoshis:      satoshis,
+// 		LockingScript: s,
+// 	})
+// 	return nil
+// }
 
-// AddP2PKHOutputFromAddress makes an output to a PKH with a value.
-func (tx *Transaction) AddP2PKHOutputFromAddress(addr string, satoshis uint64) error {
-	s, err := script.NewP2PKHFromAddress(addr)
-	if err != nil {
-		return err
-	}
+// // AddP2PKHOutputFromAddress makes an output to a PKH with a value.
+// func (tx *Transaction) AddP2PKHOutputFromAddress(addr string, satoshis uint64) error {
+// 	s, err := script.NewP2PKHFromAddress(addr)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	tx.AddOutput(&TransactionOutput{
-		Satoshis:      satoshis,
-		LockingScript: s,
-	})
-	return nil
-}
+// 	tx.AddOutput(&TransactionOutput{
+// 		Satoshis:      satoshis,
+// 		LockingScript: s,
+// 	})
+// 	return nil
+// }
 
-// AddP2PKHOutputFromScript makes an output to a P2PKH script paid to the provided locking script with a value.
-func (tx *Transaction) AddP2PKHOutputFromScript(script *script.Script, satoshis uint64) error {
-	if !script.IsP2PKH() {
-		return errors.Wrapf(ErrInvalidScriptType, "'%s' is not a valid P2PKH script", script.ScriptType())
-	}
-	tx.AddOutput(&TransactionOutput{
-		Satoshis:      satoshis,
-		LockingScript: script,
-	})
-	return nil
-}
+// // AddP2PKHOutputFromScript makes an output to a P2PKH script paid to the provided locking script with a value.
+// func (tx *Transaction) AddP2PKHOutputFromScript(script *script.Script, satoshis uint64) error {
+// 	if !script.IsP2PKH() {
+// 		return errors.Wrapf(ErrInvalidScriptType, "'%s' is not a valid P2PKH script", script.ScriptType())
+// 	}
+// 	tx.AddOutput(&TransactionOutput{
+// 		Satoshis:      satoshis,
+// 		LockingScript: script,
+// 	})
+// 	return nil
+// }
 
 // AddHashPuzzleOutput makes an output to a hash puzzle + PKH with a value.
 func (tx *Transaction) AddHashPuzzleOutput(secret, publicKeyHash string, satoshis uint64) error {
@@ -185,14 +184,14 @@ func (tx *Transaction) AddOutput(output *TransactionOutput) {
 	tx.Outputs = append(tx.Outputs, output)
 }
 
-// PayTo creates a new P2PKH output from a BitCoin address (base58)
-// and the satoshis amount and adds that to the transaction.
-func (tx *Transaction) PayTo(script *script.Script, satoshis uint64) error {
-	return tx.AddP2PKHOutputFromScript(script, satoshis)
-}
+// // PayTo creates a new P2PKH output from a BitCoin address (base58)
+// // and the satoshis amount and adds that to the transaction.
+// func (tx *Transaction) PayTo(script *script.Script, satoshis uint64) error {
+// 	return tx.AddP2PKHOutputFromScript(script, satoshis)
+// }
 
-// PayToAddress creates a new P2PKH output from a BitCoin address (base58)
-// and the satoshis amount and adds that to the transaction.
-func (tx *Transaction) PayToAddress(addr string, satoshis uint64) error {
-	return tx.AddP2PKHOutputFromAddress(addr, satoshis)
-}
+// // PayToAddress creates a new P2PKH output from a BitCoin address (base58)
+// // and the satoshis amount and adds that to the transaction.
+// func (tx *Transaction) PayToAddress(addr string, satoshis uint64) error {
+// 	return tx.AddP2PKHOutputFromAddress(addr, satoshis)
+// }

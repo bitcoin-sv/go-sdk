@@ -64,7 +64,7 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 	}
 	in := tx.InputIdx(int(inputNumber))
 
-	if len(in.PreviousTxID()) == 0 {
+	if len(in.PreviousTxID) == 0 {
 		return nil, ErrEmptyPreviousTxID
 	}
 	if in.PreviousTxScript == nil {
@@ -107,7 +107,7 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 	buf = append(buf, hashSequence...)
 
 	//  outpoint (32-byte hash + 4-byte little endian)
-	buf = append(buf, util.ReverseBytes(in.PreviousTxID())...)
+	buf = append(buf, util.ReverseBytes(in.PreviousTxID)...)
 	oi := make([]byte, 4)
 	binary.LittleEndian.PutUint32(oi, in.PreviousTxOutIndex)
 	buf = append(buf, oi...)
@@ -153,7 +153,7 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 	}
 	in := tx.InputIdx(int(inputNumber))
 
-	if len(in.PreviousTxID()) == 0 {
+	if len(in.PreviousTxID) == 0 {
 		return nil, ErrEmptyPreviousTxID
 	}
 	if in.PreviousTxScript == nil {
@@ -229,7 +229,7 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 
 	buf = append(buf, VarInt(uint64(len(txCopy.Inputs))).Bytes()...)
 	for _, in := range txCopy.Inputs {
-		buf = append(buf, util.ReverseBytes(in.PreviousTxID())...)
+		buf = append(buf, util.ReverseBytes(in.PreviousTxID)...)
 
 		oi := make([]byte, 4)
 		binary.LittleEndian.PutUint32(oi, in.PreviousTxOutIndex)

@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"log"
+	"slices"
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/util"
 )
 
@@ -371,182 +370,30 @@ func (tx *Transaction) toBytesHelper(index int, lockingScript []byte, extended b
 	return append(h, lt...)
 }
 
-// TxSize contains the size breakdown of a transaction
-// including the breakdown of data bytes vs standard bytes.
-// This information can be used when calculating fees.
-type TxSize struct {
-	// TotalBytes are the amount of bytes for the entire tx.
-	TotalBytes uint64
-	// TotalStdBytes are the amount of bytes for the tx minus the data bytes.
-	TotalStdBytes uint64
-	// TotalDataBytes is the size in bytes of the op_return / data outputs.
-	TotalDataBytes uint64
-}
-
 // Size will return the size of tx in bytes.
 func (tx *Transaction) Size() int {
 	return len(tx.Bytes())
 }
 
-// SizeWithTypes will return the size of tx in bytes
-// and include the different data types (std/data/etc.).
-func (tx *Transaction) SizeWithTypes() *TxSize {
-	totBytes := tx.Size()
+func (tx *Transaction) AddMerkleProof(bump *MerklePath) error {
+	if !slices.ContainsFunc(bump.Path[0], func(v *PathElement) bool {
+		return bytes.Equal(v.Hash, tx.TxIDBytes())
+	}) {
+		return ErrBadMerkleProof
+	}
+	tx.MerklePath = bump
+	return nil
+}
 
-	// calculate data outputs
-	dataLen := 0
-	for _, d := range tx.Outputs {
-		if d.LockingScript.IsData() {
-			dataLen += len(*d.LockingScript)
+func (tx *Transaction) Sign() error {
+	for vin, i := range tx.Inputs {
+		if i.Template == nil {
+			unlock, err := i.Template.Sign(tx, UnlockParams{InputIdx: uint32(vin)})
+			if err != nil {
+				return err
+			}
+			i.UnlockingScript = unlock
 		}
 	}
-	return &TxSize{
-		TotalBytes:     uint64(totBytes),
-		TotalStdBytes:  uint64(totBytes - dataLen),
-		TotalDataBytes: uint64(dataLen),
-	}
-}
-
-// EstimateSize will return the size of tx in bytes and will add 107 bytes
-// to the unlocking script of any unsigned inputs (only P2PKH for now) found
-// to give a final size estimate of the tx size.
-func (tx *Transaction) EstimateSize() (int, error) {
-	tempTx, err := tx.estimatedFinalTx()
-	if err != nil {
-		return 0, err
-	}
-
-	return tempTx.Size(), nil
-}
-
-// EstimateSizeWithTypes will return the size of tx in bytes, including the
-// different data types (std/data/etc.), and will add 107 bytes to the unlocking
-// script of any unsigned inputs (only P2PKH for now) found to give a final size
-// estimate of the tx size.
-func (tx *Transaction) EstimateSizeWithTypes() (*TxSize, error) {
-	tempTx, err := tx.estimatedFinalTx()
-	if err != nil {
-		return nil, err
-	}
-
-	return tempTx.SizeWithTypes(), nil
-}
-
-func (tx *Transaction) estimatedFinalTx() (*Transaction, error) {
-	tempTx := tx.Clone()
-
-	for i, in := range tempTx.Inputs {
-		if in.PreviousTxScript == nil {
-			return nil, fmt.Errorf("%w at index %d in order to calc expected UnlockingScript", ErrEmptyPreviousTxScript, i)
-		}
-		if !(in.PreviousTxScript.IsP2PKH() || in.PreviousTxScript.IsP2PKHInscription()) {
-			return nil, ErrUnsupportedScript
-		}
-		if in.UnlockingScript == nil || len(*in.UnlockingScript) == 0 {
-			//nolint:lll // insert dummy p2pkh unlocking script (sig + pubkey)
-			dummyUnlockingScript, _ := hex.DecodeString("4830450221009c13cbcbb16f2cfedc7abf3a4af1c3fe77df1180c0e7eee30d9bcc53ebda39da02207b258005f1bc3cf9dffa06edb358d6db2bcfc87f50516fac8e3f4686fc2a03df412103107feff22788a1fc8357240bf450fd7bca4bd45d5f8bac63818c5a7b67b03876")
-			in.UnlockingScript = script.NewFromBytes(dummyUnlockingScript)
-		}
-	}
-	return tempTx, nil
-}
-
-// TxFees is returned when CalculateFee is called and contains
-// a breakdown of the fees including the total and the size breakdown of
-// the tx in bytes.
-type TxFees struct {
-	// TotalFeePaid is the total amount of fees this tx will pay.
-	TotalFeePaid uint64
-	// StdFeePaid is the amount of fee to cover the standard inputs and outputs etc.
-	StdFeePaid uint64
-	// DataFeePaid is the amount of fee to cover the op_return data outputs.
-	DataFeePaid uint64
-}
-
-// IsFeePaidEnough will calculate the fees that this transaction is paying
-// including the individual fee types (std/data/etc.).
-func (tx *Transaction) IsFeePaidEnough(fees *FeeQuote) (bool, error) {
-	expFeesPaid, err := tx.feesPaid(tx.SizeWithTypes(), fees)
-	if err != nil {
-		return false, err
-	}
-	totalInputSatoshis := tx.TotalInputSatoshis()
-	totalOutputSatoshis := tx.TotalOutputSatoshis()
-
-	if totalInputSatoshis < totalOutputSatoshis {
-		return false, nil
-	}
-
-	actualFeePaid := totalInputSatoshis - totalOutputSatoshis
-	return actualFeePaid >= expFeesPaid.TotalFeePaid, nil
-}
-
-// EstimateIsFeePaidEnough will calculate the fees that this transaction is paying
-// including the individual fee types (std/data/etc.), and will add 107 bytes to the unlocking
-// script of any unsigned inputs (only P2PKH for now) found to give a final size
-// estimate of the tx size for fee calculation.
-func (tx *Transaction) EstimateIsFeePaidEnough(fees *FeeQuote) (bool, error) {
-	tempTx, err := tx.estimatedFinalTx()
-	if err != nil {
-		return false, err
-	}
-	expFeesPaid, err := tempTx.feesPaid(tempTx.SizeWithTypes(), fees)
-	if err != nil {
-		return false, err
-	}
-	totalInputSatoshis := tempTx.TotalInputSatoshis()
-	totalOutputSatoshis := tempTx.TotalOutputSatoshis()
-
-	if totalInputSatoshis < totalOutputSatoshis {
-		return false, nil
-	}
-
-	actualFeePaid := totalInputSatoshis - totalOutputSatoshis
-	return actualFeePaid >= expFeesPaid.TotalFeePaid, nil
-}
-
-// EstimateFeesPaid will estimate how big the tx will be when finalised
-// by estimating input unlocking scripts that have not yet been filled
-// including the individual fee types (std/data/etc.).
-func (tx *Transaction) EstimateFeesPaid(fees *FeeQuote) (*TxFees, error) {
-	size, err := tx.EstimateSizeWithTypes()
-	if err != nil {
-		return nil, err
-	}
-	return tx.feesPaid(size, fees)
-}
-
-func (tx *Transaction) feesPaid(size *TxSize, fees *FeeQuote) (*TxFees, error) {
-	// get fees
-	stdFee, err := fees.Fee(FeeTypeStandard)
-	if err != nil {
-		return nil, err
-	}
-	dataFee, err := fees.Fee(FeeTypeData)
-	if err != nil {
-		return nil, err
-	}
-
-	txFees := &TxFees{
-		StdFeePaid:  size.TotalStdBytes * uint64(stdFee.MiningFee.Satoshis) / uint64(stdFee.MiningFee.Bytes),
-		DataFeePaid: size.TotalDataBytes * uint64(dataFee.MiningFee.Satoshis) / uint64(dataFee.MiningFee.Bytes),
-	}
-	txFees.TotalFeePaid = txFees.StdFeePaid + txFees.DataFeePaid
-	return txFees, nil
-}
-
-func (tx *Transaction) estimateDeficit(fees *FeeQuote) (uint64, error) {
-	totalInputSatoshis := tx.TotalInputSatoshis()
-	totalOutputSatoshis := tx.TotalOutputSatoshis()
-
-	expFeesPaid, err := tx.EstimateFeesPaid(fees)
-	if err != nil {
-		return 0, err
-	}
-
-	if totalInputSatoshis > totalOutputSatoshis+expFeesPaid.TotalFeePaid {
-		return 0, nil
-	}
-
-	return totalOutputSatoshis + expFeesPaid.TotalFeePaid - totalInputSatoshis, nil
+	return nil
 }

@@ -8,6 +8,7 @@ import (
 
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
+	"github.com/bitcoin-sv/go-sdk/transaction/template"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -15,38 +16,26 @@ func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 	t.Parallel()
 
 	t.Run("empty pubkey hash", func(t *testing.T) {
-		tx := transaction.NewTx()
-		err := tx.AddP2PKHOutputFromPubKeyHashStr(
-			"",
-			uint64(5000),
-		)
-		assert.NoError(t, err)
-		assert.Equal(t,
-			"76a91488ac",
-			tx.Outputs[0].LockingScriptHex(),
-		)
+		tmpl := &template.P2PKHTemplate{}
+		_, err := tmpl.Lock()
+		assert.Error(t, err)
 	})
 
 	t.Run("invalid pubkey hash", func(t *testing.T) {
-		tx := transaction.NewTx()
-		err := tx.AddP2PKHOutputFromPubKeyHashStr(
-			"0",
-			uint64(5000),
-		)
+		tmpl := &template.P2PKHTemplate{PKHash: []byte("invalid")}
+		_, err := tmpl.Lock()
 		assert.Error(t, err)
 	})
 
 	t.Run("valid output", func(t *testing.T) {
 		// This is the PKH for address mtdruWYVEV1wz5yL7GvpBj4MgifCB7yhPd
-		tx := transaction.NewTx()
-		err := tx.AddP2PKHOutputFromPubKeyHashStr(
-			"8fe80c75c9560e8b56ed64ea3c26e18d2c52211b",
-			uint64(5000),
-		)
+		tmpl := &template.P2PKHTemplate{}
+		tmpl.PKHash, _ = hex.DecodeString("8fe80c75c9560e8b56ed64ea3c26e18d2c52211b")
+		s, err := tmpl.Lock()
 		assert.NoError(t, err)
 		assert.Equal(t,
 			"76a9148fe80c75c9560e8b56ed64ea3c26e18d2c52211b88ac",
-			tx.Outputs[0].LockingScriptHex(),
+			hex.EncodeToString(*s),
 		)
 	})
 }
@@ -134,51 +123,6 @@ func TestTx_TotalOutputSatoshis(t *testing.T) {
 	})
 }
 
-func TestTx_PayToAddress(t *testing.T) {
-	t.Run("missing pay to address", func(t *testing.T) {
-		tx := transaction.NewTx()
-		assert.NotNil(t, tx)
-		err := tx.From(
-			"07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b",
-			0,
-			"76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac",
-			4000000)
-		assert.NoError(t, err)
-
-		err = tx.PayToAddress("", 100)
-		assert.Error(t, err)
-	})
-
-	t.Run("invalid pay to address", func(t *testing.T) {
-		tx := transaction.NewTx()
-		assert.NotNil(t, tx)
-		err := tx.From(
-			"07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b",
-			0,
-			"76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac",
-			4000000)
-		assert.NoError(t, err)
-
-		err = tx.PayToAddress("1234567", 100)
-		assert.Error(t, err)
-	})
-
-	t.Run("valid pay to address", func(t *testing.T) {
-		tx := transaction.NewTx()
-		assert.NotNil(t, tx)
-		err := tx.From(
-			"07912972e42095fe58daaf09161c5a5da57be47c2054dc2aaa52b30fefa1940b",
-			0,
-			"76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac",
-			4000000)
-		assert.NoError(t, err)
-
-		err = tx.PayToAddress("1GHMW7ABrFma2NSwiVe9b9bZxkMB7tuPZi", 100)
-		assert.NoError(t, err)
-		assert.Equal(t, 1, tx.OutputCount())
-	})
-}
-
 func TestTx_PayTo(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
@@ -187,7 +131,10 @@ func TestTx_PayTo(t *testing.T) {
 	}{
 		"valid p2pkh script should create valid output": {
 			script: func() *script.Script {
-				s, err := script.NewP2PKHFromAddress("1GHMW7ABrFma2NSwiVe9b9bZxkMB7tuPZi")
+				add, err := script.NewAddressFromString("1GHMW7ABrFma2NSwiVe9b9bZxkMB7tuPZi")
+				assert.NoError(t, err)
+				tmpl := template.NewP2PKHTemplateFromAddress(add)
+				s, err := tmpl.Lock()
 				assert.NoError(t, err)
 				return s
 			}(),
@@ -210,7 +157,15 @@ func TestTx_PayTo(t *testing.T) {
 				"76a914af2590a45ae401651fdbdf59a76ad43d1862534088ac",
 				4000000)
 			assert.NoError(t, err)
-			err = tx.PayTo(test.script, 100)
+			pkhash, _ := hex.DecodeString("af2590a45ae401651fdbdf59a76ad43d18625340")
+			tmpl := &template.P2PKHTemplate{PKHash: pkhash}
+			script, err := tmpl.Lock()
+			assert.NoError(t, err)
+			tx.AddOutput(&transaction.TransactionOutput{
+				Satoshis:      100,
+				LockingScript: script,
+			})
+
 			if test.err == nil {
 				assert.NoError(t, err)
 				assert.Equal(t, 1, tx.OutputCount())

@@ -26,6 +26,7 @@ Txout-script / scriptPubKey   Script                                      <out-s
 type TransactionOutput struct {
 	Satoshis      uint64         `json:"satoshis"`
 	LockingScript *script.Script `json:"locking_script"`
+	Change        bool           `json:"change"`
 }
 
 // ReadFrom reads from the `io.Reader` into the `bt.Output`.
@@ -99,18 +100,4 @@ func (o *TransactionOutput) BytesForSigHash() []byte {
 	buf = append(buf, *o.LockingScript...)
 
 	return buf
-}
-
-// NodeJSON returns a wrapped *bt.Output for marshalling/unmarshalling into a node output format.
-//
-// Marshalling usage example:
-//
-//	bb, err := json.Marshal(output.NodeJSON())
-//
-// Unmarshalling usage example:
-//
-//	output := &bt.Output{}
-//	if err := json.Unmarshal(bb, output.NodeJSON()); err != nil {}
-func (o *TransactionOutput) NodeJSON() interface{} {
-	return &nodeOutputWrapper{TransactionOutput: o}
 }

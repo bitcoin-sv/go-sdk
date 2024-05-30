@@ -37,7 +37,7 @@ type TransactionInput struct {
 	UnlockingScript    *script.Script
 	PreviousTxOutIndex uint32
 	SequenceNumber     uint32
-	Unlocker           *Unlocker
+	Template           ScriptTemplate
 }
 
 func (i *TransactionInput) PreviousTx() *Transaction {
@@ -45,7 +45,6 @@ func (i *TransactionInput) PreviousTx() *Transaction {
 }
 
 func (i *TransactionInput) SetPreviousTx(tx *Transaction) {
-	i.PreviousTxID = tx.TxIDBytes()
 	i.PreviousTxScript = tx.Outputs[i.PreviousTxOutIndex].LockingScript
 	i.PreviousTxSatoshis = tx.Outputs[i.PreviousTxOutIndex].Satoshis
 	i.previousTx = tx

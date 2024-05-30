@@ -12,6 +12,7 @@ var (
 	ErrUnsupportedScript = errors.New("non-P2PKH input used in the tx - unsupported")
 	ErrInvalidScriptType = errors.New("invalid script type")
 	ErrNoUnlocker        = errors.New("unlocker not supplied")
+	ErrBadMerkleProof    = errors.New("bad merkle proof")
 )
 
 // Sentinal errors reported by inputs.

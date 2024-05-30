@@ -42,12 +42,12 @@ func main() {
 	tx.FillInput(
 		context.Background(),
 		&unlocker.Multisig{PrivateKey: key.PrivKey},
-		transaction.UnlockerParams{},
+		transaction.UnlockParams{},
 	)
 
 	tx.FillInput(
 		context.Background(),
 		&unlocker.Multisig{PrivateKey: key2.PrivKey},
-		transaction.UnlockerParams{},
+		transaction.UnlockParams{},
 	)
 }

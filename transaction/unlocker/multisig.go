@@ -14,7 +14,7 @@ type Multisig struct {
 	PrivateKey *ec.PrivateKey
 }
 
-func (l *Multisig) UnlockingScript(ctx context.Context, tx *transaction.Transaction, params transaction.UnlockerParams) (*script.Script, error) {
+func (l *Multisig) UnlockingScript(ctx context.Context, tx *transaction.Transaction, params transaction.UnlockParams) (*script.Script, error) {
 	if params.SigHashFlags == 0 {
 		params.SigHashFlags = sighash.AllForkID
 	}
