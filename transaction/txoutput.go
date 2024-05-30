@@ -184,14 +184,21 @@ func (tx *Transaction) AddOutput(output *TransactionOutput) {
 	tx.Outputs = append(tx.Outputs, output)
 }
 
-// // PayTo creates a new P2PKH output from a BitCoin address (base58)
-// // and the satoshis amount and adds that to the transaction.
-// func (tx *Transaction) PayTo(script *script.Script, satoshis uint64) error {
-// 	return tx.AddP2PKHOutputFromScript(script, satoshis)
-// }
-
 // // PayToAddress creates a new P2PKH output from a BitCoin address (base58)
 // // and the satoshis amount and adds that to the transaction.
-// func (tx *Transaction) PayToAddress(addr string, satoshis uint64) error {
-// 	return tx.AddP2PKHOutputFromAddress(addr, satoshis)
-// }
+func (tx *Transaction) PayToAddress(addr string, satoshis uint64) error {
+	add, err := script.NewAddressFromString(addr)
+	if err != nil {
+		return err
+	}
+	b := make([]byte, 0, 25)
+	b = append(b, script.OpDUP, script.OpHASH160, script.OpDATA20)
+	b = append(b, add.PublicKeyHash...)
+	b = append(b, script.OpEQUALVERIFY, script.OpCHECKSIG)
+	s := script.Script(b)
+	tx.AddOutput(&TransactionOutput{
+		Satoshis:      satoshis,
+		LockingScript: &s,
+	})
+	return nil
+}

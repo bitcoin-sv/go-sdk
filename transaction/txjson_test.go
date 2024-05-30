@@ -1,7 +1,6 @@
 package transaction_test
 
 import (
-	"context"
 	"encoding/json"
 	"testing"
 
@@ -9,7 +8,6 @@ import (
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/template"
-	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,6 +18,11 @@ func TestTx_JSON(t *testing.T) {
 	}{
 		"standard tx should marshal and unmarshal correctly": {
 			tx: func() *transaction.Transaction {
+				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
+				assert.NoError(t, err)
+				assert.NotNil(t, w)
+				tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
+
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
@@ -27,22 +30,26 @@ func TestTx_JSON(t *testing.T) {
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					2000000,
 				))
-				add, err := script.NewAddressFromString("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk")
-				assert.NoError(t, err)
-				tmpl := template.NewP2PKHTemplateFromAddress(add)
-				tx.AddOutput()
-				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
-				var w *wif.WIF
-				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
-				assert.NoError(t, err)
-				assert.NotNil(t, w)
+				tx.Inputs[0].Template = tmpl
 
-				err = tx.FillAllInputs(context.Background(), &unlocker.Getter{PrivateKey: w.PrivKey})
+				s, err := tmpl.Lock()
+				assert.NoError(t, err)
+				tx.AddOutput(&transaction.TransactionOutput{
+					LockingScript: s,
+					Satoshis:      1000,
+				})
+
+				err = tx.Sign()
 				assert.NoError(t, err)
 				return tx
 			}(),
 		}, "data tx should marshall correctly": {
 			tx: func() *transaction.Transaction {
+				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
+				assert.NoError(t, err)
+				assert.NotNil(t, w)
+				tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
+
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
@@ -50,17 +57,15 @@ func TestTx_JSON(t *testing.T) {
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					2000000,
 				))
-				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
-				var w *wif.WIF
-				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
-				assert.NoError(t, err)
-				assert.NotNil(t, w)
+				tx.Inputs[0].Template = tmpl
+				// assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 				s := &script.Script{}
 				assert.NoError(t, s.AppendPushDataString("test"))
 				tx.AddOutput(&transaction.TransactionOutput{
 					LockingScript: s,
+					Satoshis:      1000,
 				})
-				err = tx.FillAllInputs(context.Background(), &unlocker.Getter{PrivateKey: w.PrivKey})
+				err = tx.Sign()
 				assert.NoError(t, err)
 				return tx
 			}(),
@@ -117,6 +122,11 @@ func TestTx_MarshallJSON(t *testing.T) {
 }`,
 		}, "transaction with multiple Inputs": {
 			tx: func() *transaction.Transaction {
+				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
+				assert.NoError(t, err)
+				assert.NotNil(t, w)
+				tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
+
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
@@ -124,25 +134,24 @@ func TestTx_MarshallJSON(t *testing.T) {
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
 				))
+				tx.Inputs[0].Template = tmpl
 				assert.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					2,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
 				))
+				tx.Inputs[1].Template = tmpl
 				assert.NoError(t, tx.From(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					114,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
 				))
+				tx.Inputs[2].Template = tmpl
 				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
-				var w *wif.WIF
-				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
-				assert.NoError(t, err)
-				assert.NotNil(t, w)
-				err = tx.FillAllInputs(context.Background(), &unlocker.Getter{PrivateKey: w.PrivKey})
-				assert.NoError(t, err)
+
+				assert.NoError(t, tx.Sign())
 				return tx
 			}(),
 			expJSON: `{

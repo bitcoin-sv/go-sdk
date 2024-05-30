@@ -8,12 +8,12 @@ import (
 
 // UTXO an unspent transaction output, used for creating inputs
 type UTXO struct {
-	TxID           []byte          `json:"txid"`
-	Vout           uint32          `json:"vout"`
-	LockingScript  *script.Script  `json:"locking_script"`
-	Satoshis       uint64          `json:"satoshis"`
-	SequenceNumber uint32          `json:"sequence_number"`
-	Template       *ScriptTemplate `json:"-"`
+	TxID           []byte         `json:"txid"`
+	Vout           uint32         `json:"vout"`
+	LockingScript  *script.Script `json:"locking_script"`
+	Satoshis       uint64         `json:"satoshis"`
+	SequenceNumber uint32         `json:"sequence_number"`
+	Template       ScriptTemplate `json:"-"`
 }
 
 // UTXOs a collection of *bt.UTXO.
