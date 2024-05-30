@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/stretchr/testify/assert"
 )
@@ -72,7 +72,7 @@ func TestNewHashPuzzleOutput(t *testing.T) {
 	})
 
 	t.Run("valid puzzle output", func(t *testing.T) {
-		addr, err := bscript.NewAddressFromString("myFhJggmsaA2S8Qe6ZQDEcVCwC4wLkvC4e")
+		addr, err := script.NewAddressFromString("myFhJggmsaA2S8Qe6ZQDEcVCwC4wLkvC4e")
 		assert.NoError(t, err)
 		assert.NotNil(t, addr)
 
@@ -182,21 +182,21 @@ func TestTx_PayToAddress(t *testing.T) {
 func TestTx_PayTo(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		script *bscript.Script
+		script *script.Script
 		err    error
 	}{
 		"valid p2pkh script should create valid output": {
-			script: func() *bscript.Script {
-				s, err := bscript.NewP2PKHFromAddress("1GHMW7ABrFma2NSwiVe9b9bZxkMB7tuPZi")
+			script: func() *script.Script {
+				s, err := script.NewP2PKHFromAddress("1GHMW7ABrFma2NSwiVe9b9bZxkMB7tuPZi")
 				assert.NoError(t, err)
 				return s
 			}(),
 			err: nil,
 		}, "empty p2pkh script should return error": {
-			script: &bscript.Script{},
+			script: &script.Script{},
 			err:    errors.New("'empty' is not a valid P2PKH script: invalid script type"),
 		}, "non p2pkh script should return error": {
-			script: bscript.NewFromBytes([]byte("test")),
+			script: script.NewFromBytes([]byte("test")),
 			err:    errors.New("'nonstandard' is not a valid P2PKH script: invalid script type"),
 		},
 	}

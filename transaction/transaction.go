@@ -9,7 +9,7 @@ import (
 	"log"
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/util"
 )
 
@@ -309,8 +309,12 @@ func (tx *Transaction) Clone() *Transaction {
 	}
 
 	for i, input := range tx.Inputs {
-		clone.Inputs[i].PreviousTxSatoshis = input.PreviousTxSatoshis
-		clone.Inputs[i].PreviousTxScript = input.PreviousTxScript
+		if input.PreviousTx() != nil {
+			clone.Inputs[i].SetPreviousTx(input.PreviousTx())
+		} else {
+			clone.Inputs[i].PreviousTxSatoshis = input.PreviousTxSatoshis
+			clone.Inputs[i].PreviousTxScript = input.PreviousTxScript
+		}
 	}
 
 	return clone
@@ -464,7 +468,7 @@ func (tx *Transaction) estimatedFinalTx() (*Transaction, error) {
 		if in.UnlockingScript == nil || len(*in.UnlockingScript) == 0 {
 			//nolint:lll // insert dummy p2pkh unlocking script (sig + pubkey)
 			dummyUnlockingScript, _ := hex.DecodeString("4830450221009c13cbcbb16f2cfedc7abf3a4af1c3fe77df1180c0e7eee30d9bcc53ebda39da02207b258005f1bc3cf9dffa06edb358d6db2bcfc87f50516fac8e3f4686fc2a03df412103107feff22788a1fc8357240bf450fd7bca4bd45d5f8bac63818c5a7b67b03876")
-			in.UnlockingScript = bscript.NewFromBytes(dummyUnlockingScript)
+			in.UnlockingScript = script.NewFromBytes(dummyUnlockingScript)
 		}
 	}
 	return tempTx, nil

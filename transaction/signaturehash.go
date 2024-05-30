@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"github.com/bitcoin-sv/go-sdk/util"
 )
@@ -190,8 +190,8 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 		if i == int(inputNumber) {
 			txCopy.Inputs[i].PreviousTxScript = tx.Inputs[inputNumber].PreviousTxScript
 		} else {
-			txCopy.Inputs[i].UnlockingScript = &bscript.Script{}
-			txCopy.Inputs[i].PreviousTxScript = &bscript.Script{}
+			txCopy.Inputs[i].UnlockingScript = &script.Script{}
+			txCopy.Inputs[i].PreviousTxScript = &script.Script{}
 		}
 	}
 
@@ -206,7 +206,7 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 		txCopy.Outputs = txCopy.Outputs[:inputNumber+1]
 		for i := 0; i < int(inputNumber); i++ {
 			txCopy.Outputs[i].Satoshis = 18446744073709551615 // -1 but underflowed
-			txCopy.Outputs[i].LockingScript = &bscript.Script{}
+			txCopy.Outputs[i].LockingScript = &script.Script{}
 		}
 
 		for i := range txCopy.Inputs {

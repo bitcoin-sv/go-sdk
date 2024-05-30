@@ -1,7 +1,7 @@
 package transaction
 
 import (
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 )
 
 // OrdinalsPrefix contains 'ORD' the inscription protocol prefix.
@@ -10,7 +10,7 @@ import (
 const OrdinalsPrefix = "ord"
 
 // Inscribe adds an output to the transaction with an inscription.
-func (tx *Transaction) Inscribe(ia *bscript.InscriptionArgs) error {
+func (tx *Transaction) Inscribe(ia *script.InscriptionArgs) error {
 	s := *ia.LockingScriptPrefix // deep copy
 
 	// add Inscription data
@@ -27,22 +27,22 @@ func (tx *Transaction) Inscribe(ia *bscript.InscriptionArgs) error {
 	//						OP_ENDIF
 	// )
 	// see: https://docs.ordinals.com/inscriptions.html
-	_ = s.AppendOpcodes(bscript.OpFALSE, bscript.OpIF)
+	_ = s.AppendOpcodes(script.OpFALSE, script.OpIF)
 	err := s.AppendPushDataString(OrdinalsPrefix)
 	if err != nil {
 		return err
 	}
-	_ = s.AppendOpcodes(bscript.Op1)
+	_ = s.AppendOpcodes(script.Op1)
 	err = s.AppendPushData([]byte(ia.ContentType))
 	if err != nil {
 		return err
 	}
-	_ = s.AppendOpcodes(bscript.Op0)
+	_ = s.AppendOpcodes(script.Op0)
 	err = s.AppendPushData(ia.Data)
 	if err != nil {
 		return err
 	}
-	_ = s.AppendOpcodes(bscript.OpENDIF)
+	_ = s.AppendOpcodes(script.OpENDIF)
 
 	if ia.EnrichedArgs != nil {
 		if len(ia.EnrichedArgs.OpReturnData) > 0 {
@@ -54,7 +54,7 @@ func (tx *Transaction) Inscribe(ia *bscript.InscriptionArgs) error {
 			// 	return nil, err
 			// }
 
-			_ = s.AppendOpcodes(bscript.OpRETURN)
+			_ = s.AppendOpcodes(script.OpRETURN)
 			if err := s.AppendPushDataArray(ia.EnrichedArgs.OpReturnData); err != nil {
 				return err
 			}
@@ -77,8 +77,8 @@ func (tx *Transaction) Inscribe(ia *bscript.InscriptionArgs) error {
 //
 // One output will be created with the extra Satoshis and then another
 // output will be created with 1 Satoshi with the inscription in it.
-func (tx *Transaction) InscribeSpecificOrdinal(ia *bscript.InscriptionArgs, inputIdx uint32, satoshiIdx uint64,
-	extraOutputScript *bscript.Script) error {
+func (tx *Transaction) InscribeSpecificOrdinal(ia *script.InscriptionArgs, inputIdx uint32, satoshiIdx uint64,
+	extraOutputScript *script.Script) error {
 	amount, err := rangeAbove(tx.Inputs, inputIdx, satoshiIdx)
 	if err != nil {
 		return err

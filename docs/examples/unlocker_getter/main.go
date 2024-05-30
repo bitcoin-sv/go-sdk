@@ -4,7 +4,7 @@ import (
 	"context"
 
 	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )
@@ -61,7 +61,7 @@ func main() {
 		}
 	}
 
-	changeScript, err := bscript.NewP2PKHFromPubKeyEC(decodedWif.PrivKey.PubKey())
+	changeScript, err := script.NewP2PKHFromPubKeyEC(decodedWif.PrivKey.PubKey())
 	if err != nil {
 		panic(err)
 	}

@@ -9,7 +9,7 @@ import (
 	"os"
 
 	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 )
@@ -19,8 +19,8 @@ func main() {
 
 	// get public key bytes and address
 	pubkey := decodedWif.SerialisePubKey()
-	addr, _ := bscript.NewAddressFromPublicKeyString(hex.EncodeToString(pubkey), true)
-	s, _ := bscript.NewP2PKHFromAddress(addr.AddressString)
+	addr, _ := script.NewAddressFromPublicKeyString(hex.EncodeToString(pubkey), true)
+	s, _ := script.NewP2PKHFromAddress(addr.AddressString)
 	fmt.Println(addr.AddressString)
 
 	tx := transaction.NewTx()
@@ -42,7 +42,7 @@ func main() {
 	// Get the content type of the image
 	contentType := mime.TypeByExtension(".png")
 
-	tx.Inscribe(&bscript.InscriptionArgs{
+	tx.Inscribe(&script.InscriptionArgs{
 		LockingScriptPrefix: s,
 		Data:                data,
 		ContentType:         contentType,

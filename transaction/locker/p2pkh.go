@@ -1,18 +1,18 @@
 package locker
 
 import (
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/ec"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/bitcoin-sv/go-sdk/script"
 )
 
 type P2PKH struct {
 	PubKey *ec.PublicKey
 }
 
-func (p P2PKH) LockingScript() (*bscript.Script, error) {
-	return bscript.NewP2PKHFromPubKeyBytes(p.PubKey.SerialiseCompressed())
+func (p P2PKH) LockingScript() (*script.Script, error) {
+	return script.NewP2PKHFromPubKeyBytes(p.PubKey.SerialiseCompressed())
 }
 
-func (p P2PKH) IsLockingScript(script *bscript.Script) bool {
+func (p P2PKH) IsLockingScript(script *script.Script) bool {
 	return script.IsP2PKH()
 }

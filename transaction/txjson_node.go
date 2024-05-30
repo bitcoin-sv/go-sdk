@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 )
 
 type nodeTxWrapper struct {
@@ -155,7 +155,7 @@ func (o *nodeOutputJSON) fromOutput(out *TransactionOutput) error {
 
 func (o *nodeOutputJSON) toOutput() (*TransactionOutput, error) {
 	out := &TransactionOutput{}
-	s, err := bscript.NewFromHex(o.ScriptPubKey.Hex)
+	s, err := script.NewFromHex(o.ScriptPubKey.Hex)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func (o *nodeOutputJSON) toOutput() (*TransactionOutput, error) {
 
 func (i *nodeInputJSON) toInput() (*TransactionInput, error) {
 	input := &TransactionInput{}
-	s, err := bscript.NewFromHex(i.ScriptSig.Hex)
+	s, err := script.NewFromHex(i.ScriptSig.Hex)
 	if err != nil {
 		return nil, err
 	}

@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 )
 
@@ -19,7 +19,7 @@ import (
 func TestOpcodeDisabled(t *testing.T) {
 	t.Parallel()
 
-	tests := []byte{bscript.Op2MUL, bscript.Op2DIV}
+	tests := []byte{script.Op2MUL, script.Op2DIV}
 	for _, opcodeVal := range tests {
 		pop := ParsedOpcode{op: opcodeArray[opcodeVal], Data: nil}
 		err := opcodeDisabled(&pop, nil)
@@ -45,16 +45,16 @@ func TestParse(t *testing.T) {
 			expectedParsedScript: ParsedScript{
 				ParsedOpcode{
 					op: opcode{
-						val:    bscript.OpDATA1,
+						val:    script.OpDATA1,
 						name:   "OP_DATA_1",
 						length: 2,
 						exec:   opcodePushData,
 					},
-					Data: []byte{bscript.OpENDIF},
+					Data: []byte{script.OpENDIF},
 				},
 				ParsedOpcode{
 					op: opcode{
-						val:    bscript.OpNIP,
+						val:    script.OpNIP,
 						name:   "OP_NIP",
 						length: 1,
 						exec:   opcodeNip,
@@ -63,7 +63,7 @@ func TestParse(t *testing.T) {
 				},
 				ParsedOpcode{
 					op: opcode{
-						val:    bscript.OpRETURN,
+						val:    script.OpRETURN,
 						name:   "OP_RETURN",
 						length: 1,
 						exec:   opcodeReturn,
@@ -84,7 +84,7 @@ func TestParse(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			s, err := bscript.NewFromHex(tc.scriptHexString)
+			s, err := script.NewFromHex(tc.scriptHexString)
 			require.NoError(t, err)
 
 			codeParser := DefaultOpcodeParser{}

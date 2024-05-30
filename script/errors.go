@@ -1,4 +1,4 @@
-package bscript
+package script
 
 import "github.com/pkg/errors"
 

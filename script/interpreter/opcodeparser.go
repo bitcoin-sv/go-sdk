@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"encoding/binary"
 
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 )
 
-// OpcodeParser parses *bscript.Script into a ParsedScript, and unparsing back
+// OpcodeParser parses *script.Script into a ParsedScript, and unparsing back
 type OpcodeParser interface {
-	Parse(*bscript.Script) (ParsedScript, error)
-	Unparse(ParsedScript) (*bscript.Script, error)
+	Parse(*script.Script) (ParsedScript, error)
+	Unparse(ParsedScript) (*script.Script, error)
 }
 
 // ParsedScript is a slice of ParsedOp
@@ -46,7 +46,7 @@ func (o ParsedOpcode) Length() int {
 // IsDisabled returns true if the op is disabled.
 func (o *ParsedOpcode) IsDisabled() bool {
 	switch o.op.val {
-	case bscript.Op2MUL, bscript.Op2DIV:
+	case script.Op2MUL, script.Op2DIV:
 		return true
 	default:
 		return false
@@ -56,8 +56,8 @@ func (o *ParsedOpcode) IsDisabled() bool {
 // RequiresTx returns true if the op is checksig.
 func (o *ParsedOpcode) RequiresTx() bool {
 	switch o.op.val {
-	case bscript.OpCHECKSIG, bscript.OpCHECKSIGVERIFY,
-		bscript.OpCHECKMULTISIG, bscript.OpCHECKMULTISIGVERIFY, bscript.OpCHECKSEQUENCEVERIFY:
+	case script.OpCHECKSIG, script.OpCHECKSIGVERIFY,
+		script.OpCHECKMULTISIG, script.OpCHECKMULTISIGVERIFY, script.OpCHECKSEQUENCEVERIFY:
 		return true
 	default:
 		return false
@@ -67,7 +67,7 @@ func (o *ParsedOpcode) RequiresTx() bool {
 // AlwaysIllegal returns true if the op is always illegal.
 func (o *ParsedOpcode) AlwaysIllegal() bool {
 	switch o.op.val {
-	case bscript.OpVERIF, bscript.OpVERNOTIF:
+	case script.OpVERIF, script.OpVERNOTIF:
 		return true
 	default:
 		return false
@@ -77,7 +77,7 @@ func (o *ParsedOpcode) AlwaysIllegal() bool {
 // IsConditional returns true if the op is a conditional.
 func (o *ParsedOpcode) IsConditional() bool {
 	switch o.op.val {
-	case bscript.OpIF, bscript.OpNOTIF, bscript.OpELSE, bscript.OpENDIF, bscript.OpVERIF, bscript.OpVERNOTIF:
+	case script.OpIF, script.OpNOTIF, script.OpELSE, script.OpENDIF, script.OpVERIF, script.OpVERNOTIF:
 		return true
 	default:
 		return false
@@ -88,20 +88,20 @@ func (o *ParsedOpcode) IsConditional() bool {
 // Errs if not the case.
 func (o *ParsedOpcode) enforceMinimumDataPush() error {
 	dataLen := len(o.Data)
-	if dataLen == 0 && o.op.val != bscript.Op0 {
+	if dataLen == 0 && o.op.val != script.Op0 {
 		return errs.NewError(
 			errs.ErrMinimalData,
 			"zero length data push is encoded with opcode %s instead of OP_0",
 			o.op.name,
 		)
 	}
-	if dataLen == 1 && (1 <= o.Data[0] && o.Data[0] <= 16) && o.op.val != bscript.Op1+o.Data[0]-1 {
+	if dataLen == 1 && (1 <= o.Data[0] && o.Data[0] <= 16) && o.op.val != script.Op1+o.Data[0]-1 {
 		return errs.NewError(
 			errs.ErrMinimalData,
 			"data push of the value %d encoded with opcode %s instead of OP_%d", o.Data[0], o.op.name, o.Data[0],
 		)
 	}
-	if dataLen == 1 && o.Data[0] == 0x81 && o.op.val != bscript.Op1NEGATE {
+	if dataLen == 1 && o.Data[0] == 0x81 && o.op.val != script.Op1NEGATE {
 		return errs.NewError(
 			errs.ErrMinimalData,
 			"data push of the value -1 encoded with opcode %s instead of OP_1NEGATE", o.op.name,
@@ -115,14 +115,14 @@ func (o *ParsedOpcode) enforceMinimumDataPush() error {
 			)
 		}
 	} else if dataLen <= 255 {
-		if o.op.val != bscript.OpPUSHDATA1 {
+		if o.op.val != script.OpPUSHDATA1 {
 			return errs.NewError(
 				errs.ErrMinimalData,
 				"data push of %d bytes encoded with opcode %s instead of OP_PUSHDATA1", dataLen, o.op.name,
 			)
 		}
 	} else if dataLen <= 65535 {
-		if o.op.val != bscript.OpPUSHDATA2 {
+		if o.op.val != script.OpPUSHDATA2 {
 			return errs.NewError(
 				errs.ErrMinimalData,
 				"data push of %d bytes encoded with opcode %s instead of OP_PUSHDATA2", dataLen, o.op.name,
@@ -132,8 +132,8 @@ func (o *ParsedOpcode) enforceMinimumDataPush() error {
 	return nil
 }
 
-// Parse takes a *bscript.Script and returns a []interpreter.ParsedOp
-func (p *DefaultOpcodeParser) Parse(s *bscript.Script) (ParsedScript, error) {
+// Parse takes a *script.Script and returns a []interpreter.ParsedOp
+func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
 	script := *s
 	parsedOps := make([]ParsedOpcode, 0, len(script))
 	conditionalBlock := 0
@@ -147,11 +147,11 @@ func (p *DefaultOpcodeParser) Parse(s *bscript.Script) (ParsedScript, error) {
 		}
 
 		switch parsedOp.op.val {
-		case bscript.OpIF, bscript.OpNOTIF, bscript.OpVERIF, bscript.OpVERNOTIF:
+		case script.OpIF, script.OpNOTIF, script.OpVERIF, script.OpVERNOTIF:
 			conditionalBlock++
-		case bscript.OpENDIF:
+		case script.OpENDIF:
 			conditionalBlock--
-		case bscript.OpRETURN:
+		case script.OpRETURN:
 			// If we are not in a conditional block, we end script evaluation.
 			// This must be the final evaluated opcode, everything after is ignored.
 			if conditionalBlock == 0 {
@@ -232,9 +232,9 @@ func (p *DefaultOpcodeParser) Parse(s *bscript.Script) (ParsedScript, error) {
 }
 
 // Unparse reverses the action of Parse and returns the
-// ParsedScript as a *bscript.Script
-func (p *DefaultOpcodeParser) Unparse(pscr ParsedScript) (*bscript.Script, error) {
-	script := make(bscript.Script, 0, len(pscr))
+// ParsedScript as a *script.Script
+func (p *DefaultOpcodeParser) Unparse(pscr ParsedScript) (*script.Script, error) {
+	script := make(script.Script, 0, len(pscr))
 	for _, pop := range pscr {
 		b, err := pop.bytes()
 		if err != nil {
@@ -248,7 +248,7 @@ func (p *DefaultOpcodeParser) Unparse(pscr ParsedScript) (*bscript.Script, error
 // IsPushOnly returns true if the ParsedScript only contains push commands
 func (p ParsedScript) IsPushOnly() bool {
 	for _, op := range p {
-		if op.op.val > bscript.Op16 {
+		if op.op.val > script.Op16 {
 			return false
 		}
 	}
@@ -287,20 +287,20 @@ func (o ParsedOpcode) canonicalPush() bool {
 	opcode := o.op.val
 	data := o.Data
 	dataLen := len(o.Data)
-	if opcode > bscript.Op16 {
+	if opcode > script.Op16 {
 		return true
 	}
 
-	if opcode < bscript.OpPUSHDATA1 && opcode > bscript.Op0 && (dataLen == 1 && data[0] <= 16) {
+	if opcode < script.OpPUSHDATA1 && opcode > script.Op0 && (dataLen == 1 && data[0] <= 16) {
 		return false
 	}
-	if opcode == bscript.OpPUSHDATA1 && dataLen < int(bscript.OpPUSHDATA1) {
+	if opcode == script.OpPUSHDATA1 && dataLen < int(script.OpPUSHDATA1) {
 		return false
 	}
-	if opcode == bscript.OpPUSHDATA2 && dataLen <= 0xff {
+	if opcode == script.OpPUSHDATA2 && dataLen <= 0xff {
 		return false
 	}
-	if opcode == bscript.OpPUSHDATA4 && dataLen <= 0xffff {
+	if opcode == script.OpPUSHDATA4 && dataLen <= 0xffff {
 		return false
 	}
 	return true

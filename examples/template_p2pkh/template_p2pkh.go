@@ -4,8 +4,7 @@ import (
 	"context"
 	"encoding/hex"
 
-	"github.com/bitcoin-sv/go-sdk/bscript"
-	"github.com/bitcoin-sv/go-sdk/ec/wif"
+	"github.com/bitcoin-sv/go-sdk/compat/wif"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/locker"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
@@ -26,7 +25,7 @@ func main() {
 	})
 
 	prevTx, _ := hex.DecodeString("11b476ad8e0a48fcd40807a111a050af51114877e09283bfa7f3505081a1819d")
-	script, _ = bscript.NewFromHex("76a9145c171f2511f5f93ac8aed7c61c676842eee4283988ac")
+	script, _ = script.NewFromHex("76a9145c171f2511f5f93ac8aed7c61c676842eee4283988ac")
 
 	p2pkhUtxo := transaction.UTXO{
 		TxID:          prevTx,

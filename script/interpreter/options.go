@@ -1,7 +1,7 @@
 package interpreter
 
 import (
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 )
@@ -18,8 +18,8 @@ func WithTx(tx *transaction.Transaction, inputIdx int, prevOutput *transaction.T
 	}
 }
 
-// WithScripts configure the execution to run again a set of *bscript.Script.
-func WithScripts(lockingScript *bscript.Script, unlockingScript *bscript.Script) ExecutionOptionFunc {
+// WithScripts configure the execution to run again a set of *script.Script.
+func WithScripts(lockingScript *script.Script, unlockingScript *script.Script) ExecutionOptionFunc {
 	return func(p *execOpts) {
 		p.lockingScript = lockingScript
 		p.unlockingScript = unlockingScript

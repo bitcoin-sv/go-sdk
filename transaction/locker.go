@@ -1,9 +1,9 @@
 package transaction
 
-import "github.com/bitcoin-sv/go-sdk/bscript"
+import script "github.com/bitcoin-sv/go-sdk/script"
 
 type Locker interface {
-	LockingScript() *bscript.Script
-	IsLockingScript(script *bscript.Script) bool
-	Parse(script *bscript.Script) error
+	LockingScript() *script.Script
+	IsLockingScript(script *script.Script) bool
+	Parse(script *script.Script) error
 }

@@ -6,9 +6,9 @@ import (
 	"fmt"
 )
 
-type BeefTx struct {
-	pathIndex *uint64
-	tx        *Transaction
+func (t *Transaction) FromBEEF(beef []byte) error {
+	t, err := NewTxFromBEEF(beef)
+	return err
 }
 
 func NewTxFromBEEF(beef []byte) (*Transaction, error) {
@@ -45,19 +45,16 @@ func NewTxFromBEEF(beef []byte) (*Transaction, error) {
 		return nil, err
 	}
 
-	transactions := make(map[string]*BeefTx, 0)
-	lastTxid := ""
+	transactions := make(map[string]*Transaction, 0)
+	var tx *Transaction
 	for i := 0; i < int(numberOfTransactions); i++ {
-		tx := &Transaction{}
+		tx = &Transaction{}
 		_, err = tx.ReadFrom(reader)
 		if err != nil {
 			return nil, err
 		}
-		beefTx := &BeefTx{tx: tx}
 		txid := tx.TxID()
-		if i+1 == int(numberOfTransactions) {
-			lastTxid = txid
-		}
+
 		hasBump := make([]byte, 1)
 		_, err = reader.Read(hasBump)
 		if err != nil {
@@ -69,89 +66,81 @@ func NewTxFromBEEF(beef []byte) (*Transaction, error) {
 			if err != nil {
 				return nil, err
 			}
-			val := uint64(pathIndex)
-			beefTx.pathIndex = &val
+			tx.MerklePath = BUMPs[int(pathIndex)]
 		}
-		transactions[txid] = beefTx
-	}
-
-	populateInputsFromBeef(transactions[lastTxid], BUMPs, transactions)
-	return transactions[lastTxid].tx, nil
-}
-
-func populateInputsFromBeef(beefTx *BeefTx, bumps []*MerklePath, transactions map[string]*BeefTx) {
-	if beefTx.pathIndex != nil {
-		path := bumps[*beefTx.pathIndex]
-		if path == nil {
-			panic("Invalid merkle path index found in BEEF!")
-		}
-		beefTx.tx.MerklePath = path
-	} else {
-		for _, input := range beefTx.tx.Inputs {
+		for _, input := range tx.Inputs {
 			sourceTxid := input.PreviousTxIDStr()
-			if sourceObj, ok := transactions[sourceTxid]; !ok {
+			if sourceObj, ok := transactions[sourceTxid]; ok {
+				input.SetPreviousTx(sourceObj)
+			} else if tx.MerklePath == nil {
 				panic(fmt.Sprintf("Reference to unknown TXID in BUMP: %s", sourceTxid))
-			} else {
-				input.PreviousTxScript = sourceObj.tx.Outputs[input.PreviousTxOutIndex].LockingScript
-				input.PreviousTxSatoshis = sourceObj.tx.Outputs[input.PreviousTxOutIndex].Satoshis
-				populateInputsFromBeef(sourceObj, bumps, transactions)
 			}
 		}
+		transactions[txid] = tx
 	}
+
+	return tx, nil
 }
 
-func (t *Transaction) BEEF() []byte {
+func (t *Transaction) BEEF() ([]byte, error) {
 	b := new(bytes.Buffer)
 	binary.Write(b, binary.LittleEndian, uint32(4022206465))
-	bumps := make([]*MerklePath, 0)
-	txs := make(map[string]*BeefTx, 0)
+	bumps := map[uint32]*MerklePath{}
+	bumpIndex := map[uint32]int{}
+	txns := make(map[string]*Transaction, 0)
+	ancestors, err := t.collectAncestors(txns)
+	if err != nil {
+		return nil, err
+	}
+	for _, txid := range ancestors {
+		tx := txns[txid]
+		if tx.MerklePath == nil {
+			continue
+		}
+		if _, ok := bumps[tx.MerklePath.BlockHeight]; !ok {
+			bumpIndex[tx.MerklePath.BlockHeight] = len(bumps)
+			bumps[tx.MerklePath.BlockHeight] = tx.MerklePath
+		} else {
+			bumps[tx.MerklePath.BlockHeight].Combine(tx.MerklePath)
+		}
+	}
 
-	addPathsAndInputs(t, &bumps)
 	b.Write(VarInt(len(bumps)).Bytes())
 	for _, bump := range bumps {
 		b.Write(bump.Bytes())
 	}
-	b.Write(VarInt(len(txs)).Bytes())
-	for _, beefTx := range txs {
-		b.Write(beefTx.tx.Bytes())
-		if beefTx.pathIndex != nil {
+	b.Write(VarInt(len(txns)).Bytes())
+	for _, txid := range ancestors {
+		tx := txns[txid]
+		b.Write(tx.Bytes())
+		if tx.MerklePath != nil {
 			b.Write([]byte{1})
-			b.Write(VarInt(*beefTx.pathIndex).Bytes())
+			b.Write(VarInt(bumpIndex[tx.MerklePath.BlockHeight]).Bytes())
 		} else {
 			b.Write([]byte{0})
 		}
 	}
-	return b.Bytes()
+	return b.Bytes(), nil
 }
 
-func addPathsAndInputs(tx *Transaction, bumps *[]*MerklePath) {
-	beefTx := &BeefTx{tx: tx}
-	hasProof := tx.MerklePath != nil
-
-	if hasProof {
-		added := false
-		for i, bump := range *bumps {
-			pathIndex := uint64(i)
-			if bytes.Equal(bump.Bytes(), tx.MerklePath.Bytes()) {
-				beefTx.pathIndex = &pathIndex
-				added = true
-				break
-			}
-			if bump.BlockHeight == tx.MerklePath.BlockHeight {
-				rootA, _ := bump.ComputeRoot(nil)
-				rootB, _ := tx.MerklePath.ComputeRoot(nil)
-				if rootA == rootB {
-					bump.Combine(tx.MerklePath)
-					beefTx.pathIndex = &pathIndex
-					added = true
-					break
-				}
-			}
+func (t *Transaction) collectAncestors(txns map[string]*Transaction) ([]string, error) {
+	if t.MerklePath != nil {
+		return []string{t.TxID()}, nil
+	}
+	ancestors := make([]string, 0)
+	for _, input := range t.Inputs {
+		if input.previousTx == nil {
+			return nil, fmt.Errorf("missing previous transaction for %s", t.TxID())
 		}
-		if !added {
-			pathIndex := uint64(len(*bumps))
-			beefTx.pathIndex = &pathIndex
-			*bumps = append(*bumps, tx.MerklePath)
+		if _, ok := txns[input.PreviousTxIDStr()]; ok {
+			continue
+		}
+		if grands, err := input.previousTx.collectAncestors(txns); err != nil {
+			return nil, err
+		} else {
+			ancestors = append(grands, ancestors...)
 		}
 	}
+	ancestors = append(ancestors, t.TxID())
+	return ancestors, nil
 }

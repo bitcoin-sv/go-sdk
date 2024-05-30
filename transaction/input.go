@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/pkg/errors"
 )
@@ -31,11 +31,22 @@ const DefaultSequenceNumber uint32 = 0xFFFFFFFF
 // DO NOT CHANGE ORDER - Optimised for memory via maligned
 type TransactionInput struct {
 	previousTxID       []byte
+	previousTx         *Transaction
 	PreviousTxSatoshis uint64
-	PreviousTxScript   *bscript.Script
-	UnlockingScript    *bscript.Script
+	PreviousTxScript   *script.Script
+	UnlockingScript    *script.Script
 	PreviousTxOutIndex uint32
 	SequenceNumber     uint32
+}
+
+func (i *TransactionInput) PreviousTx() *Transaction {
+	return i.previousTx
+}
+
+func (i *TransactionInput) SetPreviousTx(tx *Transaction) {
+	i.PreviousTxScript = tx.Outputs[i.PreviousTxOutIndex].LockingScript
+	i.PreviousTxSatoshis = tx.Outputs[i.PreviousTxOutIndex].Satoshis
+	i.previousTx = tx
 }
 
 // ReadFrom reads from the `io.Reader` into the `bt.Input`.
@@ -90,12 +101,12 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 
 	i.previousTxID = util.ReverseBytes(previousTxID)
 	i.PreviousTxOutIndex = binary.LittleEndian.Uint32(prevIndex)
-	i.UnlockingScript = bscript.NewFromBytes(scriptBytes)
+	i.UnlockingScript = script.NewFromBytes(scriptBytes)
 	i.SequenceNumber = binary.LittleEndian.Uint32(sequence)
 
 	if extended {
 		prevSatoshis := make([]byte, 8)
-		var prevTxLockingScript bscript.Script
+		var prevTxLockingScript script.Script
 
 		n, err = io.ReadFull(r, prevSatoshis)
 		bytesRead += int64(n)
@@ -118,10 +129,10 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 			return bytesRead, errors.Wrapf(err, "script(%d): got %d bytes", scriptLen.Length(), n)
 		}
 
-		prevTxLockingScript = *bscript.NewFromBytes(scriptBytes)
+		prevTxLockingScript = *script.NewFromBytes(scriptBytes)
 
 		i.PreviousTxSatoshis = binary.LittleEndian.Uint64(prevSatoshis)
-		i.PreviousTxScript = bscript.NewFromBytes(prevTxLockingScript)
+		i.PreviousTxScript = script.NewFromBytes(prevTxLockingScript)
 	}
 
 	return bytesRead, nil

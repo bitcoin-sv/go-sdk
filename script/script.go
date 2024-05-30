@@ -1,4 +1,4 @@
-package bscript
+package script
 
 import (
 	"bytes"
@@ -507,7 +507,7 @@ func (s *Script) MarshalJSON() ([]byte, error) {
 	return []byte(fmt.Sprintf(`"%s"`, s.String())), nil
 }
 
-// UnmarshalJSON covert from json into *bscript.Script.
+// UnmarshalJSON covert from json into *script.Script.
 func (s *Script) UnmarshalJSON(bb []byte) error {
 	ss, err := NewFromHex(string(bytes.Trim(bb, `"`)))
 	if err != nil {

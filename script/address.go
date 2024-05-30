@@ -1,5 +1,5 @@
-// Package bscript comment
-package bscript
+// Package script comment
+package script
 
 import (
 	"encoding/hex"

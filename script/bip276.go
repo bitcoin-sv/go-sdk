@@ -1,4 +1,4 @@
-package bscript
+package script
 
 import (
 	"encoding/hex"

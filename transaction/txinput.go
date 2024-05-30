@@ -8,7 +8,7 @@ import (
 	"fmt"
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/pkg/errors"
@@ -65,7 +65,7 @@ func (tx *Transaction) AddP2PKHInputsFromTx(pvsTx *Transaction, matchPK []byte) 
 // finalised sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
 // afterwards.
 func (tx *Transaction) From(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64) error {
-	pts, err := bscript.NewFromHex(prevTxLockingScript)
+	pts, err := script.NewFromHex(prevTxLockingScript)
 	if err != nil {
 		return err
 	}
@@ -198,7 +198,7 @@ func (tx *Transaction) SequenceHash() []byte {
 
 // InsertInputUnlockingScript applies a script to the transaction at a specific index in
 // unlocking script field.
-func (tx *Transaction) InsertInputUnlockingScript(index uint32, s *bscript.Script) error {
+func (tx *Transaction) InsertInputUnlockingScript(index uint32, s *script.Script) error {
 	if tx.Inputs[index] != nil {
 		tx.Inputs[index].UnlockingScript = s
 		return nil

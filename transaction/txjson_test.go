@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
 	"github.com/stretchr/testify/assert"
@@ -50,7 +50,7 @@ func TestTx_JSON(t *testing.T) {
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, w)
-				s := &bscript.Script{}
+				s := &script.Script{}
 				assert.NoError(t, s.AppendPushDataString("test"))
 				tx.AddOutput(&transaction.TransactionOutput{
 					LockingScript: s,

@@ -6,7 +6,7 @@ import (
 	"errors"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 )
@@ -21,7 +21,7 @@ type Getter struct {
 // as the calling `*local.Getter`.
 //
 // For an example implementation, see `examples/unlocker_getter/`.
-func (g *Getter) Unlocker(ctx context.Context, lockingScript *bscript.Script) (transaction.Unlocker, error) {
+func (g *Getter) Unlocker(ctx context.Context, lockingScript *script.Script) (transaction.Unlocker, error) {
 	return &P2PKH{PrivateKey: g.PrivateKey}, nil
 }
 
@@ -40,7 +40,7 @@ type P2PKH struct {
 // canonical in accordance with RFC6979 and BIP0062.
 //
 // For example usage, see `examples/create_tx/create_tx.go`
-func (l *P2PKH) UnlockingScript(ctx context.Context, tx *transaction.Transaction, params transaction.UnlockerParams) (*bscript.Script, error) {
+func (l *P2PKH) UnlockingScript(ctx context.Context, tx *transaction.Transaction, params transaction.UnlockerParams) (*script.Script, error) {
 	if params.SigHashFlags == 0 {
 		params.SigHashFlags = sighash.AllForkID
 	}
@@ -49,7 +49,7 @@ func (l *P2PKH) UnlockingScript(ctx context.Context, tx *transaction.Transaction
 		return nil, transaction.ErrEmptyPreviousTxScript
 	}
 	switch tx.Inputs[params.InputIdx].PreviousTxScript.ScriptType() {
-	case bscript.ScriptTypePubKeyHash, bscript.ScriptTypePubKeyHashInscription:
+	case script.ScriptTypePubKeyHash, script.ScriptTypePubKeyHashInscription:
 		sh, err := tx.CalcInputSignatureHash(params.InputIdx, params.SigHashFlags)
 		if err != nil {
 			return nil, err
@@ -63,7 +63,7 @@ func (l *P2PKH) UnlockingScript(ctx context.Context, tx *transaction.Transaction
 		pubKey := l.PrivateKey.PubKey().SerialiseCompressed()
 		signature := sig.Serialise()
 
-		uscript, err := bscript.NewP2PKHUnlockingScript(pubKey, signature, params.SigHashFlags)
+		uscript, err := script.NewP2PKHUnlockingScript(pubKey, signature, params.SigHashFlags)
 		if err != nil {
 			return nil, err
 		}

@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/pkg/errors"
 )
 
@@ -85,7 +85,7 @@ func (i *TransactionInput) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	s, err := bscript.NewFromHex(ij.UnlockingScript)
+	s, err := script.NewFromHex(ij.UnlockingScript)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (o *TransactionOutput) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &oj); err != nil {
 		return err
 	}
-	s, err := bscript.NewFromHex(oj.LockingScript)
+	s, err := script.NewFromHex(oj.LockingScript)
 	if err != nil {
 		return err
 	}
