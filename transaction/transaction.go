@@ -288,10 +288,15 @@ func (tx *Transaction) Bytes() []byte {
 	return tx.toBytesHelper(0, nil, false)
 }
 
-// ExtendedBytes outputs the transaction into a byte array in extended format
+// EF outputs the transaction into a byte array in extended format
 // (with PreviousTxSatoshis and PreviousTXScript included)
-func (tx *Transaction) ExtendedBytes() []byte {
-	return tx.toBytesHelper(0, nil, true)
+func (tx *Transaction) EF() ([]byte, error) {
+	for _, in := range tx.Inputs {
+		if in.PreviousTxScript == nil {
+			return nil, ErrEmptyPreviousTxScript
+		}
+	}
+	return tx.toBytesHelper(0, nil, true), nil
 }
 
 // BytesWithClearedInputs encodes the transaction into a byte array but clears its Inputs first.

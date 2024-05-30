@@ -72,7 +72,14 @@ func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSucce
 		}
 	}
 	if buf == nil {
-		buf = bytes.NewBuffer(t.ExtendedBytes())
+		if ef, err := t.EF(); err != nil {
+			return nil, &transaction.BroadcastFailure{
+				Code:        "500",
+				Description: err.Error(),
+			}
+		} else {
+			buf = bytes.NewBuffer(ef)
+		}
 	}
 
 	req, err := http.NewRequest(
