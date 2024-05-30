@@ -464,8 +464,8 @@ func (t *thread) Step() (bool, error) {
 				return false, err
 			}
 
-			script := t.savedFirstStack[len(t.savedFirstStack)-1]
-			pops, err := t.scriptParser.Parse(script.NewFromBytes(script))
+			s := t.savedFirstStack[len(t.savedFirstStack)-1]
+			pops, err := t.scriptParser.Parse(script.NewFromBytes(s))
 			if err != nil {
 				return false, err
 			}

@@ -2125,12 +2125,12 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 		return errs.NewError(errs.ErrSigNullDummy, "multisig dummy argument has length %d instead of 0", len(dummy))
 	}
 
-	// Get script starting from the most recent script.OpCODESEPARATOR.
-	script := t.subScript()
+	// Get s starting from the most recent s.OpCODESEPARATOR.
+	s := t.subScript()
 
 	for _, sigInfo := range signatures {
-		script = script.removeOpcodeByData(sigInfo.signature)
-		script = script.removeOpcode(script.OpCODESEPARATOR)
+		s = s.removeOpcodeByData(sigInfo.signature)
+		s = s.removeOpcode(script.OpCODESEPARATOR)
 	}
 
 	success := true
@@ -2207,7 +2207,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 			continue
 		}
 
-		up, err := t.scriptParser.Unparse(script)
+		up, err := t.scriptParser.Unparse(s)
 		if err != nil {
 			t.dstack.PushBool(false)
 			return nil //nolint:nilerr // only need a false push in this case
