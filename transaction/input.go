@@ -34,6 +34,7 @@ type TransactionInput struct {
 	PreviousTxID       []byte
 	PreviousTxSatoshis uint64
 	PreviousTxScript   *script.Script
+	// PreviousTxOutput   *TransactionOutput
 	UnlockingScript    *script.Script
 	PreviousTxOutIndex uint32
 	SequenceNumber     uint32

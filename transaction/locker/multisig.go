@@ -12,7 +12,7 @@ type Multisig struct {
 	RequiredSigs int
 }
 
-func (m Multisig) LockingScript() (*script.Script, error) {
+func (m *Multisig) LockingScript() (*script.Script, error) {
 	if m.RequiredSigs > 16 || len(m.PubKeys) > 16 {
 		return nil, fmt.Errorf("Multisig: Sigs must be less than 16")
 	}
@@ -27,7 +27,7 @@ func (m Multisig) LockingScript() (*script.Script, error) {
 	return s, nil
 }
 
-func (m Multisig) IsLockingScript(script *script.Script) bool {
+func (m *Multisig) IsLockingScript(script *script.Script) bool {
 	return script.IsMultiSigOut()
 }
 

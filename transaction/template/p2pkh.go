@@ -62,7 +62,7 @@ func (p *P2PKHTemplate) IsUnlockingScript(s *script.Script) bool {
 
 func (p *P2PKHTemplate) Lock() (*script.Script, error) {
 	if len(p.PKHash) != 20 {
-		return nil, ErrInvalidPublicKeyHash
+		return nil, ErrBadPublicKeyHash
 	}
 	b := make([]byte, 0, 25)
 	b = append(b, script.OpDUP, script.OpHASH160, script.OpDATA20)
@@ -74,7 +74,7 @@ func (p *P2PKHTemplate) Lock() (*script.Script, error) {
 
 func (p *P2PKHTemplate) Sign(tx *transaction.Transaction, params transaction.UnlockParams) (*script.Script, error) {
 	if p.privateKey == nil {
-		return nil, ErrMisingPrivateKey
+		return nil, ErrNoPrivateKey
 	}
 	if params.SigHashFlags == 0 {
 		params.SigHashFlags = sighash.AllForkID
