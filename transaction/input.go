@@ -30,13 +30,14 @@ const DefaultSequenceNumber uint32 = 0xFFFFFFFF
 //
 // DO NOT CHANGE ORDER - Optimised for memory via maligned
 type TransactionInput struct {
-	previousTxID       []byte
 	previousTx         *Transaction
+	PreviousTxID       []byte
 	PreviousTxSatoshis uint64
 	PreviousTxScript   *script.Script
 	UnlockingScript    *script.Script
 	PreviousTxOutIndex uint32
 	SequenceNumber     uint32
+	Unlocker           *Unlocker
 }
 
 func (i *TransactionInput) PreviousTx() *Transaction {
@@ -44,6 +45,7 @@ func (i *TransactionInput) PreviousTx() *Transaction {
 }
 
 func (i *TransactionInput) SetPreviousTx(tx *Transaction) {
+	i.PreviousTxID = tx.TxIDBytes()
 	i.PreviousTxScript = tx.Outputs[i.PreviousTxOutIndex].LockingScript
 	i.PreviousTxSatoshis = tx.Outputs[i.PreviousTxOutIndex].Satoshis
 	i.previousTx = tx
@@ -99,7 +101,7 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 		return bytesRead, errors.Wrapf(err, "sequence(4): got %d bytes", n)
 	}
 
-	i.previousTxID = util.ReverseBytes(previousTxID)
+	i.PreviousTxID = util.ReverseBytes(previousTxID)
 	i.PreviousTxOutIndex = binary.LittleEndian.Uint32(prevIndex)
 	i.UnlockingScript = script.NewFromBytes(scriptBytes)
 	i.SequenceNumber = binary.LittleEndian.Uint32(sequence)
@@ -138,34 +140,9 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 	return bytesRead, nil
 }
 
-// PreviousTxIDAdd will add the supplied txID bytes to the Input,
-// if it isn't a valid transaction id an ErrInvalidTxID error will be returned.
-func (i *TransactionInput) PreviousTxIDAdd(txID []byte) error {
-	if !IsValidTxID(txID) {
-		return ErrInvalidTxID
-	}
-	i.previousTxID = txID
-	return nil
-}
-
-// PreviousTxIDAddStr will validate and add the supplied txID string to the Input,
-// if it isn't a valid transaction id an ErrInvalidTxID error will be returned.
-func (i *TransactionInput) PreviousTxIDAddStr(txID string) error {
-	bb, err := hex.DecodeString(txID)
-	if err != nil {
-		return err
-	}
-	return i.PreviousTxIDAdd(bb)
-}
-
-// PreviousTxID will return the PreviousTxID if set.
-func (i *TransactionInput) PreviousTxID() []byte {
-	return i.previousTxID
-}
-
 // PreviousTxIDStr returns the Previous TxID as a hex string.
 func (i *TransactionInput) PreviousTxIDStr() string {
-	return hex.EncodeToString(i.previousTxID)
+	return hex.EncodeToString(i.PreviousTxID)
 }
 
 // String implements the Stringer interface and returns a string
@@ -178,7 +155,7 @@ scriptLen:    %d
 script:       %s
 sequence:     %x
 `,
-		hex.EncodeToString(i.previousTxID),
+		hex.EncodeToString(i.PreviousTxID),
 		i.PreviousTxOutIndex,
 		len(*i.UnlockingScript),
 		i.UnlockingScript,
@@ -190,7 +167,7 @@ sequence:     %x
 func (i *TransactionInput) Bytes(clear bool) []byte {
 	h := make([]byte, 0)
 
-	h = append(h, util.ReverseBytes(i.previousTxID)...)
+	h = append(h, util.ReverseBytes(i.PreviousTxID)...)
 	h = append(h, util.LittleEndianBytes(i.PreviousTxOutIndex, 4)...)
 	if clear {
 		h = append(h, 0x00)

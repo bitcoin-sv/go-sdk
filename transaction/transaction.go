@@ -247,7 +247,7 @@ func (tx *Transaction) IsCoinbase() bool {
 
 	cbi := make([]byte, 32)
 
-	if !bytes.Equal(tx.Inputs[0].PreviousTxID(), cbi) {
+	if !bytes.Equal(tx.Inputs[0].PreviousTxID, cbi) {
 		return false
 	}
 
@@ -323,34 +323,6 @@ func (tx *Transaction) Clone() *Transaction {
 	}
 
 	return clone
-}
-
-// NodeJSON returns a wrapped *bt.Tx for marshalling/unmarshalling into a node tx format.
-//
-// Marshalling usage example:
-//
-//	bb, err := json.Marshal(tx.NodeJSON())
-//
-// Unmarshalling usage example:
-//
-//	tx := bt.NewTx()
-//	if err := json.Unmarshal(bb, tx.NodeJSON()); err != nil {}
-func (tx *Transaction) NodeJSON() interface{} {
-	return &nodeTxWrapper{Transaction: tx}
-}
-
-// NodeJSON returns a wrapped bt.Txs for marshalling/unmarshalling into a node tx format.
-//
-// Marshalling usage example:
-//
-//	bb, err := json.Marshal(txs.NodeJSON())
-//
-// Unmarshalling usage example:
-//
-//	var txs bt.Txs
-//	if err := json.Unmarshal(bb, txs.NodeJSON()); err != nil {}
-func (tt *Transactions) NodeJSON() interface{} {
-	return (*nodeTxsWrapper)(tt)
 }
 
 func (tx *Transaction) toBytesHelper(index int, lockingScript []byte, extended bool) []byte {

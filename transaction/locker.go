@@ -1,4 +1,4 @@
-package transaction
+package scripttemplate
 
 import script "github.com/bitcoin-sv/go-sdk/script"
 

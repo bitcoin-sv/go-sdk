@@ -7,9 +7,6 @@ import (
 	"math/big"
 	"math/bits"
 	"strings"
-
-	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 )
 
 // ScriptKey types.
@@ -62,46 +59,46 @@ func NewFromASM(str string) (*Script, error) {
 	return &s, nil
 }
 
-// NewP2PKHFromPubKeyEC takes a public key hex string (in
-// compressed format) and creates a P2PKH script from it.
-func NewP2PKHFromPubKeyEC(pubKey *ec.PublicKey) (*Script, error) {
-	return NewP2PKHFromPubKeyBytes(pubKey.SerialiseCompressed())
-}
+// // NewP2PKHFromPubKeyEC takes a public key hex string (in
+// // compressed format) and creates a P2PKH script from it.
+// func NewP2PKHFromPubKeyEC(pubKey *ec.PublicKey) (*Script, error) {
+// 	return NewP2PKHFromPubKeyBytes(pubKey.SerialiseCompressed())
+// }
 
-// NewP2PKHFromPubKeyStr takes a public key hex string (in
-// compressed format) and creates a P2PKH script from it.
-func NewP2PKHFromPubKeyStr(pubKey string) (*Script, error) {
-	pubKeyBytes, err := hex.DecodeString(pubKey)
-	if err != nil {
-		return nil, err
-	}
-	return NewP2PKHFromPubKeyBytes(pubKeyBytes)
-}
+// // NewP2PKHFromPubKeyStr takes a public key hex string (in
+// // compressed format) and creates a P2PKH script from it.
+// func NewP2PKHFromPubKeyStr(pubKey string) (*Script, error) {
+// 	pubKeyBytes, err := hex.DecodeString(pubKey)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return NewP2PKHFromPubKeyBytes(pubKeyBytes)
+// }
 
-// NewP2PKHFromPubKeyBytes takes public key bytes (in
-// compressed format) and creates a P2PKH script from it.
-func NewP2PKHFromPubKeyBytes(pubKeyBytes []byte) (*Script, error) {
-	if len(pubKeyBytes) != 33 {
-		return nil, ErrInvalidPKLen
-	}
-	return NewP2PKHFromPubKeyHash(crypto.Hash160(pubKeyBytes))
-}
+// // NewP2PKHFromPubKeyBytes takes public key bytes (in
+// // compressed format) and creates a P2PKH script from it.
+// func NewP2PKHFromPubKeyBytes(pubKeyBytes []byte) (*Script, error) {
+// 	if len(pubKeyBytes) != 33 {
+// 		return nil, ErrInvalidPKLen
+// 	}
+// 	return NewP2PKHFromPubKeyHash(crypto.Hash160(pubKeyBytes))
+// }
 
-// NewP2PKHFromPubKeyHash takes a public key hex string (in
-// compressed format) and creates a P2PKH script from it.
-func NewP2PKHFromPubKeyHash(pubKeyHash []byte) (*Script, error) {
-	b := []byte{
-		OpDUP,
-		OpHASH160,
-		OpDATA20,
-	}
-	b = append(b, pubKeyHash...)
-	b = append(b, OpEQUALVERIFY)
-	b = append(b, OpCHECKSIG)
+// // NewP2PKHFromPubKeyHash takes a public key hex string (in
+// // compressed format) and creates a P2PKH script from it.
+// func NewP2PKHFromPubKeyHash(pubKeyHash []byte) (*Script, error) {
+// 	b := []byte{
+// 		OpDUP,
+// 		OpHASH160,
+// 		OpDATA20,
+// 	}
+// 	b = append(b, pubKeyHash...)
+// 	b = append(b, OpEQUALVERIFY)
+// 	b = append(b, OpCHECKSIG)
 
-	s := Script(b)
-	return &s, nil
-}
+// 	s := Script(b)
+// 	return &s, nil
+// }
 
 // NewP2PKHFromPubKeyHashStr takes a public key hex string (in
 // compressed format) and creates a P2PKH script from it.
@@ -231,16 +228,16 @@ func (s *Script) ToASM() (string, error) {
 	return strings.Join(asm, " "), nil
 }
 
-// IsP2PKH returns true if this is a pay to pubkey hash output script.
-func (s *Script) IsP2PKH() bool {
-	b := []byte(*s)
-	return len(b) == 25 &&
-		b[0] == OpDUP &&
-		b[1] == OpHASH160 &&
-		b[2] == OpDATA20 &&
-		b[23] == OpEQUALVERIFY &&
-		b[24] == OpCHECKSIG
-}
+// // IsP2PKH returns true if this is a pay to pubkey hash output script.
+// func (s *Script) IsP2PKH() bool {
+// 	b := []byte(*s)
+// 	return len(b) == 25 &&
+// 		b[0] == OpDUP &&
+// 		b[1] == OpHASH160 &&
+// 		b[2] == OpDATA20 &&
+// 		b[23] == OpEQUALVERIFY &&
+// 		b[24] == OpCHECKSIG
+// }
 
 // IsP2PK returns true if this is a public key output script.
 func (s *Script) IsP2PK() bool {
