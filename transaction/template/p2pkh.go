@@ -19,6 +19,14 @@ func NewP2PKHTemplateFromAddress(address *script.Address) *P2PKHTemplate {
 	}
 }
 
+func NewP2PKHTemplateFromAddressString(addressStr string) (*P2PKHTemplate, error) {
+	add, err := script.NewAddressFromString(addressStr)
+	if err != nil {
+		return nil, err
+	}
+	return NewP2PKHTemplateFromAddress(add), nil
+}
+
 func NewP2PKHTemplateFromPubKey(pubKey []byte) *P2PKHTemplate {
 	return &P2PKHTemplate{
 		PKHash: hash.Hash160(pubKey),

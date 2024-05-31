@@ -6,9 +6,9 @@ import (
 	"log"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	hash "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	opcodes "github.com/bitcoin-sv/go-sdk/script"
 	script "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/transaction/template"
 )
 
 func main() {
@@ -39,8 +39,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	publicKeyHash := hash.Hash160(privKey.PubKey().SerialiseCompressed())
-	lockingScript, err := script.NewP2PKHFromPubKeyHash(publicKeyHash)
+	// publicKeyHash := hash.Hash160(privKey.PubKey().SerialiseCompressed())
+	tmpl := template.NewP2PKHTemplateFromPubKeyEC(privKey.PubKey())
+	lockingScript, err := tmpl.Lock()
 	if err != nil {
 		log.Fatal(err)
 	}

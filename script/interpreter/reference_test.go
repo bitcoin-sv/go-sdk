@@ -50,7 +50,7 @@ func init() {
 //     0x14 is OP_DATA_20)
 //   - Single quoted strings are pushed as data
 //   - Anything else is an error
-func parseShortForm(script string) (*script.Script, error) {
+func parseShortForm(s string) (*script.Script, error) {
 	// Only create the short form opcode map once.
 	if shortFormOps == nil {
 		ops := make(map[string]byte)
@@ -77,9 +77,9 @@ func parseShortForm(script string) (*script.Script, error) {
 	}
 
 	// Split only does one separator so convert all \n and tab into  space.
-	script = strings.Replace(script, "\n", " ", -1)
-	script = strings.Replace(script, "\t", " ", -1)
-	tokens := strings.Split(script, " ")
+	s = strings.Replace(s, "\n", " ", -1)
+	s = strings.Replace(s, "\t", " ", -1)
+	tokens := strings.Split(s, " ")
 
 	var scr script.Script
 	for _, tok := range tokens {
@@ -310,7 +310,7 @@ func createSpendingTx(sigScript, pkScript *script.Script, outputValue int64) *tr
 			LockingScript: pkScript,
 		}},
 	}
-	coinbaseTx.Inputs[0].PreviousTxIDAdd(make([]byte, 32))
+	coinbaseTx.Inputs[0].PreviousTxID = make([]byte, 32)
 
 	spendingTx := &transaction.Transaction{
 		Version:  1,
@@ -326,7 +326,7 @@ func createSpendingTx(sigScript, pkScript *script.Script, outputValue int64) *tr
 			LockingScript: script.NewFromBytes([]byte{}),
 		}},
 	}
-	spendingTx.Inputs[0].PreviousTxIDAdd(coinbaseTx.TxIDBytes())
+	spendingTx.Inputs[0].PreviousTxID = coinbaseTx.TxIDBytes()
 
 	return spendingTx
 }

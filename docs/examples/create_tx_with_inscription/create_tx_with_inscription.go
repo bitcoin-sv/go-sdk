@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-	"encoding/hex"
 	"fmt"
 	"log"
 	"mime"
@@ -11,25 +9,21 @@ import (
 	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
-	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
+	"github.com/bitcoin-sv/go-sdk/transaction/template"
 )
 
 func main() {
-	decodedWif, _ := wif.DecodeWIF("KznpA63DPFrmHecASyL6sFmcRgrNT9oM8Ebso8mwq1dfJF3ZgZ3V")
+	w, _ := wif.DecodeWIF("KznpA63DPFrmHecASyL6sFmcRgrNT9oM8Ebso8mwq1dfJF3ZgZ3V")
 
-	// get public key bytes and address
-	pubkey := decodedWif.SerialisePubKey()
-	addr, _ := script.NewAddressFromPublicKeyString(hex.EncodeToString(pubkey), true)
-	s, _ := script.NewP2PKHFromAddress(addr.AddressString)
-	fmt.Println(addr.AddressString)
+	tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey) // get public key bytes and address
 
 	tx := transaction.NewTx()
-
 	_ = tx.From(
 		"39e5954ee335fdb5a1368ab9e851a954ed513f73f6e8e85eff5e31adbb5837e7",
 		0,
 		"76a9144bca0c466925b875875a8e1355698bdcc0b2d45d88ac",
 		500,
+		tmpl,
 	)
 
 	// Read the image file
@@ -42,18 +36,22 @@ func main() {
 	// Get the content type of the image
 	contentType := mime.TypeByExtension(".png")
 
+	s, _ := tmpl.Lock()
 	tx.Inscribe(&script.InscriptionArgs{
 		LockingScriptPrefix: s,
 		Data:                data,
 		ContentType:         contentType,
 	})
 
-	err = tx.ChangeToAddress("17ujiveRLkf2JQiGR8Sjtwb37evX7vG3WG", transaction.NewFeeQuote())
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	changeAdd, _ := script.NewAddressFromString("17ujiveRLkf2JQiGR8Sjtwb37evX7vG3WG")
+	changeTmpl := template.NewP2PKHTemplateFromAddress(changeAdd)
+	changeScript, _ := changeTmpl.Lock()
+	tx.AddOutput(&transaction.TransactionOutput{
+		LockingScript: changeScript,
+		Change:        true,
+	})
 
-	err = tx.FillAllInputs(context.Background(), &unlocker.Getter{PrivateKey: decodedWif.PrivKey})
+	err = tx.Sign()
 	if err != nil {
 		log.Fatal(err.Error())
 	}

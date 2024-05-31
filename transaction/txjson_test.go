@@ -29,6 +29,7 @@ func TestTx_JSON(t *testing.T) {
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					2000000,
+					nil,
 				))
 				tx.Inputs[0].Template = tmpl
 
@@ -56,6 +57,7 @@ func TestTx_JSON(t *testing.T) {
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					2000000,
+					nil,
 				))
 				tx.Inputs[0].Template = tmpl
 				// assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
@@ -133,6 +135,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
+					nil,
 				))
 				tx.Inputs[0].Template = tmpl
 				assert.NoError(t, tx.From(
@@ -140,6 +143,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 					2,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
+					nil,
 				))
 				tx.Inputs[1].Template = tmpl
 				assert.NoError(t, tx.From(
@@ -147,6 +151,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 					114,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
+					nil,
 				))
 				tx.Inputs[2].Template = tmpl
 				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))

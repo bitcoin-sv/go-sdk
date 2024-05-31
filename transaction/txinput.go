@@ -93,7 +93,7 @@ func (tx *Transaction) AddP2PKHInputsFromTx(pvsTx *Transaction, matchPK []byte) 
 // From adds a new input to the transaction from the specified UTXO fields, using the default
 // finalised sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
 // afterwards.
-func (tx *Transaction) From(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64) error {
+func (tx *Transaction) From(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64, template ScriptTemplate) error {
 	pts, err := script.NewFromHex(prevTxLockingScript)
 	if err != nil {
 		return err
@@ -108,6 +108,7 @@ func (tx *Transaction) From(prevTxID string, vout uint32, prevTxLockingScript st
 		Vout:          vout,
 		LockingScript: pts,
 		Satoshis:      satoshis,
+		Template:      template,
 	})
 }
 

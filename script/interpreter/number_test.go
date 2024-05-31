@@ -335,11 +335,11 @@ func TestScriptNumInt64(t *testing.T) {
 }
 
 func TestDisasmString(t *testing.T) {
-	script, _ := script.NewFromHex("3105abcdef4280548004abcdefc2877451a0637c757451a0637c757451a0637c757451a0637c757451a0637c756868686868")
+	s, _ := script.NewFromHex("3105abcdef4280548004abcdefc2877451a0637c757451a0637c757451a0637c757451a0637c757451a0637c756868686868")
 	prev, _ := script.NewFromHex("a91464902b04c3d9ea558b7f2edb24758b383343a2d587")
 	tx := transaction.NewTx()
 	in := &transaction.TransactionInput{
-		UnlockingScript: script,
+		UnlockingScript: s,
 	}
 	tx.Inputs = append(tx.Inputs, in)
 	if err := NewEngine().Execute(

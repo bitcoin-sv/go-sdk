@@ -49,17 +49,21 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 		"valid signature 1": {
 			tx: func() *transaction.Transaction {
 				tx := transaction.NewTx()
-				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "76a914c7c6987b6e2345a6b138e3384141520a0fbc18c588ac", 15564838601))
+				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "76a914c7c6987b6e2345a6b138e3384141520a0fbc18c588ac", 15564838601, nil))
 
 				script1, err := script.NewFromHex("76a91442f9682260509ac80722b1963aec8a896593d16688ac")
 				assert.NoError(t, err)
 
-				assert.NoError(t, tx.AddP2PKHOutputFromScript(script1, 375041432))
+				tx.AddOutput(&transaction.TransactionOutput{
+					Satoshis:      375041432,
+					LockingScript: script1,
+				})
 
 				script2, err := script.NewFromHex("76a914c36538e91213a8100dcb2aed456ade363de8483f88ac")
-				assert.NoError(t, err)
-
-				assert.NoError(t, tx.AddP2PKHOutputFromScript(script2, 15189796941))
+				tx.AddOutput(&transaction.TransactionOutput{
+					Satoshis:      15189796941,
+					LockingScript: script2,
+				})
 
 				return tx
 			}(),
@@ -70,19 +74,23 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 
 				assert.NoError(
 					t,
-					tx.From("64faeaa2e3cbadaf82d8fa8c7ded508cb043c5d101671f43c084be2ac6163148", 1, "76a914343cadc47d08a14ef773d70b3b2a90870b67b3ad88ac", 5000000000),
+					tx.From("64faeaa2e3cbadaf82d8fa8c7ded508cb043c5d101671f43c084be2ac6163148", 1, "76a914343cadc47d08a14ef773d70b3b2a90870b67b3ad88ac", 5000000000, nil),
 				)
 				tx.Inputs[0].SequenceNumber = 0xfffffffe
 
 				script1, err := script.NewFromHex("76a9140108b364bbbddb222e2d0fac1ad4f6f86b10317688ac")
 				assert.NoError(t, err)
-
-				assert.NoError(t, tx.AddP2PKHOutputFromScript(script1, 2200000000))
+				tx.AddOutput(&transaction.TransactionOutput{
+					Satoshis:      2200000000,
+					LockingScript: script1,
+				})
 
 				script2, err := script.NewFromHex("76a9143ac52294c730e7a4e9671abe3e7093d8834126ed88ac")
 				assert.NoError(t, err)
-
-				assert.NoError(t, tx.AddP2PKHOutputFromScript(script2, 2799998870))
+				tx.AddOutput(&transaction.TransactionOutput{
+					Satoshis:      2799998870,
+					LockingScript: script2,
+				})
 				return tx
 			}(),
 		},

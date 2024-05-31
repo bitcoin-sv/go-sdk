@@ -184,6 +184,19 @@ func (tx *Transaction) AddOutput(output *TransactionOutput) {
 	tx.Outputs = append(tx.Outputs, output)
 }
 
+// AddOutput adds a new output to the transaction.
+func (tx *Transaction) AddOutputFromTemplate(template ScriptTemplate, satoshis uint64) (err error) {
+	output := &TransactionOutput{
+		Satoshis: satoshis,
+	}
+	output.LockingScript, err = template.Lock()
+	if err != nil {
+		return
+	}
+	tx.Outputs = append(tx.Outputs, output)
+	return nil
+}
+
 // // PayToAddress creates a new P2PKH output from a BitCoin address (base58)
 // // and the satoshis amount and adds that to the transaction.
 func (tx *Transaction) PayToAddress(addr string, satoshis uint64) error {
