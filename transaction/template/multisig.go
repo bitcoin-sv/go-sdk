@@ -7,29 +7,29 @@ import (
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 )
 
-type MultisigTemplate struct {
+type Multisig struct {
 	PubKeys      []*ec.PublicKey
 	RequiredSigs int
 	privKeys     []*ec.PrivateKey
 }
 
-func NewMultisigTemplateFromPrivKeys(privKeys []*ec.PrivateKey, requiredSigs int) *MultisigTemplate {
+func NewMultisigTemplateFromPrivKeys(privKeys []*ec.PrivateKey, requiredSigs int) *Multisig {
 	pubKeys := make([]*ec.PublicKey, len(privKeys))
 	for i, privKey := range privKeys {
 		pubKeys[i] = privKey.PubKey()
 	}
-	return &MultisigTemplate{
+	return &Multisig{
 		PubKeys:      pubKeys,
 		RequiredSigs: requiredSigs,
 		privKeys:     privKeys,
 	}
 }
 
-func (m *MultisigTemplate) IsLockingScript(script *script.Script) bool {
+func (m *Multisig) IsLockingScript(script *script.Script) bool {
 	return script.IsMultiSigOut()
 }
 
-func (m *MultisigTemplate) IsUnlockingScript(s *script.Script) bool {
+func (m *Multisig) IsUnlockingScript(s *script.Script) bool {
 	pos := 0
 	if op, err := s.ReadOp(&pos); err != nil {
 		return false
@@ -47,7 +47,7 @@ func (m *MultisigTemplate) IsUnlockingScript(s *script.Script) bool {
 	}
 }
 
-func (m *MultisigTemplate) Lock() (*script.Script, error) {
+func (m *Multisig) Lock() (*script.Script, error) {
 	if m.RequiredSigs > 16 || len(m.PubKeys) > 16 {
 		return nil, ErrTooManySignatures
 	}
@@ -62,7 +62,7 @@ func (m *MultisigTemplate) Lock() (*script.Script, error) {
 	return s, nil
 }
 
-func (m *MultisigTemplate) Sign(tx *transaction.Transaction, params transaction.UnlockParams) (*script.Script, error) {
+func (m *Multisig) Sign(tx *transaction.Transaction, params transaction.UnlockParams) (*script.Script, error) {
 	if len(m.privKeys) == 0 {
 		return nil, ErrNoPrivateKey
 	}
@@ -119,6 +119,6 @@ func (m *MultisigTemplate) Sign(tx *transaction.Transaction, params transaction.
 	return uscript, nil
 }
 
-func (p *MultisigTemplate) EstimateSize(_ *transaction.Transaction, inputIndex uint32) int {
+func (p *Multisig) EstimateSize(_ *transaction.Transaction, inputIndex uint32) int {
 	return 34 * p.RequiredSigs
 }

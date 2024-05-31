@@ -8,18 +8,18 @@ import (
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 )
 
-type P2PKHTemplate struct {
+type P2PKH struct {
 	PKHash     []byte
 	privateKey *ec.PrivateKey
 }
 
-func NewP2PKHTemplateFromAddress(address *script.Address) *P2PKHTemplate {
-	return &P2PKHTemplate{
+func NewP2PKHTemplateFromAddress(address *script.Address) *P2PKH {
+	return &P2PKH{
 		PKHash: address.PublicKeyHash,
 	}
 }
 
-func NewP2PKHTemplateFromAddressString(addressStr string) (*P2PKHTemplate, error) {
+func NewP2PKHTemplateFromAddressString(addressStr string) (*P2PKH, error) {
 	add, err := script.NewAddressFromString(addressStr)
 	if err != nil {
 		return nil, err
@@ -27,30 +27,30 @@ func NewP2PKHTemplateFromAddressString(addressStr string) (*P2PKHTemplate, error
 	return NewP2PKHTemplateFromAddress(add), nil
 }
 
-func NewP2PKHTemplateFromPubKey(pubKey []byte) *P2PKHTemplate {
-	return &P2PKHTemplate{
+func NewP2PKHTemplateFromPubKey(pubKey []byte) *P2PKH {
+	return &P2PKH{
 		PKHash: hash.Hash160(pubKey),
 	}
 }
 
-func NewP2PKHTemplateFromPubKeyEC(pubKey *ec.PublicKey) *P2PKHTemplate {
-	return &P2PKHTemplate{
+func NewP2PKHTemplateFromPubKeyEC(pubKey *ec.PublicKey) *P2PKH {
+	return &P2PKH{
 		PKHash: hash.Hash160(pubKey.SerialiseCompressed()),
 	}
 }
 
-func NewP2PKHTemplateFromPrivKey(privKey *ec.PrivateKey) *P2PKHTemplate {
-	return &P2PKHTemplate{
+func NewP2PKHTemplateFromPrivKey(privKey *ec.PrivateKey) *P2PKH {
+	return &P2PKH{
 		PKHash:     hash.Hash160(privKey.PubKey().SerialiseCompressed()),
 		privateKey: privKey,
 	}
 }
 
-func (p *P2PKHTemplate) IsLockingScript(s *script.Script) bool {
+func (p *P2PKH) IsLockingScript(s *script.Script) bool {
 	return s.IsP2PKH()
 }
 
-func (p *P2PKHTemplate) IsUnlockingScript(s *script.Script) bool {
+func (p *P2PKH) IsUnlockingScript(s *script.Script) bool {
 	pos := 0
 
 	if op, err := s.ReadOp(&pos); err != nil {
@@ -68,7 +68,7 @@ func (p *P2PKHTemplate) IsUnlockingScript(s *script.Script) bool {
 	return true
 }
 
-func (p *P2PKHTemplate) Lock() (*script.Script, error) {
+func (p *P2PKH) Lock() (*script.Script, error) {
 	if len(p.PKHash) != 20 {
 		return nil, ErrBadPublicKeyHash
 	}
@@ -80,7 +80,7 @@ func (p *P2PKHTemplate) Lock() (*script.Script, error) {
 	return &s, nil
 }
 
-func (p *P2PKHTemplate) Sign(tx *transaction.Transaction, params transaction.UnlockParams) (*script.Script, error) {
+func (p *P2PKH) Sign(tx *transaction.Transaction, params transaction.UnlockParams) (*script.Script, error) {
 	if p.privateKey == nil {
 		return nil, ErrNoPrivateKey
 	}
@@ -113,6 +113,6 @@ func (p *P2PKHTemplate) Sign(tx *transaction.Transaction, params transaction.Unl
 	return uscript, nil
 }
 
-func (p *P2PKHTemplate) EstimateSize(_ *transaction.Transaction, inputIndex uint32) int {
+func (p *P2PKH) EstimateSize(_ *transaction.Transaction, inputIndex uint32) int {
 	return 106
 }

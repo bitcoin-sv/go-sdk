@@ -15,20 +15,20 @@ func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 	t.Parallel()
 
 	t.Run("empty pubkey hash", func(t *testing.T) {
-		tmpl := &template.P2PKHTemplate{}
+		tmpl := &template.P2PKH{}
 		_, err := tmpl.Lock()
 		assert.Error(t, err)
 	})
 
 	t.Run("invalid pubkey hash", func(t *testing.T) {
-		tmpl := &template.P2PKHTemplate{PKHash: []byte("invalid")}
+		tmpl := &template.P2PKH{PKHash: []byte("invalid")}
 		_, err := tmpl.Lock()
 		assert.Error(t, err)
 	})
 
 	t.Run("valid output", func(t *testing.T) {
 		// This is the PKH for address mtdruWYVEV1wz5yL7GvpBj4MgifCB7yhPd
-		tmpl := &template.P2PKHTemplate{}
+		tmpl := &template.P2PKH{}
 		tmpl.PKHash, _ = hex.DecodeString("8fe80c75c9560e8b56ed64ea3c26e18d2c52211b")
 		s, err := tmpl.Lock()
 		assert.NoError(t, err)
