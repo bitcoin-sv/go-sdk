@@ -351,9 +351,11 @@ func (t *thread) apply(opts *execOpts) error {
 	t.dstack = newStack(t.cfg, t.hasFlag(scriptflag.VerifyMinimalData))
 	t.astack = newStack(t.cfg, t.hasFlag(scriptflag.VerifyMinimalData))
 
-	if t.tx != nil {
-		t.tx.InputIdx(t.inputIdx).PreviousTxScript = t.prevOutput.LockingScript
-		t.tx.InputIdx(t.inputIdx).PreviousTxSatoshis = t.prevOutput.Satoshis
+	if t.tx != nil && !t.tx.IsCoinbase() {
+		t.tx.Inputs[t.inputIdx].SetPrevTxFromOutput(&transaction.TransactionOutput{
+			LockingScript: t.prevOutput.LockingScript,
+			Satoshis:      t.prevOutput.Satoshis,
+		})
 	}
 
 	t.state = t

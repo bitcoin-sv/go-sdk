@@ -4,14 +4,14 @@ import (
 	script "github.com/bitcoin-sv/go-sdk/script"
 )
 
-// OrdinalsPrefix contains 'ORD' the inscription protocol prefix.
+// OrdinalsPrefix contains 'ord' the inscription protocol prefix.
 //
 // Check the docs here: https://docs.1satordinals.com/
 const OrdinalsPrefix = "ord"
 
 // Inscribe adds an output to the transaction with an inscription.
 func (tx *Transaction) Inscribe(ia *script.InscriptionArgs) error {
-	s := *ia.LockingScriptPrefix // deep copy
+	ins := script.Script{} // deep copy
 
 	// add Inscription data
 	// (Example: 	OP_FALSE
@@ -27,35 +27,29 @@ func (tx *Transaction) Inscribe(ia *script.InscriptionArgs) error {
 	//						OP_ENDIF
 	// )
 	// see: https://docs.ordinals.com/inscriptions.html
-	_ = s.AppendOpcodes(script.OpFALSE, script.OpIF)
-	err := s.AppendPushDataString(OrdinalsPrefix)
+	_ = ins.AppendOpcodes(script.OpFALSE, script.OpIF)
+	err := ins.AppendPushDataString(OrdinalsPrefix)
 	if err != nil {
 		return err
 	}
-	_ = s.AppendOpcodes(script.Op1)
-	err = s.AppendPushData([]byte(ia.ContentType))
+	_ = ins.AppendOpcodes(script.Op1)
+	err = ins.AppendPushData([]byte(ia.ContentType))
 	if err != nil {
 		return err
 	}
-	_ = s.AppendOpcodes(script.Op0)
-	err = s.AppendPushData(ia.Data)
+	_ = ins.AppendOpcodes(script.Op0)
+	err = ins.AppendPushData(ia.Data)
 	if err != nil {
 		return err
 	}
-	_ = s.AppendOpcodes(script.OpENDIF)
+	_ = ins.AppendOpcodes(script.OpENDIF)
+
+	s := script.NewFromBytes(append(ins, *ia.LockingScript...))
 
 	if ia.EnrichedArgs != nil {
 		if len(ia.EnrichedArgs.OpReturnData) > 0 {
-
-			// FIXME: import cycle
-			// // Sign with AIP
-			// _, outData, _, err := aip.SignOpReturnData(*signingKey, "BITCOIN_ECDSA", opReturn)
-			// if err != nil {
-			// 	return nil, err
-			// }
-
-			_ = s.AppendOpcodes(script.OpRETURN)
-			if err := s.AppendPushDataArray(ia.EnrichedArgs.OpReturnData); err != nil {
+			_ = ins.AppendOpcodes(script.OpRETURN)
+			if err := ins.AppendPushDataArray(ia.EnrichedArgs.OpReturnData); err != nil {
 				return err
 			}
 		}
@@ -63,7 +57,7 @@ func (tx *Transaction) Inscribe(ia *script.InscriptionArgs) error {
 
 	tx.AddOutput(&TransactionOutput{
 		Satoshis:      1,
-		LockingScript: &s,
+		LockingScript: s,
 	})
 	return nil
 }
@@ -122,10 +116,11 @@ func rangeAbove(is []*TransactionInput, inputIdx uint32, satIdx uint64) (uint64,
 		if uint32(i) >= inputIdx {
 			break
 		}
-		if in.PreviousTxSatoshis == 0 {
+		prevSats := in.PreviousTxSatoshis()
+		if prevSats == nil || *prevSats == 0 {
 			return 0, ErrInputSatsZero
 		}
-		acc += in.PreviousTxSatoshis
+		acc += *prevSats
 	}
 	return acc + satIdx, nil
 }

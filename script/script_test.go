@@ -491,7 +491,7 @@ func TestParseInscription(t *testing.T) {
 
 	pi, err := s.ParseInscription()
 	assert.NoError(t, err)
-	assert.Equal(t, hex.EncodeToString(elsp), pi.LockingScriptPrefix.String())
+	assert.Equal(t, hex.EncodeToString(elsp), pi.LockingScript.String())
 
 	assert.Equal(t, ec, pi.ContentType)
 	if !reflect.DeepEqual(ed, pi.Data) {
@@ -610,7 +610,7 @@ func TestSpendValid(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			tx.FromUTXOs(&transaction.UTXO{
+			tx.AddInputsFromUTXOs(&transaction.UTXO{
 				TxID:          prevTxid,
 				Vout:          prevIndex,
 				Satoshis:      1,

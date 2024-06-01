@@ -1976,7 +1976,7 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 	}
 
 	txCopy := t.tx.Clone()
-	txCopy.Inputs[t.inputIdx].PreviousTxScript = up
+	txCopy.Inputs[t.inputIdx].PreviousTx.Outputs[txCopy.Inputs[t.inputIdx].PreviousTxOutIndex].LockingScript = up
 
 	hash, err = txCopy.CalcInputSignatureHash(uint32(t.inputIdx), shf)
 	if err != nil {
@@ -2215,7 +2215,9 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 		// Generate the signature hash based on the signature hash type.
 		txCopy := t.tx.Clone()
-		txCopy.Inputs[t.inputIdx].PreviousTxScript = up
+		txCopy.Inputs[t.inputIdx].SetPrevTxFromOutput(&transaction.TransactionOutput{
+			LockingScript: up,
+		})
 
 		signatureHash, err := txCopy.CalcInputSignatureHash(uint32(t.inputIdx), shf)
 		if err != nil {

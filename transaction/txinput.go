@@ -13,7 +13,11 @@ import (
 // TotalInputSatoshis returns the total Satoshis inputted to the transaction.
 func (tx *Transaction) TotalInputSatoshis() (total uint64) {
 	for _, in := range tx.Inputs {
-		total += in.PreviousTxSatoshis
+		prevSats := uint64(0)
+		if in.PreviousTxSatoshis() != nil {
+			prevSats = *in.PreviousTxSatoshis()
+		}
+		total += prevSats
 	}
 	return
 }
@@ -22,12 +26,18 @@ func (tx *Transaction) AddInput(input *TransactionInput) {
 	tx.Inputs = append(tx.Inputs, input)
 }
 
+func (tx *Transaction) AddInputWithOutput(input *TransactionInput, output *TransactionOutput) {
+	input.SetPrevTxFromOutput(output)
+	tx.Inputs = append(tx.Inputs, input)
+}
+
 func (tx *Transaction) AddInputFromTx(prevTx *Transaction, vout uint32) {
 	i := &TransactionInput{
+		PreviousTxID:       prevTx.TxIDBytes(),
 		PreviousTxOutIndex: vout,
+		PreviousTx:         prevTx,
 		SequenceNumber:     DefaultSequenceNumber, // use default finalised sequence number
 	}
-	i.SetPreviousTx(prevTx)
 
 	tx.Inputs = append(tx.Inputs, i)
 }
@@ -76,7 +86,7 @@ func (tx *Transaction) AddP2PKHInputsFromTx(pvsTx *Transaction, matchPK []byte) 
 		}
 
 		if bytes.Equal(utxoPkHASH160, crypto.Hash160(matchPK)) {
-			if err := tx.FromUTXOs(&UTXO{
+			if err := tx.AddInputsFromUTXOs(&UTXO{
 				TxID:          prevTxIDBytes,
 				Vout:          uint32(i),
 				Satoshis:      utxo.Satoshis,
@@ -90,10 +100,10 @@ func (tx *Transaction) AddP2PKHInputsFromTx(pvsTx *Transaction, matchPK []byte) 
 	return nil
 }
 
-// From adds a new input to the transaction from the specified UTXO fields, using the default
+// AddInputFrom adds a new input to the transaction from the specified UTXO fields, using the default
 // finalised sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
 // afterwards.
-func (tx *Transaction) From(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64, template ScriptTemplate) error {
+func (tx *Transaction) AddInputFrom(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64, template ScriptTemplate) error {
 	pts, err := script.NewFromHex(prevTxLockingScript)
 	if err != nil {
 		return err
@@ -103,7 +113,7 @@ func (tx *Transaction) From(prevTxID string, vout uint32, prevTxLockingScript st
 		return err
 	}
 
-	return tx.FromUTXOs(&UTXO{
+	return tx.AddInputsFromUTXOs(&UTXO{
 		TxID:          pti,
 		Vout:          vout,
 		LockingScript: pts,
@@ -112,18 +122,21 @@ func (tx *Transaction) From(prevTxID string, vout uint32, prevTxLockingScript st
 	})
 }
 
-// FromUTXOs adds a new input to the transaction from the specified *bt.UTXO fields, using the default
+// AddInputsFromUTXOs adds a new input to the transaction from the specified *bt.UTXO fields, using the default
 // finalised sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
 // afterwards.
-func (tx *Transaction) FromUTXOs(utxos ...*UTXO) error {
+func (tx *Transaction) AddInputsFromUTXOs(utxos ...*UTXO) error {
 	for _, utxo := range utxos {
 		i := &TransactionInput{
 			PreviousTxID:       utxo.TxID,
 			PreviousTxOutIndex: utxo.Vout,
-			PreviousTxSatoshis: utxo.Satoshis,
-			PreviousTxScript:   utxo.LockingScript,
 			SequenceNumber:     DefaultSequenceNumber, // use default finalised sequence number
+			Template:           utxo.Template,
 		}
+		i.SetPrevTxFromOutput(&TransactionOutput{
+			Satoshis:      utxo.Satoshis,
+			LockingScript: utxo.LockingScript,
+		})
 
 		tx.AddInput(i)
 	}

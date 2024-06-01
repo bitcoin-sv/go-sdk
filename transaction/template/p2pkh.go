@@ -88,8 +88,8 @@ func (p *P2PKH) Sign(tx *transaction.Transaction, params transaction.UnlockParam
 		params.SigHashFlags = sighash.AllForkID
 	}
 
-	if tx.Inputs[params.InputIdx].PreviousTxScript == nil {
-		return nil, transaction.ErrEmptyPreviousTxScript
+	if tx.Inputs[params.InputIdx].PreviousTx == nil {
+		return nil, transaction.ErrEmptyPreviousTx
 	}
 
 	sh, err := tx.CalcInputSignatureHash(params.InputIdx, params.SigHashFlags)

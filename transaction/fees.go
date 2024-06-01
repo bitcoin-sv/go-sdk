@@ -24,13 +24,10 @@ func (tx *Transaction) Fee(f FeeModel, changeDistribution ChangeDistribution) er
 	}
 	satsIn := uint64(0)
 	for _, i := range tx.Inputs {
-		if i.previousTx != nil {
-			satsIn += i.previousTx.Outputs[i.PreviousTxOutIndex].Satoshis
-		} else if len(*i.PreviousTxScript) > 0 {
-			satsIn += i.PreviousTxSatoshis
-		} else {
-			return ErrEmptyPreviousTxScript
+		if i.PreviousTx == nil {
+			return ErrEmptyPreviousTx
 		}
+		satsIn += *i.PreviousTxSatoshis()
 	}
 	satsOut := uint64(0)
 	changeOuts := uint64(0)

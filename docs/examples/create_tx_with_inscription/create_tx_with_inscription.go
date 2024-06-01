@@ -18,7 +18,7 @@ func main() {
 	tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey) // get public key bytes and address
 
 	tx := transaction.NewTx()
-	_ = tx.From(
+	_ = tx.AddInputFrom(
 		"39e5954ee335fdb5a1368ab9e851a954ed513f73f6e8e85eff5e31adbb5837e7",
 		0,
 		"76a9144bca0c466925b875875a8e1355698bdcc0b2d45d88ac",
@@ -38,9 +38,9 @@ func main() {
 
 	s, _ := tmpl.Lock()
 	tx.Inscribe(&script.InscriptionArgs{
-		LockingScriptPrefix: s,
-		Data:                data,
-		ContentType:         contentType,
+		LockingScript: s,
+		Data:          data,
+		ContentType:   contentType,
 	})
 
 	changeAdd, _ := script.NewAddressFromString("17ujiveRLkf2JQiGR8Sjtwb37evX7vG3WG")

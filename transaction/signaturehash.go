@@ -67,8 +67,8 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 	if len(in.PreviousTxID) == 0 {
 		return nil, ErrEmptyPreviousTxID
 	}
-	if in.PreviousTxScript == nil {
-		return nil, ErrEmptyPreviousTxScript
+	if in.PreviousTx == nil {
+		return nil, ErrEmptyPreviousTx
 	}
 
 	hashPreviousOuts := make([]byte, 32)
@@ -113,12 +113,16 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 	buf = append(buf, oi...)
 
 	// scriptCode of the input (serialised as scripts inside CTxOuts)
-	buf = append(buf, VarInt(uint64(len(*in.PreviousTxScript))).Bytes()...)
-	buf = append(buf, *in.PreviousTxScript...)
+	buf = append(buf, VarInt(uint64(len(*in.PreviousTxScript()))).Bytes()...)
+	buf = append(buf, *in.PreviousTxScript()...)
 
 	// value of the output spent by this input (8-byte little endian)
 	sat := make([]byte, 8)
-	binary.LittleEndian.PutUint64(sat, in.PreviousTxSatoshis)
+	prevSats := uint64(0)
+	if in.PreviousTxSatoshis() != nil {
+		prevSats = *in.PreviousTxSatoshis()
+	}
+	binary.LittleEndian.PutUint64(sat, prevSats)
 	buf = append(buf, sat...)
 
 	// nSequence of the input (4-byte little endian)
@@ -156,8 +160,8 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 	if len(in.PreviousTxID) == 0 {
 		return nil, ErrEmptyPreviousTxID
 	}
-	if in.PreviousTxScript == nil {
-		return nil, ErrEmptyPreviousTxScript
+	if in.PreviousTx == nil {
+		return nil, ErrEmptyPreviousTx
 	}
 
 	// The SigHashSingle signature type signs only the corresponding input
@@ -188,10 +192,10 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 
 	for i := range txCopy.Inputs {
 		if i == int(inputNumber) {
-			txCopy.Inputs[i].PreviousTxScript = tx.Inputs[inputNumber].PreviousTxScript
+			txCopy.Inputs[i].PreviousTx = tx.Inputs[inputNumber].PreviousTx
 		} else {
 			txCopy.Inputs[i].UnlockingScript = &script.Script{}
-			txCopy.Inputs[i].PreviousTxScript = &script.Script{}
+			txCopy.Inputs[i].SetPrevTxFromOutput(&TransactionOutput{})
 		}
 	}
 
@@ -235,8 +239,12 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 		binary.LittleEndian.PutUint32(oi, in.PreviousTxOutIndex)
 		buf = append(buf, oi...)
 
-		buf = append(buf, VarInt(uint64(len(*in.PreviousTxScript))).Bytes()...)
-		buf = append(buf, *in.PreviousTxScript...)
+		if in.PreviousTxScript() != nil {
+			buf = append(buf, VarInt(uint64(len(*in.PreviousTxScript()))).Bytes()...)
+			buf = append(buf, *in.PreviousTxScript()...)
+		} else {
+			buf = append(buf, VarInt(0).Bytes()...)
+		}
 
 		sq := make([]byte, 4)
 		binary.LittleEndian.PutUint32(sq, in.SequenceNumber)

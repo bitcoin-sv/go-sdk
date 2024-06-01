@@ -18,12 +18,13 @@ func main() {
 
 	txid, _ := hex.DecodeString("b7b0650a7c3a1bd4716369783876348b59f5404784970192cec1996e86950576")
 	s, _ := script.NewFromHex("76a9149cbe9f5e72fa286ac8a38052d1d5337aa363ea7f88ac")
-	tx.AddInput(&transaction.TransactionInput{
+	tx.AddInputWithOutput(&transaction.TransactionInput{
 		PreviousTxID:       txid,
 		PreviousTxOutIndex: 0,
-		PreviousTxSatoshis: 1000,
-		PreviousTxScript:   s,
 		Template:           tmpl,
+	}, &transaction.TransactionOutput{
+		LockingScript: s,
+		Satoshis:      1000,
 	})
 	_ = tx.AddOpReturnOutput([]byte("You are using go-sdk!"))
 

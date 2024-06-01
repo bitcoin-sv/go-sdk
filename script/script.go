@@ -271,9 +271,9 @@ func (s *Script) ParseInscription() (*InscriptionArgs, error) {
 	// reordered - this is based on the original ordinals
 	// indexer: https://github.com/casey/ord
 	return &InscriptionArgs{
-		LockingScriptPrefix: s.Slice(0, 25),
-		Data:                p[11],
-		ContentType:         string(p[9]),
+		LockingScript: s.Slice(0, 25),
+		Data:          p[11],
+		ContentType:   string(p[9]),
 		// EnrichedArgs: , // TODO:
 	}, nil
 }

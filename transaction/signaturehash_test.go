@@ -60,10 +60,13 @@ func TestTx_CalcInputPreimage(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, tx)
 
-			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
-			tx.InputIdx(test.index).PreviousTxSatoshis = test.previousTxSatoshis
-			tx.InputIdx(test.index).PreviousTxScript, err = script.NewFromHex(test.previousTxScript)
+			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
+			prevScript, err := script.NewFromHex(test.previousTxScript)
 			assert.NoError(t, err)
+			tx.InputIdx(test.index).SetPrevTxFromOutput(&transaction.TransactionOutput{
+				LockingScript: prevScript,
+				Satoshis:      test.previousTxSatoshis,
+			})
 
 			var actualSigHash []byte
 			actualSigHash, err = tx.CalcInputPreimage(uint32(test.index), sighash.All|sighash.ForkID)
@@ -150,10 +153,13 @@ func TestTx_CalcInputSignatureHash(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, tx)
 
-			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
-			tx.Inputs[test.index].PreviousTxSatoshis = test.previousTxSatoshis
-			tx.Inputs[test.index].PreviousTxScript, err = script.NewFromHex(test.previousTxScript)
+			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
+			prevScript, err := script.NewFromHex(test.previousTxScript)
 			assert.NoError(t, err)
+			tx.Inputs[test.index].SetPrevTxFromOutput(&transaction.TransactionOutput{
+				LockingScript: prevScript,
+				Satoshis:      test.previousTxSatoshis,
+			})
 
 			var actualSigHash []byte
 			actualSigHash, err = tx.CalcInputSignatureHash(test.index, test.sigHashType)
@@ -213,10 +219,13 @@ func TestTx_CalcInputPreimageLegacy(t *testing.T) {
 			assert.NoError(t, err)
 			assert.NotNil(t, tx)
 
-			// Add the UTXO amount and script (PreviousTxScript already in unsigned tx)
-			tx.InputIdx(test.index).PreviousTxSatoshis = test.previousTxSatoshis
-			tx.InputIdx(test.index).PreviousTxScript, err = script.NewFromHex(test.previousTxScript)
+			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
+			prevScript, err := script.NewFromHex(test.previousTxScript)
 			assert.NoError(t, err)
+			tx.Inputs[test.index].SetPrevTxFromOutput(&transaction.TransactionOutput{
+				LockingScript: prevScript,
+				Satoshis:      test.previousTxSatoshis,
+			})
 
 			var actualSigHash []byte
 			actualSigHash, err = tx.CalcInputPreimageLegacy(uint32(test.index), test.sigHashType)

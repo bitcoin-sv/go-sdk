@@ -30,25 +30,26 @@ const DefaultSequenceNumber uint32 = 0xFFFFFFFF
 //
 // DO NOT CHANGE ORDER - Optimised for memory via maligned
 type TransactionInput struct {
-	previousTx         *Transaction
+	PreviousTx         *Transaction
 	PreviousTxID       []byte
-	PreviousTxSatoshis uint64
-	PreviousTxScript   *script.Script
-	// PreviousTxOutput   *TransactionOutput
 	UnlockingScript    *script.Script
 	PreviousTxOutIndex uint32
 	SequenceNumber     uint32
 	Template           ScriptTemplate
 }
 
-func (i *TransactionInput) PreviousTx() *Transaction {
-	return i.previousTx
+func (i *TransactionInput) PreviousTxScript() *script.Script {
+	if i.PreviousTx == nil {
+		return nil
+	}
+	return i.PreviousTx.Outputs[i.PreviousTxOutIndex].LockingScript
 }
 
-func (i *TransactionInput) SetPreviousTx(tx *Transaction) {
-	i.PreviousTxScript = tx.Outputs[i.PreviousTxOutIndex].LockingScript
-	i.PreviousTxSatoshis = tx.Outputs[i.PreviousTxOutIndex].Satoshis
-	i.previousTx = tx
+func (i *TransactionInput) PreviousTxSatoshis() *uint64 {
+	if i.PreviousTx == nil {
+		return nil
+	}
+	return &i.PreviousTx.Outputs[i.PreviousTxOutIndex].Satoshis
 }
 
 // ReadFrom reads from the `io.Reader` into the `bt.Input`.
@@ -108,8 +109,6 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 
 	if extended {
 		prevSatoshis := make([]byte, 8)
-		var prevTxLockingScript script.Script
-
 		n, err = io.ReadFull(r, prevSatoshis)
 		bytesRead += int64(n)
 		if err != nil {
@@ -131,10 +130,10 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 			return bytesRead, errors.Wrapf(err, "script(%d): got %d bytes", scriptLen.Length(), n)
 		}
 
-		prevTxLockingScript = *script.NewFromBytes(scriptBytes)
-
-		i.PreviousTxSatoshis = binary.LittleEndian.Uint64(prevSatoshis)
-		i.PreviousTxScript = script.NewFromBytes(prevTxLockingScript)
+		i.SetPrevTxFromOutput(&TransactionOutput{
+			Satoshis:      binary.LittleEndian.Uint64(prevSatoshis),
+			LockingScript: script.NewFromBytes(scriptBytes),
+		})
 	}
 
 	return bytesRead, nil
@@ -181,4 +180,14 @@ func (i *TransactionInput) Bytes(clear bool) []byte {
 	}
 
 	return append(h, util.LittleEndianBytes(i.SequenceNumber, 4)...)
+}
+
+func (i *TransactionInput) SetPrevTxFromOutput(txo *TransactionOutput) {
+	prevTx := &Transaction{}
+	prevTx.Outputs = make([]*TransactionOutput, i.PreviousTxOutIndex+1)
+	prevTx.Outputs[i.PreviousTxOutIndex] = &TransactionOutput{
+		Satoshis:      txo.Satoshis,
+		LockingScript: txo.LockingScript,
+	}
+	i.PreviousTx = prevTx
 }

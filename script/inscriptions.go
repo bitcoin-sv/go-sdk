@@ -2,10 +2,10 @@ package script
 
 // InscriptionArgs contains the Ordinal inscription data.
 type InscriptionArgs struct {
-	LockingScriptPrefix *Script
-	Data                []byte
-	ContentType         string
-	EnrichedArgs        *EnrichedInscriptionArgs
+	LockingScript *Script
+	Data          []byte
+	ContentType   string
+	EnrichedArgs  *EnrichedInscriptionArgs
 }
 
 // EnrichedInscriptionArgs contains data needed for enriched inscription

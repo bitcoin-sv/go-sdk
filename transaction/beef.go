@@ -71,7 +71,7 @@ func NewTxFromBEEF(beef []byte) (*Transaction, error) {
 		for _, input := range tx.Inputs {
 			sourceTxid := input.PreviousTxIDStr()
 			if sourceObj, ok := transactions[sourceTxid]; ok {
-				input.SetPreviousTx(sourceObj)
+				input.PreviousTx = sourceObj
 			} else if tx.MerklePath == nil {
 				panic(fmt.Sprintf("Reference to unknown TXID in BUMP: %s", sourceTxid))
 			}
@@ -129,13 +129,13 @@ func (t *Transaction) collectAncestors(txns map[string]*Transaction) ([]string, 
 	}
 	ancestors := make([]string, 0)
 	for _, input := range t.Inputs {
-		if input.previousTx == nil {
+		if input.PreviousTx == nil {
 			return nil, fmt.Errorf("missing previous transaction for %s", t.TxID())
 		}
 		if _, ok := txns[input.PreviousTxIDStr()]; ok {
 			continue
 		}
-		if grands, err := input.previousTx.collectAncestors(txns); err != nil {
+		if grands, err := input.PreviousTx.collectAncestors(txns); err != nil {
 			return nil, err
 		} else {
 			ancestors = append(grands, ancestors...)

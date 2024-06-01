@@ -38,8 +38,8 @@ var (
 
 // Sentinal errors reported by signature hash.
 var (
-	ErrEmptyPreviousTxID     = errors.New("'PreviousTxID' not supplied")
-	ErrEmptyPreviousTxScript = errors.New("'PreviousTxScript' not supplied")
+	ErrEmptyPreviousTxID = errors.New("'PreviousTxID' not supplied")
+	ErrEmptyPreviousTx   = errors.New("'PreviousTx' not supplied")
 )
 
 // Sentinel errors reported by the fees.

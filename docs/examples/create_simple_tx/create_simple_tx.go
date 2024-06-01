@@ -19,7 +19,7 @@ func main() {
 	tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
 
 	// Add the inputs
-	err := tx.From(
+	err := tx.AddInputFrom(
 		// Previous transaction ID (hex)
 		"11b476ad8e0a48fcd40807a111a050af51114877e09283bfa7f3505081a1819d",
 		// Previous transaction output index

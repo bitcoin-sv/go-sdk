@@ -21,10 +21,12 @@ func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, tx)
 
-	// Add the UTXO amount and script.
-	tx.InputIdx(0).PreviousTxSatoshis = 100000000
-	tx.InputIdx(0).PreviousTxScript, err = script.NewFromHex("76a914c0a3c167a28cabb9fbb495affa0761e6e74ac60d88ac")
+	prevTx := transaction.NewTx()
+	prevTx.Outputs = make([]*transaction.TransactionOutput, tx.InputIdx(0).PreviousTxOutIndex+1)
+	prevTx.Outputs[tx.InputIdx(0).PreviousTxOutIndex] = &transaction.TransactionOutput{Satoshis: 100000000}
+	prevTx.Outputs[tx.InputIdx(0).PreviousTxOutIndex].LockingScript, err = script.NewFromHex("76a914c0a3c167a28cabb9fbb495affa0761e6e74ac60d88ac")
 	assert.NoError(t, err)
+	tx.Inputs[0].PreviousTx = prevTx
 
 	// Our private key
 	var w *wif.WIF
@@ -49,7 +51,7 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 		"valid signature 1": {
 			tx: func() *transaction.Transaction {
 				tx := transaction.NewTx()
-				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "76a914c7c6987b6e2345a6b138e3384141520a0fbc18c588ac", 15564838601, nil))
+				assert.NoError(t, tx.AddInputFrom("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "76a914c7c6987b6e2345a6b138e3384141520a0fbc18c588ac", 15564838601, nil))
 
 				script1, err := script.NewFromHex("76a91442f9682260509ac80722b1963aec8a896593d16688ac")
 				assert.NoError(t, err)
@@ -74,7 +76,7 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 
 				assert.NoError(
 					t,
-					tx.From("64faeaa2e3cbadaf82d8fa8c7ded508cb043c5d101671f43c084be2ac6163148", 1, "76a914343cadc47d08a14ef773d70b3b2a90870b67b3ad88ac", 5000000000, nil),
+					tx.AddInputFrom("64faeaa2e3cbadaf82d8fa8c7ded508cb043c5d101671f43c084be2ac6163148", 1, "76a914343cadc47d08a14ef773d70b3b2a90870b67b3ad88ac", 5000000000, nil),
 				)
 				tx.Inputs[0].SequenceNumber = 0xfffffffe
 

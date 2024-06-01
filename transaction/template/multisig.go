@@ -70,10 +70,10 @@ func (m *Multisig) Sign(tx *transaction.Transaction, params transaction.UnlockPa
 		params.SigHashFlags = sighash.AllForkID
 	}
 
-	if tx.Inputs[params.InputIdx].PreviousTxScript == nil {
-		return nil, transaction.ErrEmptyPreviousTxScript
+	if tx.Inputs[params.InputIdx].PreviousTx == nil {
+		return nil, transaction.ErrEmptyPreviousTx
 	}
-	s := tx.Inputs[params.InputIdx].PreviousTxScript
+	s := tx.Inputs[params.InputIdx].PreviousTxScript()
 
 	if !m.IsLockingScript(s) {
 		return nil, ErrBadScript

@@ -152,7 +152,7 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTx()
-					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
+					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
@@ -174,7 +174,7 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTx()
-					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "52529387", 0, nil)
+					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "52529387", 0, nil)
 					assert.NoError(t, err)
 
 					txUnlockingScript, err := script.NewFromASM("OP_4")
@@ -220,7 +220,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTx()
-					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
+					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
@@ -247,7 +247,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTx()
-					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
+					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
@@ -305,7 +305,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTx()
-					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
+					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
@@ -338,7 +338,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTx()
-					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
+					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
@@ -361,7 +361,7 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTx()
-					err := tx.From("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
+					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")

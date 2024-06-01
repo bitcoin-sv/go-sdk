@@ -24,7 +24,7 @@ func TestTx_JSON(t *testing.T) {
 				tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
 
 				tx := transaction.NewTx()
-				assert.NoError(t, tx.From(
+				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
@@ -52,7 +52,7 @@ func TestTx_JSON(t *testing.T) {
 				tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
 
 				tx := transaction.NewTx()
-				assert.NoError(t, tx.From(
+				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
@@ -130,7 +130,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 				tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
 
 				tx := transaction.NewTx()
-				assert.NoError(t, tx.From(
+				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
@@ -138,7 +138,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 					nil,
 				))
 				tx.Inputs[0].Template = tmpl
-				assert.NoError(t, tx.From(
+				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					2,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
@@ -146,7 +146,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 					nil,
 				))
 				tx.Inputs[1].Template = tmpl
-				assert.NoError(t, tx.From(
+				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					114,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
