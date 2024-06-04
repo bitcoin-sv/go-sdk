@@ -209,73 +209,6 @@ func (s *Script) IsData() bool {
 		(len(b) > 1 && b[0] == OpFALSE && b[1] == OpRETURN)
 }
 
-// // IsInscribed returns true if this script includes an
-// // inscription with any prepended script (not just p2pkh).
-// func (s *Script) IsInscribed() bool {
-// 	isncPattern, _ := hex.DecodeString("0063036f7264")
-// 	return bytes.Contains(*s, isncPattern)
-// }
-
-// // IsP2PKHInscription checks if it's a standard
-// // inscription with a P2PKH prefix script.
-// func (s *Script) IsP2PKHInscription() bool {
-// 	p, err := DecodeScript(*s)
-// 	if err != nil {
-// 		return false
-// 	}
-
-// 	return isP2PKHInscriptionHelper(p)
-// }
-
-// func isP2PKHInscriptionHelper(parts []ScriptOp) bool {
-// 	if len(parts) < 13 {
-// 		return false
-// 	}
-// 	valid := parts[0].Op == OpDUP &&
-// 		parts[1].Op == OpHASH160 &&
-// 		parts[3].Op == OpEQUALVERIFY &&
-// 		parts[4].Op == OpCHECKSIG &&
-// 		parts[5].Op == OpFALSE &&
-// 		parts[6].Op == OpIF &&
-// 		bytes.Equal(parts[7].Data, []byte("ord")) &&
-// 		parts[8].Op == OpTRUE &&
-// 		parts[10].Op == OpFALSE &&
-// 		parts[12].Op == OpENDIF
-
-// 	if len(parts) > 13 {
-// 		return parts[13].Op == OpRETURN && valid
-// 	}
-// 	return valid
-// }
-
-// // ParseInscription parses the script to
-// // return the inscription found. Will return
-// // an error if the script doesn't contain
-// // any inscriptions.
-// func (s *Script) ParseInscription() (*InscriptionArgs, error) {
-// 	p, err := DecodeScript(*s)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	if !isP2PKHInscriptionHelper(p) {
-// 		return nil, ErrP2PKHInscriptionNotFound
-// 	}
-
-// 	// FIXME: make it dynamic based on order.
-// 	// right now if the content type and the content change order
-// 	// then this will fail. My understanding is that the content
-// 	// always needs to be last and the previous fields can be
-// 	// reordered - this is based on the original ordinals
-// 	// indexer: https://github.com/casey/ord
-// 	return &InscriptionArgs{
-// 		LockingScript: s.Slice(0, 25),
-// 		Data:          p[11],
-// 		ContentType:   string(p[9]),
-// 		// EnrichedArgs: , // TODO:
-// 	}, nil
-// }
-
 // Slice a script to get back a subset of that script.
 func (s *Script) Slice(start, end uint64) *Script {
 	ss := *s
@@ -294,7 +227,7 @@ func (s *Script) IsMultiSigOut() bool {
 		return false
 	}
 
-	if !isSmallIntOp(parts[0].Op) {
+	if !IsSmallIntOp(parts[0].Op) {
 		return false
 	}
 
@@ -304,10 +237,10 @@ func (s *Script) IsMultiSigOut() bool {
 		}
 	}
 
-	return isSmallIntOp(parts[len(parts)-2].Op) && parts[len(parts)-1].Op == OpCHECKMULTISIG
+	return IsSmallIntOp(parts[len(parts)-2].Op) && parts[len(parts)-1].Op == OpCHECKMULTISIG
 }
 
-func isSmallIntOp(opcode byte) bool {
+func IsSmallIntOp(opcode byte) bool {
 	return opcode == OpZERO || (opcode >= OpONE && opcode <= Op16)
 }
 
@@ -327,26 +260,6 @@ func (s *Script) PublicKeyHash() ([]byte, error) {
 	}
 
 	return parts[0].Data, nil
-}
-
-// ScriptType returns the type of script this is as a string.
-func (s *Script) ScriptType() string {
-	if len(*s) == 0 {
-		return ScriptTypeEmpty
-	}
-	if s.IsP2PKH() {
-		return ScriptTypePubKeyHash
-	}
-	if s.IsP2PK() {
-		return ScriptTypePubKey
-	}
-	if s.IsMultiSigOut() {
-		return ScriptTypeMultiSig
-	}
-	if s.IsData() {
-		return ScriptTypeNullData
-	}
-	return ScriptTypeNonStandard
 }
 
 // Addresses will return all addresses found in the script, if any.
