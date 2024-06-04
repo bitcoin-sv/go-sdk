@@ -212,7 +212,7 @@ func PushDataPrefix(data []byte) ([]byte, error) {
 // DecodeStringParts takes a hex string and decodes the opcodes in it
 // returning an array of opcode parts (which could be opcodes or data
 // pushed to the stack).
-func DecodeScriptHex(s string) ([]ScriptChunk, error) {
+func DecodeScriptHex(s string) ([]*ScriptChunk, error) {
 	b, err := hex.DecodeString(s)
 	if err != nil {
 		return nil, err
@@ -223,8 +223,8 @@ func DecodeScriptHex(s string) ([]ScriptChunk, error) {
 // DecodeScript takes bytes and decodes the opcodes in it
 // returning an array of opcode parts (which could be opcodes or data
 // pushed to the stack).
-func DecodeScript(b []byte) ([]ScriptChunk, error) {
-	var ops []ScriptChunk
+func DecodeScript(b []byte) ([]*ScriptChunk, error) {
+	var ops []*ScriptChunk
 	for len(b) > 0 {
 		// Handle OP codes
 		switch b[0] {
@@ -240,7 +240,7 @@ func DecodeScript(b []byte) ([]ScriptChunk, error) {
 				return ops, ErrDataTooSmall
 			}
 
-			ops = append(ops, ScriptChunk{Op: OpPUSHDATA1, Data: b[:l]})
+			ops = append(ops, &ScriptChunk{Op: OpPUSHDATA1, Data: b[:l]})
 			b = b[l:]
 
 		case OpPUSHDATA2:
@@ -256,7 +256,7 @@ func DecodeScript(b []byte) ([]ScriptChunk, error) {
 				return ops, ErrDataTooSmall
 			}
 
-			ops = append(ops, ScriptChunk{Op: OpPUSHDATA2, Data: b[:l]})
+			ops = append(ops, &ScriptChunk{Op: OpPUSHDATA2, Data: b[:l]})
 			b = b[l:]
 
 		case OpPUSHDATA4:
@@ -272,7 +272,7 @@ func DecodeScript(b []byte) ([]ScriptChunk, error) {
 				return ops, ErrDataTooSmall
 			}
 
-			ops = append(ops, ScriptChunk{Op: OpPUSHDATA4, Data: b[:l]})
+			ops = append(ops, &ScriptChunk{Op: OpPUSHDATA4, Data: b[:l]})
 			b = b[l:]
 
 		default:
@@ -281,10 +281,10 @@ func DecodeScript(b []byte) ([]ScriptChunk, error) {
 				if len(b) < int(1+l) {
 					return ops, ErrDataTooSmall
 				}
-				ops = append(ops, ScriptChunk{Op: l, Data: b[1 : l+1]})
+				ops = append(ops, &ScriptChunk{Op: l, Data: b[1 : l+1]})
 				b = b[1+l:]
 			} else {
-				ops = append(ops, ScriptChunk{Op: b[0]})
+				ops = append(ops, &ScriptChunk{Op: b[0]})
 				b = b[1:]
 			}
 		}
