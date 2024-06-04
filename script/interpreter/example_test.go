@@ -25,7 +25,7 @@ func ExampleEngine_Execute() {
 
 	inputIdx := 0
 	input := tx.InputIdx(inputIdx)
-	prevOutput := prevTx.OutputIdx(int(input.PreviousTxOutIndex))
+	prevOutput := prevTx.OutputIdx(int(input.SourceTxOutIndex))
 
 	inputASM, err := input.UnlockingScript.ToASM()
 	if err != nil {
@@ -108,7 +108,7 @@ func ExampleEngine_Execute_concurrent() {
 	ee = append(ee, execution{
 		tx:        tx,
 		inputIdx:  0,
-		prevTxOut: prevTx.OutputIdx(int(tx.InputIdx(0).PreviousTxOutIndex)),
+		prevTxOut: prevTx.OutputIdx(int(tx.InputIdx(0).SourceTxOutIndex)),
 	})
 
 	tx2, err := transaction.NewTxFromHex("020000000532bc3895b35a4d7b2da0103589a320e4eabeed08ef9777481b6f2475c0cf0084010000006a47304402206579610b3a845e7ffa58203c686ca86ed3f2f946454bcb5f78e960c8ec34617702206cf0f168267acbca0acdc7fe38311fd94fd821868891aa1da150fe0de6e0ff6c412103bb0164c11476e32287120301be5aca1310b0f72579f83e88cf6e10e42f6f78f1feffffff46987a5d7920f32aa950c9cd258fa918fcd03bea856233921f88b9eef32896e2000000006a47304402201cd57a7064c100bb7e565a9aeff12bfe4397d59bd3d44a89115f97e2bd04669e022020cba46c8ab99a763c983f7fb10d61875495af0d6f42e3dfe010b843cb9c0ceb4121033288af9d515600042c64a8a058e80ad0a70f885ab4fc2424da847b18b74335e8feffffff46987a5d7920f32aa950c9cd258fa918fcd03bea856233921f88b9eef32896e2010000006a473044022022ce6618dca7e4d38455f327987f43f1ea127081e51375efe311e310b309aaed0220397f92dcebca00027adcfc11231b490125299ce71c38ff18c096d2272354b85f4121034a4a9529513993c0c4f44a011b0e53180e6ebace7791abfd0e291f6c4aeccef8feffffff910084749909b991b60ff63962ba5f01f2fd30e155f5f5776e694a14eb58e76a000000006a47304402201a4a9c14879acdbde902d6ec27c680f6bbf7c399296b0da31eaaad896dd0451b02201defdcc8514d8fea8425bc18406adf23f4957c218c0f321b9db3850f0b16884e412102a4b2aabf9cbfb9031de4f00d1997f10fe232e7e344b7ceb39e382be9b2e5002dfeffffff910084749909b991b60ff63962ba5f01f2fd30e155f5f5776e694a14eb58e76a010000006a47304402200fe83fbb8c1055190395bf46f8e1521670b1da12680950ea7b40ef5ad02ab7ac02205794d2fba2353cf6e8c9372b9e8900fa40fb5574880be5b455d6927b28fcbfc24121034a4a9529513993c0c4f44a011b0e53180e6ebace7791abfd0e291f6c4aeccef8feffffff0294daf505000000001976a914a12a69314c08a5155d779a2ec247ea735ade23bd88ac006d7c4d000000001976a9146dbb06e4c0395ffdec982856beab28994a548dce88ac69000000")
@@ -126,7 +126,7 @@ func ExampleEngine_Execute_concurrent() {
 	ee = append(ee, execution{
 		tx:        tx2,
 		inputIdx:  0,
-		prevTxOut: prevTx2.OutputIdx(int(tx2.InputIdx(0).PreviousTxOutIndex)),
+		prevTxOut: prevTx2.OutputIdx(int(tx2.InputIdx(0).SourceTxOutIndex)),
 	})
 
 	vm := interpreter.NewEngine()

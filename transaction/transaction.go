@@ -246,11 +246,11 @@ func (tx *Transaction) IsCoinbase() bool {
 
 	cbi := make([]byte, 32)
 
-	if !bytes.Equal(tx.Inputs[0].PreviousTxID, cbi) {
+	if !bytes.Equal(tx.Inputs[0].SourceTxID, cbi) {
 		return false
 	}
 
-	if tx.Inputs[0].PreviousTxOutIndex == DefaultSequenceNumber || tx.Inputs[0].SequenceNumber == DefaultSequenceNumber {
+	if tx.Inputs[0].SourceTxOutIndex == DefaultSequenceNumber || tx.Inputs[0].SequenceNumber == DefaultSequenceNumber {
 		return true
 	}
 
@@ -291,7 +291,7 @@ func (tx *Transaction) Bytes() []byte {
 // (with PreviousTxSatoshis and PreviousTXScript included)
 func (tx *Transaction) EF() ([]byte, error) {
 	for _, in := range tx.Inputs {
-		if in.PreviousTx == nil {
+		if in.SourceTransaction == nil {
 			return nil, ErrEmptyPreviousTx
 		}
 	}
@@ -313,7 +313,7 @@ func (tx *Transaction) Clone() *Transaction {
 	}
 
 	for i, input := range tx.Inputs {
-		clone.Inputs[i].PreviousTx = input.PreviousTx
+		clone.Inputs[i].SourceTransaction = input.SourceTransaction
 	}
 
 	return clone

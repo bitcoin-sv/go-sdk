@@ -30,26 +30,26 @@ const DefaultSequenceNumber uint32 = 0xFFFFFFFF
 //
 // DO NOT CHANGE ORDER - Optimised for memory via maligned
 type TransactionInput struct {
-	PreviousTx         *Transaction
-	PreviousTxID       []byte
-	UnlockingScript    *script.Script
-	PreviousTxOutIndex uint32
-	SequenceNumber     uint32
-	Template           ScriptTemplate
+	SourceTxID        []byte
+	UnlockingScript   *script.Script
+	SourceTxOutIndex  uint32
+	SequenceNumber    uint32
+	SourceTransaction *Transaction
+	Template          ScriptTemplate
 }
 
 func (i *TransactionInput) PreviousTxScript() *script.Script {
-	if i.PreviousTx == nil {
+	if i.SourceTransaction == nil {
 		return nil
 	}
-	return i.PreviousTx.Outputs[i.PreviousTxOutIndex].LockingScript
+	return i.SourceTransaction.Outputs[i.SourceTxOutIndex].LockingScript
 }
 
 func (i *TransactionInput) PreviousTxSatoshis() *uint64 {
-	if i.PreviousTx == nil {
+	if i.SourceTransaction == nil {
 		return nil
 	}
-	return &i.PreviousTx.Outputs[i.PreviousTxOutIndex].Satoshis
+	return &i.SourceTransaction.Outputs[i.SourceTxOutIndex].Satoshis
 }
 
 // ReadFrom reads from the `io.Reader` into the `bt.Input`.
@@ -102,8 +102,8 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 		return bytesRead, errors.Wrapf(err, "sequence(4): got %d bytes", n)
 	}
 
-	i.PreviousTxID = util.ReverseBytes(previousTxID)
-	i.PreviousTxOutIndex = binary.LittleEndian.Uint32(prevIndex)
+	i.SourceTxID = util.ReverseBytes(previousTxID)
+	i.SourceTxOutIndex = binary.LittleEndian.Uint32(prevIndex)
 	i.UnlockingScript = script.NewFromBytes(scriptBytes)
 	i.SequenceNumber = binary.LittleEndian.Uint32(sequence)
 
@@ -141,7 +141,7 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 
 // PreviousTxIDStr returns the Previous TxID as a hex string.
 func (i *TransactionInput) PreviousTxIDStr() string {
-	return hex.EncodeToString(i.PreviousTxID)
+	return hex.EncodeToString(i.SourceTxID)
 }
 
 // String implements the Stringer interface and returns a string
@@ -154,8 +154,8 @@ scriptLen:    %d
 script:       %s
 sequence:     %x
 `,
-		hex.EncodeToString(i.PreviousTxID),
-		i.PreviousTxOutIndex,
+		hex.EncodeToString(i.SourceTxID),
+		i.SourceTxOutIndex,
 		len(*i.UnlockingScript),
 		i.UnlockingScript,
 		i.SequenceNumber,
@@ -166,8 +166,8 @@ sequence:     %x
 func (i *TransactionInput) Bytes(clear bool) []byte {
 	h := make([]byte, 0)
 
-	h = append(h, util.ReverseBytes(i.PreviousTxID)...)
-	h = append(h, util.LittleEndianBytes(i.PreviousTxOutIndex, 4)...)
+	h = append(h, util.ReverseBytes(i.SourceTxID)...)
+	h = append(h, util.LittleEndianBytes(i.SourceTxOutIndex, 4)...)
 	if clear {
 		h = append(h, 0x00)
 	} else {
@@ -184,10 +184,7 @@ func (i *TransactionInput) Bytes(clear bool) []byte {
 
 func (i *TransactionInput) SetPrevTxFromOutput(txo *TransactionOutput) {
 	prevTx := &Transaction{}
-	prevTx.Outputs = make([]*TransactionOutput, i.PreviousTxOutIndex+1)
-	prevTx.Outputs[i.PreviousTxOutIndex] = &TransactionOutput{
-		Satoshis:      txo.Satoshis,
-		LockingScript: txo.LockingScript,
-	}
-	i.PreviousTx = prevTx
+	prevTx.Outputs = make([]*TransactionOutput, i.SourceTxOutIndex+1)
+	prevTx.Outputs[i.SourceTxOutIndex] = txo
+	i.SourceTransaction = prevTx
 }

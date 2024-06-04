@@ -16,7 +16,7 @@ func main() {
 	// Create a new transaction
 	tx := transaction.NewTx()
 
-	tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
+	tmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
 
 	// Add the inputs
 	err := tx.AddInputFrom(
@@ -36,7 +36,7 @@ func main() {
 	}
 
 	// Add the outputs
-	payTmpl, _ := template.NewP2PKHTemplateFromAddressString("1NRoySJ9Lvby6DuE2UQYnyT67AASwNZxGb")
+	payTmpl, _ := template.NewP2PKHFromAddressString("1NRoySJ9Lvby6DuE2UQYnyT67AASwNZxGb")
 	err = tx.AddOutputFromTemplate(payTmpl, 1000)
 	if err != nil {
 		log.Fatal(err.Error())

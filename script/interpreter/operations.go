@@ -1976,7 +1976,7 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 	}
 
 	txCopy := t.tx.Clone()
-	txCopy.Inputs[t.inputIdx].PreviousTx.Outputs[txCopy.Inputs[t.inputIdx].PreviousTxOutIndex].LockingScript = up
+	txCopy.Inputs[t.inputIdx].SourceTransaction.Outputs[txCopy.Inputs[t.inputIdx].SourceTxOutIndex].LockingScript = up
 
 	hash, err = txCopy.CalcInputSignatureHash(uint32(t.inputIdx), shf)
 	if err != nil {

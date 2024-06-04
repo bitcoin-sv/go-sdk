@@ -38,9 +38,9 @@ func TestBadPC(t *testing.T) {
 	tx := &transaction.Transaction{
 		Version: 1,
 		Inputs: []*transaction.TransactionInput{{
-			PreviousTxOutIndex: 0,
-			UnlockingScript:    uscript,
-			SequenceNumber:     4294967295,
+			SourceTxOutIndex: 0,
+			UnlockingScript:  uscript,
+			SequenceNumber:   4294967295,
 		}},
 		Outputs: []*transaction.TransactionOutput{{
 			Satoshis: 1000000000,
@@ -95,9 +95,9 @@ func TestCheckErrorCondition(t *testing.T) {
 	tx := &transaction.Transaction{
 		Version: 1,
 		Inputs: []*transaction.TransactionInput{{
-			PreviousTxOutIndex: 0,
-			UnlockingScript:    &script.Script{},
-			SequenceNumber:     4294967295,
+			SourceTxOutIndex: 0,
+			UnlockingScript:  &script.Script{},
+			SequenceNumber:   4294967295,
 		}},
 		Outputs: []*transaction.TransactionOutput{{
 			Satoshis: 1000000000,
@@ -414,9 +414,9 @@ func TestInvalidFlagCombinations(t *testing.T) {
 	tx := &transaction.Transaction{
 		Version: 1,
 		Inputs: []*transaction.TransactionInput{{
-			PreviousTxOutIndex: 0,
-			UnlockingScript:    uscript,
-			SequenceNumber:     4294967295,
+			SourceTxOutIndex: 0,
+			UnlockingScript:  uscript,
+			SequenceNumber:   4294967295,
 		}},
 		Outputs: []*transaction.TransactionOutput{{
 			Satoshis: 1000000000,
@@ -980,7 +980,7 @@ func TestExecute(t *testing.T) {
 
 			inputIdx := 0
 			input := tx.InputIdx(inputIdx)
-			prevOutput := prevTx.OutputIdx(int(input.PreviousTxOutIndex))
+			prevOutput := prevTx.OutputIdx(int(input.SourceTxOutIndex))
 
 			err = NewEngine().Execute(
 				WithTx(tx, inputIdx, prevOutput),

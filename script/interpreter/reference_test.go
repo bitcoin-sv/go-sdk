@@ -301,25 +301,25 @@ func createSpendingTx(sigScript, pkScript *script.Script, outputValue int64) *tr
 		Version:  1,
 		LockTime: 0,
 		Inputs: []*transaction.TransactionInput{{
-			PreviousTxOutIndex: ^uint32(0),
-			UnlockingScript:    script.NewFromBytes([]byte{script.Op0, script.Op0}),
-			SequenceNumber:     0xffffffff,
+			SourceTxOutIndex: ^uint32(0),
+			UnlockingScript:  script.NewFromBytes([]byte{script.Op0, script.Op0}),
+			SequenceNumber:   0xffffffff,
 		}},
 		Outputs: []*transaction.TransactionOutput{{
 			Satoshis:      uint64(outputValue),
 			LockingScript: pkScript,
 		}},
 	}
-	coinbaseTx.Inputs[0].PreviousTxID = make([]byte, 32)
+	coinbaseTx.Inputs[0].SourceTxID = make([]byte, 32)
 
 	spendingTx := &transaction.Transaction{
 		Version:  1,
 		LockTime: 0,
 		Inputs: []*transaction.TransactionInput{{
-			PreviousTxID:       coinbaseTx.TxIDBytes(),
-			PreviousTxOutIndex: 0,
-			UnlockingScript:    sigScript,
-			SequenceNumber:     0xffffffff,
+			SourceTxID:       coinbaseTx.TxIDBytes(),
+			SourceTxOutIndex: 0,
+			UnlockingScript:  sigScript,
+			SequenceNumber:   0xffffffff,
 		}},
 		Outputs: []*transaction.TransactionOutput{{
 			Satoshis:      uint64(outputValue),
@@ -610,7 +610,7 @@ testloop:
 		}
 
 		for k, txin := range tx.Inputs {
-			prevOut, ok := prevOuts[txIOKey{id: txin.PreviousTxIDStr(), idx: txin.PreviousTxOutIndex}]
+			prevOut, ok := prevOuts[txIOKey{id: txin.PreviousTxIDStr(), idx: txin.SourceTxOutIndex}]
 			if !ok {
 				t.Errorf("bad test (missing %dth input) %d:%v",
 					k, i, test)
@@ -754,7 +754,7 @@ testloop:
 		}
 
 		for k, txin := range tx.Inputs {
-			prevOut, ok := prevOuts[txIOKey{id: txin.PreviousTxIDStr(), idx: txin.PreviousTxOutIndex}]
+			prevOut, ok := prevOuts[txIOKey{id: txin.PreviousTxIDStr(), idx: txin.SourceTxOutIndex}]
 			if !ok {
 				t.Errorf("bad test (missing %dth input) %d:%v",
 					k, i, test)

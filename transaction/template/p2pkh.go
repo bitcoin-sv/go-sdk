@@ -13,33 +13,33 @@ type P2PKH struct {
 	privateKey *ec.PrivateKey
 }
 
-func NewP2PKHTemplateFromAddress(address *script.Address) *P2PKH {
+func NewP2PKHFromAddress(address *script.Address) *P2PKH {
 	return &P2PKH{
 		PKHash: address.PublicKeyHash,
 	}
 }
 
-func NewP2PKHTemplateFromAddressString(addressStr string) (*P2PKH, error) {
+func NewP2PKHFromAddressString(addressStr string) (*P2PKH, error) {
 	add, err := script.NewAddressFromString(addressStr)
 	if err != nil {
 		return nil, err
 	}
-	return NewP2PKHTemplateFromAddress(add), nil
+	return NewP2PKHFromAddress(add), nil
 }
 
-func NewP2PKHTemplateFromPubKey(pubKey []byte) *P2PKH {
+func NewP2PKHFromPubKey(pubKey []byte) *P2PKH {
 	return &P2PKH{
 		PKHash: hash.Hash160(pubKey),
 	}
 }
 
-func NewP2PKHTemplateFromPubKeyEC(pubKey *ec.PublicKey) *P2PKH {
+func NewP2PKHFromPubKeyEC(pubKey *ec.PublicKey) *P2PKH {
 	return &P2PKH{
 		PKHash: hash.Hash160(pubKey.SerialiseCompressed()),
 	}
 }
 
-func NewP2PKHTemplateFromPrivKey(privKey *ec.PrivateKey) *P2PKH {
+func NewP2PKHFromPrivKey(privKey *ec.PrivateKey) *P2PKH {
 	return &P2PKH{
 		PKHash:     hash.Hash160(privKey.PubKey().SerialiseCompressed()),
 		privateKey: privKey,
@@ -88,7 +88,7 @@ func (p *P2PKH) Sign(tx *transaction.Transaction, params transaction.UnlockParam
 		params.SigHashFlags = sighash.AllForkID
 	}
 
-	if tx.Inputs[params.InputIdx].PreviousTx == nil {
+	if tx.Inputs[params.InputIdx].SourceTransaction == nil {
 		return nil, transaction.ErrEmptyPreviousTx
 	}
 

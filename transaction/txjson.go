@@ -68,8 +68,8 @@ func (tx *Transaction) UnmarshalJSON(b []byte) error {
 // input struct to add additional fields.
 func (i *TransactionInput) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&inputJSON{
-		TxID:            hex.EncodeToString(i.PreviousTxID),
-		Vout:            i.PreviousTxOutIndex,
+		TxID:            hex.EncodeToString(i.SourceTxID),
+		Vout:            i.SourceTxOutIndex,
 		UnlockingScript: i.UnlockingScript.String(),
 		Sequence:        i.SequenceNumber,
 	})
@@ -90,8 +90,8 @@ func (i *TransactionInput) UnmarshalJSON(b []byte) error {
 		return err
 	}
 	i.UnlockingScript = s
-	i.PreviousTxID = ptxID
-	i.PreviousTxOutIndex = ij.Vout
+	i.SourceTxID = ptxID
+	i.SourceTxOutIndex = ij.Vout
 	i.SequenceNumber = ij.Sequence
 	return nil
 }

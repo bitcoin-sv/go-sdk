@@ -33,10 +33,10 @@ func (tx *Transaction) AddInputWithOutput(input *TransactionInput, output *Trans
 
 func (tx *Transaction) AddInputFromTx(prevTx *Transaction, vout uint32) {
 	i := &TransactionInput{
-		PreviousTxID:       prevTx.TxIDBytes(),
-		PreviousTxOutIndex: vout,
-		PreviousTx:         prevTx,
-		SequenceNumber:     DefaultSequenceNumber, // use default finalised sequence number
+		SourceTxID:        prevTx.TxIDBytes(),
+		SourceTxOutIndex:  vout,
+		SourceTransaction: prevTx,
+		SequenceNumber:    DefaultSequenceNumber, // use default finalised sequence number
 	}
 
 	tx.Inputs = append(tx.Inputs, i)
@@ -52,9 +52,9 @@ func (tx *Transaction) PreviousOutHash() []byte {
 	buf := make([]byte, 0)
 
 	for _, in := range tx.Inputs {
-		buf = append(buf, util.ReverseBytes(in.PreviousTxID)...)
+		buf = append(buf, util.ReverseBytes(in.SourceTxID)...)
 		oi := make([]byte, 4)
-		binary.LittleEndian.PutUint32(oi, in.PreviousTxOutIndex)
+		binary.LittleEndian.PutUint32(oi, in.SourceTxOutIndex)
 		buf = append(buf, oi...)
 	}
 
@@ -128,10 +128,10 @@ func (tx *Transaction) AddInputFrom(prevTxID string, vout uint32, prevTxLockingS
 func (tx *Transaction) AddInputsFromUTXOs(utxos ...*UTXO) error {
 	for _, utxo := range utxos {
 		i := &TransactionInput{
-			PreviousTxID:       utxo.TxID,
-			PreviousTxOutIndex: utxo.Vout,
-			SequenceNumber:     DefaultSequenceNumber, // use default finalised sequence number
-			Template:           utxo.Template,
+			SourceTxID:       utxo.TxID,
+			SourceTxOutIndex: utxo.Vout,
+			SequenceNumber:   DefaultSequenceNumber, // use default finalised sequence number
+			Template:         utxo.Template,
 		}
 		i.SetPrevTxFromOutput(&TransactionOutput{
 			Satoshis:      utxo.Satoshis,

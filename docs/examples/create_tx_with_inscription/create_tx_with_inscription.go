@@ -15,7 +15,7 @@ import (
 func main() {
 	w, _ := wif.DecodeWIF("KznpA63DPFrmHecASyL6sFmcRgrNT9oM8Ebso8mwq1dfJF3ZgZ3V")
 
-	tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey) // get public key bytes and address
+	tmpl := template.NewP2PKHFromPrivKey(w.PrivKey) // get public key bytes and address
 
 	tx := transaction.NewTx()
 	_ = tx.AddInputFrom(
@@ -44,7 +44,7 @@ func main() {
 	})
 
 	changeAdd, _ := script.NewAddressFromString("17ujiveRLkf2JQiGR8Sjtwb37evX7vG3WG")
-	changeTmpl := template.NewP2PKHTemplateFromAddress(changeAdd)
+	changeTmpl := template.NewP2PKHFromAddress(changeAdd)
 	changeScript, _ := changeTmpl.Lock()
 	tx.AddOutput(&transaction.TransactionOutput{
 		LockingScript: changeScript,

@@ -23,7 +23,7 @@ func TestNewInputFromReader(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotNil(t, i)
 		assert.Equal(t, int64(148), s)
-		assert.Equal(t, uint32(1), i.PreviousTxOutIndex)
+		assert.Equal(t, uint32(1), i.SourceTxOutIndex)
 		assert.Equal(t, 107, len(*i.UnlockingScript))
 		assert.Equal(t, DefaultSequenceNumber, i.SequenceNumber)
 	})

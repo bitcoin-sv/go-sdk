@@ -22,18 +22,18 @@ func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {
 	assert.NotNil(t, tx)
 
 	prevTx := transaction.NewTx()
-	prevTx.Outputs = make([]*transaction.TransactionOutput, tx.InputIdx(0).PreviousTxOutIndex+1)
-	prevTx.Outputs[tx.InputIdx(0).PreviousTxOutIndex] = &transaction.TransactionOutput{Satoshis: 100000000}
-	prevTx.Outputs[tx.InputIdx(0).PreviousTxOutIndex].LockingScript, err = script.NewFromHex("76a914c0a3c167a28cabb9fbb495affa0761e6e74ac60d88ac")
+	prevTx.Outputs = make([]*transaction.TransactionOutput, tx.InputIdx(0).SourceTxOutIndex+1)
+	prevTx.Outputs[tx.InputIdx(0).SourceTxOutIndex] = &transaction.TransactionOutput{Satoshis: 100000000}
+	prevTx.Outputs[tx.InputIdx(0).SourceTxOutIndex].LockingScript, err = script.NewFromHex("76a914c0a3c167a28cabb9fbb495affa0761e6e74ac60d88ac")
 	assert.NoError(t, err)
-	tx.Inputs[0].PreviousTx = prevTx
+	tx.Inputs[0].SourceTransaction = prevTx
 
 	// Our private key
 	var w *wif.WIF
 	w, err = wif.DecodeWIF("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
 	assert.NoError(t, err)
 
-	scriptTmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
+	scriptTmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
 
 	s, err := scriptTmpl.Sign(tx, transaction.UnlockParams{InputIdx: 0})
 	assert.NoError(t, err)
@@ -106,7 +106,7 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 			w, err := wif.DecodeWIF("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
 			assert.NoError(t, err)
 
-			unlocker := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
+			unlocker := template.NewP2PKHFromPrivKey(w.PrivKey)
 			uscript, err := unlocker.Sign(tx, transaction.UnlockParams{})
 			assert.NoError(t, err)
 

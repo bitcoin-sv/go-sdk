@@ -14,14 +14,14 @@ func main() {
 	w, _ := wif.DecodeWIF("L3VJH2hcRGYYG6YrbWGmsxQC1zyYixA82YjgEyrEUWDs4ALgk8Vu")
 
 	tx := transaction.NewTx()
-	tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
+	tmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
 
 	txid, _ := hex.DecodeString("b7b0650a7c3a1bd4716369783876348b59f5404784970192cec1996e86950576")
 	s, _ := script.NewFromHex("76a9149cbe9f5e72fa286ac8a38052d1d5337aa363ea7f88ac")
 	tx.AddInputWithOutput(&transaction.TransactionInput{
-		PreviousTxID:       txid,
-		PreviousTxOutIndex: 0,
-		Template:           tmpl,
+		SourceTxID:       txid,
+		SourceTxOutIndex: 0,
+		Template:         tmpl,
 	}, &transaction.TransactionOutput{
 		LockingScript: s,
 		Satoshis:      1000,

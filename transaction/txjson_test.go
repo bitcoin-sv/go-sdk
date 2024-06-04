@@ -21,7 +21,7 @@ func TestTx_JSON(t *testing.T) {
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, w)
-				tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
+				tmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
 
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.AddInputFrom(
@@ -49,7 +49,7 @@ func TestTx_JSON(t *testing.T) {
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, w)
-				tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
+				tmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
 
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.AddInputFrom(
@@ -127,7 +127,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, w)
-				tmpl := template.NewP2PKHTemplateFromPrivKey(w.PrivKey)
+				tmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
 
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.AddInputFrom(
