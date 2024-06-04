@@ -55,11 +55,11 @@ func (p *P2PKH) IsUnlockingScript(s *script.Script) bool {
 
 	if op, err := s.ReadOp(&pos); err != nil {
 		return false
-	} else if op.OpCode != script.Op0 && len(op.Data) == 0 {
+	} else if op.Op != script.Op0 && len(op.Data) == 0 {
 		return false
 	} else if op, err := s.ReadOp(&pos); err != nil {
 		return false
-	} else if op.OpCode != script.Op0 && len(op.Data) == 0 {
+	} else if op.Op != script.Op0 && len(op.Data) == 0 {
 		return false
 	} else if len(*s) > pos+1 {
 		return false

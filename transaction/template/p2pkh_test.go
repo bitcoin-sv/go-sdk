@@ -111,11 +111,11 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 			assert.NoError(t, err)
 
 			tx.Inputs[0].UnlockingScript = uscript
-			parts, err := script.DecodeParts(*tx.Inputs[0].UnlockingScript)
+			parts, err := script.DecodeScript(*tx.Inputs[0].UnlockingScript)
 			assert.NoError(t, err)
 
-			sigBytes := parts[0]
-			publicKeyBytes := parts[1]
+			sigBytes := parts[0].Data
+			publicKeyBytes := parts[1].Data
 
 			publicKey, err := ec.ParsePubKey(publicKeyBytes)
 			assert.NoError(t, err)

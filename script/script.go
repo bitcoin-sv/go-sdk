@@ -62,7 +62,7 @@ func NewFromASM(str string) (*Script, error) {
 // AppendPushData takes data bytes and appends them to the script
 // with proper PUSHDATA prefixes
 func (s *Script) AppendPushData(d []byte) error {
-	p, err := EncodeParts([][]byte{d})
+	p, err := EncodePushDatas([][]byte{d})
 	if err != nil {
 		return err
 	}
@@ -91,7 +91,7 @@ func (s *Script) AppendPushDataString(str string) error {
 // AppendPushDataArray takes an array of data bytes and appends them
 // to the script with proper PUSHDATA prefixes
 func (s *Script) AppendPushDataArray(d [][]byte) error {
-	p, err := EncodeParts(d)
+	p, err := EncodePushDatas(d)
 	if err != nil {
 		return err
 	}
@@ -171,13 +171,13 @@ func (s *Script) IsP2PKH() bool {
 
 // IsP2PK returns true if this is a public key output script.
 func (s *Script) IsP2PK() bool {
-	parts, err := DecodeParts(*s)
+	parts, err := DecodeScript(*s)
 	if err != nil {
 		return false
 	}
 
-	if len(parts) == 2 && len(parts[0]) > 0 && parts[1][0] == OpCHECKSIG {
-		pubkey := parts[0]
+	if len(parts) == 2 && len(parts[0].Data) > 0 && parts[1].Op == OpCHECKSIG {
+		pubkey := parts[0].Data
 		version := pubkey[0]
 
 		if (version == 0x04 || version == 0x06 || version == 0x07) && len(pubkey) == 65 {
@@ -209,74 +209,72 @@ func (s *Script) IsData() bool {
 		(len(b) > 1 && b[0] == OpFALSE && b[1] == OpRETURN)
 }
 
-// IsInscribed returns true if this script includes an
-// inscription with any prepended script (not just p2pkh).
-func (s *Script) IsInscribed() bool {
-	isncPattern, _ := hex.DecodeString("0063036f7264")
-	return bytes.Contains(*s, isncPattern)
-}
+// // IsInscribed returns true if this script includes an
+// // inscription with any prepended script (not just p2pkh).
+// func (s *Script) IsInscribed() bool {
+// 	isncPattern, _ := hex.DecodeString("0063036f7264")
+// 	return bytes.Contains(*s, isncPattern)
+// }
 
-// IsP2PKHInscription checks if it's a standard
-// inscription with a P2PKH prefix script.
-func (s *Script) IsP2PKHInscription() bool {
-	p, err := DecodeParts(*s)
-	if err != nil {
-		return false
-	}
+// // IsP2PKHInscription checks if it's a standard
+// // inscription with a P2PKH prefix script.
+// func (s *Script) IsP2PKHInscription() bool {
+// 	p, err := DecodeScript(*s)
+// 	if err != nil {
+// 		return false
+// 	}
 
-	return isP2PKHInscriptionHelper(p)
-}
+// 	return isP2PKHInscriptionHelper(p)
+// }
 
-// isP2PKHInscriptionHelper helper so that we don't need to call
-// `DecodeParts()` multiple times, such as in `ParseInscription()`
-func isP2PKHInscriptionHelper(parts [][]byte) bool {
-	if len(parts) < 13 {
-		return false
-	}
-	valid := parts[0][0] == OpDUP &&
-		parts[1][0] == OpHASH160 &&
-		parts[3][0] == OpEQUALVERIFY &&
-		parts[4][0] == OpCHECKSIG &&
-		parts[5][0] == OpFALSE &&
-		parts[6][0] == OpIF &&
-		parts[7][0] == 0x6f && parts[7][1] == 0x72 && parts[7][2] == 0x64 && // op_push "ord"
-		parts[8][0] == OpTRUE &&
-		parts[10][0] == OpFALSE &&
-		parts[12][0] == OpENDIF
+// func isP2PKHInscriptionHelper(parts []ScriptOp) bool {
+// 	if len(parts) < 13 {
+// 		return false
+// 	}
+// 	valid := parts[0].Op == OpDUP &&
+// 		parts[1].Op == OpHASH160 &&
+// 		parts[3].Op == OpEQUALVERIFY &&
+// 		parts[4].Op == OpCHECKSIG &&
+// 		parts[5].Op == OpFALSE &&
+// 		parts[6].Op == OpIF &&
+// 		bytes.Equal(parts[7].Data, []byte("ord")) &&
+// 		parts[8].Op == OpTRUE &&
+// 		parts[10].Op == OpFALSE &&
+// 		parts[12].Op == OpENDIF
 
-	if len(parts) > 13 {
-		return parts[13][0] == OpRETURN && valid
-	}
-	return valid
-}
+// 	if len(parts) > 13 {
+// 		return parts[13].Op == OpRETURN && valid
+// 	}
+// 	return valid
+// }
 
-// ParseInscription parses the script to
-// return the inscription found. Will return
-// an error if the script doesn't contain
-// any inscriptions.
-func (s *Script) ParseInscription() (*InscriptionArgs, error) {
-	p, err := DecodeParts(*s)
-	if err != nil {
-		return nil, err
-	}
+// // ParseInscription parses the script to
+// // return the inscription found. Will return
+// // an error if the script doesn't contain
+// // any inscriptions.
+// func (s *Script) ParseInscription() (*InscriptionArgs, error) {
+// 	p, err := DecodeScript(*s)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	if !isP2PKHInscriptionHelper(p) {
-		return nil, ErrP2PKHInscriptionNotFound
-	}
+// 	if !isP2PKHInscriptionHelper(p) {
+// 		return nil, ErrP2PKHInscriptionNotFound
+// 	}
 
-	// FIXME: make it dynamic based on order.
-	// right now if the content type and the content change order
-	// then this will fail. My understanding is that the content
-	// always needs to be last and the previous fields can be
-	// reordered - this is based on the original ordinals
-	// indexer: https://github.com/casey/ord
-	return &InscriptionArgs{
-		LockingScript: s.Slice(0, 25),
-		Data:          p[11],
-		ContentType:   string(p[9]),
-		// EnrichedArgs: , // TODO:
-	}, nil
-}
+// 	// FIXME: make it dynamic based on order.
+// 	// right now if the content type and the content change order
+// 	// then this will fail. My understanding is that the content
+// 	// always needs to be last and the previous fields can be
+// 	// reordered - this is based on the original ordinals
+// 	// indexer: https://github.com/casey/ord
+// 	return &InscriptionArgs{
+// 		LockingScript: s.Slice(0, 25),
+// 		Data:          p[11],
+// 		ContentType:   string(p[9]),
+// 		// EnrichedArgs: , // TODO:
+// 	}, nil
+// }
 
 // Slice a script to get back a subset of that script.
 func (s *Script) Slice(start, end uint64) *Script {
@@ -287,7 +285,7 @@ func (s *Script) Slice(start, end uint64) *Script {
 
 // IsMultiSigOut returns true if this is a multisig output script.
 func (s *Script) IsMultiSigOut() bool {
-	parts, err := DecodeParts(*s)
+	parts, err := DecodeScript(*s)
 	if err != nil {
 		return false
 	}
@@ -296,18 +294,17 @@ func (s *Script) IsMultiSigOut() bool {
 		return false
 	}
 
-	if !isSmallIntOp(parts[0][0]) {
+	if !isSmallIntOp(parts[0].Op) {
 		return false
 	}
 
 	for i := 1; i < len(parts)-2; i++ {
-		if len(parts[i]) < 1 {
+		if len(parts[i].Data) < 1 {
 			return false
 		}
 	}
 
-	return len(parts[len(parts)-2]) > 0 && isSmallIntOp(parts[len(parts)-2][0]) && len(parts[len(parts)-1]) > 0 &&
-		parts[len(parts)-1][0] == OpCHECKMULTISIG
+	return isSmallIntOp(parts[len(parts)-2].Op) && parts[len(parts)-1].Op == OpCHECKMULTISIG
 }
 
 func isSmallIntOp(opcode byte) bool {
@@ -324,12 +321,12 @@ func (s *Script) PublicKeyHash() ([]byte, error) {
 		return nil, ErrNotP2PKH
 	}
 
-	parts, err := DecodeParts((*s)[2:])
+	parts, err := DecodeScript((*s)[2:])
 	if err != nil {
 		return nil, err
 	}
 
-	return parts[0], nil
+	return parts[0].Data, nil
 }
 
 // ScriptType returns the type of script this is as a string.
@@ -348,9 +345,6 @@ func (s *Script) ScriptType() string {
 	}
 	if s.IsData() {
 		return ScriptTypeNullData
-	}
-	if s.IsP2PKHInscription() {
-		return ScriptTypePubKeyHashInscription
 	}
 	return ScriptTypeNonStandard
 }

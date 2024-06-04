@@ -33,7 +33,7 @@ func (m *Multisig) IsUnlockingScript(s *script.Script) bool {
 	pos := 0
 	if op, err := s.ReadOp(&pos); err != nil {
 		return false
-	} else if op.OpCode != script.Op0 {
+	} else if op.Op != script.Op0 {
 		return false
 	}
 	for {
@@ -87,11 +87,11 @@ func (m *Multisig) Sign(tx *transaction.Transaction, params transaction.UnlockPa
 			return nil, err
 		}
 
-		if len(op.Data) == 0 && op.OpCode != script.OpCHECKMULTISIG {
+		if len(op.Data) == 0 && op.Op != script.OpCHECKMULTISIG {
 			return nil, ErrBadScript
 		}
 
-		if op.OpCode == script.OpCHECKMULTISIG {
+		if op.Op == script.OpCHECKMULTISIG {
 			return uscript, nil
 		}
 
