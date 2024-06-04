@@ -310,13 +310,13 @@ func createSpendingTx(sigScript, pkScript *script.Script, outputValue int64) *tr
 			LockingScript: pkScript,
 		}},
 	}
-	coinbaseTx.Inputs[0].SourceTxID = make([]byte, 32)
+	coinbaseTx.Inputs[0].SourceTXID = make([]byte, 32)
 
 	spendingTx := &transaction.Transaction{
 		Version:  1,
 		LockTime: 0,
 		Inputs: []*transaction.TransactionInput{{
-			SourceTxID:       coinbaseTx.TxIDBytes(),
+			SourceTXID:       coinbaseTx.TxIDBytes(),
 			SourceTxOutIndex: 0,
 			UnlockingScript:  sigScript,
 			SequenceNumber:   0xffffffff,

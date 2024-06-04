@@ -246,7 +246,7 @@ func (tx *Transaction) IsCoinbase() bool {
 
 	cbi := make([]byte, 32)
 
-	if !bytes.Equal(tx.Inputs[0].SourceTxID, cbi) {
+	if !bytes.Equal(tx.Inputs[0].SourceTXID, cbi) {
 		return false
 	}
 
