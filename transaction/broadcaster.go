@@ -15,9 +15,9 @@ func (e *BroadcastFailure) Error() string {
 }
 
 type Broadcaster interface {
-	Broadcast(tx *Tx) (*BroadcastSuccess, *BroadcastFailure)
+	Broadcast(tx *Transaction) (*BroadcastSuccess, *BroadcastFailure)
 }
 
-func (t *Tx) Broadcast(b Broadcaster) (*BroadcastSuccess, *BroadcastFailure) {
+func (t *Transaction) Broadcast(b Broadcaster) (*BroadcastSuccess, *BroadcastFailure) {
 	return b.Broadcast(t)
 }

@@ -30,7 +30,7 @@ func TestNewOutputFromBytes(t *testing.T) {
 		bytes, err := hex.DecodeString(outputHexStr)
 		assert.NoError(t, err)
 
-		var o *Output
+		var o *TransactionOutput
 		var s int
 		o, s, err = newOutputFromBytes(bytes)
 		assert.NoError(t, err)
@@ -49,7 +49,7 @@ func TestOutput_String(t *testing.T) {
 		bytes, err := hex.DecodeString(outputHexStr)
 		assert.NoError(t, err)
 
-		var o *Output
+		var o *TransactionOutput
 		o, _, err = newOutputFromBytes(bytes)
 		assert.NoError(t, err)
 		assert.NotNil(t, o)

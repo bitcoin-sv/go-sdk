@@ -4,7 +4,7 @@ import (
 	"encoding/hex"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	chaincfg "github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
 )
 
@@ -133,12 +133,12 @@ func GetPublicKeyFromHDKey(hdKey *ExtendedKey) (*ec.PublicKey, error) {
 // GetAddressFromHDKey is a helper function to get the Address associated with a given hdKey
 //
 // Expects hdKey to not be nil (otherwise will panic)
-func GetAddressFromHDKey(hdKey *ExtendedKey) (*bscript.Address, error) {
+func GetAddressFromHDKey(hdKey *ExtendedKey) (*script.Address, error) {
 	pubKey, err := GetPublicKeyFromHDKey(hdKey)
 	if err != nil {
 		return nil, err
 	}
-	return bscript.NewAddressFromPublicKey(pubKey, true)
+	return script.NewAddressFromPublicKey(pubKey, true)
 }
 
 // GetAddressStringFromHDKey is a helper function to get the Address (string) associated with a given hdKey
@@ -199,9 +199,9 @@ func GetAddressesForPath(hdKey *ExtendedKey, num uint32) (addresses []string, er
 	}
 
 	// Loop, get address and append to results
-	var address *bscript.Address
+	var address *script.Address
 	for _, key := range pubKeys {
-		if address, err = bscript.NewAddressFromPublicKey(key, true); err != nil {
+		if address, err = script.NewAddressFromPublicKey(key, true); err != nil {
 			// Should never error if the pubKeys are valid keys
 			return
 		}

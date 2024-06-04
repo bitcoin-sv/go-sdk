@@ -386,7 +386,7 @@ func (k *ExtendedKey) Address(net *chaincfg.Params) string {
 	return k.addressFromPublicKeyHash(crypto.Hash160(k.pubKeyBytes()), net.Name == chaincfg.NetworkMain)
 }
 
-// addressFromPublicKeyHash is copied from the bt.bscript package to remove a small
+// addressFromPublicKeyHash is copied from the bt.script package to remove a small
 // dependency from bk -> bt. Adding this means bk has no dependency on bt.
 func (k *ExtendedKey) addressFromPublicKeyHash(hash []byte, mainnet bool) string {
 	// regtest := 111

@@ -1,11 +1,11 @@
-package bscript_test
+package script_test
 
 import (
 	"encoding/hex"
 	"testing"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +17,7 @@ func TestNewAddressFromString(t *testing.T) {
 	t.Run("mainnet", func(t *testing.T) {
 		addressMain := "1E7ucTTWRTahCyViPhxSMor2pj4VGQdFMr"
 
-		addr, err := bscript.NewAddressFromString(addressMain)
+		addr, err := script.NewAddressFromString(addressMain)
 		assert.NoError(t, err)
 		assert.NotNil(t, addr)
 
@@ -28,7 +28,7 @@ func TestNewAddressFromString(t *testing.T) {
 	t.Run("testnet", func(t *testing.T) {
 		addressTestnet := "mtdruWYVEV1wz5yL7GvpBj4MgifCB7yhPd"
 
-		addr, err := bscript.NewAddressFromString(addressTestnet)
+		addr, err := script.NewAddressFromString(addressTestnet)
 		assert.NoError(t, err)
 		assert.NotNil(t, addr)
 
@@ -38,7 +38,7 @@ func TestNewAddressFromString(t *testing.T) {
 
 	t.Run("short address", func(t *testing.T) {
 		shortAddress := "ADD8E55"
-		addr, err := bscript.NewAddressFromString(shortAddress)
+		addr, err := script.NewAddressFromString(shortAddress)
 		assert.Error(t, err)
 		assert.Nil(t, addr)
 		assert.EqualError(t, err, "invalid address length for '"+shortAddress+"'")
@@ -46,7 +46,7 @@ func TestNewAddressFromString(t *testing.T) {
 
 	t.Run("unsupported address", func(t *testing.T) {
 		unsupportedAddress := "27BvY7rFguYQvEL872Y7Fo77Y3EBApC2EK"
-		addr, err := bscript.NewAddressFromString(unsupportedAddress)
+		addr, err := script.NewAddressFromString(unsupportedAddress)
 		assert.Error(t, err)
 		assert.Nil(t, addr)
 		assert.EqualError(t, err, "address not supported "+unsupportedAddress)
@@ -58,7 +58,7 @@ func TestNewAddressFromPublicKeyString(t *testing.T) {
 	t.Parallel()
 
 	t.Run("mainnet", func(t *testing.T) {
-		addr, err := bscript.NewAddressFromPublicKeyString(
+		addr, err := script.NewAddressFromPublicKeyString(
 			"026cf33373a9f3f6c676b75b543180703df225f7f8edbffedc417718a8ad4e89ce",
 			true,
 		)
@@ -70,7 +70,7 @@ func TestNewAddressFromPublicKeyString(t *testing.T) {
 	})
 
 	t.Run("testnet", func(t *testing.T) {
-		addr, err := bscript.NewAddressFromPublicKeyString(
+		addr, err := script.NewAddressFromPublicKeyString(
 			"026cf33373a9f3f6c676b75b543180703df225f7f8edbffedc417718a8ad4e89ce",
 			false,
 		)
@@ -93,8 +93,8 @@ func TestNewAddressFromPublicKey(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, pubKey)
 
-	var addr *bscript.Address
-	addr, err = bscript.NewAddressFromPublicKey(pubKey, true)
+	var addr *script.Address
+	addr, err = script.NewAddressFromPublicKey(pubKey, true)
 	assert.NoError(t, err)
 	assert.NotNil(t, addr)
 
@@ -110,6 +110,6 @@ func TestBase58EncodeMissingChecksum(t *testing.T) {
 
 	assert.Equal(t,
 		"xpub661MyMwAqRbcF5ivRisXcZTEoy7d9DfLF6fLqpu5GWMfeUyGHuWJHVp5uexDqXTWoySh8pNx3ELW7qymwPNg3UEYHjwh1tpdm3P9J2j4g32",
-		bscript.Base58EncodeMissingChecksum(input),
+		script.Base58EncodeMissingChecksum(input),
 	)
 }

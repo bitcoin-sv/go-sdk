@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/debug"
 )
@@ -42,10 +42,10 @@ func TestDebugger_BeforeExecute(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			var timesCalled int
@@ -138,10 +138,10 @@ func TestDebugger_BeforeStep(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -238,10 +238,10 @@ func TestDebugger_AfterStep(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -339,10 +339,10 @@ func TestDebugger_BeforeExecuteOpcode(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -439,10 +439,10 @@ func TestDebugger_AfterExecuteOpcode(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -522,10 +522,10 @@ func TestDebugger_BeforeScriptChange(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -609,10 +609,10 @@ func TestDebugger_AfterScriptChange(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -678,10 +678,10 @@ func TestDebugger_AfterExecution(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			stack := make([]string, 0)
@@ -736,10 +736,10 @@ func TestDebugger_AfterError(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			stack := make([]string, 0)
@@ -802,10 +802,10 @@ func TestDebugger_AfterSuccess(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			stack := make([]string, 0)
@@ -908,10 +908,10 @@ func TestDebugger_BeforeStackPush(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -1017,10 +1017,10 @@ func TestDebugger_AfterStackPush(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -1118,10 +1118,10 @@ func TestDebugger_BeforeStackPop(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{
@@ -1221,10 +1221,10 @@ func TestDebugger_AfterStackPop(t *testing.T) {
 
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			lscript, err := bscript.NewFromHex(test.lockingScriptHex)
+			lscript, err := script.NewFromHex(test.lockingScriptHex)
 			assert.NoError(t, err)
 
-			uscript, err := bscript.NewFromHex(test.unlockingScriptHex)
+			uscript, err := script.NewFromHex(test.unlockingScriptHex)
 			assert.NoError(t, err)
 
 			history := &stateHistory{

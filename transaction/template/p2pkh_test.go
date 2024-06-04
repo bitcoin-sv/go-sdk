@@ -1,17 +1,16 @@
-package unlocker_test
+package template_test
 
 import (
-	"context"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 
 	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
-	"github.com/bitcoin-sv/go-sdk/transaction/unlocker"
+	"github.com/bitcoin-sv/go-sdk/transaction/template"
 )
 
 func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {
@@ -22,19 +21,23 @@ func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, tx)
 
-	// Add the UTXO amount and bscript.
-	tx.InputIdx(0).PreviousTxSatoshis = 100000000
-	tx.InputIdx(0).PreviousTxScript, err = bscript.NewFromHex("76a914c0a3c167a28cabb9fbb495affa0761e6e74ac60d88ac")
+	prevTx := transaction.NewTx()
+	prevTx.Outputs = make([]*transaction.TransactionOutput, tx.InputIdx(0).SourceTxOutIndex+1)
+	prevTx.Outputs[tx.InputIdx(0).SourceTxOutIndex] = &transaction.TransactionOutput{Satoshis: 100000000}
+	prevTx.Outputs[tx.InputIdx(0).SourceTxOutIndex].LockingScript, err = script.NewFromHex("76a914c0a3c167a28cabb9fbb495affa0761e6e74ac60d88ac")
 	assert.NoError(t, err)
+	tx.Inputs[0].SourceTransaction = prevTx
 
 	// Our private key
 	var w *wif.WIF
 	w, err = wif.DecodeWIF("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
 	assert.NoError(t, err)
 
-	unlocker := unlocker.Getter{PrivateKey: w.PrivKey}
-	err = tx.FillAllInputs(context.Background(), &unlocker)
+	scriptTmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
+
+	s, err := scriptTmpl.Sign(tx, transaction.UnlockParams{InputIdx: 0})
 	assert.NoError(t, err)
+	tx.Inputs[0].UnlockingScript = s
 
 	expectedSignedTx := "010000000193a35408b6068499e0d5abd799d3e827d9bfe70c9b75ebe209c91d2507232651000000006b483045022100c1d77036dc6cd1f3fa1214b0688391ab7f7a16cd31ea4e5a1f7a415ef167df820220751aced6d24649fa235132f1e6969e163b9400f80043a72879237dab4a1190ad412103b8b40a84123121d260f5c109bc5a46ec819c2e4002e5ba08638783bfb4e01435ffffffff02404b4c00000000001976a91404ff367be719efa79d76e4416ffb072cd53b208888acde94a905000000001976a91404d03f746652cfcb6cb55119ab473a045137d26588ac00000000"
 	assert.Equal(t, expectedSignedTx, tx.String())
@@ -43,45 +46,53 @@ func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {
 
 func TestLocalUnlocker_ValidSignature(t *testing.T) {
 	tests := map[string]struct {
-		tx *transaction.Tx
+		tx *transaction.Transaction
 	}{
 		"valid signature 1": {
-			tx: func() *transaction.Tx {
+			tx: func() *transaction.Transaction {
 				tx := transaction.NewTx()
-				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "76a914c7c6987b6e2345a6b138e3384141520a0fbc18c588ac", 15564838601))
+				assert.NoError(t, tx.AddInputFrom("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "76a914c7c6987b6e2345a6b138e3384141520a0fbc18c588ac", 15564838601, nil))
 
-				script1, err := bscript.NewFromHex("76a91442f9682260509ac80722b1963aec8a896593d16688ac")
+				script1, err := script.NewFromHex("76a91442f9682260509ac80722b1963aec8a896593d16688ac")
 				assert.NoError(t, err)
 
-				assert.NoError(t, tx.AddP2PKHOutputFromScript(script1, 375041432))
+				tx.AddOutput(&transaction.TransactionOutput{
+					Satoshis:      375041432,
+					LockingScript: script1,
+				})
 
-				script2, err := bscript.NewFromHex("76a914c36538e91213a8100dcb2aed456ade363de8483f88ac")
-				assert.NoError(t, err)
-
-				assert.NoError(t, tx.AddP2PKHOutputFromScript(script2, 15189796941))
+				script2, err := script.NewFromHex("76a914c36538e91213a8100dcb2aed456ade363de8483f88ac")
+				tx.AddOutput(&transaction.TransactionOutput{
+					Satoshis:      15189796941,
+					LockingScript: script2,
+				})
 
 				return tx
 			}(),
 		},
 		"valid signature 2": {
-			tx: func() *transaction.Tx {
+			tx: func() *transaction.Transaction {
 				tx := transaction.NewTx()
 
 				assert.NoError(
 					t,
-					tx.From("64faeaa2e3cbadaf82d8fa8c7ded508cb043c5d101671f43c084be2ac6163148", 1, "76a914343cadc47d08a14ef773d70b3b2a90870b67b3ad88ac", 5000000000),
+					tx.AddInputFrom("64faeaa2e3cbadaf82d8fa8c7ded508cb043c5d101671f43c084be2ac6163148", 1, "76a914343cadc47d08a14ef773d70b3b2a90870b67b3ad88ac", 5000000000, nil),
 				)
 				tx.Inputs[0].SequenceNumber = 0xfffffffe
 
-				script1, err := bscript.NewFromHex("76a9140108b364bbbddb222e2d0fac1ad4f6f86b10317688ac")
+				script1, err := script.NewFromHex("76a9140108b364bbbddb222e2d0fac1ad4f6f86b10317688ac")
 				assert.NoError(t, err)
+				tx.AddOutput(&transaction.TransactionOutput{
+					Satoshis:      2200000000,
+					LockingScript: script1,
+				})
 
-				assert.NoError(t, tx.AddP2PKHOutputFromScript(script1, 2200000000))
-
-				script2, err := bscript.NewFromHex("76a9143ac52294c730e7a4e9671abe3e7093d8834126ed88ac")
+				script2, err := script.NewFromHex("76a9143ac52294c730e7a4e9671abe3e7093d8834126ed88ac")
 				assert.NoError(t, err)
-
-				assert.NoError(t, tx.AddP2PKHOutputFromScript(script2, 2799998870))
+				tx.AddOutput(&transaction.TransactionOutput{
+					Satoshis:      2799998870,
+					LockingScript: script2,
+				})
 				return tx
 			}(),
 		},
@@ -95,17 +106,16 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 			w, err := wif.DecodeWIF("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
 			assert.NoError(t, err)
 
-			unlocker := &unlocker.Simple{PrivateKey: w.PrivKey}
-			uscript, err := unlocker.UnlockingScript(context.Background(), tx, transaction.UnlockerParams{})
+			unlocker := template.NewP2PKHFromPrivKey(w.PrivKey)
+			uscript, err := unlocker.Sign(tx, transaction.UnlockParams{})
 			assert.NoError(t, err)
 
-			assert.NoError(t, tx.InsertInputUnlockingScript(0, uscript))
-
-			parts, err := bscript.DecodeParts(*tx.Inputs[0].UnlockingScript)
+			tx.Inputs[0].UnlockingScript = uscript
+			parts, err := script.DecodeScript(*tx.Inputs[0].UnlockingScript)
 			assert.NoError(t, err)
 
-			sigBytes := parts[0]
-			publicKeyBytes := parts[1]
+			sigBytes := parts[0].Data
+			publicKeyBytes := parts[1].Data
 
 			publicKey, err := ec.ParsePubKey(publicKeyBytes)
 			assert.NoError(t, err)
@@ -121,102 +131,102 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 	}
 }
 
-type mockUnlockerGetter struct {
-	t            *testing.T
-	unlockerFunc func(ctx context.Context, lockingScript *bscript.Script) (transaction.Unlocker, error)
-}
+// type mockUnlockerGetter struct {
+// 	t            *testing.T
+// 	unlockerFunc func(ctx context.Context, lockingScript *script.Script) (transaction.ScriptTemplate, error)
+// }
 
-func (m *mockUnlockerGetter) Unlocker(ctx context.Context, lockingScript *bscript.Script) (transaction.Unlocker, error) {
-	assert.NotNil(m.t, m.unlockerFunc, "unlockerFunc not set in this test")
-	return m.unlockerFunc(ctx, lockingScript)
-}
+// func (m *mockUnlockerGetter) Unlocker(ctx context.Context, lockingScript *script.Script) (transaction.ScriptTemplate, error) {
+// 	assert.NotNil(m.t, m.unlockerFunc, "unlockerFunc not set in this test")
+// 	return m.unlockerFunc(ctx, lockingScript)
+// }
 
-type mockUnlocker struct {
-	t      *testing.T
-	script string
-}
+// type mockUnlocker struct {
+// 	t      *testing.T
+// 	script string
+// }
 
-func (m *mockUnlocker) UnlockingScript(ctx context.Context, tx *transaction.Tx, params transaction.UnlockerParams) (*bscript.Script, error) {
-	uscript, err := bscript.NewFromASM(m.script)
-	assert.NoError(m.t, err)
+// func (m *mockUnlocker) UnlockingScript(ctx context.Context, tx *transaction.Transaction, params transaction.UnlockParams) (*script.Script, error) {
+// 	uscript, err := script.NewFromASM(m.script)
+// 	assert.NoError(m.t, err)
 
-	return uscript, nil
-}
+// 	return uscript, nil
+// }
 
-func TestLocalUnlocker_NonSignature(t *testing.T) {
-	t.Parallel()
-	tests := map[string]struct {
-		tx                  *transaction.Tx
-		unlockerFunc        func(ctx context.Context, lockingScript *bscript.Script) (transaction.Unlocker, error)
-		expUnlockingScripts []string
-	}{
-		"simple script": {
-			tx: func() *transaction.Tx {
-				tx := transaction.NewTx()
-				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529387", 15564838601))
-				return tx
-			}(),
-			unlockerFunc: func(ctx context.Context, lockingScript *bscript.Script) (transaction.Unlocker, error) {
-				asm, err := lockingScript.ToASM()
-				assert.NoError(t, err)
+// func TestLocalUnlocker_NonSignature(t *testing.T) {
+// 	t.Parallel()
+// 	tests := map[string]struct {
+// 		tx                  *transaction.Transaction
+// 		unlockerFunc        func(ctx context.Context, lockingScript *script.Script) (transaction.Unlocker, error)
+// 		expUnlockingScripts []string
+// 	}{
+// 		"simple script": {
+// 			tx: func() *transaction.Transaction {
+// 				tx := transaction.NewTx()
+// 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529387", 15564838601))
+// 				return tx
+// 			}(),
+// 			unlockerFunc: func(ctx context.Context, lockingScript *script.Script) (transaction.Unlocker, error) {
+// 				asm, err := lockingScript.ToASM()
+// 				assert.NoError(t, err)
 
-				unlocker, ok := map[string]*mockUnlocker{
-					"OP_2 OP_2 OP_ADD OP_EQUAL": {t: t, script: "OP_4"},
-				}[asm]
+// 				unlocker, ok := map[string]*mockUnlocker{
+// 					"OP_2 OP_2 OP_ADD OP_EQUAL": {t: t, script: "OP_4"},
+// 				}[asm]
 
-				assert.True(t, ok)
-				assert.NotNil(t, unlocker)
+// 				assert.True(t, ok)
+// 				assert.NotNil(t, unlocker)
 
-				return unlocker, nil
-			},
-			expUnlockingScripts: []string{"OP_4"},
-		},
-		"multiple inputs unlocked": {
-			tx: func() *transaction.Tx {
-				tx := transaction.NewTx()
-				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529487", 15564838601))
-				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52589587", 15564838601))
-				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "5a559687", 15564838601))
-				return tx
-			}(),
-			unlockerFunc: func(ctx context.Context, lockingScript *bscript.Script) (transaction.Unlocker, error) {
-				asm, err := lockingScript.ToASM()
-				assert.NoError(t, err)
+// 				return unlocker, nil
+// 			},
+// 			expUnlockingScripts: []string{"OP_4"},
+// 		},
+// 		"multiple inputs unlocked": {
+// 			tx: func() *transaction.Transaction {
+// 				tx := transaction.NewTx()
+// 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529487", 15564838601))
+// 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52589587", 15564838601))
+// 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "5a559687", 15564838601))
+// 				return tx
+// 			}(),
+// 			unlockerFunc: func(ctx context.Context, lockingScript *script.Script) (transaction.ScriptTemplate, error) {
+// 				asm, err := lockingScript.ToASM()
+// 				assert.NoError(t, err)
 
-				unlocker, ok := map[string]*mockUnlocker{
-					"OP_2 OP_2 OP_SUB OP_EQUAL":  {t: t, script: "OP_FALSE"},
-					"OP_2 OP_8 OP_MUL OP_EQUAL":  {t: t, script: "OP_16"},
-					"OP_10 OP_5 OP_DIV OP_EQUAL": {t: t, script: "OP_2"},
-				}[asm]
+// 				unlocker, ok := map[string]*mockUnlocker{
+// 					"OP_2 OP_2 OP_SUB OP_EQUAL":  {t: t, script: "OP_FALSE"},
+// 					"OP_2 OP_8 OP_MUL OP_EQUAL":  {t: t, script: "OP_16"},
+// 					"OP_10 OP_5 OP_DIV OP_EQUAL": {t: t, script: "OP_2"},
+// 				}[asm]
 
-				assert.True(t, ok)
-				assert.NotNil(t, unlocker)
+// 				assert.True(t, ok)
+// 				assert.NotNil(t, unlocker)
 
-				return unlocker, nil
-			},
-			expUnlockingScripts: []string{"OP_FALSE", "OP_16", "OP_2"},
-		},
-	}
+// 				return unlocker, nil
+// 			},
+// 			expUnlockingScripts: []string{"OP_FALSE", "OP_16", "OP_2"},
+// 		},
+// 	}
 
-	for name, test := range tests {
-		t.Run(name, func(t *testing.T) {
-			tx := test.tx
-			assert.Equal(t, len(tx.Inputs), len(test.expUnlockingScripts))
+// 	for name, test := range tests {
+// 		t.Run(name, func(t *testing.T) {
+// 			tx := test.tx
+// 			assert.Equal(t, len(tx.Inputs), len(test.expUnlockingScripts))
 
-			ug := &mockUnlockerGetter{
-				t:            t,
-				unlockerFunc: test.unlockerFunc,
-			}
-			assert.NoError(t, tx.FillAllInputs(context.Background(), ug))
-			for i, script := range test.expUnlockingScripts {
-				asm, err := tx.Inputs[i].UnlockingScript.ToASM()
-				assert.NoError(t, err)
+// 			ug := &mockUnlockerGetter{
+// 				t:            t,
+// 				unlockerFunc: test.unlockerFunc,
+// 			}
+// 			assert.NoError(t, tx.FillAllInputs(context.Background(), ug))
+// 			for i, script := range test.expUnlockingScripts {
+// 				asm, err := tx.Inputs[i].UnlockingScript.ToASM()
+// 				assert.NoError(t, err)
 
-				assert.Equal(t, script, asm)
-			}
-		})
-	}
-}
+// 				assert.Equal(t, script, asm)
+// 			}
+// 		})
+// 	}
+// }
 
 //
 // func TestBareMultiSigValidation(t *testing.T) {
@@ -275,7 +285,7 @@ func TestLocalUnlocker_NonSignature(t *testing.T) {
 // 	sigHashTypes[1] = uint32(sig1HashType)
 //
 // 	var previousTxSatoshis uint64 = 99728
-// 	var previousTxScript, _ = bbscript.NewFromHex("5221023ff15e2676e03b2c0af30fc17b7fb354bbfa9f549812da945194d3407dc0969b21039281958c651c013f5b3b007c78be231eeb37f130b925ceff63dc3ac8886f22a32103ac76121ffc9db556b0ce1da978021bd6cb4a5f9553c14f785e15f0e202139e3e53ae")
+// 	var previousTxScript, _ = bscript.NewFromHex("5221023ff15e2676e03b2c0af30fc17b7fb354bbfa9f549812da945194d3407dc0969b21039281958c651c013f5b3b007c78be231eeb37f130b925ceff63dc3ac8886f22a32103ac76121ffc9db556b0ce1da978021bd6cb4a5f9553c14f785e15f0e202139e3e53ae")
 // 	var prevIndex uint32
 // 	var outIndex uint32
 //
@@ -351,7 +361,7 @@ func TestLocalUnlocker_NonSignature(t *testing.T) {
 // 	sigHashTypes[1] = uint32(sig1HashType)
 //
 // 	var previousTxSatoshis uint64 = 8785040
-// 	var previousTxScript, _ = bscript.NewFromHex("5221021db57ae3de17143cb6c314fb206b56956e8ed45e2f1cbad3947411228b8d17f1210308b00cf7dfbb64604475e8b18e8450ac6ec04655cfa5c6d4d8a0f3f141ee419421030c7f9342ff6583599db8ee8b52383cadb4cf6fee3650c1ad8f66158a4ff0ebd953ae")
+// 	var previousTxScript, _ = script.NewFromHex("5221021db57ae3de17143cb6c314fb206b56956e8ed45e2f1cbad3947411228b8d17f1210308b00cf7dfbb64604475e8b18e8450ac6ec04655cfa5c6d4d8a0f3f141ee419421030c7f9342ff6583599db8ee8b52383cadb4cf6fee3650c1ad8f66158a4ff0ebd953ae")
 // 	var prevIndex uint32 = 1
 // 	var outIndex uint32 = 0
 //

@@ -15,7 +15,7 @@ import (
 	"strings"
 	"testing"
 
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
 	"github.com/bitcoin-sv/go-sdk/transaction"
@@ -31,11 +31,11 @@ func init() {
 	for _, op := range &opcodeArray {
 		opcodeByName[op.Name()] = op.val
 	}
-	opcodeByName["OP_0"] = bscript.Op0
-	opcodeByName["OP_1"] = bscript.Op1
-	opcodeByName["OP_CHECKLOCKTIMEVERIFY"] = bscript.OpCHECKLOCKTIMEVERIFY
-	opcodeByName["OP_CHECKSEQUENCEVERIFY"] = bscript.OpCHECKSEQUENCEVERIFY
-	opcodeByName["OP_RESERVED"] = bscript.OpRESERVED
+	opcodeByName["OP_0"] = script.Op0
+	opcodeByName["OP_1"] = script.Op1
+	opcodeByName["OP_CHECKLOCKTIMEVERIFY"] = script.OpCHECKLOCKTIMEVERIFY
+	opcodeByName["OP_CHECKSEQUENCEVERIFY"] = script.OpCHECKSEQUENCEVERIFY
+	opcodeByName["OP_RESERVED"] = script.OpRESERVED
 
 }
 
@@ -50,7 +50,7 @@ func init() {
 //     0x14 is OP_DATA_20)
 //   - Single quoted strings are pushed as data
 //   - Anything else is an error
-func parseShortForm(script string) (*bscript.Script, error) {
+func parseShortForm(s string) (*script.Script, error) {
 	// Only create the short form opcode map once.
 	if shortFormOps == nil {
 		ops := make(map[string]byte)
@@ -67,8 +67,8 @@ func parseShortForm(script string) (*bscript.Script, error) {
 			// have the same value, so detect those by name and
 			// allow them.
 			if (opcodeName == "OP_FALSE" || opcodeName == "OP_TRUE") ||
-				(opcodeValue != bscript.Op0 && (opcodeValue < bscript.Op1 ||
-					opcodeValue > bscript.Op16)) {
+				(opcodeValue != script.Op0 && (opcodeValue < script.Op1 ||
+					opcodeValue > script.Op16)) {
 
 				ops[strings.TrimPrefix(opcodeName, "OP_")] = opcodeValue
 			}
@@ -77,11 +77,11 @@ func parseShortForm(script string) (*bscript.Script, error) {
 	}
 
 	// Split only does one separator so convert all \n and tab into  space.
-	script = strings.Replace(script, "\n", " ", -1)
-	script = strings.Replace(script, "\t", " ", -1)
-	tokens := strings.Split(script, " ")
+	s = strings.Replace(s, "\n", " ", -1)
+	s = strings.Replace(s, "\t", " ", -1)
+	tokens := strings.Split(s, " ")
 
-	var scr bscript.Script
+	var scr script.Script
 	for _, tok := range tokens {
 		if len(tok) == 0 {
 			continue
@@ -89,9 +89,9 @@ func parseShortForm(script string) (*bscript.Script, error) {
 		// if parses as a plain number
 		if num, err := strconv.ParseInt(tok, 10, 64); err == nil {
 			if num == 0 {
-				scr.AppendOpcodes(bscript.Op0)
+				scr.AppendOpcodes(script.Op0)
 			} else if num == -1 || (1 <= num && num <= 16) {
-				scr.AppendOpcodes((bscript.Op1 - 1) + byte(num))
+				scr.AppendOpcodes((script.Op1 - 1) + byte(num))
 			} else {
 				n := &scriptNumber{val: big.NewInt(num)}
 				scr.AppendPushData(n.Bytes())
@@ -295,38 +295,40 @@ func parseExpectedResult(expected string) ([]errs.ErrorCode, error) {
 
 // createSpendTx generates a basic spending transaction given the passed
 // signature and locking scripts.
-func createSpendingTx(sigScript, pkScript *bscript.Script, outputValue int64) *transaction.Tx {
+func createSpendingTx(sigScript, pkScript *script.Script, outputValue int64) *transaction.Transaction {
 
-	coinbaseTx := &transaction.Tx{
+	coinbaseTx := &transaction.Transaction{
 		Version:  1,
 		LockTime: 0,
-		Inputs: []*transaction.Input{{
-			PreviousTxOutIndex: ^uint32(0),
-			UnlockingScript:    bscript.NewFromBytes([]byte{bscript.Op0, bscript.Op0}),
-			SequenceNumber:     0xffffffff,
+		Inputs: []*transaction.TransactionInput{{
+			SourceTxOutIndex: ^uint32(0),
+			UnlockingScript:  script.NewFromBytes([]byte{script.Op0, script.Op0}),
+			SequenceNumber:   0xffffffff,
 		}},
-		Outputs: []*transaction.Output{{
+		Outputs: []*transaction.TransactionOutput{{
 			Satoshis:      uint64(outputValue),
 			LockingScript: pkScript,
 		}},
 	}
-	coinbaseTx.Inputs[0].PreviousTxIDAdd(make([]byte, 32))
+	coinbaseTx.Inputs[0].SourceTXID = make([]byte, 32)
 
-	spendingTx := &transaction.Tx{
+	spendingTx := &transaction.Transaction{
 		Version:  1,
 		LockTime: 0,
-		Inputs: []*transaction.Input{{
-			PreviousTxOutIndex: 0,
-			PreviousTxScript:   pkScript,
-			UnlockingScript:    sigScript,
-			SequenceNumber:     0xffffffff,
+		Inputs: []*transaction.TransactionInput{{
+			SourceTXID:       coinbaseTx.TxIDBytes(),
+			SourceTxOutIndex: 0,
+			UnlockingScript:  sigScript,
+			SequenceNumber:   0xffffffff,
 		}},
-		Outputs: []*transaction.Output{{
+		Outputs: []*transaction.TransactionOutput{{
 			Satoshis:      uint64(outputValue),
-			LockingScript: bscript.NewFromBytes([]byte{}),
+			LockingScript: script.NewFromBytes([]byte{}),
 		}},
 	}
-	spendingTx.Inputs[0].PreviousTxIDAdd(coinbaseTx.TxIDBytes())
+	spendingTx.Inputs[0].SetPrevTxFromOutput(&transaction.TransactionOutput{
+		LockingScript: pkScript,
+	})
 
 	return spendingTx
 }
@@ -434,7 +436,7 @@ func TestScripts(t *testing.T) {
 		tx := createSpendingTx(scriptSig, scriptPubKey, inputAmt)
 
 		err = NewEngine().Execute(
-			WithTx(tx, 0, &transaction.Output{LockingScript: scriptPubKey, Satoshis: uint64(inputAmt)}),
+			WithTx(tx, 0, &transaction.TransactionOutput{LockingScript: scriptPubKey, Satoshis: uint64(inputAmt)}),
 			WithFlags(flags),
 		)
 
@@ -546,7 +548,7 @@ testloop:
 			continue
 		}
 
-		prevOuts := make(map[txIOKey]*transaction.Output)
+		prevOuts := make(map[txIOKey]*transaction.TransactionOutput)
 		for j, iinput := range inputs {
 			input, ok := iinput.([]interface{})
 			if !ok {
@@ -600,7 +602,7 @@ testloop:
 				}
 			}
 
-			v := &transaction.Output{
+			v := &transaction.TransactionOutput{
 				Satoshis:      uint64(inputValue),
 				LockingScript: script,
 			}
@@ -608,7 +610,7 @@ testloop:
 		}
 
 		for k, txin := range tx.Inputs {
-			prevOut, ok := prevOuts[txIOKey{id: txin.PreviousTxIDStr(), idx: txin.PreviousTxOutIndex}]
+			prevOut, ok := prevOuts[txIOKey{id: txin.PreviousTxIDStr(), idx: txin.SourceTxOutIndex}]
 			if !ok {
 				t.Errorf("bad test (missing %dth input) %d:%v",
 					k, i, test)
@@ -690,7 +692,7 @@ testloop:
 			continue
 		}
 
-		prevOuts := make(map[txIOKey]*transaction.Output)
+		prevOuts := make(map[txIOKey]*transaction.TransactionOutput)
 		for j, iinput := range inputs {
 			input, ok := iinput.([]interface{})
 			if !ok {
@@ -744,7 +746,7 @@ testloop:
 				}
 			}
 
-			v := &transaction.Output{
+			v := &transaction.TransactionOutput{
 				Satoshis:      uint64(inputValue),
 				LockingScript: script,
 			}
@@ -752,7 +754,7 @@ testloop:
 		}
 
 		for k, txin := range tx.Inputs {
-			prevOut, ok := prevOuts[txIOKey{id: txin.PreviousTxIDStr(), idx: txin.PreviousTxOutIndex}]
+			prevOut, ok := prevOuts[txIOKey{id: txin.PreviousTxIDStr(), idx: txin.SourceTxOutIndex}]
 			if !ok {
 				t.Errorf("bad test (missing %dth input) %d:%v",
 					k, i, test)

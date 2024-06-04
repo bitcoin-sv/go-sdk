@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	"github.com/bitcoin-sv/go-sdk/util"
 )
@@ -19,7 +19,7 @@ type sigHashFunc func(inputIdx uint32, shf sighash.Flag) ([]byte, error)
 // The legacy serialisation will be used for txs pre-fork
 // whereas the new serialisation will be used for post-fork
 // txs (and they should include the sighash_forkid flag).
-func (tx *Tx) sigStrat(shf sighash.Flag) sigHashFunc {
+func (tx *Transaction) sigStrat(shf sighash.Flag) sigHashFunc {
 	if shf.Has(sighash.ForkID) {
 		return tx.CalcInputPreimage
 	}
@@ -31,7 +31,7 @@ func (tx *Tx) sigStrat(shf sighash.Flag) sigHashFunc {
 // after the UAHF fork for replay protection.
 //
 // see https://github.com/bitcoin-sv/bitcoin-sv/blob/master/doc/abc/replay-protected-sighash.md#digest-algorithm
-func (tx *Tx) CalcInputSignatureHash(inputNumber uint32, sigHashFlag sighash.Flag) ([]byte, error) {
+func (tx *Transaction) CalcInputSignatureHash(inputNumber uint32, sigHashFlag sighash.Flag) ([]byte, error) {
 	sigHashFn := tx.sigStrat(sigHashFlag)
 	buf, err := sigHashFn(inputNumber, sigHashFlag)
 	if err != nil {
@@ -58,17 +58,17 @@ func (tx *Tx) CalcInputSignatureHash(inputNumber uint32, sigHashFlag sighash.Fla
 // and returns the preimage before double hashing (SHA256d).
 //
 // see https://github.com/bitcoin-sv/bitcoin-sv/blob/master/doc/abc/replay-protected-sighash.md#digest-algorithm
-func (tx *Tx) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([]byte, error) {
+func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([]byte, error) {
 	if tx.InputIdx(int(inputNumber)) == nil {
 		return nil, ErrInputNoExist
 	}
 	in := tx.InputIdx(int(inputNumber))
 
-	if len(in.PreviousTxID()) == 0 {
+	if len(in.SourceTXID) == 0 {
 		return nil, ErrEmptyPreviousTxID
 	}
-	if in.PreviousTxScript == nil {
-		return nil, ErrEmptyPreviousTxScript
+	if in.SourceTransaction == nil {
+		return nil, ErrEmptyPreviousTx
 	}
 
 	hashPreviousOuts := make([]byte, 32)
@@ -107,18 +107,22 @@ func (tx *Tx) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([
 	buf = append(buf, hashSequence...)
 
 	//  outpoint (32-byte hash + 4-byte little endian)
-	buf = append(buf, util.ReverseBytes(in.PreviousTxID())...)
+	buf = append(buf, util.ReverseBytes(in.SourceTXID)...)
 	oi := make([]byte, 4)
-	binary.LittleEndian.PutUint32(oi, in.PreviousTxOutIndex)
+	binary.LittleEndian.PutUint32(oi, in.SourceTxOutIndex)
 	buf = append(buf, oi...)
 
 	// scriptCode of the input (serialised as scripts inside CTxOuts)
-	buf = append(buf, VarInt(uint64(len(*in.PreviousTxScript))).Bytes()...)
-	buf = append(buf, *in.PreviousTxScript...)
+	buf = append(buf, VarInt(uint64(len(*in.PreviousTxScript()))).Bytes()...)
+	buf = append(buf, *in.PreviousTxScript()...)
 
 	// value of the output spent by this input (8-byte little endian)
 	sat := make([]byte, 8)
-	binary.LittleEndian.PutUint64(sat, in.PreviousTxSatoshis)
+	prevSats := uint64(0)
+	if in.PreviousTxSatoshis() != nil {
+		prevSats = *in.PreviousTxSatoshis()
+	}
+	binary.LittleEndian.PutUint64(sat, prevSats)
 	buf = append(buf, sat...)
 
 	// nSequence of the input (4-byte little endian)
@@ -147,17 +151,17 @@ func (tx *Tx) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash.Flag) ([
 // and returns the preimage before double hashing (SHA256d), in the legacy format.
 //
 // see https://wiki.bitcoinsv.io/index.php/Legacy_Sighash_Algorithm
-func (tx *Tx) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]byte, error) {
+func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]byte, error) {
 	if tx.InputIdx(int(inputNumber)) == nil {
 		return nil, ErrInputNoExist
 	}
 	in := tx.InputIdx(int(inputNumber))
 
-	if len(in.PreviousTxID()) == 0 {
+	if len(in.SourceTXID) == 0 {
 		return nil, ErrEmptyPreviousTxID
 	}
-	if in.PreviousTxScript == nil {
-		return nil, ErrEmptyPreviousTxScript
+	if in.SourceTransaction == nil {
+		return nil, ErrEmptyPreviousTx
 	}
 
 	// The SigHashSingle signature type signs only the corresponding input
@@ -188,10 +192,10 @@ func (tx *Tx) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]b
 
 	for i := range txCopy.Inputs {
 		if i == int(inputNumber) {
-			txCopy.Inputs[i].PreviousTxScript = tx.Inputs[inputNumber].PreviousTxScript
+			txCopy.Inputs[i].SourceTransaction = tx.Inputs[inputNumber].SourceTransaction
 		} else {
-			txCopy.Inputs[i].UnlockingScript = &bscript.Script{}
-			txCopy.Inputs[i].PreviousTxScript = &bscript.Script{}
+			txCopy.Inputs[i].UnlockingScript = &script.Script{}
+			txCopy.Inputs[i].SetPrevTxFromOutput(&TransactionOutput{})
 		}
 	}
 
@@ -206,7 +210,7 @@ func (tx *Tx) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]b
 		txCopy.Outputs = txCopy.Outputs[:inputNumber+1]
 		for i := 0; i < int(inputNumber); i++ {
 			txCopy.Outputs[i].Satoshis = 18446744073709551615 // -1 but underflowed
-			txCopy.Outputs[i].LockingScript = &bscript.Script{}
+			txCopy.Outputs[i].LockingScript = &script.Script{}
 		}
 
 		for i := range txCopy.Inputs {
@@ -229,14 +233,18 @@ func (tx *Tx) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]b
 
 	buf = append(buf, VarInt(uint64(len(txCopy.Inputs))).Bytes()...)
 	for _, in := range txCopy.Inputs {
-		buf = append(buf, util.ReverseBytes(in.PreviousTxID())...)
+		buf = append(buf, util.ReverseBytes(in.SourceTXID)...)
 
 		oi := make([]byte, 4)
-		binary.LittleEndian.PutUint32(oi, in.PreviousTxOutIndex)
+		binary.LittleEndian.PutUint32(oi, in.SourceTxOutIndex)
 		buf = append(buf, oi...)
 
-		buf = append(buf, VarInt(uint64(len(*in.PreviousTxScript))).Bytes()...)
-		buf = append(buf, *in.PreviousTxScript...)
+		if in.PreviousTxScript() != nil {
+			buf = append(buf, VarInt(uint64(len(*in.PreviousTxScript()))).Bytes()...)
+			buf = append(buf, *in.PreviousTxScript()...)
+		} else {
+			buf = append(buf, VarInt(0).Bytes()...)
+		}
 
 		sq := make([]byte, 4)
 		binary.LittleEndian.PutUint32(sq, in.SequenceNumber)
@@ -265,7 +273,7 @@ func (tx *Tx) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.Flag) ([]b
 
 // OutputsHash returns a bytes slice of the requested output, used for generating
 // the txs signature hash. If n is -1, it will create the byte slice from all outputs.
-func (tx *Tx) OutputsHash(n int32) []byte {
+func (tx *Transaction) OutputsHash(n int32) []byte {
 	buf := make([]byte, 0)
 
 	if n == -1 {

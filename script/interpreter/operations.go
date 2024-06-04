@@ -11,7 +11,7 @@ import (
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
 	"github.com/bitcoin-sv/go-sdk/transaction"
@@ -40,281 +40,281 @@ func (o opcode) Name() string {
 // be correctly placed in an array
 var opcodeArray = [256]opcode{
 	// Data push opcodes.
-	bscript.OpFALSE:     {bscript.OpFALSE, "OP_0", 1, opcodeFalse},
-	bscript.OpDATA1:     {bscript.OpDATA1, "OP_DATA_1", 2, opcodePushData},
-	bscript.OpDATA2:     {bscript.OpDATA2, "OP_DATA_2", 3, opcodePushData},
-	bscript.OpDATA3:     {bscript.OpDATA3, "OP_DATA_3", 4, opcodePushData},
-	bscript.OpDATA4:     {bscript.OpDATA4, "OP_DATA_4", 5, opcodePushData},
-	bscript.OpDATA5:     {bscript.OpDATA5, "OP_DATA_5", 6, opcodePushData},
-	bscript.OpDATA6:     {bscript.OpDATA6, "OP_DATA_6", 7, opcodePushData},
-	bscript.OpDATA7:     {bscript.OpDATA7, "OP_DATA_7", 8, opcodePushData},
-	bscript.OpDATA8:     {bscript.OpDATA8, "OP_DATA_8", 9, opcodePushData},
-	bscript.OpDATA9:     {bscript.OpDATA9, "OP_DATA_9", 10, opcodePushData},
-	bscript.OpDATA10:    {bscript.OpDATA10, "OP_DATA_10", 11, opcodePushData},
-	bscript.OpDATA11:    {bscript.OpDATA11, "OP_DATA_11", 12, opcodePushData},
-	bscript.OpDATA12:    {bscript.OpDATA12, "OP_DATA_12", 13, opcodePushData},
-	bscript.OpDATA13:    {bscript.OpDATA13, "OP_DATA_13", 14, opcodePushData},
-	bscript.OpDATA14:    {bscript.OpDATA14, "OP_DATA_14", 15, opcodePushData},
-	bscript.OpDATA15:    {bscript.OpDATA15, "OP_DATA_15", 16, opcodePushData},
-	bscript.OpDATA16:    {bscript.OpDATA16, "OP_DATA_16", 17, opcodePushData},
-	bscript.OpDATA17:    {bscript.OpDATA17, "OP_DATA_17", 18, opcodePushData},
-	bscript.OpDATA18:    {bscript.OpDATA18, "OP_DATA_18", 19, opcodePushData},
-	bscript.OpDATA19:    {bscript.OpDATA19, "OP_DATA_19", 20, opcodePushData},
-	bscript.OpDATA20:    {bscript.OpDATA20, "OP_DATA_20", 21, opcodePushData},
-	bscript.OpDATA21:    {bscript.OpDATA21, "OP_DATA_21", 22, opcodePushData},
-	bscript.OpDATA22:    {bscript.OpDATA22, "OP_DATA_22", 23, opcodePushData},
-	bscript.OpDATA23:    {bscript.OpDATA23, "OP_DATA_23", 24, opcodePushData},
-	bscript.OpDATA24:    {bscript.OpDATA24, "OP_DATA_24", 25, opcodePushData},
-	bscript.OpDATA25:    {bscript.OpDATA25, "OP_DATA_25", 26, opcodePushData},
-	bscript.OpDATA26:    {bscript.OpDATA26, "OP_DATA_26", 27, opcodePushData},
-	bscript.OpDATA27:    {bscript.OpDATA27, "OP_DATA_27", 28, opcodePushData},
-	bscript.OpDATA28:    {bscript.OpDATA28, "OP_DATA_28", 29, opcodePushData},
-	bscript.OpDATA29:    {bscript.OpDATA29, "OP_DATA_29", 30, opcodePushData},
-	bscript.OpDATA30:    {bscript.OpDATA30, "OP_DATA_30", 31, opcodePushData},
-	bscript.OpDATA31:    {bscript.OpDATA31, "OP_DATA_31", 32, opcodePushData},
-	bscript.OpDATA32:    {bscript.OpDATA32, "OP_DATA_32", 33, opcodePushData},
-	bscript.OpDATA33:    {bscript.OpDATA33, "OP_DATA_33", 34, opcodePushData},
-	bscript.OpDATA34:    {bscript.OpDATA34, "OP_DATA_34", 35, opcodePushData},
-	bscript.OpDATA35:    {bscript.OpDATA35, "OP_DATA_35", 36, opcodePushData},
-	bscript.OpDATA36:    {bscript.OpDATA36, "OP_DATA_36", 37, opcodePushData},
-	bscript.OpDATA37:    {bscript.OpDATA37, "OP_DATA_37", 38, opcodePushData},
-	bscript.OpDATA38:    {bscript.OpDATA38, "OP_DATA_38", 39, opcodePushData},
-	bscript.OpDATA39:    {bscript.OpDATA39, "OP_DATA_39", 40, opcodePushData},
-	bscript.OpDATA40:    {bscript.OpDATA40, "OP_DATA_40", 41, opcodePushData},
-	bscript.OpDATA41:    {bscript.OpDATA41, "OP_DATA_41", 42, opcodePushData},
-	bscript.OpDATA42:    {bscript.OpDATA42, "OP_DATA_42", 43, opcodePushData},
-	bscript.OpDATA43:    {bscript.OpDATA43, "OP_DATA_43", 44, opcodePushData},
-	bscript.OpDATA44:    {bscript.OpDATA44, "OP_DATA_44", 45, opcodePushData},
-	bscript.OpDATA45:    {bscript.OpDATA45, "OP_DATA_45", 46, opcodePushData},
-	bscript.OpDATA46:    {bscript.OpDATA46, "OP_DATA_46", 47, opcodePushData},
-	bscript.OpDATA47:    {bscript.OpDATA47, "OP_DATA_47", 48, opcodePushData},
-	bscript.OpDATA48:    {bscript.OpDATA48, "OP_DATA_48", 49, opcodePushData},
-	bscript.OpDATA49:    {bscript.OpDATA49, "OP_DATA_49", 50, opcodePushData},
-	bscript.OpDATA50:    {bscript.OpDATA50, "OP_DATA_50", 51, opcodePushData},
-	bscript.OpDATA51:    {bscript.OpDATA51, "OP_DATA_51", 52, opcodePushData},
-	bscript.OpDATA52:    {bscript.OpDATA52, "OP_DATA_52", 53, opcodePushData},
-	bscript.OpDATA53:    {bscript.OpDATA53, "OP_DATA_53", 54, opcodePushData},
-	bscript.OpDATA54:    {bscript.OpDATA54, "OP_DATA_54", 55, opcodePushData},
-	bscript.OpDATA55:    {bscript.OpDATA55, "OP_DATA_55", 56, opcodePushData},
-	bscript.OpDATA56:    {bscript.OpDATA56, "OP_DATA_56", 57, opcodePushData},
-	bscript.OpDATA57:    {bscript.OpDATA57, "OP_DATA_57", 58, opcodePushData},
-	bscript.OpDATA58:    {bscript.OpDATA58, "OP_DATA_58", 59, opcodePushData},
-	bscript.OpDATA59:    {bscript.OpDATA59, "OP_DATA_59", 60, opcodePushData},
-	bscript.OpDATA60:    {bscript.OpDATA60, "OP_DATA_60", 61, opcodePushData},
-	bscript.OpDATA61:    {bscript.OpDATA61, "OP_DATA_61", 62, opcodePushData},
-	bscript.OpDATA62:    {bscript.OpDATA62, "OP_DATA_62", 63, opcodePushData},
-	bscript.OpDATA63:    {bscript.OpDATA63, "OP_DATA_63", 64, opcodePushData},
-	bscript.OpDATA64:    {bscript.OpDATA64, "OP_DATA_64", 65, opcodePushData},
-	bscript.OpDATA65:    {bscript.OpDATA65, "OP_DATA_65", 66, opcodePushData},
-	bscript.OpDATA66:    {bscript.OpDATA66, "OP_DATA_66", 67, opcodePushData},
-	bscript.OpDATA67:    {bscript.OpDATA67, "OP_DATA_67", 68, opcodePushData},
-	bscript.OpDATA68:    {bscript.OpDATA68, "OP_DATA_68", 69, opcodePushData},
-	bscript.OpDATA69:    {bscript.OpDATA69, "OP_DATA_69", 70, opcodePushData},
-	bscript.OpDATA70:    {bscript.OpDATA70, "OP_DATA_70", 71, opcodePushData},
-	bscript.OpDATA71:    {bscript.OpDATA71, "OP_DATA_71", 72, opcodePushData},
-	bscript.OpDATA72:    {bscript.OpDATA72, "OP_DATA_72", 73, opcodePushData},
-	bscript.OpDATA73:    {bscript.OpDATA73, "OP_DATA_73", 74, opcodePushData},
-	bscript.OpDATA74:    {bscript.OpDATA74, "OP_DATA_74", 75, opcodePushData},
-	bscript.OpDATA75:    {bscript.OpDATA75, "OP_DATA_75", 76, opcodePushData},
-	bscript.OpPUSHDATA1: {bscript.OpPUSHDATA1, "OP_PUSHDATA1", -1, opcodePushData},
-	bscript.OpPUSHDATA2: {bscript.OpPUSHDATA2, "OP_PUSHDATA2", -2, opcodePushData},
-	bscript.OpPUSHDATA4: {bscript.OpPUSHDATA4, "OP_PUSHDATA4", -4, opcodePushData},
-	bscript.Op1NEGATE:   {bscript.Op1NEGATE, "OP_1NEGATE", 1, opcode1Negate},
-	bscript.OpRESERVED:  {bscript.OpRESERVED, "OP_RESERVED", 1, opcodeReserved},
-	bscript.OpTRUE:      {bscript.OpTRUE, "OP_1", 1, opcodeN},
-	bscript.Op2:         {bscript.Op2, "OP_2", 1, opcodeN},
-	bscript.Op3:         {bscript.Op3, "OP_3", 1, opcodeN},
-	bscript.Op4:         {bscript.Op4, "OP_4", 1, opcodeN},
-	bscript.Op5:         {bscript.Op5, "OP_5", 1, opcodeN},
-	bscript.Op6:         {bscript.Op6, "OP_6", 1, opcodeN},
-	bscript.Op7:         {bscript.Op7, "OP_7", 1, opcodeN},
-	bscript.Op8:         {bscript.Op8, "OP_8", 1, opcodeN},
-	bscript.Op9:         {bscript.Op9, "OP_9", 1, opcodeN},
-	bscript.Op10:        {bscript.Op10, "OP_10", 1, opcodeN},
-	bscript.Op11:        {bscript.Op11, "OP_11", 1, opcodeN},
-	bscript.Op12:        {bscript.Op12, "OP_12", 1, opcodeN},
-	bscript.Op13:        {bscript.Op13, "OP_13", 1, opcodeN},
-	bscript.Op14:        {bscript.Op14, "OP_14", 1, opcodeN},
-	bscript.Op15:        {bscript.Op15, "OP_15", 1, opcodeN},
-	bscript.Op16:        {bscript.Op16, "OP_16", 1, opcodeN},
+	script.OpFALSE:     {script.OpFALSE, "OP_0", 1, opcodeFalse},
+	script.OpDATA1:     {script.OpDATA1, "OP_DATA_1", 2, opcodePushData},
+	script.OpDATA2:     {script.OpDATA2, "OP_DATA_2", 3, opcodePushData},
+	script.OpDATA3:     {script.OpDATA3, "OP_DATA_3", 4, opcodePushData},
+	script.OpDATA4:     {script.OpDATA4, "OP_DATA_4", 5, opcodePushData},
+	script.OpDATA5:     {script.OpDATA5, "OP_DATA_5", 6, opcodePushData},
+	script.OpDATA6:     {script.OpDATA6, "OP_DATA_6", 7, opcodePushData},
+	script.OpDATA7:     {script.OpDATA7, "OP_DATA_7", 8, opcodePushData},
+	script.OpDATA8:     {script.OpDATA8, "OP_DATA_8", 9, opcodePushData},
+	script.OpDATA9:     {script.OpDATA9, "OP_DATA_9", 10, opcodePushData},
+	script.OpDATA10:    {script.OpDATA10, "OP_DATA_10", 11, opcodePushData},
+	script.OpDATA11:    {script.OpDATA11, "OP_DATA_11", 12, opcodePushData},
+	script.OpDATA12:    {script.OpDATA12, "OP_DATA_12", 13, opcodePushData},
+	script.OpDATA13:    {script.OpDATA13, "OP_DATA_13", 14, opcodePushData},
+	script.OpDATA14:    {script.OpDATA14, "OP_DATA_14", 15, opcodePushData},
+	script.OpDATA15:    {script.OpDATA15, "OP_DATA_15", 16, opcodePushData},
+	script.OpDATA16:    {script.OpDATA16, "OP_DATA_16", 17, opcodePushData},
+	script.OpDATA17:    {script.OpDATA17, "OP_DATA_17", 18, opcodePushData},
+	script.OpDATA18:    {script.OpDATA18, "OP_DATA_18", 19, opcodePushData},
+	script.OpDATA19:    {script.OpDATA19, "OP_DATA_19", 20, opcodePushData},
+	script.OpDATA20:    {script.OpDATA20, "OP_DATA_20", 21, opcodePushData},
+	script.OpDATA21:    {script.OpDATA21, "OP_DATA_21", 22, opcodePushData},
+	script.OpDATA22:    {script.OpDATA22, "OP_DATA_22", 23, opcodePushData},
+	script.OpDATA23:    {script.OpDATA23, "OP_DATA_23", 24, opcodePushData},
+	script.OpDATA24:    {script.OpDATA24, "OP_DATA_24", 25, opcodePushData},
+	script.OpDATA25:    {script.OpDATA25, "OP_DATA_25", 26, opcodePushData},
+	script.OpDATA26:    {script.OpDATA26, "OP_DATA_26", 27, opcodePushData},
+	script.OpDATA27:    {script.OpDATA27, "OP_DATA_27", 28, opcodePushData},
+	script.OpDATA28:    {script.OpDATA28, "OP_DATA_28", 29, opcodePushData},
+	script.OpDATA29:    {script.OpDATA29, "OP_DATA_29", 30, opcodePushData},
+	script.OpDATA30:    {script.OpDATA30, "OP_DATA_30", 31, opcodePushData},
+	script.OpDATA31:    {script.OpDATA31, "OP_DATA_31", 32, opcodePushData},
+	script.OpDATA32:    {script.OpDATA32, "OP_DATA_32", 33, opcodePushData},
+	script.OpDATA33:    {script.OpDATA33, "OP_DATA_33", 34, opcodePushData},
+	script.OpDATA34:    {script.OpDATA34, "OP_DATA_34", 35, opcodePushData},
+	script.OpDATA35:    {script.OpDATA35, "OP_DATA_35", 36, opcodePushData},
+	script.OpDATA36:    {script.OpDATA36, "OP_DATA_36", 37, opcodePushData},
+	script.OpDATA37:    {script.OpDATA37, "OP_DATA_37", 38, opcodePushData},
+	script.OpDATA38:    {script.OpDATA38, "OP_DATA_38", 39, opcodePushData},
+	script.OpDATA39:    {script.OpDATA39, "OP_DATA_39", 40, opcodePushData},
+	script.OpDATA40:    {script.OpDATA40, "OP_DATA_40", 41, opcodePushData},
+	script.OpDATA41:    {script.OpDATA41, "OP_DATA_41", 42, opcodePushData},
+	script.OpDATA42:    {script.OpDATA42, "OP_DATA_42", 43, opcodePushData},
+	script.OpDATA43:    {script.OpDATA43, "OP_DATA_43", 44, opcodePushData},
+	script.OpDATA44:    {script.OpDATA44, "OP_DATA_44", 45, opcodePushData},
+	script.OpDATA45:    {script.OpDATA45, "OP_DATA_45", 46, opcodePushData},
+	script.OpDATA46:    {script.OpDATA46, "OP_DATA_46", 47, opcodePushData},
+	script.OpDATA47:    {script.OpDATA47, "OP_DATA_47", 48, opcodePushData},
+	script.OpDATA48:    {script.OpDATA48, "OP_DATA_48", 49, opcodePushData},
+	script.OpDATA49:    {script.OpDATA49, "OP_DATA_49", 50, opcodePushData},
+	script.OpDATA50:    {script.OpDATA50, "OP_DATA_50", 51, opcodePushData},
+	script.OpDATA51:    {script.OpDATA51, "OP_DATA_51", 52, opcodePushData},
+	script.OpDATA52:    {script.OpDATA52, "OP_DATA_52", 53, opcodePushData},
+	script.OpDATA53:    {script.OpDATA53, "OP_DATA_53", 54, opcodePushData},
+	script.OpDATA54:    {script.OpDATA54, "OP_DATA_54", 55, opcodePushData},
+	script.OpDATA55:    {script.OpDATA55, "OP_DATA_55", 56, opcodePushData},
+	script.OpDATA56:    {script.OpDATA56, "OP_DATA_56", 57, opcodePushData},
+	script.OpDATA57:    {script.OpDATA57, "OP_DATA_57", 58, opcodePushData},
+	script.OpDATA58:    {script.OpDATA58, "OP_DATA_58", 59, opcodePushData},
+	script.OpDATA59:    {script.OpDATA59, "OP_DATA_59", 60, opcodePushData},
+	script.OpDATA60:    {script.OpDATA60, "OP_DATA_60", 61, opcodePushData},
+	script.OpDATA61:    {script.OpDATA61, "OP_DATA_61", 62, opcodePushData},
+	script.OpDATA62:    {script.OpDATA62, "OP_DATA_62", 63, opcodePushData},
+	script.OpDATA63:    {script.OpDATA63, "OP_DATA_63", 64, opcodePushData},
+	script.OpDATA64:    {script.OpDATA64, "OP_DATA_64", 65, opcodePushData},
+	script.OpDATA65:    {script.OpDATA65, "OP_DATA_65", 66, opcodePushData},
+	script.OpDATA66:    {script.OpDATA66, "OP_DATA_66", 67, opcodePushData},
+	script.OpDATA67:    {script.OpDATA67, "OP_DATA_67", 68, opcodePushData},
+	script.OpDATA68:    {script.OpDATA68, "OP_DATA_68", 69, opcodePushData},
+	script.OpDATA69:    {script.OpDATA69, "OP_DATA_69", 70, opcodePushData},
+	script.OpDATA70:    {script.OpDATA70, "OP_DATA_70", 71, opcodePushData},
+	script.OpDATA71:    {script.OpDATA71, "OP_DATA_71", 72, opcodePushData},
+	script.OpDATA72:    {script.OpDATA72, "OP_DATA_72", 73, opcodePushData},
+	script.OpDATA73:    {script.OpDATA73, "OP_DATA_73", 74, opcodePushData},
+	script.OpDATA74:    {script.OpDATA74, "OP_DATA_74", 75, opcodePushData},
+	script.OpDATA75:    {script.OpDATA75, "OP_DATA_75", 76, opcodePushData},
+	script.OpPUSHDATA1: {script.OpPUSHDATA1, "OP_PUSHDATA1", -1, opcodePushData},
+	script.OpPUSHDATA2: {script.OpPUSHDATA2, "OP_PUSHDATA2", -2, opcodePushData},
+	script.OpPUSHDATA4: {script.OpPUSHDATA4, "OP_PUSHDATA4", -4, opcodePushData},
+	script.Op1NEGATE:   {script.Op1NEGATE, "OP_1NEGATE", 1, opcode1Negate},
+	script.OpRESERVED:  {script.OpRESERVED, "OP_RESERVED", 1, opcodeReserved},
+	script.OpTRUE:      {script.OpTRUE, "OP_1", 1, opcodeN},
+	script.Op2:         {script.Op2, "OP_2", 1, opcodeN},
+	script.Op3:         {script.Op3, "OP_3", 1, opcodeN},
+	script.Op4:         {script.Op4, "OP_4", 1, opcodeN},
+	script.Op5:         {script.Op5, "OP_5", 1, opcodeN},
+	script.Op6:         {script.Op6, "OP_6", 1, opcodeN},
+	script.Op7:         {script.Op7, "OP_7", 1, opcodeN},
+	script.Op8:         {script.Op8, "OP_8", 1, opcodeN},
+	script.Op9:         {script.Op9, "OP_9", 1, opcodeN},
+	script.Op10:        {script.Op10, "OP_10", 1, opcodeN},
+	script.Op11:        {script.Op11, "OP_11", 1, opcodeN},
+	script.Op12:        {script.Op12, "OP_12", 1, opcodeN},
+	script.Op13:        {script.Op13, "OP_13", 1, opcodeN},
+	script.Op14:        {script.Op14, "OP_14", 1, opcodeN},
+	script.Op15:        {script.Op15, "OP_15", 1, opcodeN},
+	script.Op16:        {script.Op16, "OP_16", 1, opcodeN},
 
 	// Control opcodes.
-	bscript.OpNOP:                 {bscript.OpNOP, "OP_NOP", 1, opcodeNop},
-	bscript.OpVER:                 {bscript.OpVER, "OP_VER", 1, opcodeReserved},
-	bscript.OpIF:                  {bscript.OpIF, "OP_IF", 1, opcodeIf},
-	bscript.OpNOTIF:               {bscript.OpNOTIF, "OP_NOTIF", 1, opcodeNotIf},
-	bscript.OpVERIF:               {bscript.OpVERIF, "OP_VERIF", 1, opcodeVerConditional},
-	bscript.OpVERNOTIF:            {bscript.OpVERNOTIF, "OP_VERNOTIF", 1, opcodeVerConditional},
-	bscript.OpELSE:                {bscript.OpELSE, "OP_ELSE", 1, opcodeElse},
-	bscript.OpENDIF:               {bscript.OpENDIF, "OP_ENDIF", 1, opcodeEndif},
-	bscript.OpVERIFY:              {bscript.OpVERIFY, "OP_VERIFY", 1, opcodeVerify},
-	bscript.OpRETURN:              {bscript.OpRETURN, "OP_RETURN", 1, opcodeReturn},
-	bscript.OpCHECKLOCKTIMEVERIFY: {bscript.OpCHECKLOCKTIMEVERIFY, "OP_CHECKLOCKTIMEVERIFY", 1, opcodeCheckLockTimeVerify},
-	bscript.OpCHECKSEQUENCEVERIFY: {bscript.OpCHECKSEQUENCEVERIFY, "OP_CHECKSEQUENCEVERIFY", 1, opcodeCheckSequenceVerify},
+	script.OpNOP:                 {script.OpNOP, "OP_NOP", 1, opcodeNop},
+	script.OpVER:                 {script.OpVER, "OP_VER", 1, opcodeReserved},
+	script.OpIF:                  {script.OpIF, "OP_IF", 1, opcodeIf},
+	script.OpNOTIF:               {script.OpNOTIF, "OP_NOTIF", 1, opcodeNotIf},
+	script.OpVERIF:               {script.OpVERIF, "OP_VERIF", 1, opcodeVerConditional},
+	script.OpVERNOTIF:            {script.OpVERNOTIF, "OP_VERNOTIF", 1, opcodeVerConditional},
+	script.OpELSE:                {script.OpELSE, "OP_ELSE", 1, opcodeElse},
+	script.OpENDIF:               {script.OpENDIF, "OP_ENDIF", 1, opcodeEndif},
+	script.OpVERIFY:              {script.OpVERIFY, "OP_VERIFY", 1, opcodeVerify},
+	script.OpRETURN:              {script.OpRETURN, "OP_RETURN", 1, opcodeReturn},
+	script.OpCHECKLOCKTIMEVERIFY: {script.OpCHECKLOCKTIMEVERIFY, "OP_CHECKLOCKTIMEVERIFY", 1, opcodeCheckLockTimeVerify},
+	script.OpCHECKSEQUENCEVERIFY: {script.OpCHECKSEQUENCEVERIFY, "OP_CHECKSEQUENCEVERIFY", 1, opcodeCheckSequenceVerify},
 
 	// Stack opcodes.
-	bscript.OpTOALTSTACK:   {bscript.OpTOALTSTACK, "OP_TOALTSTACK", 1, opcodeToAltStack},
-	bscript.OpFROMALTSTACK: {bscript.OpFROMALTSTACK, "OP_FROMALTSTACK", 1, opcodeFromAltStack},
-	bscript.Op2DROP:        {bscript.Op2DROP, "OP_2DROP", 1, opcode2Drop},
-	bscript.Op2DUP:         {bscript.Op2DUP, "OP_2DUP", 1, opcode2Dup},
-	bscript.Op3DUP:         {bscript.Op3DUP, "OP_3DUP", 1, opcode3Dup},
-	bscript.Op2OVER:        {bscript.Op2OVER, "OP_2OVER", 1, opcode2Over},
-	bscript.Op2ROT:         {bscript.Op2ROT, "OP_2ROT", 1, opcode2Rot},
-	bscript.Op2SWAP:        {bscript.Op2SWAP, "OP_2SWAP", 1, opcode2Swap},
-	bscript.OpIFDUP:        {bscript.OpIFDUP, "OP_IFDUP", 1, opcodeIfDup},
-	bscript.OpDEPTH:        {bscript.OpDEPTH, "OP_DEPTH", 1, opcodeDepth},
-	bscript.OpDROP:         {bscript.OpDROP, "OP_DROP", 1, opcodeDrop},
-	bscript.OpDUP:          {bscript.OpDUP, "OP_DUP", 1, opcodeDup},
-	bscript.OpNIP:          {bscript.OpNIP, "OP_NIP", 1, opcodeNip},
-	bscript.OpOVER:         {bscript.OpOVER, "OP_OVER", 1, opcodeOver},
-	bscript.OpPICK:         {bscript.OpPICK, "OP_PICK", 1, opcodePick},
-	bscript.OpROLL:         {bscript.OpROLL, "OP_ROLL", 1, opcodeRoll},
-	bscript.OpROT:          {bscript.OpROT, "OP_ROT", 1, opcodeRot},
-	bscript.OpSWAP:         {bscript.OpSWAP, "OP_SWAP", 1, opcodeSwap},
-	bscript.OpTUCK:         {bscript.OpTUCK, "OP_TUCK", 1, opcodeTuck},
+	script.OpTOALTSTACK:   {script.OpTOALTSTACK, "OP_TOALTSTACK", 1, opcodeToAltStack},
+	script.OpFROMALTSTACK: {script.OpFROMALTSTACK, "OP_FROMALTSTACK", 1, opcodeFromAltStack},
+	script.Op2DROP:        {script.Op2DROP, "OP_2DROP", 1, opcode2Drop},
+	script.Op2DUP:         {script.Op2DUP, "OP_2DUP", 1, opcode2Dup},
+	script.Op3DUP:         {script.Op3DUP, "OP_3DUP", 1, opcode3Dup},
+	script.Op2OVER:        {script.Op2OVER, "OP_2OVER", 1, opcode2Over},
+	script.Op2ROT:         {script.Op2ROT, "OP_2ROT", 1, opcode2Rot},
+	script.Op2SWAP:        {script.Op2SWAP, "OP_2SWAP", 1, opcode2Swap},
+	script.OpIFDUP:        {script.OpIFDUP, "OP_IFDUP", 1, opcodeIfDup},
+	script.OpDEPTH:        {script.OpDEPTH, "OP_DEPTH", 1, opcodeDepth},
+	script.OpDROP:         {script.OpDROP, "OP_DROP", 1, opcodeDrop},
+	script.OpDUP:          {script.OpDUP, "OP_DUP", 1, opcodeDup},
+	script.OpNIP:          {script.OpNIP, "OP_NIP", 1, opcodeNip},
+	script.OpOVER:         {script.OpOVER, "OP_OVER", 1, opcodeOver},
+	script.OpPICK:         {script.OpPICK, "OP_PICK", 1, opcodePick},
+	script.OpROLL:         {script.OpROLL, "OP_ROLL", 1, opcodeRoll},
+	script.OpROT:          {script.OpROT, "OP_ROT", 1, opcodeRot},
+	script.OpSWAP:         {script.OpSWAP, "OP_SWAP", 1, opcodeSwap},
+	script.OpTUCK:         {script.OpTUCK, "OP_TUCK", 1, opcodeTuck},
 
 	// Splice opcodes.
-	bscript.OpCAT:     {bscript.OpCAT, "OP_CAT", 1, opcodeCat},
-	bscript.OpSPLIT:   {bscript.OpSPLIT, "OP_SPLIT", 1, opcodeSplit},
-	bscript.OpNUM2BIN: {bscript.OpNUM2BIN, "OP_NUM2BIN", 1, opcodeNum2bin},
-	bscript.OpBIN2NUM: {bscript.OpBIN2NUM, "OP_BIN2NUM", 1, opcodeBin2num},
-	bscript.OpSIZE:    {bscript.OpSIZE, "OP_SIZE", 1, opcodeSize},
+	script.OpCAT:     {script.OpCAT, "OP_CAT", 1, opcodeCat},
+	script.OpSPLIT:   {script.OpSPLIT, "OP_SPLIT", 1, opcodeSplit},
+	script.OpNUM2BIN: {script.OpNUM2BIN, "OP_NUM2BIN", 1, opcodeNum2bin},
+	script.OpBIN2NUM: {script.OpBIN2NUM, "OP_BIN2NUM", 1, opcodeBin2num},
+	script.OpSIZE:    {script.OpSIZE, "OP_SIZE", 1, opcodeSize},
 
 	// Bitwise logic opcodes.
-	bscript.OpINVERT:      {bscript.OpINVERT, "OP_INVERT", 1, opcodeInvert},
-	bscript.OpAND:         {bscript.OpAND, "OP_AND", 1, opcodeAnd},
-	bscript.OpOR:          {bscript.OpOR, "OP_OR", 1, opcodeOr},
-	bscript.OpXOR:         {bscript.OpXOR, "OP_XOR", 1, opcodeXor},
-	bscript.OpEQUAL:       {bscript.OpEQUAL, "OP_EQUAL", 1, opcodeEqual},
-	bscript.OpEQUALVERIFY: {bscript.OpEQUALVERIFY, "OP_EQUALVERIFY", 1, opcodeEqualVerify},
-	bscript.OpRESERVED1:   {bscript.OpRESERVED1, "OP_RESERVED1", 1, opcodeReserved},
-	bscript.OpRESERVED2:   {bscript.OpRESERVED2, "OP_RESERVED2", 1, opcodeReserved},
+	script.OpINVERT:      {script.OpINVERT, "OP_INVERT", 1, opcodeInvert},
+	script.OpAND:         {script.OpAND, "OP_AND", 1, opcodeAnd},
+	script.OpOR:          {script.OpOR, "OP_OR", 1, opcodeOr},
+	script.OpXOR:         {script.OpXOR, "OP_XOR", 1, opcodeXor},
+	script.OpEQUAL:       {script.OpEQUAL, "OP_EQUAL", 1, opcodeEqual},
+	script.OpEQUALVERIFY: {script.OpEQUALVERIFY, "OP_EQUALVERIFY", 1, opcodeEqualVerify},
+	script.OpRESERVED1:   {script.OpRESERVED1, "OP_RESERVED1", 1, opcodeReserved},
+	script.OpRESERVED2:   {script.OpRESERVED2, "OP_RESERVED2", 1, opcodeReserved},
 
 	// Numeric related opcodes.
-	bscript.Op1ADD:               {bscript.Op1ADD, "OP_1ADD", 1, opcode1Add},
-	bscript.Op1SUB:               {bscript.Op1SUB, "OP_1SUB", 1, opcode1Sub},
-	bscript.Op2MUL:               {bscript.Op2MUL, "OP_2MUL", 1, opcodeDisabled},
-	bscript.Op2DIV:               {bscript.Op2DIV, "OP_2DIV", 1, opcodeDisabled},
-	bscript.OpNEGATE:             {bscript.OpNEGATE, "OP_NEGATE", 1, opcodeNegate},
-	bscript.OpABS:                {bscript.OpABS, "OP_ABS", 1, opcodeAbs},
-	bscript.OpNOT:                {bscript.OpNOT, "OP_NOT", 1, opcodeNot},
-	bscript.Op0NOTEQUAL:          {bscript.Op0NOTEQUAL, "OP_0NOTEQUAL", 1, opcode0NotEqual},
-	bscript.OpADD:                {bscript.OpADD, "OP_ADD", 1, opcodeAdd},
-	bscript.OpSUB:                {bscript.OpSUB, "OP_SUB", 1, opcodeSub},
-	bscript.OpMUL:                {bscript.OpMUL, "OP_MUL", 1, opcodeMul},
-	bscript.OpDIV:                {bscript.OpDIV, "OP_DIV", 1, opcodeDiv},
-	bscript.OpMOD:                {bscript.OpMOD, "OP_MOD", 1, opcodeMod},
-	bscript.OpLSHIFT:             {bscript.OpLSHIFT, "OP_LSHIFT", 1, opcodeLShift},
-	bscript.OpRSHIFT:             {bscript.OpRSHIFT, "OP_RSHIFT", 1, opcodeRShift},
-	bscript.OpBOOLAND:            {bscript.OpBOOLAND, "OP_BOOLAND", 1, opcodeBoolAnd},
-	bscript.OpBOOLOR:             {bscript.OpBOOLOR, "OP_BOOLOR", 1, opcodeBoolOr},
-	bscript.OpNUMEQUAL:           {bscript.OpNUMEQUAL, "OP_NUMEQUAL", 1, opcodeNumEqual},
-	bscript.OpNUMEQUALVERIFY:     {bscript.OpNUMEQUALVERIFY, "OP_NUMEQUALVERIFY", 1, opcodeNumEqualVerify},
-	bscript.OpNUMNOTEQUAL:        {bscript.OpNUMNOTEQUAL, "OP_NUMNOTEQUAL", 1, opcodeNumNotEqual},
-	bscript.OpLESSTHAN:           {bscript.OpLESSTHAN, "OP_LESSTHAN", 1, opcodeLessThan},
-	bscript.OpGREATERTHAN:        {bscript.OpGREATERTHAN, "OP_GREATERTHAN", 1, opcodeGreaterThan},
-	bscript.OpLESSTHANOREQUAL:    {bscript.OpLESSTHANOREQUAL, "OP_LESSTHANOREQUAL", 1, opcodeLessThanOrEqual},
-	bscript.OpGREATERTHANOREQUAL: {bscript.OpGREATERTHANOREQUAL, "OP_GREATERTHANOREQUAL", 1, opcodeGreaterThanOrEqual},
-	bscript.OpMIN:                {bscript.OpMIN, "OP_MIN", 1, opcodeMin},
-	bscript.OpMAX:                {bscript.OpMAX, "OP_MAX", 1, opcodeMax},
-	bscript.OpWITHIN:             {bscript.OpWITHIN, "OP_WITHIN", 1, opcodeWithin},
+	script.Op1ADD:               {script.Op1ADD, "OP_1ADD", 1, opcode1Add},
+	script.Op1SUB:               {script.Op1SUB, "OP_1SUB", 1, opcode1Sub},
+	script.Op2MUL:               {script.Op2MUL, "OP_2MUL", 1, opcodeDisabled},
+	script.Op2DIV:               {script.Op2DIV, "OP_2DIV", 1, opcodeDisabled},
+	script.OpNEGATE:             {script.OpNEGATE, "OP_NEGATE", 1, opcodeNegate},
+	script.OpABS:                {script.OpABS, "OP_ABS", 1, opcodeAbs},
+	script.OpNOT:                {script.OpNOT, "OP_NOT", 1, opcodeNot},
+	script.Op0NOTEQUAL:          {script.Op0NOTEQUAL, "OP_0NOTEQUAL", 1, opcode0NotEqual},
+	script.OpADD:                {script.OpADD, "OP_ADD", 1, opcodeAdd},
+	script.OpSUB:                {script.OpSUB, "OP_SUB", 1, opcodeSub},
+	script.OpMUL:                {script.OpMUL, "OP_MUL", 1, opcodeMul},
+	script.OpDIV:                {script.OpDIV, "OP_DIV", 1, opcodeDiv},
+	script.OpMOD:                {script.OpMOD, "OP_MOD", 1, opcodeMod},
+	script.OpLSHIFT:             {script.OpLSHIFT, "OP_LSHIFT", 1, opcodeLShift},
+	script.OpRSHIFT:             {script.OpRSHIFT, "OP_RSHIFT", 1, opcodeRShift},
+	script.OpBOOLAND:            {script.OpBOOLAND, "OP_BOOLAND", 1, opcodeBoolAnd},
+	script.OpBOOLOR:             {script.OpBOOLOR, "OP_BOOLOR", 1, opcodeBoolOr},
+	script.OpNUMEQUAL:           {script.OpNUMEQUAL, "OP_NUMEQUAL", 1, opcodeNumEqual},
+	script.OpNUMEQUALVERIFY:     {script.OpNUMEQUALVERIFY, "OP_NUMEQUALVERIFY", 1, opcodeNumEqualVerify},
+	script.OpNUMNOTEQUAL:        {script.OpNUMNOTEQUAL, "OP_NUMNOTEQUAL", 1, opcodeNumNotEqual},
+	script.OpLESSTHAN:           {script.OpLESSTHAN, "OP_LESSTHAN", 1, opcodeLessThan},
+	script.OpGREATERTHAN:        {script.OpGREATERTHAN, "OP_GREATERTHAN", 1, opcodeGreaterThan},
+	script.OpLESSTHANOREQUAL:    {script.OpLESSTHANOREQUAL, "OP_LESSTHANOREQUAL", 1, opcodeLessThanOrEqual},
+	script.OpGREATERTHANOREQUAL: {script.OpGREATERTHANOREQUAL, "OP_GREATERTHANOREQUAL", 1, opcodeGreaterThanOrEqual},
+	script.OpMIN:                {script.OpMIN, "OP_MIN", 1, opcodeMin},
+	script.OpMAX:                {script.OpMAX, "OP_MAX", 1, opcodeMax},
+	script.OpWITHIN:             {script.OpWITHIN, "OP_WITHIN", 1, opcodeWithin},
 
 	// Crypto opcodes.
-	bscript.OpRIPEMD160:           {bscript.OpRIPEMD160, "OP_RIPEMD160", 1, opcodeRipemd160},
-	bscript.OpSHA1:                {bscript.OpSHA1, "OP_SHA1", 1, opcodeSha1},
-	bscript.OpSHA256:              {bscript.OpSHA256, "OP_SHA256", 1, opcodeSha256},
-	bscript.OpHASH160:             {bscript.OpHASH160, "OP_HASH160", 1, opcodeHash160},
-	bscript.OpHASH256:             {bscript.OpHASH256, "OP_HASH256", 1, opcodeHash256},
-	bscript.OpCODESEPARATOR:       {bscript.OpCODESEPARATOR, "OP_CODESEPARATOR", 1, opcodeCodeSeparator},
-	bscript.OpCHECKSIG:            {bscript.OpCHECKSIG, "OP_CHECKSIG", 1, opcodeCheckSig},
-	bscript.OpCHECKSIGVERIFY:      {bscript.OpCHECKSIGVERIFY, "OP_CHECKSIGVERIFY", 1, opcodeCheckSigVerify},
-	bscript.OpCHECKMULTISIG:       {bscript.OpCHECKMULTISIG, "OP_CHECKMULTISIG", 1, opcodeCheckMultiSig},
-	bscript.OpCHECKMULTISIGVERIFY: {bscript.OpCHECKMULTISIGVERIFY, "OP_CHECKMULTISIGVERIFY", 1, opcodeCheckMultiSigVerify},
+	script.OpRIPEMD160:           {script.OpRIPEMD160, "OP_RIPEMD160", 1, opcodeRipemd160},
+	script.OpSHA1:                {script.OpSHA1, "OP_SHA1", 1, opcodeSha1},
+	script.OpSHA256:              {script.OpSHA256, "OP_SHA256", 1, opcodeSha256},
+	script.OpHASH160:             {script.OpHASH160, "OP_HASH160", 1, opcodeHash160},
+	script.OpHASH256:             {script.OpHASH256, "OP_HASH256", 1, opcodeHash256},
+	script.OpCODESEPARATOR:       {script.OpCODESEPARATOR, "OP_CODESEPARATOR", 1, opcodeCodeSeparator},
+	script.OpCHECKSIG:            {script.OpCHECKSIG, "OP_CHECKSIG", 1, opcodeCheckSig},
+	script.OpCHECKSIGVERIFY:      {script.OpCHECKSIGVERIFY, "OP_CHECKSIGVERIFY", 1, opcodeCheckSigVerify},
+	script.OpCHECKMULTISIG:       {script.OpCHECKMULTISIG, "OP_CHECKMULTISIG", 1, opcodeCheckMultiSig},
+	script.OpCHECKMULTISIGVERIFY: {script.OpCHECKMULTISIGVERIFY, "OP_CHECKMULTISIGVERIFY", 1, opcodeCheckMultiSigVerify},
 
 	// Reserved opcodes.
-	bscript.OpNOP1:  {bscript.OpNOP1, "OP_NOP1", 1, opcodeNop},
-	bscript.OpNOP4:  {bscript.OpNOP4, "OP_NOP4", 1, opcodeNop},
-	bscript.OpNOP5:  {bscript.OpNOP5, "OP_NOP5", 1, opcodeNop},
-	bscript.OpNOP6:  {bscript.OpNOP6, "OP_NOP6", 1, opcodeNop},
-	bscript.OpNOP7:  {bscript.OpNOP7, "OP_NOP7", 1, opcodeNop},
-	bscript.OpNOP8:  {bscript.OpNOP8, "OP_NOP8", 1, opcodeNop},
-	bscript.OpNOP9:  {bscript.OpNOP9, "OP_NOP9", 1, opcodeNop},
-	bscript.OpNOP10: {bscript.OpNOP10, "OP_NOP10", 1, opcodeNop},
+	script.OpNOP1:  {script.OpNOP1, "OP_NOP1", 1, opcodeNop},
+	script.OpNOP4:  {script.OpNOP4, "OP_NOP4", 1, opcodeNop},
+	script.OpNOP5:  {script.OpNOP5, "OP_NOP5", 1, opcodeNop},
+	script.OpNOP6:  {script.OpNOP6, "OP_NOP6", 1, opcodeNop},
+	script.OpNOP7:  {script.OpNOP7, "OP_NOP7", 1, opcodeNop},
+	script.OpNOP8:  {script.OpNOP8, "OP_NOP8", 1, opcodeNop},
+	script.OpNOP9:  {script.OpNOP9, "OP_NOP9", 1, opcodeNop},
+	script.OpNOP10: {script.OpNOP10, "OP_NOP10", 1, opcodeNop},
 
 	// Undefined opcodes.
-	bscript.OpUNKNOWN186: {bscript.OpUNKNOWN186, "OP_UNKNOWN186", 1, opcodeInvalid},
-	bscript.OpUNKNOWN187: {bscript.OpUNKNOWN187, "OP_UNKNOWN187", 1, opcodeInvalid},
-	bscript.OpUNKNOWN188: {bscript.OpUNKNOWN188, "OP_UNKNOWN188", 1, opcodeInvalid},
-	bscript.OpUNKNOWN189: {bscript.OpUNKNOWN189, "OP_UNKNOWN189", 1, opcodeInvalid},
-	bscript.OpUNKNOWN190: {bscript.OpUNKNOWN190, "OP_UNKNOWN190", 1, opcodeInvalid},
-	bscript.OpUNKNOWN191: {bscript.OpUNKNOWN191, "OP_UNKNOWN191", 1, opcodeInvalid},
-	bscript.OpUNKNOWN192: {bscript.OpUNKNOWN192, "OP_UNKNOWN192", 1, opcodeInvalid},
-	bscript.OpUNKNOWN193: {bscript.OpUNKNOWN193, "OP_UNKNOWN193", 1, opcodeInvalid},
-	bscript.OpUNKNOWN194: {bscript.OpUNKNOWN194, "OP_UNKNOWN194", 1, opcodeInvalid},
-	bscript.OpUNKNOWN195: {bscript.OpUNKNOWN195, "OP_UNKNOWN195", 1, opcodeInvalid},
-	bscript.OpUNKNOWN196: {bscript.OpUNKNOWN196, "OP_UNKNOWN196", 1, opcodeInvalid},
-	bscript.OpUNKNOWN197: {bscript.OpUNKNOWN197, "OP_UNKNOWN197", 1, opcodeInvalid},
-	bscript.OpUNKNOWN198: {bscript.OpUNKNOWN198, "OP_UNKNOWN198", 1, opcodeInvalid},
-	bscript.OpUNKNOWN199: {bscript.OpUNKNOWN199, "OP_UNKNOWN199", 1, opcodeInvalid},
-	bscript.OpUNKNOWN200: {bscript.OpUNKNOWN200, "OP_UNKNOWN200", 1, opcodeInvalid},
-	bscript.OpUNKNOWN201: {bscript.OpUNKNOWN201, "OP_UNKNOWN201", 1, opcodeInvalid},
-	bscript.OpUNKNOWN202: {bscript.OpUNKNOWN202, "OP_UNKNOWN202", 1, opcodeInvalid},
-	bscript.OpUNKNOWN203: {bscript.OpUNKNOWN203, "OP_UNKNOWN203", 1, opcodeInvalid},
-	bscript.OpUNKNOWN204: {bscript.OpUNKNOWN204, "OP_UNKNOWN204", 1, opcodeInvalid},
-	bscript.OpUNKNOWN205: {bscript.OpUNKNOWN205, "OP_UNKNOWN205", 1, opcodeInvalid},
-	bscript.OpUNKNOWN206: {bscript.OpUNKNOWN206, "OP_UNKNOWN206", 1, opcodeInvalid},
-	bscript.OpUNKNOWN207: {bscript.OpUNKNOWN207, "OP_UNKNOWN207", 1, opcodeInvalid},
-	bscript.OpUNKNOWN208: {bscript.OpUNKNOWN208, "OP_UNKNOWN208", 1, opcodeInvalid},
-	bscript.OpUNKNOWN209: {bscript.OpUNKNOWN209, "OP_UNKNOWN209", 1, opcodeInvalid},
-	bscript.OpUNKNOWN210: {bscript.OpUNKNOWN210, "OP_UNKNOWN210", 1, opcodeInvalid},
-	bscript.OpUNKNOWN211: {bscript.OpUNKNOWN211, "OP_UNKNOWN211", 1, opcodeInvalid},
-	bscript.OpUNKNOWN212: {bscript.OpUNKNOWN212, "OP_UNKNOWN212", 1, opcodeInvalid},
-	bscript.OpUNKNOWN213: {bscript.OpUNKNOWN213, "OP_UNKNOWN213", 1, opcodeInvalid},
-	bscript.OpUNKNOWN214: {bscript.OpUNKNOWN214, "OP_UNKNOWN214", 1, opcodeInvalid},
-	bscript.OpUNKNOWN215: {bscript.OpUNKNOWN215, "OP_UNKNOWN215", 1, opcodeInvalid},
-	bscript.OpUNKNOWN216: {bscript.OpUNKNOWN216, "OP_UNKNOWN216", 1, opcodeInvalid},
-	bscript.OpUNKNOWN217: {bscript.OpUNKNOWN217, "OP_UNKNOWN217", 1, opcodeInvalid},
-	bscript.OpUNKNOWN218: {bscript.OpUNKNOWN218, "OP_UNKNOWN218", 1, opcodeInvalid},
-	bscript.OpUNKNOWN219: {bscript.OpUNKNOWN219, "OP_UNKNOWN219", 1, opcodeInvalid},
-	bscript.OpUNKNOWN220: {bscript.OpUNKNOWN220, "OP_UNKNOWN220", 1, opcodeInvalid},
-	bscript.OpUNKNOWN221: {bscript.OpUNKNOWN221, "OP_UNKNOWN221", 1, opcodeInvalid},
-	bscript.OpUNKNOWN222: {bscript.OpUNKNOWN222, "OP_UNKNOWN222", 1, opcodeInvalid},
-	bscript.OpUNKNOWN223: {bscript.OpUNKNOWN223, "OP_UNKNOWN223", 1, opcodeInvalid},
-	bscript.OpUNKNOWN224: {bscript.OpUNKNOWN224, "OP_UNKNOWN224", 1, opcodeInvalid},
-	bscript.OpUNKNOWN225: {bscript.OpUNKNOWN225, "OP_UNKNOWN225", 1, opcodeInvalid},
-	bscript.OpUNKNOWN226: {bscript.OpUNKNOWN226, "OP_UNKNOWN226", 1, opcodeInvalid},
-	bscript.OpUNKNOWN227: {bscript.OpUNKNOWN227, "OP_UNKNOWN227", 1, opcodeInvalid},
-	bscript.OpUNKNOWN228: {bscript.OpUNKNOWN228, "OP_UNKNOWN228", 1, opcodeInvalid},
-	bscript.OpUNKNOWN229: {bscript.OpUNKNOWN229, "OP_UNKNOWN229", 1, opcodeInvalid},
-	bscript.OpUNKNOWN230: {bscript.OpUNKNOWN230, "OP_UNKNOWN230", 1, opcodeInvalid},
-	bscript.OpUNKNOWN231: {bscript.OpUNKNOWN231, "OP_UNKNOWN231", 1, opcodeInvalid},
-	bscript.OpUNKNOWN232: {bscript.OpUNKNOWN232, "OP_UNKNOWN232", 1, opcodeInvalid},
-	bscript.OpUNKNOWN233: {bscript.OpUNKNOWN233, "OP_UNKNOWN233", 1, opcodeInvalid},
-	bscript.OpUNKNOWN234: {bscript.OpUNKNOWN234, "OP_UNKNOWN234", 1, opcodeInvalid},
-	bscript.OpUNKNOWN235: {bscript.OpUNKNOWN235, "OP_UNKNOWN235", 1, opcodeInvalid},
-	bscript.OpUNKNOWN236: {bscript.OpUNKNOWN236, "OP_UNKNOWN236", 1, opcodeInvalid},
-	bscript.OpUNKNOWN237: {bscript.OpUNKNOWN237, "OP_UNKNOWN237", 1, opcodeInvalid},
-	bscript.OpUNKNOWN238: {bscript.OpUNKNOWN238, "OP_UNKNOWN238", 1, opcodeInvalid},
-	bscript.OpUNKNOWN239: {bscript.OpUNKNOWN239, "OP_UNKNOWN239", 1, opcodeInvalid},
-	bscript.OpUNKNOWN240: {bscript.OpUNKNOWN240, "OP_UNKNOWN240", 1, opcodeInvalid},
-	bscript.OpUNKNOWN241: {bscript.OpUNKNOWN241, "OP_UNKNOWN241", 1, opcodeInvalid},
-	bscript.OpUNKNOWN242: {bscript.OpUNKNOWN242, "OP_UNKNOWN242", 1, opcodeInvalid},
-	bscript.OpUNKNOWN243: {bscript.OpUNKNOWN243, "OP_UNKNOWN243", 1, opcodeInvalid},
-	bscript.OpUNKNOWN244: {bscript.OpUNKNOWN244, "OP_UNKNOWN244", 1, opcodeInvalid},
-	bscript.OpUNKNOWN245: {bscript.OpUNKNOWN245, "OP_UNKNOWN245", 1, opcodeInvalid},
-	bscript.OpUNKNOWN246: {bscript.OpUNKNOWN246, "OP_UNKNOWN246", 1, opcodeInvalid},
-	bscript.OpUNKNOWN247: {bscript.OpUNKNOWN247, "OP_UNKNOWN247", 1, opcodeInvalid},
-	bscript.OpUNKNOWN248: {bscript.OpUNKNOWN248, "OP_UNKNOWN248", 1, opcodeInvalid},
-	bscript.OpUNKNOWN249: {bscript.OpUNKNOWN249, "OP_UNKNOWN249", 1, opcodeInvalid},
+	script.OpUNKNOWN186: {script.OpUNKNOWN186, "OP_UNKNOWN186", 1, opcodeInvalid},
+	script.OpUNKNOWN187: {script.OpUNKNOWN187, "OP_UNKNOWN187", 1, opcodeInvalid},
+	script.OpUNKNOWN188: {script.OpUNKNOWN188, "OP_UNKNOWN188", 1, opcodeInvalid},
+	script.OpUNKNOWN189: {script.OpUNKNOWN189, "OP_UNKNOWN189", 1, opcodeInvalid},
+	script.OpUNKNOWN190: {script.OpUNKNOWN190, "OP_UNKNOWN190", 1, opcodeInvalid},
+	script.OpUNKNOWN191: {script.OpUNKNOWN191, "OP_UNKNOWN191", 1, opcodeInvalid},
+	script.OpUNKNOWN192: {script.OpUNKNOWN192, "OP_UNKNOWN192", 1, opcodeInvalid},
+	script.OpUNKNOWN193: {script.OpUNKNOWN193, "OP_UNKNOWN193", 1, opcodeInvalid},
+	script.OpUNKNOWN194: {script.OpUNKNOWN194, "OP_UNKNOWN194", 1, opcodeInvalid},
+	script.OpUNKNOWN195: {script.OpUNKNOWN195, "OP_UNKNOWN195", 1, opcodeInvalid},
+	script.OpUNKNOWN196: {script.OpUNKNOWN196, "OP_UNKNOWN196", 1, opcodeInvalid},
+	script.OpUNKNOWN197: {script.OpUNKNOWN197, "OP_UNKNOWN197", 1, opcodeInvalid},
+	script.OpUNKNOWN198: {script.OpUNKNOWN198, "OP_UNKNOWN198", 1, opcodeInvalid},
+	script.OpUNKNOWN199: {script.OpUNKNOWN199, "OP_UNKNOWN199", 1, opcodeInvalid},
+	script.OpUNKNOWN200: {script.OpUNKNOWN200, "OP_UNKNOWN200", 1, opcodeInvalid},
+	script.OpUNKNOWN201: {script.OpUNKNOWN201, "OP_UNKNOWN201", 1, opcodeInvalid},
+	script.OpUNKNOWN202: {script.OpUNKNOWN202, "OP_UNKNOWN202", 1, opcodeInvalid},
+	script.OpUNKNOWN203: {script.OpUNKNOWN203, "OP_UNKNOWN203", 1, opcodeInvalid},
+	script.OpUNKNOWN204: {script.OpUNKNOWN204, "OP_UNKNOWN204", 1, opcodeInvalid},
+	script.OpUNKNOWN205: {script.OpUNKNOWN205, "OP_UNKNOWN205", 1, opcodeInvalid},
+	script.OpUNKNOWN206: {script.OpUNKNOWN206, "OP_UNKNOWN206", 1, opcodeInvalid},
+	script.OpUNKNOWN207: {script.OpUNKNOWN207, "OP_UNKNOWN207", 1, opcodeInvalid},
+	script.OpUNKNOWN208: {script.OpUNKNOWN208, "OP_UNKNOWN208", 1, opcodeInvalid},
+	script.OpUNKNOWN209: {script.OpUNKNOWN209, "OP_UNKNOWN209", 1, opcodeInvalid},
+	script.OpUNKNOWN210: {script.OpUNKNOWN210, "OP_UNKNOWN210", 1, opcodeInvalid},
+	script.OpUNKNOWN211: {script.OpUNKNOWN211, "OP_UNKNOWN211", 1, opcodeInvalid},
+	script.OpUNKNOWN212: {script.OpUNKNOWN212, "OP_UNKNOWN212", 1, opcodeInvalid},
+	script.OpUNKNOWN213: {script.OpUNKNOWN213, "OP_UNKNOWN213", 1, opcodeInvalid},
+	script.OpUNKNOWN214: {script.OpUNKNOWN214, "OP_UNKNOWN214", 1, opcodeInvalid},
+	script.OpUNKNOWN215: {script.OpUNKNOWN215, "OP_UNKNOWN215", 1, opcodeInvalid},
+	script.OpUNKNOWN216: {script.OpUNKNOWN216, "OP_UNKNOWN216", 1, opcodeInvalid},
+	script.OpUNKNOWN217: {script.OpUNKNOWN217, "OP_UNKNOWN217", 1, opcodeInvalid},
+	script.OpUNKNOWN218: {script.OpUNKNOWN218, "OP_UNKNOWN218", 1, opcodeInvalid},
+	script.OpUNKNOWN219: {script.OpUNKNOWN219, "OP_UNKNOWN219", 1, opcodeInvalid},
+	script.OpUNKNOWN220: {script.OpUNKNOWN220, "OP_UNKNOWN220", 1, opcodeInvalid},
+	script.OpUNKNOWN221: {script.OpUNKNOWN221, "OP_UNKNOWN221", 1, opcodeInvalid},
+	script.OpUNKNOWN222: {script.OpUNKNOWN222, "OP_UNKNOWN222", 1, opcodeInvalid},
+	script.OpUNKNOWN223: {script.OpUNKNOWN223, "OP_UNKNOWN223", 1, opcodeInvalid},
+	script.OpUNKNOWN224: {script.OpUNKNOWN224, "OP_UNKNOWN224", 1, opcodeInvalid},
+	script.OpUNKNOWN225: {script.OpUNKNOWN225, "OP_UNKNOWN225", 1, opcodeInvalid},
+	script.OpUNKNOWN226: {script.OpUNKNOWN226, "OP_UNKNOWN226", 1, opcodeInvalid},
+	script.OpUNKNOWN227: {script.OpUNKNOWN227, "OP_UNKNOWN227", 1, opcodeInvalid},
+	script.OpUNKNOWN228: {script.OpUNKNOWN228, "OP_UNKNOWN228", 1, opcodeInvalid},
+	script.OpUNKNOWN229: {script.OpUNKNOWN229, "OP_UNKNOWN229", 1, opcodeInvalid},
+	script.OpUNKNOWN230: {script.OpUNKNOWN230, "OP_UNKNOWN230", 1, opcodeInvalid},
+	script.OpUNKNOWN231: {script.OpUNKNOWN231, "OP_UNKNOWN231", 1, opcodeInvalid},
+	script.OpUNKNOWN232: {script.OpUNKNOWN232, "OP_UNKNOWN232", 1, opcodeInvalid},
+	script.OpUNKNOWN233: {script.OpUNKNOWN233, "OP_UNKNOWN233", 1, opcodeInvalid},
+	script.OpUNKNOWN234: {script.OpUNKNOWN234, "OP_UNKNOWN234", 1, opcodeInvalid},
+	script.OpUNKNOWN235: {script.OpUNKNOWN235, "OP_UNKNOWN235", 1, opcodeInvalid},
+	script.OpUNKNOWN236: {script.OpUNKNOWN236, "OP_UNKNOWN236", 1, opcodeInvalid},
+	script.OpUNKNOWN237: {script.OpUNKNOWN237, "OP_UNKNOWN237", 1, opcodeInvalid},
+	script.OpUNKNOWN238: {script.OpUNKNOWN238, "OP_UNKNOWN238", 1, opcodeInvalid},
+	script.OpUNKNOWN239: {script.OpUNKNOWN239, "OP_UNKNOWN239", 1, opcodeInvalid},
+	script.OpUNKNOWN240: {script.OpUNKNOWN240, "OP_UNKNOWN240", 1, opcodeInvalid},
+	script.OpUNKNOWN241: {script.OpUNKNOWN241, "OP_UNKNOWN241", 1, opcodeInvalid},
+	script.OpUNKNOWN242: {script.OpUNKNOWN242, "OP_UNKNOWN242", 1, opcodeInvalid},
+	script.OpUNKNOWN243: {script.OpUNKNOWN243, "OP_UNKNOWN243", 1, opcodeInvalid},
+	script.OpUNKNOWN244: {script.OpUNKNOWN244, "OP_UNKNOWN244", 1, opcodeInvalid},
+	script.OpUNKNOWN245: {script.OpUNKNOWN245, "OP_UNKNOWN245", 1, opcodeInvalid},
+	script.OpUNKNOWN246: {script.OpUNKNOWN246, "OP_UNKNOWN246", 1, opcodeInvalid},
+	script.OpUNKNOWN247: {script.OpUNKNOWN247, "OP_UNKNOWN247", 1, opcodeInvalid},
+	script.OpUNKNOWN248: {script.OpUNKNOWN248, "OP_UNKNOWN248", 1, opcodeInvalid},
+	script.OpUNKNOWN249: {script.OpUNKNOWN249, "OP_UNKNOWN249", 1, opcodeInvalid},
 
 	// Bitcoin Core internal use opcode.  Defined here for completeness.
-	bscript.OpSMALLINTEGER: {bscript.OpSMALLINTEGER, "OP_SMALLINTEGER", 1, opcodeInvalid},
-	bscript.OpPUBKEYS:      {bscript.OpPUBKEYS, "OP_PUBKEYS", 1, opcodeInvalid},
-	bscript.OpUNKNOWN252:   {bscript.OpUNKNOWN252, "OP_UNKNOWN252", 1, opcodeInvalid},
-	bscript.OpPUBKEYHASH:   {bscript.OpPUBKEYHASH, "OP_PUBKEYHASH", 1, opcodeInvalid},
-	bscript.OpPUBKEY:       {bscript.OpPUBKEY, "OP_PUBKEY", 1, opcodeInvalid},
+	script.OpSMALLINTEGER: {script.OpSMALLINTEGER, "OP_SMALLINTEGER", 1, opcodeInvalid},
+	script.OpPUBKEYS:      {script.OpPUBKEYS, "OP_PUBKEYS", 1, opcodeInvalid},
+	script.OpUNKNOWN252:   {script.OpUNKNOWN252, "OP_UNKNOWN252", 1, opcodeInvalid},
+	script.OpPUBKEYHASH:   {script.OpPUBKEYHASH, "OP_PUBKEYHASH", 1, opcodeInvalid},
+	script.OpPUBKEY:       {script.OpPUBKEY, "OP_PUBKEY", 1, opcodeInvalid},
 
-	bscript.OpINVALIDOPCODE: {bscript.OpINVALIDOPCODE, "OP_INVALIDOPCODE", 1, opcodeInvalid},
+	script.OpINVALIDOPCODE: {script.OpINVALIDOPCODE, "OP_INVALIDOPCODE", 1, opcodeInvalid},
 }
 
 // *******************************************
@@ -380,7 +380,7 @@ func opcode1Negate(op *ParsedOpcode, t *thread) error {
 func opcodeN(op *ParsedOpcode, t *thread) error {
 	// The opcodes are all defined consecutively, so the numeric value is
 	// the difference.
-	t.dstack.PushByteArray([]byte{(op.op.val - (bscript.Op1 - 1))})
+	t.dstack.PushByteArray([]byte{(op.op.val - (script.Op1 - 1))})
 	return nil
 }
 
@@ -389,13 +389,13 @@ func opcodeN(op *ParsedOpcode, t *thread) error {
 // the flag to discourage use of NOPs is set for select opcodes.
 func opcodeNop(op *ParsedOpcode, t *thread) error {
 	switch op.op.val {
-	case bscript.OpNOP1, bscript.OpNOP4, bscript.OpNOP5,
-		bscript.OpNOP6, bscript.OpNOP7, bscript.OpNOP8, bscript.OpNOP9, bscript.OpNOP10:
+	case script.OpNOP1, script.OpNOP4, script.OpNOP5,
+		script.OpNOP6, script.OpNOP7, script.OpNOP8, script.OpNOP9, script.OpNOP10:
 		if t.hasFlag(scriptflag.DiscourageUpgradableNops) {
 			return errs.NewError(
 				errs.ErrDiscourageUpgradableNOPs,
-				"bscript.OpNOP%d reserved for soft-fork upgrades",
-				op.op.val-(bscript.OpNOP1-1),
+				"script.OpNOP%d reserved for soft-fork upgrades",
+				op.op.val-(script.OpNOP1-1),
 			)
 		}
 	}
@@ -501,7 +501,7 @@ func opcodeNotIf(op *ParsedOpcode, t *thread) error {
 
 // opcodeElse inverts conditional execution for other half of if/else/endif.
 //
-// An error is returned if there has not already been a matching bscript.OpIF.
+// An error is returned if there has not already been a matching script.OpIF.
 //
 // Conditional stack transformation: [... OpCondValue] -> [... !OpCondValue]
 func opcodeElse(op *ParsedOpcode, t *thread) error {
@@ -538,7 +538,7 @@ func opcodeElse(op *ParsedOpcode, t *thread) error {
 // opcodeEndif terminates a conditional block, removing the value from the
 // conditional execution stack.
 //
-// An error is returned if there has not already been a matching bscript.OpIF.
+// An error is returned if there has not already been a matching script.OpIF.
 //
 // Conditional stack transformation: [... OpCondValue] -> [...]
 func opcodeEndif(op *ParsedOpcode, t *thread) error {
@@ -617,14 +617,14 @@ func verifyLockTime(txLockTime, threshold, lockTime int64) error {
 // opcodeCheckLockTimeVerify compares the top item on the data stack to the
 // LockTime field of the transaction containing the script signature
 // validating if the transaction outputs are spendable yet.  If flag
-// ScriptVerifyCheckLockTimeVerify is not set, the code continues as if bscript.OpNOP2
+// ScriptVerifyCheckLockTimeVerify is not set, the code continues as if script.OpNOP2
 // were executed.
 func opcodeCheckLockTimeVerify(op *ParsedOpcode, t *thread) error {
 	// If the ScriptVerifyCheckLockTimeVerify script flag is not set, treat
-	// opcode as bscript.OpNOP2 instead.
+	// opcode as script.OpNOP2 instead.
 	if !t.hasFlag(scriptflag.VerifyCheckLockTimeVerify) || t.afterGenesis {
 		if t.hasFlag(scriptflag.DiscourageUpgradableNops) {
-			return errs.NewError(errs.ErrDiscourageUpgradableNOPs, "bscript.OpNOP2 reserved for soft-fork upgrades")
+			return errs.NewError(errs.ErrDiscourageUpgradableNOPs, "script.OpNOP2 reserved for soft-fork upgrades")
 		}
 
 		return nil
@@ -650,7 +650,7 @@ func opcodeCheckLockTimeVerify(op *ParsedOpcode, t *thread) error {
 
 	// In the rare event that the argument needs to be < 0 due to some
 	// arithmetic being done first, you can always use
-	// 0 bscript.OpMAX bscript.OpCHECKLOCKTIMEVERIFY.
+	// 0 script.OpMAX script.OpCHECKLOCKTIMEVERIFY.
 	if lockTime.LessThanInt(0) {
 		return errs.NewError(errs.ErrNegativeLockTime, "negative lock time: %d", lockTime.Int64())
 	}
@@ -664,7 +664,7 @@ func opcodeCheckLockTimeVerify(op *ParsedOpcode, t *thread) error {
 	}
 
 	// The lock time feature can also be disabled, thereby bypassing
-	// bscript.OpCHECKLOCKTIMEVERIFY, if every transaction input has been finalised by
+	// script.OpCHECKLOCKTIMEVERIFY, if every transaction input has been finalised by
 	// setting its sequence to the maximum value (transaction.MaxTxInSequenceNum).  This
 	// condition would result in the transaction being allowed into the blockchain
 	// making the opcode ineffective.
@@ -687,14 +687,14 @@ func opcodeCheckLockTimeVerify(op *ParsedOpcode, t *thread) error {
 // opcodeCheckSequenceVerify compares the top item on the data stack to the
 // LockTime field of the transaction containing the script signature
 // validating if the transaction outputs are spendable yet.  If flag
-// ScriptVerifyCheckSequenceVerify is not set, the code continues as if bscript.OpNOP3
+// ScriptVerifyCheckSequenceVerify is not set, the code continues as if script.OpNOP3
 // were executed.
 func opcodeCheckSequenceVerify(op *ParsedOpcode, t *thread) error {
 	// If the ScriptVerifyCheckSequenceVerify script flag is not set, treat
-	// opcode as bscript.OpNOP3 instead.
+	// opcode as script.OpNOP3 instead.
 	if !t.hasFlag(scriptflag.VerifyCheckSequenceVerify) || t.afterGenesis {
 		if t.hasFlag(scriptflag.DiscourageUpgradableNops) {
-			return errs.NewError(errs.ErrDiscourageUpgradableNOPs, "bscript.OpNOP3 reserved for soft-fork upgrades")
+			return errs.NewError(errs.ErrDiscourageUpgradableNOPs, "script.OpNOP3 reserved for soft-fork upgrades")
 		}
 
 		return nil
@@ -720,7 +720,7 @@ func opcodeCheckSequenceVerify(op *ParsedOpcode, t *thread) error {
 
 	// In the rare event that the argument needs to be < 0 due to some
 	// arithmetic being done first, you can always use
-	// 0 bscript.OpMAX bscript.OpCHECKSEQUENCEVERIFY.
+	// 0 script.OpMAX script.OpCHECKSEQUENCEVERIFY.
 	if stackSequence.LessThanInt(0) {
 		return errs.NewError(errs.ErrNegativeLockTime, "negative sequence: %d", stackSequence.Int64())
 	}
@@ -946,7 +946,7 @@ func opcodeTuck(op *ParsedOpcode, t *thread) error {
 // opcodeCat concatenates two byte sequences. The result must
 // not be larger than MaxScriptElementSize.
 //
-// Stack transformation: {Ox11} {0x22, 0x33} bscript.OpCAT -> 0x112233
+// Stack transformation: {Ox11} {0x22, 0x33} script.OpCAT -> 0x112233
 func opcodeCat(op *ParsedOpcode, t *thread) error {
 	b, err := t.dstack.PopByteArray()
 	if err != nil {
@@ -969,9 +969,9 @@ func opcodeCat(op *ParsedOpcode, t *thread) error {
 }
 
 // opcodeSplit splits the operand at the given position.
-// This operation is the exact inverse of bscript.OpCAT
+// This operation is the exact inverse of script.OpCAT
 //
-// Stack transformation: x n bscript.OpSPLIT -> x1 x2
+// Stack transformation: x n script.OpSPLIT -> x1 x2
 func opcodeSplit(op *ParsedOpcode, t *thread) error {
 	n, err := t.dstack.PopInt()
 	if err != nil {
@@ -1002,7 +1002,7 @@ func opcodeSplit(op *ParsedOpcode, t *thread) error {
 // certain size, taking account of the sign bit. The byte sequence
 // produced uses the little-endian encoding.
 //
-// Stack transformation: a b bscript.OpNUM2BIN -> x
+// Stack transformation: a b script.OpNUM2BIN -> x
 func opcodeNum2bin(op *ParsedOpcode, t *thread) error {
 	n, err := t.dstack.PopInt()
 	if err != nil {
@@ -1054,7 +1054,7 @@ func opcodeNum2bin(op *ParsedOpcode, t *thread) error {
 // including minimal encoding. The byte sequence must encode the
 // value in little-endian encoding.
 //
-// Stack transformation: a bscript.OpBIN2NUM -> x
+// Stack transformation: a script.OpBIN2NUM -> x
 func opcodeBin2num(op *ParsedOpcode, t *thread) error {
 	a, err := t.dstack.PopByteArray()
 	if err != nil {
@@ -1110,7 +1110,7 @@ func opcodeInvert(op *ParsedOpcode, t *thread) error {
 
 // opcodeAnd executes a boolean and between each bit in the operands
 //
-// Stack transformation: x1 x2 bscript.OpAND -> out
+// Stack transformation: x1 x2 script.OpAND -> out
 func opcodeAnd(op *ParsedOpcode, t *thread) error { //nolint:dupl // to keep functionality with function signature
 	a, err := t.dstack.PopByteArray()
 	if err != nil {
@@ -1137,7 +1137,7 @@ func opcodeAnd(op *ParsedOpcode, t *thread) error { //nolint:dupl // to keep fun
 
 // opcodeOr executes a boolean or between each bit in the operands
 //
-// Stack transformation: x1 x2 bscript.OpOR -> out
+// Stack transformation: x1 x2 script.OpOR -> out
 func opcodeOr(op *ParsedOpcode, t *thread) error { //nolint:dupl // to keep functionality with function signature
 	a, err := t.dstack.PopByteArray()
 	if err != nil {
@@ -1164,7 +1164,7 @@ func opcodeOr(op *ParsedOpcode, t *thread) error { //nolint:dupl // to keep func
 
 // opcodeXor executes a boolean xor between each bit in the operands
 //
-// Stack transformation: x1 x2 bscript.OpXOR -> out
+// Stack transformation: x1 x2 script.OpXOR -> out
 func opcodeXor(op *ParsedOpcode, t *thread) error { //nolint:dupl // to keep functionality with function signature
 	a, err := t.dstack.PopByteArray()
 	if err != nil {
@@ -1389,7 +1389,7 @@ func opcodeMul(op *ParsedOpcode, t *thread) error {
 // opcodeDiv return the integer quotient of a and b. If the result
 // would be a non-integer it is rounded towards zero.
 //
-// Stack transformation: a b bscript.OpDIV -> out
+// Stack transformation: a b script.OpDIV -> out
 func opcodeDiv(op *ParsedOpcode, t *thread) error {
 	b, err := t.dstack.PopInt()
 	if err != nil {
@@ -1412,7 +1412,7 @@ func opcodeDiv(op *ParsedOpcode, t *thread) error {
 // opcodeMod returns the remainder after dividing a by b. The output will
 // be represented using the least number of bytes required.
 //
-// Stack transformation: a b bscript.OpMOD -> out
+// Stack transformation: a b script.OpMOD -> out
 func opcodeMod(op *ParsedOpcode, t *thread) error {
 	b, err := t.dstack.PopInt()
 	if err != nil {
@@ -1892,7 +1892,7 @@ func opcodeHash256(op *ParsedOpcode, t *thread) error {
 }
 
 // opcodeCodeSeparator stores the current script offset as the most recently
-// seen bscript.OpCODESEPARATOR which is used during signature checking.
+// seen script.OpCODESEPARATOR which is used during signature checking.
 //
 // This opcode does not change the contents of the data stack.
 func opcodeCodeSeparator(op *ParsedOpcode, t *thread) error {
@@ -1908,8 +1908,8 @@ func opcodeCodeSeparator(op *ParsedOpcode, t *thread) error {
 // the same way the transaction signer did.  It involves hashing portions of the
 // transaction based on the hash type byte (which is the final byte of the
 // signature) and the portion of the script starting from the most recent
-// bscript.OpCODESEPARATOR (or the beginning of the script if there are none) to the
-// end of the script (with any other bscript.OpCODESEPARATORs removed).  Once this
+// script.OpCODESEPARATOR (or the beginning of the script if there are none) to the
+// end of the script (with any other script.OpCODESEPARATORs removed).  Once this
 // "script hash" is calculated, the signature is checked using standard
 // cryptographic methods against the provided public key.
 //
@@ -1957,7 +1957,7 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	// Get script starting from the most recent bscript.OpCODESEPARATOR.
+	// Get script starting from the most recent script.OpCODESEPARATOR.
 	subScript := t.subScript()
 
 	// Generate the signature hash based on the signature hash type.
@@ -1967,7 +1967,7 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 	// to sign itself.
 	if !t.hasFlag(scriptflag.EnableSighashForkID) || !shf.Has(sighash.ForkID) {
 		subScript = subScript.removeOpcodeByData(fullSigBytes)
-		subScript = subScript.removeOpcode(bscript.OpCODESEPARATOR)
+		subScript = subScript.removeOpcode(script.OpCODESEPARATOR)
 	}
 
 	up, err := t.scriptParser.Unparse(subScript)
@@ -1976,7 +1976,7 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 	}
 
 	txCopy := t.tx.Clone()
-	txCopy.Inputs[t.inputIdx].PreviousTxScript = up
+	txCopy.Inputs[t.inputIdx].SourceTransaction.Outputs[txCopy.Inputs[t.inputIdx].SourceTxOutIndex].LockingScript = up
 
 	hash, err = txCopy.CalcInputSignatureHash(uint32(t.inputIdx), shf)
 	if err != nil {
@@ -2039,9 +2039,9 @@ type parsedSigInfo struct {
 //
 // Due to a bug in the original Satoshi client implementation, an additional
 // dummy argument is also required by the consensus rules, although it is not
-// used.  The dummy value SHOULD be an bscript.Op0, although that is not required by
+// used.  The dummy value SHOULD be an script.Op0, although that is not required by
 // the consensus rules.  When the ScriptStrictMultiSig flag is set, it must be
-// bscript.Op0.
+// script.Op0.
 //
 // All of the aforementioned stack items are replaced with a bool which
 // indicates if the requisite number of signatures were successfully verified.
@@ -2125,12 +2125,12 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 		return errs.NewError(errs.ErrSigNullDummy, "multisig dummy argument has length %d instead of 0", len(dummy))
 	}
 
-	// Get script starting from the most recent bscript.OpCODESEPARATOR.
-	script := t.subScript()
+	// Get s starting from the most recent s.OpCODESEPARATOR.
+	s := t.subScript()
 
 	for _, sigInfo := range signatures {
-		script = script.removeOpcodeByData(sigInfo.signature)
-		script = script.removeOpcode(bscript.OpCODESEPARATOR)
+		s = s.removeOpcodeByData(sigInfo.signature)
+		s = s.removeOpcode(script.OpCODESEPARATOR)
 	}
 
 	success := true
@@ -2153,7 +2153,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 		// The order of the signature and public key evaluation is
 		// important here since it can be distinguished by an
-		// bscript.OpCHECKMULTISIG NOT when the strict encoding flag is set.
+		// script.OpCHECKMULTISIG NOT when the strict encoding flag is set.
 
 		rawSig := sigInfo.signature
 		if len(rawSig) == 0 {
@@ -2207,7 +2207,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 			continue
 		}
 
-		up, err := t.scriptParser.Unparse(script)
+		up, err := t.scriptParser.Unparse(s)
 		if err != nil {
 			t.dstack.PushBool(false)
 			return nil //nolint:nilerr // only need a false push in this case
@@ -2215,7 +2215,9 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 		// Generate the signature hash based on the signature hash type.
 		txCopy := t.tx.Clone()
-		txCopy.Inputs[t.inputIdx].PreviousTxScript = up
+		txCopy.Inputs[t.inputIdx].SetPrevTxFromOutput(&transaction.TransactionOutput{
+			LockingScript: up,
+		})
 
 		signatureHash, err := txCopy.CalcInputSignatureHash(uint32(t.inputIdx), shf)
 		if err != nil {

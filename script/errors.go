@@ -1,12 +1,13 @@
-package bscript
+package script
 
 import "github.com/pkg/errors"
 
 // Sentinel errors raised by data ops.
 var (
-	ErrDataTooBig   = errors.New("data too big")
-	ErrDataTooSmall = errors.New("not enough data")
-	ErrPartTooBig   = errors.New("part too big")
+	ErrDataTooBig            = errors.New("data too big")
+	ErrDataTooSmall          = errors.New("not enough data")
+	ErrPartTooBig            = errors.New("part too big")
+	ErrScriptIndexOutOfRange = errors.New("script index out of range")
 )
 
 // Sentinel errors raised by addresses.

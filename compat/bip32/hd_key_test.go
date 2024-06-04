@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -702,7 +702,7 @@ func TestGetAddressFromHDKey(t *testing.T) {
 		{validHdKey, "13xHrMdZuqa2gpweHf37w8hu6tfv3JrnaW", false, false},
 	}
 
-	var address *bscript.Address
+	var address *script.Address
 	for _, test := range tests {
 		if address, err = GetAddressFromHDKey(test.input); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error not expected but got: %s", t.Name(), test.input, err.Error())
@@ -737,7 +737,7 @@ func ExampleGetAddressFromHDKey() {
 		return
 	}
 
-	var address *bscript.Address
+	var address *script.Address
 	if address, err = GetAddressFromHDKey(hdKey); err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return

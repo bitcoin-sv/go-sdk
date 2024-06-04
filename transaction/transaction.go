@@ -4,34 +4,33 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
-	"fmt"
 	"io"
 	"log"
+	"slices"
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/util"
 )
 
-type Tx struct {
-	Version    uint32      `json:"version"`
-	Inputs     []*Input    `json:"inputs"`
-	Outputs    []*Output   `json:"outputs"`
-	LockTime   uint32      `json:"locktime"`
-	MerklePath *MerklePath `json:"merklePath"`
+type Transaction struct {
+	Version    uint32               `json:"version"`
+	Inputs     []*TransactionInput  `json:"inputs"`
+	Outputs    []*TransactionOutput `json:"outputs"`
+	LockTime   uint32               `json:"locktime"`
+	MerklePath *MerklePath          `json:"merklePath"`
 }
 
 // Transactions a collection of *bt.Tx.
-type Transactions []*Tx
+type Transactions []*Transaction
 
 // NewTx creates a new transaction object with default values.
-func NewTx() *Tx {
-	return &Tx{Version: 1, LockTime: 0, Inputs: make([]*Input, 0)}
+func NewTx() *Transaction {
+	return &Transaction{Version: 1, LockTime: 0, Inputs: make([]*TransactionInput, 0)}
 }
 
 // NewTxFromHex takes a toBytesHelper string representation of a bitcoin transaction
 // and returns a Tx object.
-func NewTxFromHex(str string) (*Tx, error) {
+func NewTxFromHex(str string) (*Transaction, error) {
 	bb, err := hex.DecodeString(str)
 	if err != nil {
 		return nil, err
@@ -42,7 +41,7 @@ func NewTxFromHex(str string) (*Tx, error) {
 
 // NewTxFromBytes takes an array of bytes, constructs a Tx and returns it.
 // This function assumes that the byte slice contains exactly 1 transaction.
-func NewTxFromBytes(b []byte) (*Tx, error) {
+func NewTxFromBytes(b []byte) (*Transaction, error) {
 	tx, used, err := NewTxFromStream(b)
 	if err != nil {
 		return nil, err
@@ -58,8 +57,8 @@ func NewTxFromBytes(b []byte) (*Tx, error) {
 // NewTxFromStream takes an array of bytes and constructs a Tx from it, returning the Tx and the bytes used.
 // Despite the name, this is not actually reading a stream in the true sense: it is a byte slice that contains
 // many transactions one after another.
-func NewTxFromStream(b []byte) (*Tx, int, error) {
-	tx := Tx{}
+func NewTxFromStream(b []byte) (*Transaction, int, error) {
+	tx := Transaction{}
 
 	bytesRead, err := tx.ReadFrom(bytes.NewReader(b))
 
@@ -67,8 +66,8 @@ func NewTxFromStream(b []byte) (*Tx, int, error) {
 }
 
 // ReadFrom reads from the `io.Reader` into the `bt.Tx`.
-func (tx *Tx) ReadFrom(r io.Reader) (int64, error) {
-	*tx = Tx{}
+func (tx *Transaction) ReadFrom(r io.Reader) (int64, error) {
+	*tx = Transaction{}
 	var bytesRead int64
 
 	// Define n64 and err here to avoid linter complaining about shadowing variables.
@@ -138,7 +137,7 @@ func (tx *Tx) ReadFrom(r io.Reader) (int64, error) {
 
 	// create Inputs
 	for i := uint64(0); i < uint64(inputCount); i++ {
-		input := &Input{}
+		input := &TransactionInput{}
 		n64, err = input.readFrom(r, extended)
 		bytesRead += n64
 		if err != nil {
@@ -157,7 +156,7 @@ func (tx *Tx) ReadFrom(r io.Reader) (int64, error) {
 	}
 
 	for i := uint64(0); i < uint64(outputCount); i++ {
-		output := new(Output)
+		output := new(TransactionOutput)
 		n64, err = output.ReadFrom(r)
 		bytesRead += n64
 		if err != nil {
@@ -189,10 +188,10 @@ func (tt *Transactions) ReadFrom(r io.Reader) (int64, error) {
 		return bytesRead, err
 	}
 
-	*tt = make([]*Tx, txCount)
+	*tt = make([]*Transaction, txCount)
 
 	for i := uint64(0); i < uint64(txCount); i++ {
-		tx := new(Tx)
+		tx := new(Transaction)
 		n, err := tx.ReadFrom(r)
 		bytesRead += n
 		if err != nil {
@@ -207,7 +206,7 @@ func (tt *Transactions) ReadFrom(r io.Reader) (int64, error) {
 
 // HasDataOutputs returns true if the transaction has
 // at least one data (OP_RETURN) output in it.
-func (tx *Tx) HasDataOutputs() bool {
+func (tx *Transaction) HasDataOutputs() bool {
 	for _, out := range tx.Outputs {
 		if out.LockingScript.IsData() {
 			return true
@@ -220,7 +219,7 @@ func (tx *Tx) HasDataOutputs() bool {
 //
 // This will consume an overflow error and simply return nil if the input
 // isn't found at the index.
-func (tx *Tx) InputIdx(i int) *Input {
+func (tx *Transaction) InputIdx(i int) *TransactionInput {
 	if i > tx.InputCount()-1 {
 		return nil
 	}
@@ -231,7 +230,7 @@ func (tx *Tx) InputIdx(i int) *Input {
 //
 // This will consume an overflow error and simply return nil if the output
 // isn't found at the index.
-func (tx *Tx) OutputIdx(i int) *Output {
+func (tx *Transaction) OutputIdx(i int) *TransactionOutput {
 	if i > tx.OutputCount()-1 {
 		return nil
 	}
@@ -240,18 +239,18 @@ func (tx *Tx) OutputIdx(i int) *Output {
 
 // IsCoinbase determines if this transaction is a coinbase by
 // checking if the tx input is a standard coinbase input.
-func (tx *Tx) IsCoinbase() bool {
+func (tx *Transaction) IsCoinbase() bool {
 	if len(tx.Inputs) != 1 {
 		return false
 	}
 
 	cbi := make([]byte, 32)
 
-	if !bytes.Equal(tx.Inputs[0].PreviousTxID(), cbi) {
+	if !bytes.Equal(tx.Inputs[0].SourceTXID, cbi) {
 		return false
 	}
 
-	if tx.Inputs[0].PreviousTxOutIndex == DefaultSequenceNumber || tx.Inputs[0].SequenceNumber == DefaultSequenceNumber {
+	if tx.Inputs[0].SourceTxOutIndex == DefaultSequenceNumber || tx.Inputs[0].SequenceNumber == DefaultSequenceNumber {
 		return true
 	}
 
@@ -260,18 +259,18 @@ func (tx *Tx) IsCoinbase() bool {
 
 // TxIDBytes returns the transaction ID of the transaction as bytes
 // (which is also the transaction hash).
-func (tx *Tx) TxIDBytes() []byte {
+func (tx *Transaction) TxIDBytes() []byte {
 	return util.ReverseBytes(crypto.Sha256d(tx.Bytes()))
 }
 
 // TxID returns the transaction ID of the transaction
 // (which is also the transaction hash).
-func (tx *Tx) TxID() string {
+func (tx *Transaction) TxID() string {
 	return hex.EncodeToString(util.ReverseBytes(crypto.Sha256d(tx.Bytes())))
 }
 
 // String encodes the transaction into a hex string.
-func (tx *Tx) String() string {
+func (tx *Transaction) String() string {
 	return hex.EncodeToString(tx.Bytes())
 }
 
@@ -284,24 +283,29 @@ func IsValidTxID(txid []byte) bool {
 
 // Bytes encodes the transaction into a byte array.
 // See https://chainquery.com/bitcoin-cli/decoderawtransaction
-func (tx *Tx) Bytes() []byte {
+func (tx *Transaction) Bytes() []byte {
 	return tx.toBytesHelper(0, nil, false)
 }
 
-// ExtendedBytes outputs the transaction into a byte array in extended format
+// EF outputs the transaction into a byte array in extended format
 // (with PreviousTxSatoshis and PreviousTXScript included)
-func (tx *Tx) ExtendedBytes() []byte {
-	return tx.toBytesHelper(0, nil, true)
+func (tx *Transaction) EF() ([]byte, error) {
+	for _, in := range tx.Inputs {
+		if in.SourceTransaction == nil {
+			return nil, ErrEmptyPreviousTx
+		}
+	}
+	return tx.toBytesHelper(0, nil, true), nil
 }
 
 // BytesWithClearedInputs encodes the transaction into a byte array but clears its Inputs first.
 // This is used when signing transactions.
-func (tx *Tx) BytesWithClearedInputs(index int, lockingScript []byte) []byte {
+func (tx *Transaction) BytesWithClearedInputs(index int, lockingScript []byte) []byte {
 	return tx.toBytesHelper(index, lockingScript, false)
 }
 
 // Clone returns a clone of the tx
-func (tx *Tx) Clone() *Tx {
+func (tx *Transaction) Clone() *Transaction {
 	// Ignore err as byte slice passed in is created from valid tx
 	clone, err := NewTxFromBytes(tx.Bytes())
 	if err != nil {
@@ -309,42 +313,13 @@ func (tx *Tx) Clone() *Tx {
 	}
 
 	for i, input := range tx.Inputs {
-		clone.Inputs[i].PreviousTxSatoshis = input.PreviousTxSatoshis
-		clone.Inputs[i].PreviousTxScript = input.PreviousTxScript
+		clone.Inputs[i].SourceTransaction = input.SourceTransaction
 	}
 
 	return clone
 }
 
-// NodeJSON returns a wrapped *bt.Tx for marshalling/unmarshalling into a node tx format.
-//
-// Marshalling usage example:
-//
-//	bb, err := json.Marshal(tx.NodeJSON())
-//
-// Unmarshalling usage example:
-//
-//	tx := bt.NewTx()
-//	if err := json.Unmarshal(bb, tx.NodeJSON()); err != nil {}
-func (tx *Tx) NodeJSON() interface{} {
-	return &nodeTxWrapper{Tx: tx}
-}
-
-// NodeJSON returns a wrapped bt.Txs for marshalling/unmarshalling into a node tx format.
-//
-// Marshalling usage example:
-//
-//	bb, err := json.Marshal(txs.NodeJSON())
-//
-// Unmarshalling usage example:
-//
-//	var txs bt.Txs
-//	if err := json.Unmarshal(bb, txs.NodeJSON()); err != nil {}
-func (tt *Transactions) NodeJSON() interface{} {
-	return (*nodeTxsWrapper)(tt)
-}
-
-func (tx *Tx) toBytesHelper(index int, lockingScript []byte, extended bool) []byte {
+func (tx *Transaction) toBytesHelper(index int, lockingScript []byte, extended bool) []byte {
 	h := make([]byte, 0)
 
 	h = append(h, util.LittleEndianBytes(tx.Version, 4)...)
@@ -366,13 +341,18 @@ func (tx *Tx) toBytesHelper(index int, lockingScript []byte, extended bool) []by
 
 		if extended {
 			b := make([]byte, 8)
-			binary.LittleEndian.PutUint64(b, in.PreviousTxSatoshis)
+			prevSats := uint64(0)
+			if in.PreviousTxSatoshis() != nil {
+				prevSats = *in.PreviousTxSatoshis()
+			}
+			binary.LittleEndian.PutUint64(b, prevSats)
 			h = append(h, b...)
 
-			if in.PreviousTxScript != nil {
-				l := uint64(len(*in.PreviousTxScript))
+			prevScript := in.PreviousTxScript()
+			if prevScript != nil {
+				l := uint64(len(*prevScript))
 				h = append(h, VarInt(l).Bytes()...)
-				h = append(h, *in.PreviousTxScript...)
+				h = append(h, *prevScript...)
 			} else {
 				h = append(h, 0x00) // The length of the script is zero
 			}
@@ -390,182 +370,30 @@ func (tx *Tx) toBytesHelper(index int, lockingScript []byte, extended bool) []by
 	return append(h, lt...)
 }
 
-// TxSize contains the size breakdown of a transaction
-// including the breakdown of data bytes vs standard bytes.
-// This information can be used when calculating fees.
-type TxSize struct {
-	// TotalBytes are the amount of bytes for the entire tx.
-	TotalBytes uint64
-	// TotalStdBytes are the amount of bytes for the tx minus the data bytes.
-	TotalStdBytes uint64
-	// TotalDataBytes is the size in bytes of the op_return / data outputs.
-	TotalDataBytes uint64
-}
-
 // Size will return the size of tx in bytes.
-func (tx *Tx) Size() int {
+func (tx *Transaction) Size() int {
 	return len(tx.Bytes())
 }
 
-// SizeWithTypes will return the size of tx in bytes
-// and include the different data types (std/data/etc.).
-func (tx *Tx) SizeWithTypes() *TxSize {
-	totBytes := tx.Size()
+func (tx *Transaction) AddMerkleProof(bump *MerklePath) error {
+	if !slices.ContainsFunc(bump.Path[0], func(v *PathElement) bool {
+		return bytes.Equal(v.Hash, tx.TxIDBytes())
+	}) {
+		return ErrBadMerkleProof
+	}
+	tx.MerklePath = bump
+	return nil
+}
 
-	// calculate data outputs
-	dataLen := 0
-	for _, d := range tx.Outputs {
-		if d.LockingScript.IsData() {
-			dataLen += len(*d.LockingScript)
+func (tx *Transaction) Sign() error {
+	for vin, i := range tx.Inputs {
+		if i.Template != nil {
+			unlock, err := i.Template.Sign(tx, UnlockParams{InputIdx: uint32(vin)})
+			if err != nil {
+				return err
+			}
+			i.UnlockingScript = unlock
 		}
 	}
-	return &TxSize{
-		TotalBytes:     uint64(totBytes),
-		TotalStdBytes:  uint64(totBytes - dataLen),
-		TotalDataBytes: uint64(dataLen),
-	}
-}
-
-// EstimateSize will return the size of tx in bytes and will add 107 bytes
-// to the unlocking script of any unsigned inputs (only P2PKH for now) found
-// to give a final size estimate of the tx size.
-func (tx *Tx) EstimateSize() (int, error) {
-	tempTx, err := tx.estimatedFinalTx()
-	if err != nil {
-		return 0, err
-	}
-
-	return tempTx.Size(), nil
-}
-
-// EstimateSizeWithTypes will return the size of tx in bytes, including the
-// different data types (std/data/etc.), and will add 107 bytes to the unlocking
-// script of any unsigned inputs (only P2PKH for now) found to give a final size
-// estimate of the tx size.
-func (tx *Tx) EstimateSizeWithTypes() (*TxSize, error) {
-	tempTx, err := tx.estimatedFinalTx()
-	if err != nil {
-		return nil, err
-	}
-
-	return tempTx.SizeWithTypes(), nil
-}
-
-func (tx *Tx) estimatedFinalTx() (*Tx, error) {
-	tempTx := tx.Clone()
-
-	for i, in := range tempTx.Inputs {
-		if in.PreviousTxScript == nil {
-			return nil, fmt.Errorf("%w at index %d in order to calc expected UnlockingScript", ErrEmptyPreviousTxScript, i)
-		}
-		if !(in.PreviousTxScript.IsP2PKH() || in.PreviousTxScript.IsP2PKHInscription()) {
-			return nil, ErrUnsupportedScript
-		}
-		if in.UnlockingScript == nil || len(*in.UnlockingScript) == 0 {
-			//nolint:lll // insert dummy p2pkh unlocking script (sig + pubkey)
-			dummyUnlockingScript, _ := hex.DecodeString("4830450221009c13cbcbb16f2cfedc7abf3a4af1c3fe77df1180c0e7eee30d9bcc53ebda39da02207b258005f1bc3cf9dffa06edb358d6db2bcfc87f50516fac8e3f4686fc2a03df412103107feff22788a1fc8357240bf450fd7bca4bd45d5f8bac63818c5a7b67b03876")
-			in.UnlockingScript = bscript.NewFromBytes(dummyUnlockingScript)
-		}
-	}
-	return tempTx, nil
-}
-
-// TxFees is returned when CalculateFee is called and contains
-// a breakdown of the fees including the total and the size breakdown of
-// the tx in bytes.
-type TxFees struct {
-	// TotalFeePaid is the total amount of fees this tx will pay.
-	TotalFeePaid uint64
-	// StdFeePaid is the amount of fee to cover the standard inputs and outputs etc.
-	StdFeePaid uint64
-	// DataFeePaid is the amount of fee to cover the op_return data outputs.
-	DataFeePaid uint64
-}
-
-// IsFeePaidEnough will calculate the fees that this transaction is paying
-// including the individual fee types (std/data/etc.).
-func (tx *Tx) IsFeePaidEnough(fees *FeeQuote) (bool, error) {
-	expFeesPaid, err := tx.feesPaid(tx.SizeWithTypes(), fees)
-	if err != nil {
-		return false, err
-	}
-	totalInputSatoshis := tx.TotalInputSatoshis()
-	totalOutputSatoshis := tx.TotalOutputSatoshis()
-
-	if totalInputSatoshis < totalOutputSatoshis {
-		return false, nil
-	}
-
-	actualFeePaid := totalInputSatoshis - totalOutputSatoshis
-	return actualFeePaid >= expFeesPaid.TotalFeePaid, nil
-}
-
-// EstimateIsFeePaidEnough will calculate the fees that this transaction is paying
-// including the individual fee types (std/data/etc.), and will add 107 bytes to the unlocking
-// script of any unsigned inputs (only P2PKH for now) found to give a final size
-// estimate of the tx size for fee calculation.
-func (tx *Tx) EstimateIsFeePaidEnough(fees *FeeQuote) (bool, error) {
-	tempTx, err := tx.estimatedFinalTx()
-	if err != nil {
-		return false, err
-	}
-	expFeesPaid, err := tempTx.feesPaid(tempTx.SizeWithTypes(), fees)
-	if err != nil {
-		return false, err
-	}
-	totalInputSatoshis := tempTx.TotalInputSatoshis()
-	totalOutputSatoshis := tempTx.TotalOutputSatoshis()
-
-	if totalInputSatoshis < totalOutputSatoshis {
-		return false, nil
-	}
-
-	actualFeePaid := totalInputSatoshis - totalOutputSatoshis
-	return actualFeePaid >= expFeesPaid.TotalFeePaid, nil
-}
-
-// EstimateFeesPaid will estimate how big the tx will be when finalised
-// by estimating input unlocking scripts that have not yet been filled
-// including the individual fee types (std/data/etc.).
-func (tx *Tx) EstimateFeesPaid(fees *FeeQuote) (*TxFees, error) {
-	size, err := tx.EstimateSizeWithTypes()
-	if err != nil {
-		return nil, err
-	}
-	return tx.feesPaid(size, fees)
-}
-
-func (tx *Tx) feesPaid(size *TxSize, fees *FeeQuote) (*TxFees, error) {
-	// get fees
-	stdFee, err := fees.Fee(FeeTypeStandard)
-	if err != nil {
-		return nil, err
-	}
-	dataFee, err := fees.Fee(FeeTypeData)
-	if err != nil {
-		return nil, err
-	}
-
-	txFees := &TxFees{
-		StdFeePaid:  size.TotalStdBytes * uint64(stdFee.MiningFee.Satoshis) / uint64(stdFee.MiningFee.Bytes),
-		DataFeePaid: size.TotalDataBytes * uint64(dataFee.MiningFee.Satoshis) / uint64(dataFee.MiningFee.Bytes),
-	}
-	txFees.TotalFeePaid = txFees.StdFeePaid + txFees.DataFeePaid
-	return txFees, nil
-}
-
-func (tx *Tx) estimateDeficit(fees *FeeQuote) (uint64, error) {
-	totalInputSatoshis := tx.TotalInputSatoshis()
-	totalOutputSatoshis := tx.TotalOutputSatoshis()
-
-	expFeesPaid, err := tx.EstimateFeesPaid(fees)
-	if err != nil {
-		return 0, err
-	}
-
-	if totalInputSatoshis > totalOutputSatoshis+expFeesPaid.TotalFeePaid {
-		return 0, nil
-	}
-
-	return totalOutputSatoshis + expFeesPaid.TotalFeePaid - totalInputSatoshis, nil
+	return nil
 }

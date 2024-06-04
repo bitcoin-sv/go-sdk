@@ -6,9 +6,9 @@ import (
 	"log"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	hash "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	bscript "github.com/bitcoin-sv/go-sdk/script"
 	opcodes "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/transaction/template"
 )
 
 func main() {
@@ -16,14 +16,14 @@ func main() {
 
 	// From Hex
 	opTrueHex := hex.EncodeToString([]byte{opcodes.OpTRUE})
-	scriptFromHex, err := bscript.NewFromHex(opTrueHex)
+	scriptFromHex, err := script.NewFromHex(opTrueHex)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println("Script from Hex:", scriptFromHex)
 
 	// From ASM
-	scriptFromASM, err := bscript.NewFromASM("OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG")
+	scriptFromASM, err := script.NewFromASM("OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -31,7 +31,7 @@ func main() {
 
 	// From Binary
 	binaryData := []byte{opcodes.OpPUSHDATA1, 3, 1, 2, 3}
-	scriptFromBinary := bscript.NewFromBytes(binaryData)
+	scriptFromBinary := script.NewFromBytes(binaryData)
 	fmt.Println("Script from Binary:", scriptFromBinary)
 
 	// Advanced Example: Creating a P2PKH Locking Script
@@ -39,8 +39,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	publicKeyHash := hash.Hash160(privKey.PubKey().SerialiseCompressed())
-	lockingScript, err := bscript.NewP2PKHFromPubKeyHash(publicKeyHash)
+	// publicKeyHash := hash.Hash160(privKey.PubKey().SerialiseCompressed())
+	tmpl := template.NewP2PKHFromPubKeyEC(privKey.PubKey())
+	lockingScript, err := tmpl.Lock()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -51,7 +52,7 @@ func main() {
 	}
 
 	// Serializing Scripts
-	script, err := bscript.NewFromASM("OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG")
+	script, err := script.NewFromASM("OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG")
 	if err != nil {
 		log.Fatal(err)
 	}

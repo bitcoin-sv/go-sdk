@@ -1,10 +1,10 @@
-package bscript_test
+package script_test
 
 import (
 	"fmt"
 	"testing"
 
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,11 +12,11 @@ func TestEncodeBIP276(t *testing.T) {
 	t.Parallel()
 
 	t.Run("valid encode (mainnet)", func(t *testing.T) {
-		s := bscript.EncodeBIP276(
-			bscript.BIP276{
-				Prefix:  bscript.PrefixScript,
-				Version: bscript.CurrentVersion,
-				Network: bscript.NetworkMainnet,
+		s := script.EncodeBIP276(
+			script.BIP276{
+				Prefix:  script.PrefixScript,
+				Version: script.CurrentVersion,
+				Network: script.NetworkMainnet,
 				Data:    []byte("fake script"),
 			},
 		)
@@ -25,11 +25,11 @@ func TestEncodeBIP276(t *testing.T) {
 	})
 
 	t.Run("valid encode (testnet)", func(t *testing.T) {
-		s := bscript.EncodeBIP276(
-			bscript.BIP276{
-				Prefix:  bscript.PrefixScript,
-				Version: bscript.CurrentVersion,
-				Network: bscript.NetworkTestnet,
+		s := script.EncodeBIP276(
+			script.BIP276{
+				Prefix:  script.PrefixScript,
+				Version: script.CurrentVersion,
+				Network: script.NetworkTestnet,
 				Data:    []byte("fake script"),
 			},
 		)
@@ -38,11 +38,11 @@ func TestEncodeBIP276(t *testing.T) {
 	})
 
 	t.Run("invalid version = 0", func(t *testing.T) {
-		s := bscript.EncodeBIP276(
-			bscript.BIP276{
-				Prefix:  bscript.PrefixScript,
+		s := script.EncodeBIP276(
+			script.BIP276{
+				Prefix:  script.PrefixScript,
 				Version: 0,
-				Network: bscript.NetworkMainnet,
+				Network: script.NetworkMainnet,
 				Data:    []byte("fake script"),
 			},
 		)
@@ -51,11 +51,11 @@ func TestEncodeBIP276(t *testing.T) {
 	})
 
 	t.Run("invalid version > 255", func(t *testing.T) {
-		s := bscript.EncodeBIP276(
-			bscript.BIP276{
-				Prefix:  bscript.PrefixScript,
+		s := script.EncodeBIP276(
+			script.BIP276{
+				Prefix:  script.PrefixScript,
 				Version: 256,
-				Network: bscript.NetworkMainnet,
+				Network: script.NetworkMainnet,
 				Data:    []byte("fake script"),
 			},
 		)
@@ -64,10 +64,10 @@ func TestEncodeBIP276(t *testing.T) {
 	})
 
 	t.Run("invalid network = 0", func(t *testing.T) {
-		s := bscript.EncodeBIP276(
-			bscript.BIP276{
-				Prefix:  bscript.PrefixScript,
-				Version: bscript.CurrentVersion,
+		s := script.EncodeBIP276(
+			script.BIP276{
+				Prefix:  script.PrefixScript,
+				Version: script.CurrentVersion,
 				Network: 0,
 				Data:    []byte("fake script"),
 			},
@@ -77,11 +77,11 @@ func TestEncodeBIP276(t *testing.T) {
 	})
 
 	t.Run("different prefix", func(t *testing.T) {
-		s := bscript.EncodeBIP276(
-			bscript.BIP276{
+		s := script.EncodeBIP276(
+			script.BIP276{
 				Prefix:  "different-prefix",
-				Version: bscript.CurrentVersion,
-				Network: bscript.NetworkMainnet,
+				Version: script.CurrentVersion,
+				Network: script.NetworkMainnet,
 				Data:    []byte("fake script"),
 			},
 		)
@@ -90,11 +90,11 @@ func TestEncodeBIP276(t *testing.T) {
 	})
 
 	t.Run("template prefix", func(t *testing.T) {
-		s := bscript.EncodeBIP276(
-			bscript.BIP276{
-				Prefix:  bscript.PrefixTemplate,
-				Version: bscript.CurrentVersion,
-				Network: bscript.NetworkMainnet,
+		s := script.EncodeBIP276(
+			script.BIP276{
+				Prefix:  script.PrefixTemplate,
+				Version: script.CurrentVersion,
+				Network: script.NetworkMainnet,
 				Data:    []byte("fake script"),
 			},
 		)
@@ -107,7 +107,7 @@ func TestDecodeBIP276(t *testing.T) {
 	t.Parallel()
 
 	t.Run("valid decode", func(t *testing.T) {
-		script, err := bscript.DecodeBIP276("bitcoin-script:010166616b65207363726970746f0cd86a")
+		script, err := script.DecodeBIP276("bitcoin-script:010166616b65207363726970746f0cd86a")
 		assert.NoError(t, err)
 		assert.Equal(t, `"bitcoin-script"`, fmt.Sprintf("%q", script.Prefix))
 		assert.Equal(t, 1, script.Network)
@@ -116,13 +116,13 @@ func TestDecodeBIP276(t *testing.T) {
 	})
 
 	t.Run("invalid decode", func(t *testing.T) {
-		script, err := bscript.DecodeBIP276("bitcoin-script:01")
+		script, err := script.DecodeBIP276("bitcoin-script:01")
 		assert.Error(t, err)
 		assert.Nil(t, script)
 	})
 
 	t.Run("valid format, bad checksum", func(t *testing.T) {
-		script, err := bscript.DecodeBIP276("bitcoin-script:010166616b65207363726970746f0cd8")
+		script, err := script.DecodeBIP276("bitcoin-script:010166616b65207363726970746f0cd8")
 		assert.Error(t, err)
 		assert.Nil(t, script)
 	})

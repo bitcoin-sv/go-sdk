@@ -12,6 +12,7 @@ var (
 	ErrUnsupportedScript = errors.New("non-P2PKH input used in the tx - unsupported")
 	ErrInvalidScriptType = errors.New("invalid script type")
 	ErrNoUnlocker        = errors.New("unlocker not supplied")
+	ErrBadMerkleProof    = errors.New("bad merkle proof")
 )
 
 // Sentinal errors reported by inputs.
@@ -37,8 +38,8 @@ var (
 
 // Sentinal errors reported by signature hash.
 var (
-	ErrEmptyPreviousTxID     = errors.New("'PreviousTxID' not supplied")
-	ErrEmptyPreviousTxScript = errors.New("'PreviousTxScript' not supplied")
+	ErrEmptyPreviousTxID = errors.New("'PreviousTxID' not supplied")
+	ErrEmptyPreviousTx   = errors.New("'PreviousTx' not supplied")
 )
 
 // Sentinel errors reported by the fees.

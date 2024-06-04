@@ -1,17 +1,17 @@
 package transaction
 
 import (
-	bscript "github.com/bitcoin-sv/go-sdk/script"
+	script "github.com/bitcoin-sv/go-sdk/script"
 )
 
-// OrdinalsPrefix contains 'ORD' the inscription protocol prefix.
+// OrdinalsPrefix contains 'ord' the inscription protocol prefix.
 //
 // Check the docs here: https://docs.1satordinals.com/
 const OrdinalsPrefix = "ord"
 
 // Inscribe adds an output to the transaction with an inscription.
-func (tx *Tx) Inscribe(ia *bscript.InscriptionArgs) error {
-	s := *ia.LockingScriptPrefix // deep copy
+func (tx *Transaction) Inscribe(ia *script.InscriptionArgs) error {
+	ins := script.Script{} // deep copy
 
 	// add Inscription data
 	// (Example: 	OP_FALSE
@@ -27,43 +27,37 @@ func (tx *Tx) Inscribe(ia *bscript.InscriptionArgs) error {
 	//						OP_ENDIF
 	// )
 	// see: https://docs.ordinals.com/inscriptions.html
-	_ = s.AppendOpcodes(bscript.OpFALSE, bscript.OpIF)
-	err := s.AppendPushDataString(OrdinalsPrefix)
+	_ = ins.AppendOpcodes(script.OpFALSE, script.OpIF)
+	err := ins.AppendPushDataString(OrdinalsPrefix)
 	if err != nil {
 		return err
 	}
-	_ = s.AppendOpcodes(bscript.Op1)
-	err = s.AppendPushData([]byte(ia.ContentType))
+	_ = ins.AppendOpcodes(script.Op1)
+	err = ins.AppendPushData([]byte(ia.ContentType))
 	if err != nil {
 		return err
 	}
-	_ = s.AppendOpcodes(bscript.Op0)
-	err = s.AppendPushData(ia.Data)
+	_ = ins.AppendOpcodes(script.Op0)
+	err = ins.AppendPushData(ia.Data)
 	if err != nil {
 		return err
 	}
-	_ = s.AppendOpcodes(bscript.OpENDIF)
+	_ = ins.AppendOpcodes(script.OpENDIF)
+
+	s := script.NewFromBytes(append(ins, *ia.LockingScript...))
 
 	if ia.EnrichedArgs != nil {
 		if len(ia.EnrichedArgs.OpReturnData) > 0 {
-
-			// FIXME: import cycle
-			// // Sign with AIP
-			// _, outData, _, err := aip.SignOpReturnData(*signingKey, "BITCOIN_ECDSA", opReturn)
-			// if err != nil {
-			// 	return nil, err
-			// }
-
-			_ = s.AppendOpcodes(bscript.OpRETURN)
-			if err := s.AppendPushDataArray(ia.EnrichedArgs.OpReturnData); err != nil {
+			_ = ins.AppendOpcodes(script.OpRETURN)
+			if err := ins.AppendPushDataArray(ia.EnrichedArgs.OpReturnData); err != nil {
 				return err
 			}
 		}
 	}
 
-	tx.AddOutput(&Output{
+	tx.AddOutput(&TransactionOutput{
 		Satoshis:      1,
-		LockingScript: &s,
+		LockingScript: s,
 	})
 	return nil
 }
@@ -77,8 +71,8 @@ func (tx *Tx) Inscribe(ia *bscript.InscriptionArgs) error {
 //
 // One output will be created with the extra Satoshis and then another
 // output will be created with 1 Satoshi with the inscription in it.
-func (tx *Tx) InscribeSpecificOrdinal(ia *bscript.InscriptionArgs, inputIdx uint32, satoshiIdx uint64,
-	extraOutputScript *bscript.Script) error {
+func (tx *Transaction) InscribeSpecificOrdinal(ia *script.InscriptionArgs, inputIdx uint32, satoshiIdx uint64,
+	extraOutputScript *script.Script) error {
 	amount, err := rangeAbove(tx.Inputs, inputIdx, satoshiIdx)
 	if err != nil {
 		return err
@@ -88,7 +82,7 @@ func (tx *Tx) InscribeSpecificOrdinal(ia *bscript.InscriptionArgs, inputIdx uint
 		return ErrOutputsNotEmpty
 	}
 
-	tx.AddOutput(&Output{
+	tx.AddOutput(&TransactionOutput{
 		Satoshis:      amount,
 		LockingScript: extraOutputScript,
 	})
@@ -112,7 +106,7 @@ func (tx *Tx) InscribeSpecificOrdinal(ia *bscript.InscriptionArgs, inputIdx uint
 // [a b] [c] [d e f] → [a b c d] [e f]
 //
 // For more info check the Ordinals Theory Handbook (https://docs.ordinals.com/faq.html).
-func rangeAbove(is []*Input, inputIdx uint32, satIdx uint64) (uint64, error) {
+func rangeAbove(is []*TransactionInput, inputIdx uint32, satIdx uint64) (uint64, error) {
 	if uint32(len(is)) < inputIdx {
 		return 0, ErrOutputNoExist
 	}
@@ -122,10 +116,11 @@ func rangeAbove(is []*Input, inputIdx uint32, satIdx uint64) (uint64, error) {
 		if uint32(i) >= inputIdx {
 			break
 		}
-		if in.PreviousTxSatoshis == 0 {
+		prevSats := in.PreviousTxSatoshis()
+		if prevSats == nil || *prevSats == 0 {
 			return 0, ErrInputSatsZero
 		}
-		acc += in.PreviousTxSatoshis
+		acc += *prevSats
 	}
 	return acc + satIdx, nil
 }
