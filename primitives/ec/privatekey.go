@@ -107,7 +107,11 @@ func PrivateKeyFromWif(wif string) (*PrivateKey, error) {
 	return privKey, nil
 }
 
-func (p *PrivateKey) Wif(net *chaincfg.Params) string {
+func (p *PrivateKey) Wif() string {
+	return p.WifForChain(&chaincfg.MainNet)
+}
+
+func (p *PrivateKey) WifForChain(net *chaincfg.Params) string {
 	// Precalculate size.  Maximum number of bytes before base58 encoding
 	// is one byte for the network, 32 bytes of private key, possibly one
 	// extra byte if the pubkey is to be compressed, and finally four
