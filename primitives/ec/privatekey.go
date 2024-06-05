@@ -11,7 +11,6 @@ import (
 
 	base58 "github.com/bitcoin-sv/go-sdk/compat/base58"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	chaincfg "github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
 )
 
 var (
@@ -24,6 +23,13 @@ var (
 	// if the byte length is incorrect or an unexpected magic number was
 	// encountered.
 	ErrMalformedPrivateKey = errors.New("malformed private key")
+)
+
+type Network byte
+
+var (
+	MainNet Network = 0x80
+	TestNet Network = 0xef
 )
 
 // compressMagic is the magic byte used to identify a WIF encoding for
@@ -108,10 +114,10 @@ func PrivateKeyFromWif(wif string) (*PrivateKey, error) {
 }
 
 func (p *PrivateKey) Wif() string {
-	return p.WifForChain(&chaincfg.MainNet)
+	return p.WifPrefix(byte(MainNet))
 }
 
-func (p *PrivateKey) WifForChain(net *chaincfg.Params) string {
+func (p *PrivateKey) WifPrefix(prefix byte) string {
 	// Precalculate size.  Maximum number of bytes before base58 encoding
 	// is one byte for the network, 32 bytes of private key, possibly one
 	// extra byte if the pubkey is to be compressed, and finally four
@@ -125,7 +131,7 @@ func (p *PrivateKey) WifForChain(net *chaincfg.Params) string {
 	encodeLen := 1 + PrivateKeyBytesLen + 4 + 1
 
 	a := make([]byte, 0, encodeLen)
-	a = append(a, net.PrivateKeyID)
+	a = append(a, prefix)
 	// Pad and append bytes manually, instead of using Serialise, to
 	// avoid another call to make.
 	b := p.D.Bytes()

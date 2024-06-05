@@ -8,7 +8,6 @@ import (
 	"encoding/hex"
 	"testing"
 
-	chaincfg "github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +19,7 @@ func TestEncodeDecodeWIF(t *testing.T) {
 	mainPriv, _ := PrivateKeyFromWif(mainWif)
 	testPriv, _ := PrivateKeyFromWif(testWif)
 	assert.Equal(t, mainWif, mainPriv.Wif())
-	assert.Equal(t, testWif, mainPriv.WifForChain(&chaincfg.TestNet))
+	assert.Equal(t, testWif, mainPriv.WifPrefix(byte(TestNet)))
 	assert.Equal(t, privHex, hex.EncodeToString(mainPriv.Serialise()))
 	assert.Equal(t, mainPriv.Serialise(), testPriv.Serialise())
 }
