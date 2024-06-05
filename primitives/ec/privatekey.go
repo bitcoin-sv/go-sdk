@@ -1,14 +1,34 @@
 package primitives
 
 import (
+	"bytes"
 	e "crypto/ecdsa"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"math/big"
 
+	base58 "github.com/bitcoin-sv/go-sdk/compat/base58"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
+	chaincfg "github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
 )
+
+var (
+	// ErrChecksumMismatch describes an error where decoding failed due
+	// to a bad checksum.
+	ErrChecksumMismatch = errors.New("checksum mismatch")
+
+	// ErrMalformedPrivateKey describes an error where a WIF-encoded private
+	// key cannot be decoded due to being improperly formatted.  This may occur
+	// if the byte length is incorrect or an unexpected magic number was
+	// encountered.
+	ErrMalformedPrivateKey = errors.New("malformed private key")
+)
+
+// compressMagic is the magic byte used to identify a WIF encoding for
+// an address created from a compressed serialised public key.
+const compressMagic byte = 0x01
 
 // PrivateKey wraps an ecdsa.PrivateKey as a convenience mainly for signing
 // things with the the private key without having to directly import the ecdsa
@@ -41,10 +61,79 @@ func NewPrivateKey() (*PrivateKey, error) {
 }
 
 // PrivateKey is an ecdsa.PrivateKey with additional functions to
-func PrivateKeyFromString(privKeyHex string) (*PrivateKey, error) {
+func PrivateKeyFromHex(privKeyHex string) (*PrivateKey, error) {
 	privKeyBytes, _ := hex.DecodeString(privKeyHex)
 	privKey, _ := PrivateKeyFromBytes(privKeyBytes)
 	return privKey, nil
+}
+
+// PrivateKey is an ecdsa.PrivateKey with additional functions to
+func PrivateKeyFromWif(wif string) (*PrivateKey, error) {
+	decoded := base58.Decode(wif)
+	decodedLen := len(decoded)
+	var compress bool
+
+	// Length of base58 decoded WIF must be 32 bytes + an optional 1 byte
+	// (0x01) if compressed, plus 1 byte for netID + 4 bytes of checksum.
+	switch decodedLen {
+	case 1 + PrivateKeyBytesLen + 1 + 4:
+		if decoded[33] != compressMagic {
+			return nil, ErrMalformedPrivateKey
+		}
+		compress = true
+	case 1 + PrivateKeyBytesLen + 4:
+		compress = false
+	default:
+		return nil, ErrMalformedPrivateKey
+	}
+
+	// Checksum is first four bytes of double SHA256 of the identifier byte
+	// and privKey.  Verify this matches the final 4 bytes of the decoded
+	// private key.
+	var tosum []byte
+	if compress {
+		tosum = decoded[:1+PrivateKeyBytesLen+1]
+	} else {
+		tosum = decoded[:1+PrivateKeyBytesLen]
+	}
+	cksum := crypto.Sha256d(tosum)[:4]
+	if !bytes.Equal(cksum, decoded[decodedLen-4:]) {
+		return nil, ErrChecksumMismatch
+	}
+
+	// netID := decoded[0]
+	privKeyBytes := decoded[1 : 1+PrivateKeyBytesLen]
+	privKey, _ := PrivateKeyFromBytes(privKeyBytes)
+	return privKey, nil
+}
+
+func (p *PrivateKey) Wif(net *chaincfg.Params) string {
+	// Precalculate size.  Maximum number of bytes before base58 encoding
+	// is one byte for the network, 32 bytes of private key, possibly one
+	// extra byte if the pubkey is to be compressed, and finally four
+	// bytes of checksum.
+
+	// For now, we assume compressed = true
+	// encodeLen := 1 + PrivateKeyBytesLen + 4
+	// if compress {
+	// 	encodeLen++
+	// }
+	encodeLen := 1 + PrivateKeyBytesLen + 4 + 1
+
+	a := make([]byte, 0, encodeLen)
+	a = append(a, net.PrivateKeyID)
+	// Pad and append bytes manually, instead of using Serialise, to
+	// avoid another call to make.
+	b := p.D.Bytes()
+	a = paddedAppend(PrivateKeyBytesLen, a, b)
+
+	// For now, we assume compressed = true
+	// if compress {
+	a = append(a, compressMagic)
+	// }
+	cksum := crypto.Sha256d(a)[:4]
+	a = append(a, cksum...)
+	return base58.Encode(a)
 }
 
 // PubKey returns the PublicKey corresponding to this private key.

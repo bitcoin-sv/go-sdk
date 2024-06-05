@@ -86,7 +86,7 @@ func TestBRC42PrivateVectors(t *testing.T) {
 			if err != nil {
 				t.Errorf("Could not parse public key: %v", err)
 			}
-			privateKey, err := PrivateKeyFromString(v.RecipientPrivateKey)
+			privateKey, err := PrivateKeyFromHex(v.RecipientPrivateKey)
 			if err != nil {
 				t.Errorf("Could not parse private key: %v", err)
 			}

@@ -326,7 +326,7 @@ func TestBRC42PublicVectors(t *testing.T) {
 
 	for i, v := range testVectors {
 		t.Run("BRC42 public vector #"+strconv.Itoa(i+1), func(t *testing.T) {
-			privateKey, err := PrivateKeyFromString(v.SenderPrivateKey)
+			privateKey, err := PrivateKeyFromHex(v.SenderPrivateKey)
 			if err != nil {
 				t.Errorf("Could not parse private key: %v", err)
 			}

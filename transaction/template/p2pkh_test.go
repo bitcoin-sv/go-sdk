@@ -5,7 +5,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
@@ -29,11 +28,10 @@ func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {
 	tx.Inputs[0].SourceTransaction = prevTx
 
 	// Our private key
-	var w *wif.WIF
-	w, err = wif.DecodeWIF("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
+	priv, err := ec.PrivateKeyFromWif("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
 	assert.NoError(t, err)
 
-	scriptTmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
+	scriptTmpl := template.NewP2PKHFromPrivKey(priv)
 
 	s, err := scriptTmpl.Sign(tx, transaction.UnlockParams{InputIdx: 0})
 	assert.NoError(t, err)
@@ -102,11 +100,10 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			tx := test.tx
 
-			var w *wif.WIF
-			w, err := wif.DecodeWIF("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
+			priv, err := ec.PrivateKeyFromWif("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
 			assert.NoError(t, err)
 
-			unlocker := template.NewP2PKHFromPrivKey(w.PrivKey)
+			unlocker := template.NewP2PKHFromPrivKey(priv)
 			uscript, err := unlocker.Sign(tx, transaction.UnlockParams{})
 			assert.NoError(t, err)
 
