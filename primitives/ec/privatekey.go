@@ -123,12 +123,11 @@ func (p *PrivateKey) WifPrefix(prefix byte) string {
 	// extra byte if the pubkey is to be compressed, and finally four
 	// bytes of checksum.
 
+	encodeLen := 1 + PrivateKeyBytesLen + 4
 	// For now, we assume compressed = true
-	// encodeLen := 1 + PrivateKeyBytesLen + 4
 	// if compress {
-	// 	encodeLen++
+	encodeLen++
 	// }
-	encodeLen := 1 + PrivateKeyBytesLen + 4 + 1
 
 	a := make([]byte, 0, encodeLen)
 	a = append(a, prefix)
