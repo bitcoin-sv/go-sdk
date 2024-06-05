@@ -19,8 +19,8 @@ func TestEncodeDecodeWIF(t *testing.T) {
 
 	mainPriv, _ := PrivateKeyFromWif(mainWif)
 	testPriv, _ := PrivateKeyFromWif(testWif)
-	assert.Equal(t, mainWif, mainPriv.Wif(&chaincfg.MainNet))
-	assert.Equal(t, testWif, mainPriv.Wif(&chaincfg.TestNet))
+	assert.Equal(t, mainWif, mainPriv.Wif())
+	assert.Equal(t, testWif, mainPriv.WifForChain(&chaincfg.TestNet))
 	assert.Equal(t, privHex, hex.EncodeToString(mainPriv.Serialise()))
 	assert.Equal(t, mainPriv.Serialise(), testPriv.Serialise())
 }
