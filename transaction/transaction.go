@@ -298,6 +298,14 @@ func (tx *Transaction) EF() ([]byte, error) {
 	return tx.toBytesHelper(0, nil, true), nil
 }
 
+func (tx *Transaction) EFHex() (string, error) {
+	ef, err := tx.EF()
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(ef), nil
+}
+
 // BytesWithClearedInputs encodes the transaction into a byte array but clears its Inputs first.
 // This is used when signing transactions.
 func (tx *Transaction) BytesWithClearedInputs(index int, lockingScript []byte) []byte {
