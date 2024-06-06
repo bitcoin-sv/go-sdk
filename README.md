@@ -48,7 +48,7 @@ import (
 )
 
 func main() {
-	tx := transaction.NewTx()
+	tx := transaction.NewTransaction()
 
 	_ = tx.From(
 		"11b476ad8e0a48fcd40807a111a050af51114877e09283bfa7f3505081a1819d",

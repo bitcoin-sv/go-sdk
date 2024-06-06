@@ -17,7 +17,7 @@ func main() {
 
 	tmpl := template.NewP2PKHFromPrivKey(priv) // get public key bytes and address
 
-	tx := transaction.NewTx()
+	tx := transaction.NewTransaction()
 	_ = tx.AddInputFrom(
 		"39e5954ee335fdb5a1368ab9e851a954ed513f73f6e8e85eff5e31adbb5837e7",
 		0,

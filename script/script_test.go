@@ -560,7 +560,7 @@ func TestSpendValid(t *testing.T) {
 		}
 
 		t.Run(fmt.Sprintf("Spend vector %d", i), func(t *testing.T) {
-			tx := transaction.NewTx()
+			tx := transaction.NewTransaction()
 			lockingScript, err := script.NewFromHex(v[1])
 			if err != nil {
 				t.Error(err)

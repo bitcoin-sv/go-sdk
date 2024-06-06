@@ -32,11 +32,11 @@ func (tx *Transaction) AddInputWithOutput(input *TransactionInput, output *Trans
 
 func (tx *Transaction) AddInputFromTx(prevTx *Transaction, vout uint32, template ScriptTemplate) {
 	i := &TransactionInput{
-		SourceTXID:        prevTx.TxIDBytes(),
-		SourceTxOutIndex:  vout,
-		SourceTransaction: prevTx,
-		SequenceNumber:    DefaultSequenceNumber, // use default finalised sequence number
-		Template:          template,
+		SourceTXID:              prevTx.TxIDBytes(),
+		SourceTxOutIndex:        vout,
+		SourceTransaction:       prevTx,
+		SequenceNumber:          DefaultSequenceNumber, // use default finalised sequence number
+		UnlockingScriptTemplate: template,
 	}
 
 	tx.Inputs = append(tx.Inputs, i)
@@ -102,10 +102,10 @@ func (tx *Transaction) AddInputFrom(prevTxID string, vout uint32, prevTxLockingS
 func (tx *Transaction) AddInputsFromUTXOs(utxos ...*UTXO) error {
 	for _, utxo := range utxos {
 		i := &TransactionInput{
-			SourceTXID:       utxo.TxID,
-			SourceTxOutIndex: utxo.Vout,
-			SequenceNumber:   DefaultSequenceNumber, // use default finalised sequence number
-			Template:         utxo.Template,
+			SourceTXID:              utxo.TxID,
+			SourceTxOutIndex:        utxo.Vout,
+			SequenceNumber:          DefaultSequenceNumber, // use default finalised sequence number
+			UnlockingScriptTemplate: utxo.Template,
 		}
 		i.SetPrevTxFromOutput(&TransactionOutput{
 			Satoshis:      utxo.Satoshis,

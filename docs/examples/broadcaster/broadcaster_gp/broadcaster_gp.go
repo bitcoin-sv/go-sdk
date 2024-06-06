@@ -9,7 +9,7 @@ func main() {
 
 	// Create a new transaction
 	hexTx := "010000000100"
-	tx, _ := transaction.NewTxFromHex(hexTx)
+	tx, _ := transaction.NewTransactionFromHex(hexTx)
 
 	// Broadcast the transaction
 	success, failure := tx.Broadcast(&broadcaster.Arc{

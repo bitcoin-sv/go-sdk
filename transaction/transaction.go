@@ -23,26 +23,26 @@ type Transaction struct {
 // Transactions a collection of *bt.Tx.
 type Transactions []*Transaction
 
-// NewTx creates a new transaction object with default values.
-func NewTx() *Transaction {
+// NewTransaction creates a new transaction object with default values.
+func NewTransaction() *Transaction {
 	return &Transaction{Version: 1, LockTime: 0, Inputs: make([]*TransactionInput, 0)}
 }
 
-// NewTxFromHex takes a toBytesHelper string representation of a bitcoin transaction
+// NewTransactionFromHex takes a toBytesHelper string representation of a bitcoin transaction
 // and returns a Tx object.
-func NewTxFromHex(str string) (*Transaction, error) {
+func NewTransactionFromHex(str string) (*Transaction, error) {
 	bb, err := hex.DecodeString(str)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTxFromBytes(bb)
+	return NewTransactionFromBytes(bb)
 }
 
-// NewTxFromBytes takes an array of bytes, constructs a Tx and returns it.
+// NewTransactionFromBytes takes an array of bytes, constructs a Tx and returns it.
 // This function assumes that the byte slice contains exactly 1 transaction.
-func NewTxFromBytes(b []byte) (*Transaction, error) {
-	tx, used, err := NewTxFromStream(b)
+func NewTransactionFromBytes(b []byte) (*Transaction, error) {
+	tx, used, err := NewTransactionFromStream(b)
 	if err != nil {
 		return nil, err
 	}
@@ -54,10 +54,10 @@ func NewTxFromBytes(b []byte) (*Transaction, error) {
 	return tx, nil
 }
 
-// NewTxFromStream takes an array of bytes and constructs a Tx from it, returning the Tx and the bytes used.
+// NewTransactionFromStream takes an array of bytes and constructs a Tx from it, returning the Tx and the bytes used.
 // Despite the name, this is not actually reading a stream in the true sense: it is a byte slice that contains
 // many transactions one after another.
-func NewTxFromStream(b []byte) (*Transaction, int, error) {
+func NewTransactionFromStream(b []byte) (*Transaction, int, error) {
 	tx := Transaction{}
 
 	bytesRead, err := tx.ReadFrom(bytes.NewReader(b))
@@ -307,7 +307,7 @@ func (tx *Transaction) BytesWithClearedInputs(index int, lockingScript []byte) [
 // Clone returns a clone of the tx
 func (tx *Transaction) Clone() *Transaction {
 	// Ignore err as byte slice passed in is created from valid tx
-	clone, err := NewTxFromBytes(tx.Bytes())
+	clone, err := NewTransactionFromBytes(tx.Bytes())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -387,8 +387,8 @@ func (tx *Transaction) AddMerkleProof(bump *MerklePath) error {
 
 func (tx *Transaction) Sign() error {
 	for vin, i := range tx.Inputs {
-		if i.Template != nil {
-			unlock, err := i.Template.Sign(tx, UnlockParams{InputIdx: uint32(vin)})
+		if i.UnlockingScriptTemplate != nil {
+			unlock, err := i.UnlockingScriptTemplate.Sign(tx, UnlockParams{InputIdx: uint32(vin)})
 			if err != nil {
 				return err
 			}

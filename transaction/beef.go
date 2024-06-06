@@ -3,15 +3,17 @@ package transaction
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 )
 
 func (t *Transaction) FromBEEF(beef []byte) error {
-	t, err := NewTxFromBEEF(beef)
+	tx, err := NewTransactionFromBEEF(beef)
+	*t = *tx
 	return err
 }
 
-func NewTxFromBEEF(beef []byte) (*Transaction, error) {
+func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
 	reader := bytes.NewReader(beef)
 
 	var version uint32
@@ -82,6 +84,14 @@ func NewTxFromBEEF(beef []byte) (*Transaction, error) {
 	return tx, nil
 }
 
+func NewTransactionFromBEEFHex(beefHex string) (*Transaction, error) {
+	if beef, err := hex.DecodeString(beefHex); err != nil {
+		return nil, err
+	} else {
+		return NewTransactionFromBEEF(beef)
+	}
+}
+
 func (t *Transaction) BEEF() ([]byte, error) {
 	b := new(bytes.Buffer)
 	binary.Write(b, binary.LittleEndian, uint32(4022206465))
@@ -121,6 +131,14 @@ func (t *Transaction) BEEF() ([]byte, error) {
 		}
 	}
 	return b.Bytes(), nil
+}
+
+func (t *Transaction) BEEFHex() (string, error) {
+	if beef, err := t.BEEF(); err != nil {
+		return "", err
+	} else {
+		return hex.EncodeToString(beef), nil
+	}
 }
 
 func (t *Transaction) collectAncestors(txns map[string]*Transaction) ([]string, error) {

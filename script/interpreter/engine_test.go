@@ -151,7 +151,7 @@ func TestValidateParams(t *testing.T) {
 		"valid tx/previous out checksig script": {
 			params: execOpts{
 				tx: func() *transaction.Transaction {
-					tx := transaction.NewTx()
+					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
@@ -173,7 +173,7 @@ func TestValidateParams(t *testing.T) {
 		"valid tx/previous out non-checksig script": {
 			params: execOpts{
 				tx: func() *transaction.Transaction {
-					tx := transaction.NewTx()
+					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "52529387", 0, nil)
 					assert.NoError(t, err)
 
@@ -219,7 +219,7 @@ func TestValidateParams(t *testing.T) {
 					return script
 				}(),
 				tx: func() *transaction.Transaction {
-					tx := transaction.NewTx()
+					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
@@ -246,7 +246,7 @@ func TestValidateParams(t *testing.T) {
 					return script
 				}(),
 				tx: func() *transaction.Transaction {
-					tx := transaction.NewTx()
+					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
@@ -304,7 +304,7 @@ func TestValidateParams(t *testing.T) {
 					return script
 				}(),
 				tx: func() *transaction.Transaction {
-					tx := transaction.NewTx()
+					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
@@ -337,7 +337,7 @@ func TestValidateParams(t *testing.T) {
 					return script
 				}(),
 				tx: func() *transaction.Transaction {
-					tx := transaction.NewTx()
+					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
@@ -360,7 +360,7 @@ func TestValidateParams(t *testing.T) {
 		"invalid input index errors": {
 			params: execOpts{
 				tx: func() *transaction.Transaction {
-					tx := transaction.NewTx()
+					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
 					assert.NoError(t, err)
 
@@ -970,12 +970,12 @@ func TestExecute(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			tx, err := transaction.NewTxFromHex(tc.txHex)
+			tx, err := transaction.NewTransactionFromHex(tc.txHex)
 			require.NoError(t, err)
 
 			beforeScript, _ := tx.Inputs[0].UnlockingScript.ToASM()
 
-			prevTx, err := transaction.NewTxFromHex(tc.prevTxHex)
+			prevTx, err := transaction.NewTransactionFromHex(tc.prevTxHex)
 			require.NoError(t, err)
 
 			inputIdx := 0

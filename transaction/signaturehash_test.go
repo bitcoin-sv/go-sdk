@@ -56,7 +56,7 @@ func TestTx_CalcInputPreimage(t *testing.T) {
 
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
-			tx, err := transaction.NewTxFromHex(test.unsignedTx)
+			tx, err := transaction.NewTransactionFromHex(test.unsignedTx)
 			assert.NoError(t, err)
 			assert.NotNil(t, tx)
 
@@ -149,7 +149,7 @@ func TestTx_CalcInputSignatureHash(t *testing.T) {
 
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
-			tx, err := transaction.NewTxFromHex(test.unsignedTx)
+			tx, err := transaction.NewTransactionFromHex(test.unsignedTx)
 			assert.NoError(t, err)
 			assert.NotNil(t, tx)
 
@@ -215,7 +215,7 @@ func TestTx_CalcInputPreimageLegacy(t *testing.T) {
 
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
-			tx, err := transaction.NewTxFromHex(test.unsignedTx)
+			tx, err := transaction.NewTransactionFromHex(test.unsignedTx)
 			assert.NoError(t, err)
 			assert.NotNil(t, tx)
 

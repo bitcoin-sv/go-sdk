@@ -16,11 +16,11 @@ func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {
 	t.Parallel()
 
 	incompleteTx := "010000000193a35408b6068499e0d5abd799d3e827d9bfe70c9b75ebe209c91d25072326510000000000ffffffff02404b4c00000000001976a91404ff367be719efa79d76e4416ffb072cd53b208888acde94a905000000001976a91404d03f746652cfcb6cb55119ab473a045137d26588ac00000000"
-	tx, err := transaction.NewTxFromHex(incompleteTx)
+	tx, err := transaction.NewTransactionFromHex(incompleteTx)
 	assert.NoError(t, err)
 	assert.NotNil(t, tx)
 
-	prevTx := transaction.NewTx()
+	prevTx := transaction.NewTransaction()
 	prevTx.Outputs = make([]*transaction.TransactionOutput, tx.InputIdx(0).SourceTxOutIndex+1)
 	prevTx.Outputs[tx.InputIdx(0).SourceTxOutIndex] = &transaction.TransactionOutput{Satoshis: 100000000}
 	prevTx.Outputs[tx.InputIdx(0).SourceTxOutIndex].LockingScript, err = script.NewFromHex("76a914c0a3c167a28cabb9fbb495affa0761e6e74ac60d88ac")
@@ -48,7 +48,7 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 	}{
 		"valid signature 1": {
 			tx: func() *transaction.Transaction {
-				tx := transaction.NewTx()
+				tx := transaction.NewTransaction()
 				assert.NoError(t, tx.AddInputFrom("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "76a914c7c6987b6e2345a6b138e3384141520a0fbc18c588ac", 15564838601, nil))
 
 				script1, err := script.NewFromHex("76a91442f9682260509ac80722b1963aec8a896593d16688ac")
@@ -70,7 +70,7 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 		},
 		"valid signature 2": {
 			tx: func() *transaction.Transaction {
-				tx := transaction.NewTx()
+				tx := transaction.NewTransaction()
 
 				assert.NoError(
 					t,
@@ -159,7 +159,7 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 // 	}{
 // 		"simple script": {
 // 			tx: func() *transaction.Transaction {
-// 				tx := transaction.NewTx()
+// 				tx := transaction.NewTransaction()
 // 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529387", 15564838601))
 // 				return tx
 // 			}(),
@@ -180,7 +180,7 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 // 		},
 // 		"multiple inputs unlocked": {
 // 			tx: func() *transaction.Transaction {
-// 				tx := transaction.NewTx()
+// 				tx := transaction.NewTransaction()
 // 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529487", 15564838601))
 // 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52589587", 15564838601))
 // 				assert.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "5a559687", 15564838601))
