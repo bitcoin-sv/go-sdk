@@ -87,7 +87,7 @@ func (t *Transaction) BEEF() ([]byte, error) {
 	binary.Write(b, binary.LittleEndian, uint32(4022206465))
 	bumps := map[uint32]*MerklePath{}
 	bumpIndex := map[uint32]int{}
-	txns := make(map[string]*Transaction, 0)
+	txns := map[string]*Transaction{t.TxID(): t}
 	ancestors, err := t.collectAncestors(txns)
 	if err != nil {
 		return nil, err
@@ -135,6 +135,7 @@ func (t *Transaction) collectAncestors(txns map[string]*Transaction) ([]string, 
 		if _, ok := txns[input.PreviousTxIDStr()]; ok {
 			continue
 		}
+		txns[input.PreviousTxIDStr()] = input.SourceTransaction
 		if grands, err := input.SourceTransaction.collectAncestors(txns); err != nil {
 			return nil, err
 		} else {
