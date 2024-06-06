@@ -1,7 +1,6 @@
 package transaction
 
 import (
-	"bytes"
 	"encoding/binary"
 	"encoding/hex"
 
@@ -31,12 +30,13 @@ func (tx *Transaction) AddInputWithOutput(input *TransactionInput, output *Trans
 	tx.Inputs = append(tx.Inputs, input)
 }
 
-func (tx *Transaction) AddInputFromTx(prevTx *Transaction, vout uint32) {
+func (tx *Transaction) AddInputFromTx(prevTx *Transaction, vout uint32, template ScriptTemplate) {
 	i := &TransactionInput{
 		SourceTXID:        prevTx.TxIDBytes(),
 		SourceTxOutIndex:  vout,
 		SourceTransaction: prevTx,
 		SequenceNumber:    DefaultSequenceNumber, // use default finalised sequence number
+		Template:          template,
 	}
 
 	tx.Inputs = append(tx.Inputs, i)
@@ -72,32 +72,6 @@ func (tx *Transaction) SequenceHash() []byte {
 	}
 
 	return crypto.Sha256d(buf)
-}
-
-// AddP2PKHInputsFromTx will add all Outputs of given previous transaction
-// that match a specific public key to your transaction.
-func (tx *Transaction) AddP2PKHInputsFromTx(pvsTx *Transaction, matchPK []byte) error {
-	// Given that the prevTxID never changes, calculate it once up front.
-	prevTxIDBytes := pvsTx.TxIDBytes()
-	for i, utxo := range pvsTx.Outputs {
-		utxoPkHASH160, err := utxo.LockingScript.PublicKeyHash()
-		if err != nil {
-			return err
-		}
-
-		if bytes.Equal(utxoPkHASH160, crypto.Hash160(matchPK)) {
-			if err := tx.AddInputsFromUTXOs(&UTXO{
-				TxID:          prevTxIDBytes,
-				Vout:          uint32(i),
-				Satoshis:      utxo.Satoshis,
-				LockingScript: utxo.LockingScript,
-			}); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
 }
 
 // AddInputFrom adds a new input to the transaction from the specified UTXO fields, using the default
