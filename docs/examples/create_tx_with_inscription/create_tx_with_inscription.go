@@ -6,16 +6,16 @@ import (
 	"mime"
 	"os"
 
-	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/template"
 )
 
 func main() {
-	w, _ := wif.DecodeWIF("KznpA63DPFrmHecASyL6sFmcRgrNT9oM8Ebso8mwq1dfJF3ZgZ3V")
+	priv, _ := ec.PrivateKeyFromWif("KznpA63DPFrmHecASyL6sFmcRgrNT9oM8Ebso8mwq1dfJF3ZgZ3V")
 
-	tmpl := template.NewP2PKHFromPrivKey(w.PrivKey) // get public key bytes and address
+	tmpl := template.NewP2PKHFromPrivKey(priv) // get public key bytes and address
 
 	tx := transaction.NewTx()
 	_ = tx.AddInputFrom(

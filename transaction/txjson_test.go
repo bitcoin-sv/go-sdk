@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/template"
@@ -18,10 +18,10 @@ func TestTx_JSON(t *testing.T) {
 	}{
 		"standard tx should marshal and unmarshal correctly": {
 			tx: func() *transaction.Transaction {
-				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
+				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
-				assert.NotNil(t, w)
-				tmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
+				assert.NotNil(t, priv)
+				tmpl := template.NewP2PKHFromPrivKey(priv)
 
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.AddInputFrom(
@@ -46,10 +46,10 @@ func TestTx_JSON(t *testing.T) {
 			}(),
 		}, "data tx should marshall correctly": {
 			tx: func() *transaction.Transaction {
-				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
+				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
-				assert.NotNil(t, w)
-				tmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
+				assert.NotNil(t, priv)
+				tmpl := template.NewP2PKHFromPrivKey(priv)
 
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.AddInputFrom(
@@ -124,10 +124,10 @@ func TestTx_MarshallJSON(t *testing.T) {
 }`,
 		}, "transaction with multiple Inputs": {
 			tx: func() *transaction.Transaction {
-				w, err := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
+				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
-				assert.NotNil(t, w)
-				tmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
+				assert.NotNil(t, priv)
+				tmpl := template.NewP2PKHFromPrivKey(priv)
 
 				tx := transaction.NewTx()
 				assert.NoError(t, tx.AddInputFrom(

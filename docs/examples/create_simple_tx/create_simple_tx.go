@@ -3,20 +3,18 @@ package main
 import (
 	"log"
 
-	wif "github.com/bitcoin-sv/go-sdk/compat/wif"
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/template"
 )
 
 // https://goplay.tools/snippet/bnsS-pA56ob
 func main() {
-	// Fill all inputs with the given private key
-	w, _ := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
+	priv, _ := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 
 	// Create a new transaction
 	tx := transaction.NewTx()
-
-	tmpl := template.NewP2PKHFromPrivKey(w.PrivKey)
+	tmpl := template.NewP2PKHFromPrivKey(priv)
 
 	// Add the inputs
 	err := tx.AddInputFrom(
