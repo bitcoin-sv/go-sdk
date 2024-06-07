@@ -52,7 +52,7 @@ func (tx *Transaction) UnmarshalJSON(b []byte) error {
 	}
 	// quick convert
 	if txj.Hex != "" {
-		t, err := NewTxFromHex(txj.Hex)
+		t, err := NewTransactionFromHex(txj.Hex)
 		if err != nil {
 			return err
 		}

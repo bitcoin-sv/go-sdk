@@ -25,7 +25,7 @@ import (
 // https://goplay.tools/snippet/bnsS-pA56ob
 func main() {
  // Create a new transaction
- tx := transaction.NewTx()
+ tx := transaction.NewTransaction()
 
  // Add the inputs
  err := tx.From(
@@ -73,7 +73,7 @@ The program is defined in the main package.
 It imports necessary packages for handling the transaction, including context management, logging, WIF (Wallet Import Format) decoding, and transaction-related functionalities from the go-sdk.
 Main Function:
 
-`transaction.NewTx()` creates a new, empty transaction.
+`transaction.NewTransaction()` creates a new, empty transaction.
 
 `tx.From(...)` adds an input to the transaction. This input includes:
 

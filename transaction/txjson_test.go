@@ -23,7 +23,7 @@ func TestTx_JSON(t *testing.T) {
 				assert.NotNil(t, priv)
 				tmpl := template.NewP2PKHFromPrivKey(priv)
 
-				tx := transaction.NewTx()
+				tx := transaction.NewTransaction()
 				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
@@ -31,7 +31,7 @@ func TestTx_JSON(t *testing.T) {
 					2000000,
 					nil,
 				))
-				tx.Inputs[0].Template = tmpl
+				tx.Inputs[0].UnlockingScriptTemplate = tmpl
 
 				s, err := tmpl.Lock()
 				assert.NoError(t, err)
@@ -51,7 +51,7 @@ func TestTx_JSON(t *testing.T) {
 				assert.NotNil(t, priv)
 				tmpl := template.NewP2PKHFromPrivKey(priv)
 
-				tx := transaction.NewTx()
+				tx := transaction.NewTransaction()
 				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
@@ -59,7 +59,7 @@ func TestTx_JSON(t *testing.T) {
 					2000000,
 					nil,
 				))
-				tx.Inputs[0].Template = tmpl
+				tx.Inputs[0].UnlockingScriptTemplate = tmpl
 				// assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 				s := &script.Script{}
 				assert.NoError(t, s.AppendPushDataString("test"))
@@ -94,7 +94,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 	}{
 		"transaction with 1 input 1 p2pksh output 1 data output should create valid json": {
 			tx: func() *transaction.Transaction {
-				tx, err := transaction.NewTxFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
+				tx, err := transaction.NewTransactionFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
 				assert.NoError(t, err)
 				return tx
 			}(),
@@ -129,7 +129,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 				assert.NotNil(t, priv)
 				tmpl := template.NewP2PKHFromPrivKey(priv)
 
-				tx := transaction.NewTx()
+				tx := transaction.NewTransaction()
 				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
@@ -137,7 +137,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 					10000,
 					nil,
 				))
-				tx.Inputs[0].Template = tmpl
+				tx.Inputs[0].UnlockingScriptTemplate = tmpl
 				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					2,
@@ -145,7 +145,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 					10000,
 					nil,
 				))
-				tx.Inputs[1].Template = tmpl
+				tx.Inputs[1].UnlockingScriptTemplate = tmpl
 				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					114,
@@ -153,7 +153,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 					10000,
 					nil,
 				))
-				tx.Inputs[2].Template = tmpl
+				tx.Inputs[2].UnlockingScriptTemplate = tmpl
 				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 
 				assert.NoError(t, tx.Sign())
@@ -234,7 +234,7 @@ func TestTx_UnmarshalJSON(t *testing.T) {
 				]
 			}`,
 			expTX: func() *transaction.Transaction {
-				tx, err := transaction.NewTxFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
+				tx, err := transaction.NewTransactionFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
 				assert.NoError(t, err)
 				return tx
 			}(),
@@ -243,7 +243,7 @@ func TestTx_UnmarshalJSON(t *testing.T) {
 				"hex": "0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000"
 			}`,
 			expTX: func() *transaction.Transaction {
-				tx, err := transaction.NewTxFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
+				tx, err := transaction.NewTransactionFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
 				assert.NoError(t, err)
 				return tx
 			}(),
@@ -260,7 +260,7 @@ func TestTx_UnmarshalJSON(t *testing.T) {
 }
 
 func TestTx_ToJson(t *testing.T) {
-	tx, _ := transaction.NewTxFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
+	tx, _ := transaction.NewTransactionFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
 
 	_, err := json.MarshalIndent(tx, "", "\t")
 	assert.NoError(t, err)

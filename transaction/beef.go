@@ -3,15 +3,17 @@ package transaction
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/hex"
 	"fmt"
 )
 
 func (t *Transaction) FromBEEF(beef []byte) error {
-	t, err := NewTxFromBEEF(beef)
+	tx, err := NewTransactionFromBEEF(beef)
+	*t = *tx
 	return err
 }
 
-func NewTxFromBEEF(beef []byte) (*Transaction, error) {
+func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
 	reader := bytes.NewReader(beef)
 
 	var version uint32
@@ -82,12 +84,20 @@ func NewTxFromBEEF(beef []byte) (*Transaction, error) {
 	return tx, nil
 }
 
+func NewTransactionFromBEEFHex(beefHex string) (*Transaction, error) {
+	if beef, err := hex.DecodeString(beefHex); err != nil {
+		return nil, err
+	} else {
+		return NewTransactionFromBEEF(beef)
+	}
+}
+
 func (t *Transaction) BEEF() ([]byte, error) {
 	b := new(bytes.Buffer)
 	binary.Write(b, binary.LittleEndian, uint32(4022206465))
 	bumps := map[uint32]*MerklePath{}
 	bumpIndex := map[uint32]int{}
-	txns := make(map[string]*Transaction, 0)
+	txns := map[string]*Transaction{t.TxID(): t}
 	ancestors, err := t.collectAncestors(txns)
 	if err != nil {
 		return nil, err
@@ -123,6 +133,14 @@ func (t *Transaction) BEEF() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
+func (t *Transaction) BEEFHex() (string, error) {
+	if beef, err := t.BEEF(); err != nil {
+		return "", err
+	} else {
+		return hex.EncodeToString(beef), nil
+	}
+}
+
 func (t *Transaction) collectAncestors(txns map[string]*Transaction) ([]string, error) {
 	if t.MerklePath != nil {
 		return []string{t.TxID()}, nil
@@ -135,6 +153,7 @@ func (t *Transaction) collectAncestors(txns map[string]*Transaction) ([]string, 
 		if _, ok := txns[input.PreviousTxIDStr()]; ok {
 			continue
 		}
+		txns[input.PreviousTxIDStr()] = input.SourceTransaction
 		if grands, err := input.SourceTransaction.collectAncestors(txns); err != nil {
 			return nil, err
 		} else {

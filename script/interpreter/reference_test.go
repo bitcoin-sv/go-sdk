@@ -529,7 +529,7 @@ testloop:
 			continue
 		}
 
-		tx, err := transaction.NewTxFromBytes(serializedTx)
+		tx, err := transaction.NewTransactionFromBytes(serializedTx)
 		if err != nil {
 			t.Errorf("bad test (arg 2 not msgtx %v) %d: %v", err,
 				i, test)
@@ -673,7 +673,7 @@ testloop:
 			continue
 		}
 
-		tx, err := transaction.NewTxFromBytes(serializedTx)
+		tx, err := transaction.NewTransactionFromBytes(serializedTx)
 		if err != nil {
 			t.Errorf("bad test (arg 2 not msgtx %v) %d: %v", err,
 				i, test)
