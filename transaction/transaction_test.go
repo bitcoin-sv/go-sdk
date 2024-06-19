@@ -1,7 +1,6 @@
 package transaction_test
 
 import (
-	"log"
 	"testing"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
@@ -51,9 +50,9 @@ func TestNewTransaction(t *testing.T) {
 			assert.NoError(t, err)
 		}
 
-		beef, _ := tx.BEEF()
-		log.Printf("tx: %s\n", beef)
+		_, err = tx.BEEF()
 		assert.NoError(t, err)
+		// log.Printf("tx: %s\n", beef)
 	})
 }
 

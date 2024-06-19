@@ -59,7 +59,7 @@ func (p *P2PKH) NewP2PKHFromScript(s *script.Script) *P2PKH {
 	return p2pkh
 }
 
-func (p *P2PKH) Lock(params ...any) (*script.Script, error) {
+func (p *P2PKH) Lock() (*script.Script, error) {
 	if len(p.PKHash) != 20 {
 		return nil, ErrBadPublicKeyHash
 	}
@@ -71,7 +71,7 @@ func (p *P2PKH) Lock(params ...any) (*script.Script, error) {
 	return &s, nil
 }
 
-func (p *P2PKH) Unlocker(params ...any) (transaction.Unlocker, error) {
+func (p *P2PKH) Unlocker() (transaction.Unlocker, error) {
 	return p, nil
 }
 

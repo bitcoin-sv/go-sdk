@@ -19,6 +19,6 @@ type Unlocker interface {
 }
 
 type ScriptTemplate interface {
-	Lock(params ...any) (*script.Script, error)
-	Unlocker(params ...any) (Unlocker, error)
+	Lock() (*script.Script, error)
+	Unlocker() (Unlocker, error)
 }
