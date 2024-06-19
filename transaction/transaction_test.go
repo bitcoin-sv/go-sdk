@@ -1,13 +1,12 @@
 package transaction_test
 
 import (
-	"log"
 	"testing"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
-	"github.com/bitcoin-sv/go-sdk/transaction/template"
+	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,28 +30,29 @@ func TestNewTransaction(t *testing.T) {
 		// Create a new transaction
 		tx := transaction.NewTransaction()
 
-		// Create a new P2PKH template from the private key
-		unlockTemplate := template.NewP2PKHFromPrivKey(priv)
-
+		// Create a new P2PKH unlocker from the private key
+		unlocker, err := p2pkh.Unlock(priv, nil)
+		assert.NoError(t, err)
 		// Add an input
-		tx.AddInputFromTx(sourceTransaction, 0, unlockTemplate)
+		tx.AddInputFromTx(sourceTransaction, 0, unlocker)
 
-		// Create a new P2PKH template from the address
-		lockTemplate := template.NewP2PKHFromAddress(address)
+		// Create a new P2PKH locking script from the address
+		lock, err := p2pkh.Lock(address)
+		assert.NoError(t, err)
 
 		// Add the outputs
-		err := tx.AddOutputFromTemplate(lockTemplate, 1)
-		if err != nil {
-			assert.NoError(t, err)
-		}
+		tx.AddOutput(&transaction.TransactionOutput{
+			LockingScript: lock,
+			Satoshis:      1,
+		})
+		assert.NoError(t, err)
 
 		// Sign the transaction
 		if err := tx.Sign(); err != nil {
 			assert.NoError(t, err)
 		}
 
-		beef, _ := tx.BEEF()
-		log.Printf("tx: %s\n", beef)
+		_, err = tx.BEEF()
 		assert.NoError(t, err)
 	})
 }

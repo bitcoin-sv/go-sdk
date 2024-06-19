@@ -7,30 +7,19 @@ import (
 
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
-	"github.com/bitcoin-sv/go-sdk/transaction/template"
+	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 	t.Parallel()
 
-	t.Run("empty pubkey hash", func(t *testing.T) {
-		tmpl := &template.P2PKH{}
-		_, err := tmpl.Lock()
-		assert.Error(t, err)
-	})
-
-	t.Run("invalid pubkey hash", func(t *testing.T) {
-		tmpl := &template.P2PKH{PKHash: []byte("invalid")}
-		_, err := tmpl.Lock()
-		assert.Error(t, err)
-	})
-
 	t.Run("valid output", func(t *testing.T) {
 		// This is the PKH for address mtdruWYVEV1wz5yL7GvpBj4MgifCB7yhPd
-		tmpl := &template.P2PKH{}
-		tmpl.PKHash, _ = hex.DecodeString("8fe80c75c9560e8b56ed64ea3c26e18d2c52211b")
-		s, err := tmpl.Lock()
+		pkh, _ := hex.DecodeString("8fe80c75c9560e8b56ed64ea3c26e18d2c52211b")
+		add, err := script.NewAddressFromPublicKeyHash(pkh, true)
+		assert.NoError(t, err)
+		s, err := p2pkh.Lock(add)
 		assert.NoError(t, err)
 		assert.Equal(t,
 			"76a9148fe80c75c9560e8b56ed64ea3c26e18d2c52211b88ac",

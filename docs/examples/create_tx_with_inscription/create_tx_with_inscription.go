@@ -9,13 +9,17 @@ import (
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
-	"github.com/bitcoin-sv/go-sdk/transaction/template"
+	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
 )
 
 func main() {
 	priv, _ := ec.PrivateKeyFromWif("KznpA63DPFrmHecASyL6sFmcRgrNT9oM8Ebso8mwq1dfJF3ZgZ3V")
 
-	tmpl := template.NewP2PKHFromPrivKey(priv) // get public key bytes and address
+	unlocker, err := p2pkh.Unlock(priv, nil) // get public key bytes and address
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	tx := transaction.NewTransaction()
 	_ = tx.AddInputFrom(
@@ -23,7 +27,7 @@ func main() {
 		0,
 		"76a9144bca0c466925b875875a8e1355698bdcc0b2d45d88ac",
 		500,
-		tmpl,
+		unlocker,
 	)
 
 	// Read the image file
@@ -35,8 +39,12 @@ func main() {
 
 	// Get the content type of the image
 	contentType := mime.TypeByExtension(".png")
-
-	s, _ := tmpl.Lock()
+	add, err := script.NewAddressFromPublicKey(priv.PubKey(), true)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	s, _ := p2pkh.Lock(add)
 	tx.Inscribe(&script.InscriptionArgs{
 		LockingScript: s,
 		Data:          data,
@@ -44,8 +52,8 @@ func main() {
 	})
 
 	changeAdd, _ := script.NewAddressFromString("17ujiveRLkf2JQiGR8Sjtwb37evX7vG3WG")
-	changeTmpl := template.NewP2PKHFromAddress(changeAdd)
-	changeScript, _ := changeTmpl.Lock()
+
+	changeScript, _ := p2pkh.Lock(changeAdd)
 	tx.AddOutput(&transaction.TransactionOutput{
 		LockingScript: changeScript,
 		Change:        true,

@@ -7,7 +7,7 @@ import (
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
-	"github.com/bitcoin-sv/go-sdk/transaction/template"
+	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +21,7 @@ func TestTx_JSON(t *testing.T) {
 				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, priv)
-				tmpl := template.NewP2PKHFromPrivKey(priv)
+				unlocker, err := p2pkh.Unlock(priv, nil)
 
 				tx := transaction.NewTransaction()
 				assert.NoError(t, tx.AddInputFrom(
@@ -29,11 +29,12 @@ func TestTx_JSON(t *testing.T) {
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					2000000,
-					nil,
+					unlocker,
 				))
-				tx.Inputs[0].UnlockingScriptTemplate = tmpl
 
-				s, err := tmpl.Lock()
+				add, err := script.NewAddressFromPublicKey(priv.PubKey(), true)
+				assert.NoError(t, err)
+				s, err := p2pkh.Lock(add)
 				assert.NoError(t, err)
 				tx.AddOutput(&transaction.TransactionOutput{
 					LockingScript: s,
@@ -49,7 +50,8 @@ func TestTx_JSON(t *testing.T) {
 				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, priv)
-				tmpl := template.NewP2PKHFromPrivKey(priv)
+				unlocker, err := p2pkh.Unlock(priv, nil)
+				assert.NoError(t, err)
 
 				tx := transaction.NewTransaction()
 				assert.NoError(t, tx.AddInputFrom(
@@ -57,9 +59,9 @@ func TestTx_JSON(t *testing.T) {
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					2000000,
-					nil,
+					unlocker,
 				))
-				tx.Inputs[0].UnlockingScriptTemplate = tmpl
+
 				// assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 				s := &script.Script{}
 				assert.NoError(t, s.AppendPushDataString("test"))
@@ -127,7 +129,8 @@ func TestTx_MarshallJSON(t *testing.T) {
 				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, priv)
-				tmpl := template.NewP2PKHFromPrivKey(priv)
+				unlocker, err := p2pkh.Unlock(priv, nil)
+				assert.NoError(t, err)
 
 				tx := transaction.NewTransaction()
 				assert.NoError(t, tx.AddInputFrom(
@@ -135,25 +138,24 @@ func TestTx_MarshallJSON(t *testing.T) {
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
-					nil,
+					unlocker,
 				))
-				tx.Inputs[0].UnlockingScriptTemplate = tmpl
+
 				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					2,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
-					nil,
+					unlocker,
 				))
-				tx.Inputs[1].UnlockingScriptTemplate = tmpl
+
 				assert.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					114,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
-					nil,
+					unlocker,
 				))
-				tx.Inputs[2].UnlockingScriptTemplate = tmpl
 				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 
 				assert.NoError(t, tx.Sign())

@@ -8,7 +8,7 @@ import (
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	opcodes "github.com/bitcoin-sv/go-sdk/script"
 	script "github.com/bitcoin-sv/go-sdk/script"
-	"github.com/bitcoin-sv/go-sdk/transaction/template"
+	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
 )
 
 func main() {
@@ -39,9 +39,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// publicKeyHash := hash.Hash160(privKey.PubKey().SerialiseCompressed())
-	tmpl := template.NewP2PKHFromPubKeyEC(privKey.PubKey())
-	lockingScript, err := tmpl.Lock()
+	add, err := script.NewAddressFromPublicKey(privKey.PubKey(), true)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	lockingScript, err := p2pkh.Lock(add)
 	if err != nil {
 		log.Fatal(err)
 	}

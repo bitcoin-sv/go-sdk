@@ -1,4 +1,4 @@
-package template_test
+package p2pkh_test
 
 import (
 	"testing"
@@ -9,7 +9,7 @@ import (
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
-	"github.com/bitcoin-sv/go-sdk/transaction/template"
+	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
 )
 
 func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {
@@ -31,9 +31,10 @@ func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {
 	priv, err := ec.PrivateKeyFromWif("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
 	assert.NoError(t, err)
 
-	scriptTmpl := template.NewP2PKHFromPrivKey(priv)
+	unlocker, err := p2pkh.Unlock(priv, nil)
+	assert.NoError(t, err)
 
-	s, err := scriptTmpl.Sign(tx, transaction.UnlockParams{InputIdx: 0})
+	s, err := unlocker.Sign(tx, 0)
 	assert.NoError(t, err)
 	tx.Inputs[0].UnlockingScript = s
 
@@ -103,8 +104,9 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 			priv, err := ec.PrivateKeyFromWif("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
 			assert.NoError(t, err)
 
-			unlocker := template.NewP2PKHFromPrivKey(priv)
-			uscript, err := unlocker.Sign(tx, transaction.UnlockParams{})
+			unlocker, err := p2pkh.Unlock(priv, nil)
+			assert.NoError(t, err)
+			uscript, err := unlocker.Sign(tx, 0)
 			assert.NoError(t, err)
 
 			tx.Inputs[0].UnlockingScript = uscript

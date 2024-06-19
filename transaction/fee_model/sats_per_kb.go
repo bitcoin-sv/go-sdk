@@ -15,7 +15,7 @@ func (s *SatoshisPerKilobyte) ComputeFee(tx *transaction.Transaction) (uint64, e
 			scriptLen := len(*i.UnlockingScript)
 			size += transaction.VarInt(scriptLen).Length() + scriptLen
 		} else if i.UnlockingScriptTemplate != nil {
-			scriptLen := i.UnlockingScriptTemplate.EstimateSize(tx, uint32(vin))
+			scriptLen := int(i.UnlockingScriptTemplate.EstimateLength(tx, uint32(vin)))
 			size += transaction.VarInt(scriptLen).Length() + scriptLen
 		} else {
 			return 0, ErrNoUnlockingScript
