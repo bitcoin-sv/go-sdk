@@ -1,22 +1,20 @@
-package template
+package p2pkh
 
 import (
+	"errors"
+
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 )
 
-type P2PKH struct{}
+var (
+	ErrBadPublicKeyHash = errors.New("invalid public key hash")
+	ErrNoPrivateKey     = errors.New("private key not supplied")
+)
 
-type P2PKHUnlocker struct {
-	key            *ec.PrivateKey
-	sigHashFlag    *sighash.Flag
-	sourceSatoshis *uint64
-	lockingScript  *script.Script
-}
-
-func (p *P2PKH) Lock(a *script.Address) (*script.Script, error) {
+func Lock(a *script.Address) (*script.Script, error) {
 	if len(a.PublicKeyHash) != 20 {
 		return nil, ErrBadPublicKeyHash
 	}
@@ -28,7 +26,7 @@ func (p *P2PKH) Lock(a *script.Address) (*script.Script, error) {
 	return &s, nil
 }
 
-func (p *P2PKH) Unlocker(key *ec.PrivateKey, sigHashFlag *sighash.Flag, sourceSatoshis *uint64, lockingScript *script.Script) (*P2PKHUnlocker, error) {
+func Unlocker(key *ec.PrivateKey, sigHashFlag *sighash.Flag) (*P2PKHUnlocker, error) {
 	if key == nil {
 		return nil, ErrNoPrivateKey
 	}
@@ -37,35 +35,38 @@ func (p *P2PKH) Unlocker(key *ec.PrivateKey, sigHashFlag *sighash.Flag, sourceSa
 		sigHashFlag = &shf
 	}
 	return &P2PKHUnlocker{
-		key:            key,
-		sigHashFlag:    sigHashFlag,
-		sourceSatoshis: sourceSatoshis,
-		lockingScript:  lockingScript,
+		PrivateKey:  key,
+		SigHashFlag: sigHashFlag,
 	}, nil
 }
 
-func (p *P2PKHUnlocker) Unlock(tx *transaction.Transaction, inputIndex uint32) (*script.Script, error) {
+type P2PKHUnlocker struct {
+	PrivateKey  *ec.PrivateKey
+	SigHashFlag *sighash.Flag
+	// optionally could support a code separator index
+}
 
+func (p *P2PKHUnlocker) Unlock(tx *transaction.Transaction, inputIndex uint32) (*script.Script, error) {
 	if tx.Inputs[inputIndex].SourceTransaction == nil {
 		return nil, transaction.ErrEmptyPreviousTx
 	}
 
-	sh, err := tx.CalcInputSignatureHash(inputIndex, *p.sigHashFlag)
+	sh, err := tx.CalcInputSignatureHash(inputIndex, *p.SigHashFlag)
 	if err != nil {
 		return nil, err
 	}
 
-	sig, err := p.key.Sign(sh)
+	sig, err := p.PrivateKey.Sign(sh)
 	if err != nil {
 		return nil, err
 	}
 
-	pubKey := p.key.PubKey().SerialiseCompressed()
+	pubKey := p.PrivateKey.PubKey().SerialiseCompressed()
 	signature := sig.Serialise()
 
 	sigBuf := make([]byte, 0)
 	sigBuf = append(sigBuf, signature...)
-	sigBuf = append(sigBuf, uint8(*p.sigHashFlag))
+	sigBuf = append(sigBuf, uint8(*p.SigHashFlag))
 
 	s := &script.Script{}
 	if err = s.AppendPushData(sigBuf); err != nil {
@@ -77,6 +78,6 @@ func (p *P2PKHUnlocker) Unlock(tx *transaction.Transaction, inputIndex uint32) (
 	return s, nil
 }
 
-func (p *P2PKH) EstimateLength(_ *transaction.Transaction, inputIndex uint32) uint32 {
+func (p *P2PKHUnlocker) EstimateLength(_ *transaction.Transaction, inputIndex uint32) uint32 {
 	return 106
 }

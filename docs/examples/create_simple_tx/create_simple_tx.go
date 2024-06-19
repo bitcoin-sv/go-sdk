@@ -6,7 +6,7 @@ import (
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
-	"github.com/bitcoin-sv/go-sdk/transaction/template"
+	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
 )
 
 // https://goplay.tools/snippet/bnsS-pA56ob
@@ -27,16 +27,26 @@ func main() {
 	tx := transaction.NewTransaction()
 
 	// Create a new P2PKH template from the private key
-	unlockTemplate := template.NewP2PKHFromPrivKey(priv)
+	// unlockTemplate := template.NewP2PKHFromPrivKey(priv)
 
 	// Add an input
-	tx.AddInputFromTx(sourceTransaction, 0, unlockTemplate)
+	unlocker, err := p2pkh.Unlocker(priv, nil)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	tx.AddInputFromTx(sourceTransaction, 0, unlocker)
 
 	// Create a new P2PKH template from the address
-	lockTemplate := template.NewP2PKHFromAddress(address)
-
+	// lockTemplate := template.NewP2PKHFromAddress(address)
+	lockScript, err := p2pkh.Lock(address)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	// Add the outputs
-	err := tx.AddOutputFromTemplate(lockTemplate, 1)
+	tx.AddOutput(&transaction.TransactionOutput{
+		LockingScript: lockScript,
+		Satoshis:      1,
+	})
 	if err != nil {
 		log.Fatal(err.Error())
 	}

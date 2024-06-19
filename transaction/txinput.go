@@ -30,13 +30,13 @@ func (tx *Transaction) AddInputWithOutput(input *TransactionInput, output *Trans
 	tx.Inputs = append(tx.Inputs, input)
 }
 
-func (tx *Transaction) AddInputFromTx(prevTx *Transaction, vout uint32, template ScriptTemplate) {
+func (tx *Transaction) AddInputFromTx(prevTx *Transaction, vout uint32, unlocker Unlocker) {
 	i := &TransactionInput{
-		SourceTXID:              prevTx.TxIDBytes(),
-		SourceTxOutIndex:        vout,
-		SourceTransaction:       prevTx,
-		SequenceNumber:          DefaultSequenceNumber, // use default finalised sequence number
-		UnlockingScriptTemplate: template,
+		SourceTXID:        prevTx.TxIDBytes(),
+		SourceTxOutIndex:  vout,
+		SourceTransaction: prevTx,
+		SequenceNumber:    DefaultSequenceNumber, // use default finalised sequence number
+		Unlocker:          unlocker,
 	}
 
 	tx.Inputs = append(tx.Inputs, i)
@@ -77,7 +77,7 @@ func (tx *Transaction) SequenceHash() []byte {
 // AddInputFrom adds a new input to the transaction from the specified UTXO fields, using the default
 // finalised sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
 // afterwards.
-func (tx *Transaction) AddInputFrom(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64, template ScriptTemplate) error {
+func (tx *Transaction) AddInputFrom(prevTxID string, vout uint32, prevTxLockingScript string, satoshis uint64, unlocker Unlocker) error {
 	pts, err := script.NewFromHex(prevTxLockingScript)
 	if err != nil {
 		return err
@@ -92,7 +92,7 @@ func (tx *Transaction) AddInputFrom(prevTxID string, vout uint32, prevTxLockingS
 		Vout:          vout,
 		LockingScript: pts,
 		Satoshis:      satoshis,
-		Template:      template,
+		Unlocker:      unlocker,
 	})
 }
 
@@ -102,10 +102,10 @@ func (tx *Transaction) AddInputFrom(prevTxID string, vout uint32, prevTxLockingS
 func (tx *Transaction) AddInputsFromUTXOs(utxos ...*UTXO) error {
 	for _, utxo := range utxos {
 		i := &TransactionInput{
-			SourceTXID:              utxo.TxID,
-			SourceTxOutIndex:        utxo.Vout,
-			SequenceNumber:          DefaultSequenceNumber, // use default finalised sequence number
-			UnlockingScriptTemplate: utxo.Template,
+			SourceTXID:       utxo.TxID,
+			SourceTxOutIndex: utxo.Vout,
+			SequenceNumber:   DefaultSequenceNumber, // use default finalised sequence number
+			Unlocker:         utxo.Unlocker,
 		}
 		i.SetPrevTxFromOutput(&TransactionOutput{
 			Satoshis:      utxo.Satoshis,

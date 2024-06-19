@@ -9,7 +9,7 @@ type Unlocker interface {
 	EstimateLength(tx *Transaction, inputIndex uint32) uint32
 }
 
-type ScriptTemplate interface {
-	Lock(lockParams ...interface{}) (*script.Script, error)
-	Unlocker(unlockParams ...interface{}) (*Unlocker, error)
-}
+// type ScriptTemplate interface {
+// 	Lock(lockParams ...interface{}) (*script.Script, error)
+// 	Unlocker(unlockParams ...interface{}) (Unlocker, error)
+// }

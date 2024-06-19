@@ -6,7 +6,7 @@ import (
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
-	"github.com/bitcoin-sv/go-sdk/transaction/template"
+	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,19 +31,19 @@ func TestNewTransaction(t *testing.T) {
 		tx := transaction.NewTransaction()
 
 		// Create a new P2PKH template from the private key
-		unlockTemplate := template.NewP2PKHFromPrivKey(priv)
-
+		unlocker, err := p2pkh.Unlocker(priv, nil)
 		// Add an input
-		tx.AddInputFromTx(sourceTransaction, 0, unlockTemplate)
+		tx.AddInputFromTx(sourceTransaction, 0, unlocker)
 
-		// Create a new P2PKH template from the address
-		lockTemplate := template.NewP2PKHFromAddress(address)
+		lock, err := p2pkh.Lock(address)
+		assert.NoError(t, err)
 
 		// Add the outputs
-		err := tx.AddOutputFromTemplate(lockTemplate, 1)
-		if err != nil {
-			assert.NoError(t, err)
-		}
+		tx.AddOutput(&transaction.TransactionOutput{
+			LockingScript: lock,
+			Satoshis:      1,
+		})
+		assert.NoError(t, err)
 
 		// Sign the transaction
 		if err := tx.Sign(); err != nil {
