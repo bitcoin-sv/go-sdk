@@ -129,8 +129,8 @@ func TestTx_MarshallJSON(t *testing.T) {
 				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, priv)
-				// tmpl := template.NewP2PKHFromPrivKey(priv)
 				unlocker, err := p2pkh.Unlocker(priv, nil)
+				assert.NoError(t, err)
 
 				tx := transaction.NewTransaction()
 				assert.NoError(t, tx.AddInputFrom(
