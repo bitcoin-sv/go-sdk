@@ -5,7 +5,7 @@ package transaction
 type Flag uint8
 
 // SIGHASH type bits from the end of a signature.
-// see: https://wiki.bitcoinsv.io/index.php/transaction/sighash_flags
+// see: https://wiki.bitcoinsv.io/index.php/SIGHASH_flags
 const (
 	Old          Flag = 0x0
 	All          Flag = 0x1
