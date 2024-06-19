@@ -35,7 +35,7 @@ type TransactionInput struct {
 	SourceTxOutIndex  uint32
 	SequenceNumber    uint32
 	SourceTransaction *Transaction
-	Unlocker          Unlocker
+	UnlockingScriptTemplate UnlockingScriptTemplate
 }
 
 func (i *TransactionInput) PreviousTxScript() *script.Script {

@@ -31,10 +31,10 @@ func TestLocalUnlocker_UnlockAllInputs(t *testing.T) {
 	priv, err := ec.PrivateKeyFromWif("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
 	assert.NoError(t, err)
 
-	unlocker, err := p2pkh.Unlocker(priv, nil)
+	unlocker, err := p2pkh.Unlock(priv, nil)
 	assert.NoError(t, err)
 
-	s, err := unlocker.Unlock(tx, 0)
+	s, err := unlocker.Sign(tx, 0)
 	assert.NoError(t, err)
 	tx.Inputs[0].UnlockingScript = s
 
@@ -104,9 +104,9 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 			priv, err := ec.PrivateKeyFromWif("cNGwGSc7KRrTmdLUZ54fiSXWbhLNDc2Eg5zNucgQxyQCzuQ5YRDq")
 			assert.NoError(t, err)
 
-			unlocker, err := p2pkh.Unlocker(priv, nil)
+			unlocker, err := p2pkh.Unlock(priv, nil)
 			assert.NoError(t, err)
-			uscript, err := unlocker.Unlock(tx, 0)
+			uscript, err := unlocker.Sign(tx, 0)
 			assert.NoError(t, err)
 
 			tx.Inputs[0].UnlockingScript = uscript

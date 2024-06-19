@@ -395,8 +395,8 @@ func (tx *Transaction) AddMerkleProof(bump *MerklePath) error {
 
 func (tx *Transaction) Sign() error {
 	for vin, i := range tx.Inputs {
-		if i.Unlocker != nil {
-			unlock, err := i.Unlocker.Unlock(tx, uint32(vin))
+		if i.UnlockingScriptTemplate != nil {
+			unlock, err := i.UnlockingScriptTemplate.Sign(tx, uint32(vin))
 			if err != nil {
 				return err
 			}

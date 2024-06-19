@@ -31,7 +31,7 @@ func TestNewTransaction(t *testing.T) {
 		tx := transaction.NewTransaction()
 
 		// Create a new P2PKH unlocker from the private key
-		unlocker, err := p2pkh.Unlocker(priv, nil)
+		unlocker, err := p2pkh.Unlock(priv, nil)
 		assert.NoError(t, err)
 		// Add an input
 		tx.AddInputFromTx(sourceTransaction, 0, unlocker)

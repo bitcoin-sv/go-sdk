@@ -21,7 +21,7 @@ func TestTx_JSON(t *testing.T) {
 				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, priv)
-				unlocker, err := p2pkh.Unlocker(priv, nil)
+				unlocker, err := p2pkh.Unlock(priv, nil)
 
 				tx := transaction.NewTransaction()
 				assert.NoError(t, tx.AddInputFrom(
@@ -50,7 +50,7 @@ func TestTx_JSON(t *testing.T) {
 				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, priv)
-				unlocker, err := p2pkh.Unlocker(priv, nil)
+				unlocker, err := p2pkh.Unlock(priv, nil)
 				assert.NoError(t, err)
 
 				tx := transaction.NewTransaction()
@@ -129,7 +129,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 				assert.NoError(t, err)
 				assert.NotNil(t, priv)
-				unlocker, err := p2pkh.Unlocker(priv, nil)
+				unlocker, err := p2pkh.Unlock(priv, nil)
 				assert.NoError(t, err)
 
 				tx := transaction.NewTransaction()

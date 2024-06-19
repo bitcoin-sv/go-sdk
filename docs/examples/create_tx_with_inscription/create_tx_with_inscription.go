@@ -15,7 +15,7 @@ import (
 func main() {
 	priv, _ := ec.PrivateKeyFromWif("KznpA63DPFrmHecASyL6sFmcRgrNT9oM8Ebso8mwq1dfJF3ZgZ3V")
 
-	unlocker, err := p2pkh.Unlocker(priv, nil) // get public key bytes and address
+	unlocker, err := p2pkh.Unlock(priv, nil) // get public key bytes and address
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -26,7 +26,7 @@ func Lock(a *script.Address) (*script.Script, error) {
 	return &s, nil
 }
 
-func Unlocker(key *ec.PrivateKey, sigHashFlag *sighash.Flag) (*P2PKHUnlocker, error) {
+func Unlock(key *ec.PrivateKey, sigHashFlag *sighash.Flag) (*P2PKH, error) {
 	if key == nil {
 		return nil, ErrNoPrivateKey
 	}
@@ -34,19 +34,19 @@ func Unlocker(key *ec.PrivateKey, sigHashFlag *sighash.Flag) (*P2PKHUnlocker, er
 		shf := sighash.AllForkID
 		sigHashFlag = &shf
 	}
-	return &P2PKHUnlocker{
+	return &P2PKH{
 		PrivateKey:  key,
 		SigHashFlag: sigHashFlag,
 	}, nil
 }
 
-type P2PKHUnlocker struct {
+type P2PKH struct {
 	PrivateKey  *ec.PrivateKey
 	SigHashFlag *sighash.Flag
 	// optionally could support a code separator index
 }
 
-func (p *P2PKHUnlocker) Unlock(tx *transaction.Transaction, inputIndex uint32) (*script.Script, error) {
+func (p *P2PKH) Sign(tx *transaction.Transaction, inputIndex uint32) (*script.Script, error) {
 	if tx.Inputs[inputIndex].SourceTransaction == nil {
 		return nil, transaction.ErrEmptyPreviousTx
 	}
@@ -78,6 +78,6 @@ func (p *P2PKHUnlocker) Unlock(tx *transaction.Transaction, inputIndex uint32) (
 	return s, nil
 }
 
-func (p *P2PKHUnlocker) EstimateLength(_ *transaction.Transaction, inputIndex uint32) uint32 {
+func (p *P2PKH) EstimateLength(_ *transaction.Transaction, inputIndex uint32) uint32 {
 	return 106
 }

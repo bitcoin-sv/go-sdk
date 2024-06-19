@@ -28,7 +28,7 @@ func main() {
 
 	// Create a new P2PKH unlocker from the private key
 	// Add an input
-	unlocker, err := p2pkh.Unlocker(priv, nil)
+	unlocker, err := p2pkh.Unlock(priv, nil)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
