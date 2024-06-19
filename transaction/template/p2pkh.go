@@ -59,25 +59,7 @@ func (p *P2PKH) NewP2PKHFromScript(s *script.Script) *P2PKH {
 	return p2pkh
 }
 
-func (p *P2PKH) IsUnlockingScript(s *script.Script) bool {
-	pos := 0
-
-	if op, err := s.ReadOp(&pos); err != nil {
-		return false
-	} else if op.Op != script.Op0 && len(op.Data) == 0 {
-		return false
-	} else if op, err := s.ReadOp(&pos); err != nil {
-		return false
-	} else if op.Op != script.Op0 && len(op.Data) == 0 {
-		return false
-	} else if len(*s) > pos+1 {
-		return false
-	}
-
-	return true
-}
-
-func (p *P2PKH) Lock() (*script.Script, error) {
+func (p *P2PKH) Lock(params ...any) (*script.Script, error) {
 	if len(p.PKHash) != 20 {
 		return nil, ErrBadPublicKeyHash
 	}
@@ -89,7 +71,11 @@ func (p *P2PKH) Lock() (*script.Script, error) {
 	return &s, nil
 }
 
-func (p *P2PKH) Sign(tx *transaction.Transaction, params transaction.UnlockParams) (*script.Script, error) {
+func (p *P2PKH) Unlocker(params ...any) (transaction.Unlocker, error) {
+	return p, nil
+}
+
+func (p *P2PKH) Unlock(tx *transaction.Transaction, params *transaction.UnlockParams) (*script.Script, error) {
 	if p.privateKey == nil {
 		return nil, ErrNoPrivateKey
 	}
@@ -114,14 +100,20 @@ func (p *P2PKH) Sign(tx *transaction.Transaction, params transaction.UnlockParam
 	pubKey := p.privateKey.PubKey().SerialiseCompressed()
 	signature := sig.Serialise()
 
-	uscript, err := script.NewP2PKHUnlockingScript(pubKey, signature, params.SigHashFlags)
-	if err != nil {
+	sigBuf := make([]byte, 0)
+	sigBuf = append(sigBuf, signature...)
+	sigBuf = append(sigBuf, uint8(params.SigHashFlags))
+
+	s := &script.Script{}
+	if err = s.AppendPushData(sigBuf); err != nil {
+		return nil, err
+	} else if err = s.AppendPushData(pubKey); err != nil {
 		return nil, err
 	}
 
-	return uscript, nil
+	return s, nil
 }
 
-func (p *P2PKH) EstimateSize(_ *transaction.Transaction, inputIndex uint32) int {
+func (p *P2PKH) EstimateLength(_ *transaction.Transaction, inputIndex uint32) uint32 {
 	return 106
 }
