@@ -50,6 +50,24 @@ func (p *P2PKH) IsLockingScript(s *script.Script) bool {
 	return s.IsP2PKH()
 }
 
+func (p *P2PKH) IsUnlockingScript(s *script.Script) bool {
+	pos := 0
+
+	if op, err := s.ReadOp(&pos); err != nil {
+		return false
+	} else if op.Op != script.Op0 && len(op.Data) == 0 {
+		return false
+	} else if op, err := s.ReadOp(&pos); err != nil {
+		return false
+	} else if op.Op != script.Op0 && len(op.Data) == 0 {
+		return false
+	} else if len(*s) > pos+1 {
+		return false
+	}
+
+	return true
+}
+
 func (p *P2PKH) NewP2PKHFromScript(s *script.Script) *P2PKH {
 	p2pkh := &P2PKH{}
 	if !p2pkh.IsLockingScript(s) {
