@@ -43,8 +43,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// publicKeyHash := hash.Hash160(privKey.PubKey().SerialiseCompressed())
-	// tmpl := template.NewP2PKHFromPubKeyEC(privKey.PubKey())
+
 	lockingScript, err := p2pkh.Lock(add)
 	if err != nil {
 		log.Fatal(err)

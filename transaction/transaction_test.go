@@ -32,9 +32,11 @@ func TestNewTransaction(t *testing.T) {
 
 		// Create a new P2PKH template from the private key
 		unlocker, err := p2pkh.Unlocker(priv, nil)
+		assert.NoError(t, err)
 		// Add an input
 		tx.AddInputFromTx(sourceTransaction, 0, unlocker)
 
+		// Create a new P2PKH locking script from the address
 		lock, err := p2pkh.Lock(address)
 		assert.NoError(t, err)
 
@@ -52,7 +54,6 @@ func TestNewTransaction(t *testing.T) {
 
 		_, err = tx.BEEF()
 		assert.NoError(t, err)
-		// log.Printf("tx: %s\n", beef)
 	})
 }
 

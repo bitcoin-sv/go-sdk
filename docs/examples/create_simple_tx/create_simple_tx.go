@@ -26,9 +26,7 @@ func main() {
 	// Create a new transaction
 	tx := transaction.NewTransaction()
 
-	// Create a new P2PKH template from the private key
-	// unlockTemplate := template.NewP2PKHFromPrivKey(priv)
-
+	// Create a new P2PKH unlocker from the private key
 	// Add an input
 	unlocker, err := p2pkh.Unlocker(priv, nil)
 	if err != nil {
@@ -36,8 +34,7 @@ func main() {
 	}
 	tx.AddInputFromTx(sourceTransaction, 0, unlocker)
 
-	// Create a new P2PKH template from the address
-	// lockTemplate := template.NewP2PKHFromAddress(address)
+	// Create a new P2PKH lock from the address
 	lockScript, err := p2pkh.Lock(address)
 	if err != nil {
 		log.Fatal(err.Error())

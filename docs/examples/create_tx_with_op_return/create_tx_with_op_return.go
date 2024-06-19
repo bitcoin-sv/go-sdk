@@ -14,7 +14,6 @@ func main() {
 	priv, _ := ec.PrivateKeyFromWif("L3VJH2hcRGYYG6YrbWGmsxQC1zyYixA82YjgEyrEUWDs4ALgk8Vu")
 
 	tx := transaction.NewTransaction()
-	// tmpl := template.NewP2PKHFromPrivKey(priv)
 	unlocker, err := p2pkh.Unlocker(priv, nil)
 	if err != nil {
 		log.Fatal(err.Error())
