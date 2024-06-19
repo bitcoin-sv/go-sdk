@@ -104,7 +104,7 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 			assert.NoError(t, err)
 
 			unlocker := template.NewP2PKHFromPrivKey(priv)
-			uscript, err := unlocker.Sign(tx, transaction.UnlockParams{})
+			uscript, err := unlocker.Unlock(tx, transaction.UnlockParams{})
 			assert.NoError(t, err)
 
 			tx.Inputs[0].UnlockingScript = uscript
