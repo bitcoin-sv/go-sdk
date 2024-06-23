@@ -44,20 +44,20 @@ func (tx *Transaction) Fee(f FeeModel, changeDistribution ChangeDistribution) er
 	change := satsIn - satsOut - fee
 	// There is not enough change to distribute among the change outputs.
 	// We'll remove all change outputs and leave the extra for the miners.
-	if changeOuts < change {
+	if changeOuts > change {
 		tx.Outputs = slices.DeleteFunc(tx.Outputs, func(o *TransactionOutput) bool {
 			return o.Change
 		})
-	}
-
-	switch changeDistribution {
-	case ChangeDistributionRandom:
-		return errors.New("not-implemented")
-	case ChangeDistributionEqual:
-		changePerOutput := change / changeOuts
-		for _, o := range tx.Outputs {
-			if o.Change {
-				o.Satoshis += changePerOutput
+	} else {
+		switch changeDistribution {
+		case ChangeDistributionRandom:
+			return errors.New("not-implemented")
+		case ChangeDistributionEqual:
+			changePerOutput := change / changeOuts
+			for _, o := range tx.Outputs {
+				if o.Change {
+					o.Satoshis = changePerOutput
+				}
 			}
 		}
 	}
