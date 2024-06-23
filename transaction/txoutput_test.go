@@ -19,8 +19,7 @@ func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
 		pkh, _ := hex.DecodeString("8fe80c75c9560e8b56ed64ea3c26e18d2c52211b")
 		add, err := script.NewAddressFromPublicKeyHash(pkh, true)
 		assert.NoError(t, err)
-		s, err := p2pkh.Lock(add)
-		assert.NoError(t, err)
+		s := p2pkh.Lock(add)
 		assert.Equal(t,
 			"76a9148fe80c75c9560e8b56ed64ea3c26e18d2c52211b88ac",
 			hex.EncodeToString(*s),

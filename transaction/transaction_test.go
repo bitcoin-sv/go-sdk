@@ -36,13 +36,9 @@ func TestNewTransaction(t *testing.T) {
 		// Add an input
 		tx.AddInputFromTx(sourceTransaction, 0, unlocker)
 
-		// Create a new P2PKH locking script from the address
-		lock, err := p2pkh.Lock(address)
-		assert.NoError(t, err)
-
 		// Add the outputs
 		tx.AddOutput(&transaction.TransactionOutput{
-			LockingScript: lock,
+			LockingScript: p2pkh.Lock(address),
 			Satoshis:      1,
 		})
 		assert.NoError(t, err)
