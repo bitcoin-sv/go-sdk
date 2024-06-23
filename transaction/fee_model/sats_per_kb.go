@@ -1,9 +1,13 @@
 package feemodel
 
-import "github.com/bitcoin-sv/go-sdk/transaction"
+import (
+	"math"
+
+	"github.com/bitcoin-sv/go-sdk/transaction"
+)
 
 type SatoshisPerKilobyte struct {
-	value uint64
+	Satoshis uint64
 }
 
 func (s *SatoshisPerKilobyte) ComputeFee(tx *transaction.Transaction) (uint64, error) {
@@ -11,7 +15,7 @@ func (s *SatoshisPerKilobyte) ComputeFee(tx *transaction.Transaction) (uint64, e
 	size += transaction.VarInt(len(tx.Inputs)).Length()
 	for vin, i := range tx.Inputs {
 		size += 40
-		if len(*i.UnlockingScript) > 0 {
+		if i.UnlockingScript != nil && len(*i.UnlockingScript) > 0 {
 			scriptLen := len(*i.UnlockingScript)
 			size += transaction.VarInt(scriptLen).Length() + scriptLen
 		} else if i.UnlockingScriptTemplate != nil {
@@ -28,5 +32,5 @@ func (s *SatoshisPerKilobyte) ComputeFee(tx *transaction.Transaction) (uint64, e
 		size += len(*o.LockingScript)
 	}
 	size += 4
-	return (uint64(size / 1000)) * s.value, nil
+	return (uint64(math.Ceil(float64(size) / 1000))) * s.Satoshis, nil
 }
