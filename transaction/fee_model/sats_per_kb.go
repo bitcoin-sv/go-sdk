@@ -3,7 +3,7 @@ package feemodel
 import "github.com/bitcoin-sv/go-sdk/transaction"
 
 type SatoshisPerKilobyte struct {
-	value uint64
+	Satoshis uint64
 }
 
 func (s *SatoshisPerKilobyte) ComputeFee(tx *transaction.Transaction) (uint64, error) {
@@ -28,5 +28,5 @@ func (s *SatoshisPerKilobyte) ComputeFee(tx *transaction.Transaction) (uint64, e
 		size += len(*o.LockingScript)
 	}
 	size += 4
-	return (uint64(size / 1000)) * s.value, nil
+	return (uint64(size / 1000)) * s.Satoshis, nil
 }
