@@ -34,8 +34,10 @@ func TestTx_JSON(t *testing.T) {
 
 				add, err := script.NewAddressFromPublicKey(priv.PubKey(), true)
 				assert.NoError(t, err)
+				s, err := p2pkh.Lock(add)
+				assert.NoError(t, err)
 				tx.AddOutput(&transaction.TransactionOutput{
-					LockingScript: p2pkh.Lock(add),
+					LockingScript: s,
 					Satoshis:      1000,
 				})
 

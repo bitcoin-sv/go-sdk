@@ -14,13 +14,16 @@ var (
 	ErrNoPrivateKey     = errors.New("private key not supplied")
 )
 
-func Lock(a *script.Address) *script.Script {
+func Lock(a *script.Address) (*script.Script, error) {
+	if len(a.PublicKeyHash) != 20 {
+		return nil, ErrBadPublicKeyHash
+	}
 	b := make([]byte, 0, 25)
 	b = append(b, script.OpDUP, script.OpHASH160, script.OpDATA20)
 	b = append(b, a.PublicKeyHash...)
 	b = append(b, script.OpEQUALVERIFY, script.OpCHECKSIG)
 	s := script.Script(b)
-	return &s
+	return &s, nil
 }
 
 func Unlock(key *ec.PrivateKey, sigHashFlag *sighash.Flag) (*P2PKH, error) {
