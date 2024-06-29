@@ -350,13 +350,13 @@ func (tx *Transaction) toBytesHelper(index int, lockingScript []byte, extended b
 		if extended {
 			b := make([]byte, 8)
 			prevSats := uint64(0)
-			if in.PreviousTxSatoshis() != nil {
-				prevSats = *in.PreviousTxSatoshis()
+			if in.SourceTxSatoshis() != nil {
+				prevSats = *in.SourceTxSatoshis()
 			}
 			binary.LittleEndian.PutUint64(b, prevSats)
 			h = append(h, b...)
 
-			prevScript := in.PreviousTxScript()
+			prevScript := in.SourceTxScript()
 			if prevScript != nil {
 				l := uint64(len(*prevScript))
 				h = append(h, VarInt(l).Bytes()...)
