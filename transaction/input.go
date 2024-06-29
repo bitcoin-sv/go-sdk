@@ -30,22 +30,22 @@ const DefaultSequenceNumber uint32 = 0xFFFFFFFF
 //
 // DO NOT CHANGE ORDER - Optimised for memory via maligned
 type TransactionInput struct {
-	SourceTXID        []byte
-	UnlockingScript   *script.Script
-	SourceTxOutIndex  uint32
-	SequenceNumber    uint32
-	SourceTransaction *Transaction
+	SourceTXID              []byte
+	UnlockingScript         *script.Script
+	SourceTxOutIndex        uint32
+	SequenceNumber          uint32
+	SourceTransaction       *Transaction
 	UnlockingScriptTemplate UnlockingScriptTemplate
 }
 
-func (i *TransactionInput) PreviousTxScript() *script.Script {
+func (i *TransactionInput) SourceTxScript() *script.Script {
 	if i.SourceTransaction == nil {
 		return nil
 	}
 	return i.SourceTransaction.Outputs[i.SourceTxOutIndex].LockingScript
 }
 
-func (i *TransactionInput) PreviousTxSatoshis() *uint64 {
+func (i *TransactionInput) SourceTxSatoshis() *uint64 {
 	if i.SourceTransaction == nil {
 		return nil
 	}

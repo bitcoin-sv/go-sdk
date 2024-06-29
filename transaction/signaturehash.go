@@ -113,14 +113,14 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 	buf = append(buf, oi...)
 
 	// scriptCode of the input (serialised as scripts inside CTxOuts)
-	buf = append(buf, VarInt(uint64(len(*in.PreviousTxScript()))).Bytes()...)
-	buf = append(buf, *in.PreviousTxScript()...)
+	buf = append(buf, VarInt(uint64(len(*in.SourceTxScript()))).Bytes()...)
+	buf = append(buf, *in.SourceTxScript()...)
 
 	// value of the output spent by this input (8-byte little endian)
 	sat := make([]byte, 8)
 	prevSats := uint64(0)
-	if in.PreviousTxSatoshis() != nil {
-		prevSats = *in.PreviousTxSatoshis()
+	if in.SourceTxSatoshis() != nil {
+		prevSats = *in.SourceTxSatoshis()
 	}
 	binary.LittleEndian.PutUint64(sat, prevSats)
 	buf = append(buf, sat...)
@@ -239,9 +239,9 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 		binary.LittleEndian.PutUint32(oi, in.SourceTxOutIndex)
 		buf = append(buf, oi...)
 
-		if in.PreviousTxScript() != nil {
-			buf = append(buf, VarInt(uint64(len(*in.PreviousTxScript()))).Bytes()...)
-			buf = append(buf, *in.PreviousTxScript()...)
+		if in.SourceTxScript() != nil {
+			buf = append(buf, VarInt(uint64(len(*in.SourceTxScript()))).Bytes()...)
+			buf = append(buf, *in.SourceTxScript()...)
 		} else {
 			buf = append(buf, VarInt(0).Bytes()...)
 		}

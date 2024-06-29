@@ -27,7 +27,7 @@ func (tx *Transaction) Fee(f FeeModel, changeDistribution ChangeDistribution) er
 		if i.SourceTransaction == nil {
 			return ErrEmptyPreviousTx
 		}
-		satsIn += *i.PreviousTxSatoshis()
+		satsIn += *i.SourceTxSatoshis()
 	}
 	satsOut := uint64(0)
 	changeOuts := uint64(0)

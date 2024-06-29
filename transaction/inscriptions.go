@@ -116,7 +116,7 @@ func rangeAbove(is []*TransactionInput, inputIdx uint32, satIdx uint64) (uint64,
 		if uint32(i) >= inputIdx {
 			break
 		}
-		prevSats := in.PreviousTxSatoshis()
+		prevSats := in.SourceTxSatoshis()
 		if prevSats == nil || *prevSats == 0 {
 			return 0, ErrInputSatsZero
 		}

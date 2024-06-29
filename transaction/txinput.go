@@ -13,8 +13,8 @@ import (
 func (tx *Transaction) TotalInputSatoshis() (total uint64) {
 	for _, in := range tx.Inputs {
 		prevSats := uint64(0)
-		if in.PreviousTxSatoshis() != nil {
-			prevSats = *in.PreviousTxSatoshis()
+		if in.SourceTxSatoshis() != nil {
+			prevSats = *in.SourceTxSatoshis()
 		}
 		total += prevSats
 	}
