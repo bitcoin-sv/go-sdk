@@ -12,22 +12,6 @@ func TestSigningCompression(t *testing.T) {
 	testKey, _ := ec.PrivateKeyFromHex("0499f8239bfe10eb0f5e53d543635a423c96529dd85fa4bad42049a0b435ebdd")
 	testData := "test message"
 
-	// Test sign uncompressed
-	// address, err := script.NewAddressFromPublicKey(testKey.PubKey(), false)
-	// if err != nil {
-	// 	t.Errorf("Get address err %s", err)
-	// }
-	// sig, err := SignMessage(testKey, testData, false)
-	// if err != nil {
-	// 	t.Errorf("Failed to sign uncompressed %s", err)
-	// }
-
-	// err = VerifyMessage(address, sig, testData)
-
-	// if err != nil {
-	// 	t.Errorf("Failed to validate uncompressed %s", err)
-	// }
-
 	// Test sign compressed
 	address, err := script.NewAddressFromPublicKey(testKey.PubKey(), true)
 	if err != nil {

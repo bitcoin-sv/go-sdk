@@ -23,12 +23,6 @@ func PubKeyFromSignature(sig, data string) (pubKey *ec.PublicKey, wasCompressed 
 	// Validate the signature - this just shows that it was valid at all
 	// we will compare it with the key next
 	var buf bytes.Buffer
-	// if err = wire.WriteVarString(&buf, 0, hBSV); err != nil {
-	// 	return nil, false, err
-	// }
-	// if err = wire.WriteVarString(&buf, 0, data); err != nil {
-	// 	return nil, false, err
-	// }
 
 	varInt := transaction.VarInt(len(hBSV))
 	buf.Write(varInt.Bytes())
@@ -52,7 +46,7 @@ func PubKeyFromSignature(sig, data string) (pubKey *ec.PublicKey, wasCompressed 
 // a signature from a compressed key
 //
 // Error will occur if verify fails or verification is not successful (no bool)
-// Spec: https://docs.moneybutton.com/docs/bsv-message.html
+// Spec: https://github.com/bitcoin/bitcoin/pull/524
 func VerifyMessage(address, sig, data string) error {
 
 	// Reconstruct the pubkey

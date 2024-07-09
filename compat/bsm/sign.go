@@ -12,9 +12,9 @@ import (
 
 const hBSV = "Bitcoin Signed Message:\n"
 
-// SignMessage signs a string with the provided private key using Bitcoin Signed Message encoding
+// SignMessage signs a string with the provided PrivateKey using Bitcoin Signed Message encoding
 // sigRefCompressedKey bool determines whether the signature will reference a compressed or uncompresed key
-// Spec: https://docs.moneybutton.com/docs/bsv-message.html
+// Spec: https://github.com/bitcoin/bitcoin/pull/524
 func SignMessage(privateKey *ec.PrivateKey, message string, sigRefCompressedKey bool) (string, error) {
 	if privateKey == nil {
 		return "", errors.New("private key is required")
