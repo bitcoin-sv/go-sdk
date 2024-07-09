@@ -68,7 +68,13 @@ func NewPrivateKey() (*PrivateKey, error) {
 
 // PrivateKey is an ecdsa.PrivateKey with additional functions to
 func PrivateKeyFromHex(privKeyHex string) (*PrivateKey, error) {
-	privKeyBytes, _ := hex.DecodeString(privKeyHex)
+	if len(privKeyHex) == 0 {
+		return nil, errors.New("private key hex is empty")
+	}
+	privKeyBytes, err := hex.DecodeString(privKeyHex)
+	if err != nil {
+		return nil, err
+	}
 	privKey, _ := PrivateKeyFromBytes(privKeyBytes)
 	return privKey, nil
 }
