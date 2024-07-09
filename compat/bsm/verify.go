@@ -75,11 +75,6 @@ func VerifyMessage(address, sig, data string) error {
 
 // VerifyMessageDER will take a message string, a public key string and a signature string
 // (in strict DER format) and verify that the message was signed by the public key.
-//
-// Copyright (c) 2019 Bitcoin Association
-// License: https://github.com/bitcoin-sv/merchantapi-reference/blob/master/LICENSE
-//
-// Source: https://github.com/bitcoin-sv/merchantapi-reference/blob/master/handler/global.go
 func VerifyMessageDER(hash [32]byte, pubKey string, signature string) (verified bool, err error) {
 
 	// Decode the signature string
