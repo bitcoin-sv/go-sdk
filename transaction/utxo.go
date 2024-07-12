@@ -12,7 +12,6 @@ type UTXO struct {
 	Vout                    uint32                  `json:"vout"`
 	LockingScript           *script.Script          `json:"locking_script"`
 	Satoshis                uint64                  `json:"satoshis"`
-	SequenceNumber          uint32                  `json:"sequence_number"`
 	UnlockingScriptTemplate UnlockingScriptTemplate `json:"-"`
 }
 
