@@ -20,6 +20,6 @@ func TestEncodeDecodeWIF(t *testing.T) {
 	testPriv, _ := PrivateKeyFromWif(testWif)
 	require.Equal(t, mainWif, mainPriv.Wif())
 	require.Equal(t, testWif, mainPriv.WifPrefix(byte(TestNet)))
-	require.Equal(t, privHex, hex.EncodeToString(mainPriv.Serialise()))
-	require.Equal(t, mainPriv.Serialise(), testPriv.Serialise())
+	require.Equal(t, privHex, hex.EncodeToString(mainPriv.Serialize()))
+	require.Equal(t, mainPriv.Serialize(), testPriv.Serialize())
 }

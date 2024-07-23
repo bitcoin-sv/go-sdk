@@ -170,7 +170,7 @@ func TestGetPrivateKeyByPath(t *testing.T) {
 			t.Fatalf("%s Failed: [%v] [%d] [%d] inputted and was nil but not expected", t.Name(), test.inputHDKey, test.inputChain, test.inputNum)
 		} else if privateKey != nil && test.expectedNil {
 			t.Fatalf("%s Failed: [%v] [%d] [%d] inputted and was NOT nil but expected to be nil", t.Name(), test.inputHDKey, test.inputChain, test.inputNum)
-		} else if privateKey != nil && len(hex.EncodeToString(privateKey.Serialise())) == 0 {
+		} else if privateKey != nil && len(hex.EncodeToString(privateKey.Serialize())) == 0 {
 			t.Fatalf("%s Failed: [%v] [%d] [%d] inputted and should not be empty", t.Name(), test.inputHDKey, test.inputChain, test.inputNum)
 		}
 	}
@@ -202,7 +202,7 @@ func ExampleGetPrivateKeyByPath() {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
-	fmt.Printf("private key (%d) found at path %d/%d", len(privateKey.Serialise()), 0, 1)
+	fmt.Printf("private key (%d) found at path %d/%d", len(privateKey.Serialize()), 0, 1)
 	// Output:private key (32) found at path 0/1
 }
 
@@ -506,8 +506,8 @@ func TestGetPrivateKeyFromHDKey(t *testing.T) {
 			t.Fatalf("%s Failed: [%v] inputted and was nil but not expected", t.Name(), test.input)
 		} else if privateKey != nil && test.expectedNil {
 			t.Fatalf("%s Failed: [%v] inputted and was NOT nil but expected to be nil", t.Name(), test.input)
-		} else if privateKey != nil && hex.EncodeToString(privateKey.Serialise()) != test.expectedKey {
-			t.Fatalf("%s Failed: [%v] inputted [%s] expected but got: %s", t.Name(), test.input, test.expectedKey, hex.EncodeToString(privateKey.Serialise()))
+		} else if privateKey != nil && hex.EncodeToString(privateKey.Serialize()) != test.expectedKey {
+			t.Fatalf("%s Failed: [%v] inputted [%s] expected but got: %s", t.Name(), test.input, test.expectedKey, hex.EncodeToString(privateKey.Serialize()))
 		}
 	}
 }
@@ -537,7 +537,7 @@ func ExampleGetPrivateKeyFromHDKey() {
 		return
 	}
 
-	fmt.Printf("private key: %s", hex.EncodeToString(privateKey.Serialise()))
+	fmt.Printf("private key: %s", hex.EncodeToString(privateKey.Serialize()))
 	// Output:private key: 0ccf07f2cbe10dbe6f6034b7efbf62fc83cac3d44f49d67aa22ac8893d294e7a
 }
 
@@ -643,8 +643,8 @@ func TestGetPublicKeyFromHDKey(t *testing.T) {
 			t.Fatalf("%s Failed: [%v] inputted and was nil but not expected", t.Name(), test.input)
 		} else if publicKey != nil && test.expectedNil {
 			t.Fatalf("%s Failed: [%v] inputted and was NOT nil but expected to be nil", t.Name(), test.input)
-		} else if publicKey != nil && hex.EncodeToString(publicKey.SerialiseCompressed()) != test.expectedKey {
-			t.Fatalf("%s Failed: [%v] inputted [%s] expected but got: %s", t.Name(), test.input, test.expectedKey, hex.EncodeToString(publicKey.SerialiseCompressed()))
+		} else if publicKey != nil && hex.EncodeToString(publicKey.SerializeCompressed()) != test.expectedKey {
+			t.Fatalf("%s Failed: [%v] inputted [%s] expected but got: %s", t.Name(), test.input, test.expectedKey, hex.EncodeToString(publicKey.SerializeCompressed()))
 		}
 	}
 }
@@ -674,7 +674,7 @@ func ExampleGetPublicKeyFromHDKey() {
 		return
 	}
 
-	fmt.Printf("public key: %s", hex.EncodeToString(publicKey.SerialiseCompressed()))
+	fmt.Printf("public key: %s", hex.EncodeToString(publicKey.SerializeCompressed()))
 	// Output:public key: 03a25f6c10eedcd41eebac22c6bbc5278690fa1aab3afc2bbe8f2277c85e5c5def
 }
 
@@ -856,10 +856,10 @@ func TestGetPublicKeysForPath(t *testing.T) {
 			t.Fatalf("%s Failed: [%v] [%d] inputted and was nil but not expected", t.Name(), test.input, test.inputNum)
 		} else if pubKeys != nil && test.expectedNil {
 			t.Fatalf("%s Failed: [%v] [%d] inputted and was NOT nil but expected to be nil", t.Name(), test.input, test.inputNum)
-		} else if pubKeys != nil && hex.EncodeToString(pubKeys[0].SerialiseCompressed()) != test.expectedPubKey1 {
-			t.Fatalf("%s Failed: [%v] [%d] inputted key 1 [%s] expected but got: %s", t.Name(), test.input, test.inputNum, test.expectedPubKey1, hex.EncodeToString(pubKeys[0].SerialiseCompressed()))
-		} else if pubKeys != nil && hex.EncodeToString(pubKeys[1].SerialiseCompressed()) != test.expectedPubKey2 {
-			t.Fatalf("%s Failed: [%v] [%d] inputted key 2 [%s] expected but got: %s", t.Name(), test.input, test.inputNum, test.expectedPubKey2, hex.EncodeToString(pubKeys[1].SerialiseCompressed()))
+		} else if pubKeys != nil && hex.EncodeToString(pubKeys[0].SerializeCompressed()) != test.expectedPubKey1 {
+			t.Fatalf("%s Failed: [%v] [%d] inputted key 1 [%s] expected but got: %s", t.Name(), test.input, test.inputNum, test.expectedPubKey1, hex.EncodeToString(pubKeys[0].SerializeCompressed()))
+		} else if pubKeys != nil && hex.EncodeToString(pubKeys[1].SerializeCompressed()) != test.expectedPubKey2 {
+			t.Fatalf("%s Failed: [%v] [%d] inputted key 2 [%s] expected but got: %s", t.Name(), test.input, test.inputNum, test.expectedPubKey2, hex.EncodeToString(pubKeys[1].SerializeCompressed()))
 		}
 	}
 }
@@ -890,7 +890,7 @@ func ExampleGetPublicKeysForPath() {
 		return
 	}
 
-	fmt.Printf("found [%d] keys! Key 1: %s Key 2: %s", len(publicKeys), hex.EncodeToString(publicKeys[0].SerialiseCompressed()), hex.EncodeToString(publicKeys[1].SerialiseCompressed()))
+	fmt.Printf("found [%d] keys! Key 1: %s Key 2: %s", len(publicKeys), hex.EncodeToString(publicKeys[0].SerializeCompressed()), hex.EncodeToString(publicKeys[1].SerializeCompressed()))
 	// Output:found [2] keys! Key 1: 03f87ac38fb0cfca12988b51a2f1cd3e85bb4aeb1b05f549682190ac8205a67d30 Key 2: 02e78303aeef1acce1347c6493fadc1914e6d85ef3189a8856afb3accd53fbd9c5
 }
 

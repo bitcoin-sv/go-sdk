@@ -68,8 +68,8 @@ public extended keys.
 
 Serialising and Deserialising Extended Keys
 
-Extended keys are serialised and deserialised with the String and
-NewKeyFromString functions.  The serialised key is a Base58-encoded string which
+Extended keys are serialized and deserialized with the String and
+NewKeyFromString functions.  The serialized key is a Base58-encoded string which
 looks like the following:
 	public key:
 	xpub68Gmy5EdvgibQVfPdqkBBSVxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw

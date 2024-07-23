@@ -8,6 +8,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestSymmetricKeyEncryptionAndDecryption(t *testing.T) {
@@ -35,8 +37,10 @@ type symmetricTestVector struct {
 }
 
 func TestSymmetricKeyDecryption(t *testing.T) {
-	_, currentFile, _, _ := runtime.Caller(0)
+	_, currentFile, _, ok := runtime.Caller(0)
 	testdataPath := filepath.Join(filepath.Dir(currentFile), "testdata", "SymmetricKey.vectors.json")
+
+	require.True(t, ok, "Could not determine the directory of the current test file")
 
 	vectors, err := os.ReadFile(testdataPath)
 	if err != nil {

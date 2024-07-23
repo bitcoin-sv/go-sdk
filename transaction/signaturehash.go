@@ -26,7 +26,7 @@ func (tx *Transaction) sigStrat(shf sighash.Flag) sigHashFunc {
 	return tx.CalcInputPreimageLegacy
 }
 
-// CalcInputSignatureHash serialised the transaction and returns the hash digest
+// CalcInputSignatureHash serialized the transaction and returns the hash digest
 // to be signed. BitCoin (SV) uses a different signature hashing algorithm
 // after the UAHF fork for replay protection.
 //
@@ -42,7 +42,7 @@ func (tx *Transaction) CalcInputSignatureHash(inputNumber uint32, sigHashFlag si
 	// an index that is out of range results in a signature hash of 1 (as an
 	// uint256 little endian).  The original intent appeared to be to
 	// indicate failure, but unfortunately, it was never checked and thus is
-	// treated as the actual signature hash.  This buggy behaviour is now
+	// treated as the actual signature hash.  This buggy behavior is now
 	// part of the consensus and a hard fork would be required to fix it.
 	//
 	// Due to this, if the tx signature returned matches this special case value,
@@ -54,7 +54,7 @@ func (tx *Transaction) CalcInputSignatureHash(inputNumber uint32, sigHashFlag si
 	return crypto.Sha256d(buf), nil
 }
 
-// CalcInputPreimage serialises the transaction based on the input index and the SIGHASH flag
+// CalcInputPreimage serializes the transaction based on the input index and the SIGHASH flag
 // and returns the preimage before double hashing (SHA256d).
 //
 // see https://github.com/bitcoin-sv/bitcoin-sv/blob/master/doc/abc/replay-protected-sighash.md#digest-algorithm
@@ -112,7 +112,7 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 	binary.LittleEndian.PutUint32(oi, in.SourceTxOutIndex)
 	buf = append(buf, oi...)
 
-	// scriptCode of the input (serialised as scripts inside CTxOuts)
+	// scriptCode of the input (serialized as scripts inside CTxOuts)
 	buf = append(buf, VarInt(uint64(len(*in.SourceTxScript()))).Bytes()...)
 	buf = append(buf, *in.SourceTxScript()...)
 
@@ -147,7 +147,7 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 	return buf, nil
 }
 
-// CalcInputPreimageLegacy serialises the transaction based on the input index and the SIGHASH flag
+// CalcInputPreimageLegacy serializes the transaction based on the input index and the SIGHASH flag
 // and returns the preimage before double hashing (SHA256d), in the legacy format.
 //
 // see https://wiki.bitcoinsv.io/index.php/Legacy_Sighash_Algorithm
@@ -175,7 +175,7 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 	// an index that is out of range results in a signature hash of 1 (as an
 	// uint256 little endian).  The original intent appeared to be to
 	// indicate failure, but unfortunately, it was never checked and thus is
-	// treated as the actual signature hash.  This buggy behaviour is now
+	// treated as the actual signature hash.  This buggy behavior is now
 	// part of the consensus and a hard fork would be required to fix it.
 	//
 	// Due to this, care must be taken by software that creates transactions

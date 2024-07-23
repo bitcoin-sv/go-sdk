@@ -29,7 +29,7 @@ type outputJSON struct {
 	LockingScript string `json:"lockingScript"`
 }
 
-// MarshalJSON will serialise a transaction to json.
+// MarshalJSON will serialize a transaction to json.
 func (tx *Transaction) MarshalJSON() ([]byte, error) {
 	if tx == nil {
 		return nil, errors.Wrap(ErrTxNil, "cannot marshal tx")
@@ -96,7 +96,7 @@ func (i *TransactionInput) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// MarshalJSON will serialise an output to json.
+// MarshalJSON will serialize an output to json.
 func (o *TransactionOutput) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&outputJSON{
 		Satoshis:      o.Satoshis,
@@ -104,7 +104,7 @@ func (o *TransactionOutput) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// UnmarshalJSON will convert a json serialised output to a bt Output.
+// UnmarshalJSON will convert a json serialized output to a bt Output.
 func (o *TransactionOutput) UnmarshalJSON(b []byte) error {
 	var oj outputJSON
 	if err := json.Unmarshal(b, &oj); err != nil {

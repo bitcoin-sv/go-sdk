@@ -68,7 +68,7 @@ func TestEncryptedMessage(t *testing.T) {
 		if err == nil {
 			t.Fatalf("Expected an error, but got none")
 		}
-		expectedError := fmt.Sprintf("the encrypted message expects a recipient public key of %x, but the provided key is %x", recipientPub.SerialiseCompressed(), wrongRecipient.PubKey().SerialiseCompressed())
+		expectedError := fmt.Sprintf("the encrypted message expects a recipient public key of %x, but the provided key is %x", recipientPub.SerializeCompressed(), wrongRecipient.PubKey().SerializeCompressed())
 		if err.Error() != expectedError {
 			t.Errorf("Expected error: %s, but got: %s", expectedError, err.Error())
 		}

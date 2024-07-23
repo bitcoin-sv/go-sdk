@@ -2111,7 +2111,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 	// A bug in the original Satoshi client implementation means one more
 	// stack value than should be used must be popped.  Unfortunately, this
-	// buggy behaviour is now part of the consensus and a hard fork would be
+	// buggy behavior is now part of the consensus and a hard fork would be
 	// required to fix it.
 	dummy, err := t.dstack.PopByteArray()
 	if err != nil {

@@ -475,7 +475,7 @@ func TestScripts(t *testing.T) {
 // negative float to an unsigned int is implementation dependent and therefore
 // doesn't result in the expected value on all platforms.  This function woks
 // around that limitation by converting to a 32-bit signed integer first and
-// then to a 32-bit unsigned integer which results in the expected behaviour on
+// then to a 32-bit unsigned integer which results in the expected behavior on
 // all platforms.
 func testVecF64ToUint32(f float64) uint32 {
 	return uint32(int32(f))

@@ -358,8 +358,8 @@ func TestSignatures(t *testing.T) {
 	}
 }
 
-// TestSignatureSerialise ensures that serialising signatures works as expected.
-func TestSignatureSerialise(t *testing.T) {
+// TestSignatureSerialize ensures that serializing signatures works as expected.
+func TestSignatureSerialize(t *testing.T) {
 	tests := []struct {
 		name     string
 		ecsig    *Signature
@@ -454,9 +454,9 @@ func TestSignatureSerialise(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		result := test.ecsig.Serialise()
+		result := test.ecsig.Serialize()
 		if !bytes.Equal(result, test.expected) {
-			t.Errorf("Serialise #%d (%s) unexpected result:\n"+
+			t.Errorf("Serialize #%d (%s) unexpected result:\n"+
 				"got:  %x\nwant: %x", i, test.name, result,
 				test.expected)
 		}
@@ -694,7 +694,7 @@ func TestRFC6979(t *testing.T) {
 				test.msg, err)
 			continue
 		}
-		gotSigBytes := gotSig.Serialise()
+		gotSigBytes := gotSig.Serialize()
 		wantSigBytes := decodeHex(test.signature)
 		if !bytes.Equal(gotSigBytes, wantSigBytes) {
 			t.Errorf("Sign #%d (%s): mismatched signature: %x "+

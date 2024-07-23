@@ -33,7 +33,7 @@ var (
 )
 
 // compressMagic is the magic byte used to identify a WIF encoding for
-// an address created from a compressed serialised public key.
+// an address created from a compressed serialized public key.
 const compressMagic byte = 0x01
 
 // PrivateKey wraps an ecdsa.PrivateKey as a convenience mainly for signing
@@ -137,7 +137,7 @@ func (p *PrivateKey) WifPrefix(prefix byte) string {
 
 	a := make([]byte, 0, encodeLen)
 	a = append(a, prefix)
-	// Pad and append bytes manually, instead of using Serialise, to
+	// Pad and append bytes manually, instead of using Serialize, to
 	// avoid another call to make.
 	b := p.D.Bytes()
 	a = paddedAppend(PrivateKeyBytesLen, a, b)
@@ -164,12 +164,12 @@ func (p *PrivateKey) Sign(hash []byte) (*Signature, error) {
 	return signRFC6979(p, hash)
 }
 
-// PrivateKeyBytesLen defines the length in bytes of a serialised private key.
+// PrivateKeyBytesLen defines the length in bytes of a serialized private key.
 const PrivateKeyBytesLen = 32
 
-// Serialise returns the private key number d as a big-endian binary-encoded
+// Serialize returns the private key number d as a big-endian binary-encoded
 // number, padded to a length of 32 bytes.
-func (p *PrivateKey) Serialise() []byte {
+func (p *PrivateKey) Serialize() []byte {
 	b := make([]byte, 0, PrivateKeyBytesLen)
 	return paddedAppend(PrivateKeyBytesLen, b, p.D.Bytes())
 }

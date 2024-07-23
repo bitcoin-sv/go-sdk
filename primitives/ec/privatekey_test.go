@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"strconv"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestPrivKeys(t *testing.T) {
@@ -30,7 +32,7 @@ func TestPrivKeys(t *testing.T) {
 	for _, test := range tests {
 		priv, pub := PrivateKeyFromBytes(test.key)
 
-		_, err := ParsePubKey(pub.SerialiseUncompressed())
+		_, err := ParsePubKey(pub.SerializeUncompressed())
 		if err != nil {
 			t.Errorf("%s privkey: %v", test.name, err)
 			continue
@@ -48,10 +50,10 @@ func TestPrivKeys(t *testing.T) {
 			continue
 		}
 
-		serialisedKey := priv.Serialise()
-		if !bytes.Equal(serialisedKey, test.key) {
-			t.Errorf("%s unexpected serialised bytes - got: %x, "+
-				"want: %x", test.name, serialisedKey, test.key)
+		serializedKey := priv.Serialize()
+		if !bytes.Equal(serializedKey, test.key) {
+			t.Errorf("%s unexpected serialized bytes - got: %x, "+
+				"want: %x", test.name, serializedKey, test.key)
 		}
 	}
 }
@@ -66,8 +68,10 @@ type privateTestVector struct {
 
 func TestBRC42PrivateVectors(t *testing.T) {
 	// Determine the directory of the current test file
-	_, currentFile, _, _ := runtime.Caller(0)
+	_, currentFile, _, ok := runtime.Caller(0)
 	testdataPath := filepath.Join(filepath.Dir(currentFile), "testdata", "BRC42.private.vectors.json")
+
+	require.True(t, ok, "Could not determine the directory of the current test file")
 
 	// Read in the file
 	vectors, err := os.ReadFile(testdataPath)
@@ -96,7 +100,7 @@ func TestBRC42PrivateVectors(t *testing.T) {
 			}
 
 			// Convert derived private key to hex and compare
-			derivedHex := hex.EncodeToString(derived.Serialise())
+			derivedHex := hex.EncodeToString(derived.Serialize())
 			if derivedHex != v.ExpectedPrivateKey {
 				t.Errorf("Derived private key does not match expected: got %v, want %v", derivedHex, v.ExpectedPrivateKey)
 			}
