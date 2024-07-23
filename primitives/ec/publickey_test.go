@@ -238,14 +238,14 @@ func TestPubKeys(t *testing.T) {
 		var pkStr []byte
 		switch test.format {
 		case pubkeyUncompressed:
-			pkStr = pk.SerialiseUncompressed()
+			pkStr = pk.SerializeUncompressed()
 		case pubkeyCompressed:
-			pkStr = pk.SerialiseCompressed()
+			pkStr = pk.SerializeCompressed()
 		case pubkeyHybrid:
-			pkStr = pk.SerialiseHybrid()
+			pkStr = pk.SerializeHybrid()
 		}
 		if !bytes.Equal(test.key, pkStr) {
-			t.Errorf("%s pubkey: serialised keys do not match.",
+			t.Errorf("%s pubkey: serialized keys do not match.",
 				test.name)
 			spew.Dump(test.key)
 			spew.Dump(pkStr)
@@ -341,7 +341,7 @@ func TestBRC42PublicVectors(t *testing.T) {
 			}
 
 			// Convert derived public key to string/hex and compare
-			derivedStr := hex.EncodeToString(derived.SerialiseCompressed())
+			derivedStr := hex.EncodeToString(derived.SerializeCompressed())
 			if derivedStr != v.ExpectedPublicKey {
 				t.Errorf("Derived public key does not match expected: got %v, want %v", derivedStr, v.ExpectedPublicKey)
 			}

@@ -75,7 +75,7 @@ func DecryptGCM(ciphertext, key, nonce, additionalData, tag []byte) (plaintext [
 	ciphertextWithTag := append(ciphertext, tag...)
 	plaintext, err = gcm.Open(nil, nonce, ciphertextWithTag, additionalData)
 	if err != nil {
-		return nil, fmt.Errorf("decryption failed: %v", err)
+		return nil, fmt.Errorf("decryption failed: %w", err)
 	}
 
 	return plaintext, nil

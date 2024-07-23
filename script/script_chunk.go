@@ -141,9 +141,15 @@ func NewScriptFromScriptOps(parts []*ScriptChunk) (*Script, error) {
 	s := make(Script, 0, length)
 	for _, p := range parts {
 		if p.Op >= OpDATA1 && p.Op <= OpPUSHDATA4 {
-			s.AppendPushData(p.Data)
+			err := s.AppendPushData(p.Data)
+			if err != nil {
+				return nil, err
+			}
 		} else {
-			s.AppendOpcodes(p.Op)
+			err := s.AppendOpcodes(p.Op)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	return &s, nil

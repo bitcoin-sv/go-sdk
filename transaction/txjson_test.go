@@ -8,7 +8,7 @@ import (
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTx_JSON(t *testing.T) {
@@ -19,12 +19,12 @@ func TestTx_JSON(t *testing.T) {
 		"standard tx should marshal and unmarshal correctly": {
 			tx: func() *transaction.Transaction {
 				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
-				assert.NoError(t, err)
-				assert.NotNil(t, priv)
+				require.NoError(t, err)
+				require.NotNil(t, priv)
 				unlocker, err := p2pkh.Unlock(priv, nil)
-
+				require.NoError(t, err)
 				tx := transaction.NewTransaction()
-				assert.NoError(t, tx.AddInputFrom(
+				require.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
@@ -33,28 +33,28 @@ func TestTx_JSON(t *testing.T) {
 				))
 
 				add, err := script.NewAddressFromPublicKey(priv.PubKey(), true)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				s, err := p2pkh.Lock(add)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				tx.AddOutput(&transaction.TransactionOutput{
 					LockingScript: s,
 					Satoshis:      1000,
 				})
 
 				err = tx.Sign()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return tx
 			}(),
 		}, "data tx should marshall correctly": {
 			tx: func() *transaction.Transaction {
 				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
-				assert.NoError(t, err)
-				assert.NotNil(t, priv)
+				require.NoError(t, err)
+				require.NotNil(t, priv)
 				unlocker, err := p2pkh.Unlock(priv, nil)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				tx := transaction.NewTransaction()
-				assert.NoError(t, tx.AddInputFrom(
+				require.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
@@ -62,15 +62,15 @@ func TestTx_JSON(t *testing.T) {
 					unlocker,
 				))
 
-				// assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
+				// require.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 				s := &script.Script{}
-				assert.NoError(t, s.AppendPushDataString("test"))
+				require.NoError(t, s.AppendPushDataString("test"))
 				tx.AddOutput(&transaction.TransactionOutput{
 					LockingScript: s,
 					Satoshis:      1000,
 				})
 				err = tx.Sign()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return tx
 			}(),
 		},
@@ -78,13 +78,13 @@ func TestTx_JSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			bb, err := json.Marshal(test.tx)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			if err != nil {
 				return
 			}
 			var tx *transaction.Transaction
-			assert.NoError(t, json.Unmarshal(bb, &tx))
-			assert.Equal(t, test.tx.String(), tx.String())
+			require.NoError(t, json.Unmarshal(bb, &tx))
+			require.Equal(t, test.tx.String(), tx.String())
 		})
 	}
 }
@@ -97,7 +97,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 		"transaction with 1 input 1 p2pksh output 1 data output should create valid json": {
 			tx: func() *transaction.Transaction {
 				tx, err := transaction.NewTransactionFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return tx
 			}(),
 			expJSON: `{
@@ -127,13 +127,13 @@ func TestTx_MarshallJSON(t *testing.T) {
 		}, "transaction with multiple Inputs": {
 			tx: func() *transaction.Transaction {
 				priv, err := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
-				assert.NoError(t, err)
-				assert.NotNil(t, priv)
+				require.NoError(t, err)
+				require.NotNil(t, priv)
 				unlocker, err := p2pkh.Unlock(priv, nil)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 
 				tx := transaction.NewTransaction()
-				assert.NoError(t, tx.AddInputFrom(
+				require.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					0,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
@@ -141,7 +141,7 @@ func TestTx_MarshallJSON(t *testing.T) {
 					unlocker,
 				))
 
-				assert.NoError(t, tx.AddInputFrom(
+				require.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					2,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
@@ -149,16 +149,16 @@ func TestTx_MarshallJSON(t *testing.T) {
 					unlocker,
 				))
 
-				assert.NoError(t, tx.AddInputFrom(
+				require.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
 					114,
 					"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac",
 					10000,
 					unlocker,
 				))
-				assert.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
+				require.NoError(t, tx.PayToAddress("n2wmGVP89x3DsLNqk3NvctfQy9m9pvt7mk", 1000))
 
-				assert.NoError(t, tx.Sign())
+				require.NoError(t, tx.Sign())
 				return tx
 			}(),
 			expJSON: `{
@@ -198,9 +198,9 @@ func TestTx_MarshallJSON(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			bb, err := json.MarshalIndent(test.tx, "", "\t")
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
-			assert.Equal(t, test.expJSON, string(bb))
+			require.Equal(t, test.expJSON, string(bb))
 		})
 	}
 }
@@ -237,7 +237,7 @@ func TestTx_UnmarshalJSON(t *testing.T) {
 			}`,
 			expTX: func() *transaction.Transaction {
 				tx, err := transaction.NewTransactionFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return tx
 			}(),
 		}, "ONLY hex should map correctly": {
@@ -246,7 +246,7 @@ func TestTx_UnmarshalJSON(t *testing.T) {
 			}`,
 			expTX: func() *transaction.Transaction {
 				tx, err := transaction.NewTransactionFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return tx
 			}(),
 		},
@@ -255,8 +255,8 @@ func TestTx_UnmarshalJSON(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			var tx *transaction.Transaction
 			err := json.Unmarshal([]byte(test.json), &tx)
-			assert.NoError(t, err)
-			assert.Equal(t, test.expTX, tx)
+			require.NoError(t, err)
+			require.Equal(t, test.expTX, tx)
 		})
 	}
 }
@@ -265,5 +265,5 @@ func TestTx_ToJson(t *testing.T) {
 	tx, _ := transaction.NewTransactionFromHex("0100000001abad53d72f342dd3f338e5e3346b492440f8ea821f8b8800e318f461cc5ea5a2010000006a4730440220042edc1302c5463e8397120a56b28ea381c8f7f6d9bdc1fee5ebca00c84a76e2022077069bbdb7ed701c4977b7db0aba80d41d4e693112256660bb5d674599e390cf41210294639d6e4249ea381c2e077e95c78fc97afe47a52eb24e1b1595cd3fdd0afdf8ffffffff02000000000000000008006a0548656c6c6f7f030000000000001976a914b85524abf8202a961b847a3bd0bc89d3d4d41cc588ac00000000")
 
 	_, err := json.MarshalIndent(tx, "", "\t")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }

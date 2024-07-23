@@ -11,7 +11,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
-	"reflect"
 	"testing"
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
@@ -359,8 +358,8 @@ func TestSignatures(t *testing.T) {
 	}
 }
 
-// TestSignatureSerialise ensures that serialising signatures works as expected.
-func TestSignatureSerialise(t *testing.T) {
+// TestSignatureSerialize ensures that serializing signatures works as expected.
+func TestSignatureSerialize(t *testing.T) {
 	tests := []struct {
 		name     string
 		ecsig    *Signature
@@ -455,9 +454,9 @@ func TestSignatureSerialise(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		result := test.ecsig.Serialise()
+		result := test.ecsig.Serialize()
 		if !bytes.Equal(result, test.expected) {
-			t.Errorf("Serialise #%d (%s) unexpected result:\n"+
+			t.Errorf("Serialize #%d (%s) unexpected result:\n"+
 				"got:  %x\nwant: %x", i, test.name, result,
 				test.expected)
 		}
@@ -603,11 +602,10 @@ func TestRecoverCompact(t *testing.T) {
 		pub, _, err := RecoverCompact(sig, msg)
 
 		// Verify that returned error matches as expected.
-		if !reflect.DeepEqual(test.err, err) {
+		if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
 			t.Errorf("unexpected error returned from pubkey "+
 				"recovery #%d: wanted %v, got %v",
 				i, test.err, err)
-			continue
 		}
 
 		// If check succeeded because a proper error was returned, we
@@ -696,7 +694,7 @@ func TestRFC6979(t *testing.T) {
 				test.msg, err)
 			continue
 		}
-		gotSigBytes := gotSig.Serialise()
+		gotSigBytes := gotSig.Serialize()
 		wantSigBytes := decodeHex(test.signature)
 		if !bytes.Equal(gotSigBytes, wantSigBytes) {
 			t.Errorf("Sign #%d (%s): mismatched signature: %x "+

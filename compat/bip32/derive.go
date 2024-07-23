@@ -78,7 +78,7 @@ func (k *ExtendedKey) DeriveChildFromPath(derivationPath string) (*ExtendedKey, 
 
 // DerivePublicKeyFromPath will generate a new extended key derived from the key k using the
 // bip32 path provided, ie "1234/0/123". It will then transform to an bec.PublicKey before
-// serialising the bytes and returning.
+// serializing the bytes and returning.
 func (k *ExtendedKey) DerivePublicKeyFromPath(derivationPath string) ([]byte, error) {
 	key, err := k.DeriveChildFromPath(derivationPath)
 	if err != nil {
@@ -88,7 +88,7 @@ func (k *ExtendedKey) DerivePublicKeyFromPath(derivationPath string) ([]byte, er
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate public key %w", err)
 	}
-	return pubKey.SerialiseCompressed(), nil
+	return pubKey.SerializeCompressed(), nil
 }
 
 func childInt(child string) (uint32, error) {

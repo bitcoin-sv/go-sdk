@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEncodeDecodeWIF(t *testing.T) {
@@ -18,8 +18,8 @@ func TestEncodeDecodeWIF(t *testing.T) {
 
 	mainPriv, _ := PrivateKeyFromWif(mainWif)
 	testPriv, _ := PrivateKeyFromWif(testWif)
-	assert.Equal(t, mainWif, mainPriv.Wif())
-	assert.Equal(t, testWif, mainPriv.WifPrefix(byte(TestNet)))
-	assert.Equal(t, privHex, hex.EncodeToString(mainPriv.Serialise()))
-	assert.Equal(t, mainPriv.Serialise(), testPriv.Serialise())
+	require.Equal(t, mainWif, mainPriv.Wif())
+	require.Equal(t, testWif, mainPriv.WifPrefix(byte(TestNet)))
+	require.Equal(t, privHex, hex.EncodeToString(mainPriv.Serialize()))
+	require.Equal(t, mainPriv.Serialize(), testPriv.Serialize())
 }

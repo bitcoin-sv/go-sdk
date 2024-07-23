@@ -61,8 +61,8 @@ func (p *P2PKH) Sign(tx *transaction.Transaction, inputIndex uint32) (*script.Sc
 		return nil, err
 	}
 
-	pubKey := p.PrivateKey.PubKey().SerialiseCompressed()
-	signature := sig.Serialise()
+	pubKey := p.PrivateKey.PubKey().SerializeCompressed()
+	signature := sig.Serialize()
 
 	sigBuf := make([]byte, 0)
 	sigBuf = append(sigBuf, signature...)

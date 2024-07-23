@@ -23,7 +23,8 @@ func main() {
 	fmt.Println("Script from Hex:", scriptFromHex)
 
 	// From ASM
-	scriptFromASM, err := script.NewFromASM("OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG")
+	p2pkhScriptAsm := "OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG"
+	scriptFromASM, err := script.NewFromASM(p2pkhScriptAsm)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,14 +49,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	lockingScriptASM, err := lockingScript.ToASM()
+	lockingScriptASM := lockingScript.ToASM()
 	log.Printf("Locking Script (ASM): %s\n", lockingScriptASM)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	// Serializing Scripts
-	script, err := script.NewFromASM("OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG")
+	p2pkhScript := "OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG"
+	script, err := script.NewFromASM(p2pkhScript)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -65,10 +64,7 @@ func main() {
 	fmt.Println("Script as Hex:", scriptAsHex)
 
 	// Serialize script to ASM
-	scriptAsASM, err := script.ToASM()
-	if err != nil {
-		log.Fatal(err)
-	}
+	scriptAsASM := script.ToASM()
 	fmt.Println("Script as ASM:", scriptAsASM)
 
 	// Serialize script to Binary

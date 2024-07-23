@@ -24,7 +24,7 @@ import (
 var opcodeByName = make(map[string]byte)
 
 func init() {
-	// Initialise the opcode name to value map using the contents of the
+	// Initialize the opcode name to value map using the contents of the
 	// opcode array.  Also add entries for "OP_FALSE", "OP_TRUE", and
 	// "OP_NOP2" since they are aliases for "OP_0", "OP_1",
 	// and "OP_CHECKLOCKTIMEVERIFY" respectively.
@@ -289,7 +289,7 @@ func parseExpectedResult(expected string) ([]errs.ErrorCode, error) {
 		return []errs.ErrorCode{errs.ErrIllegalForkID}, nil
 	}
 
-	return nil, fmt.Errorf("unrecognised expected result in test data: %v",
+	return nil, fmt.Errorf("unrecognized expected result in test data: %v",
 		expected)
 }
 
@@ -475,7 +475,7 @@ func TestScripts(t *testing.T) {
 // negative float to an unsigned int is implementation dependent and therefore
 // doesn't result in the expected value on all platforms.  This function woks
 // around that limitation by converting to a 32-bit signed integer first and
-// then to a 32-bit unsigned integer which results in the expected behaviour on
+// then to a 32-bit unsigned integer which results in the expected behavior on
 // all platforms.
 func testVecF64ToUint32(f float64) uint32 {
 	return uint32(int32(f))

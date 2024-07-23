@@ -44,13 +44,13 @@ const (
 	// a master node.
 	MaxSeedBytes = 64 // 512 bits
 
-	// serializedKeyLen is the length of a serialised public or private
+	// serializedKeyLen is the length of a serialized public or private
 	// extended key.  It consists of 4 bytes version, 1 byte depth, 4 bytes
 	// fingerprint, 4 bytes child number, 32 bytes chain code, and 33 bytes
 	// public/private key data.
 	serializedKeyLen = 4 + 1 + 4 + 4 + 32 + 33 // 78 bytes
 
-	// maxUint8 is the max positive integer which can be serialised in a uint8
+	// maxUint8 is the max positive integer which can be serialized in a uint8
 	maxUint8 = 1<<8 - 1
 )
 
@@ -89,12 +89,12 @@ var (
 		"bits", MinSeedBytes*8, MaxSeedBytes*8)
 
 	// ErrBadChecksum describes an error in which the checksum encoded with
-	// a serialised extended key does not match the calculated value.
+	// a serialized extended key does not match the calculated value.
 	ErrBadChecksum = errors.New("bad extended key checksum")
 
-	// ErrInvalidKeyLen describes an error in which the provided serialised
+	// ErrInvalidKeyLen describes an error in which the provided serialized
 	// key is not the expected length.
-	ErrInvalidKeyLen = errors.New("the provided serialised extended key " +
+	ErrInvalidKeyLen = errors.New("the provided serialized extended key " +
 		"length is invalid")
 )
 
@@ -138,7 +138,7 @@ func NewExtendedKey(version, key, chainCode, parentFP []byte, depth uint8,
 	}
 }
 
-// pubKeyBytes returns bytes for the serialised compressed public key associated
+// pubKeyBytes returns bytes for the serialized compressed public key associated
 // with this extended key in an efficient manner including memoization as
 // necessary.
 //
@@ -158,7 +158,7 @@ func (k *ExtendedKey) pubKeyBytes() []byte {
 		if len(k.pubKey) == 0 {
 			pkx, pky := ec.S256().ScalarBaseMult(k.key)
 			pubKey := ec.PublicKey{Curve: ec.S256(), X: pkx, Y: pky}
-			k.pubKey = pubKey.SerialiseCompressed()
+			k.pubKey = pubKey.SerializeCompressed()
 		}
 	})
 
@@ -177,7 +177,7 @@ func (k *ExtendedKey) IsPrivate() bool {
 // Depth returns the current derivation level with respect to the root.
 //
 // The root key has depth zero, and the field has a maximum of 255 due to
-// how depth is serialised.
+// how depth is serialized.
 func (k *ExtendedKey) Depth() uint8 {
 	return k.depth
 }
@@ -310,7 +310,7 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 			return nil, ErrInvalidChild
 		}
 
-		// Convert the serialised compressed parent public key into X
+		// Convert the serialized compressed parent public key into X
 		// and Y coordinates so it can be added to the intermediate
 		// public key.
 		pubKey, err := ec.ParsePubKey(k.key)
@@ -324,7 +324,7 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 		// childKey = serP(point(parse256(Il)) + parentKey)
 		childX, childY := ec.S256().Add(ilx, ily, pubKey.X, pubKey.Y)
 		pk := ec.PublicKey{Curve: ec.S256(), X: childX, Y: childY}
-		childKey = pk.SerialiseCompressed()
+		childKey = pk.SerializeCompressed()
 	}
 
 	// The fingerprint of the parent for the derived child is the first 4
@@ -396,7 +396,7 @@ func (k *ExtendedKey) addressFromPublicKeyHash(hash []byte, mainnet bool) string
 	if !mainnet {
 		bb[0] = 111
 	}
-	// nolint:makezero // ignore
+	//nolint:makezero // ignore
 	bb = append(bb, hash...)
 	b := make([]byte, 0, len(bb)+4)
 	b = append(b, bb[:]...)
@@ -430,7 +430,7 @@ func (k *ExtendedKey) String() string {
 	var childNumBytes [4]byte
 	binary.BigEndian.PutUint32(childNumBytes[:], k.childNum)
 
-	// The serialised format is:
+	// The serialized format is:
 	//   version (4) || depth (1) || parent fingerprint (4)) ||
 	//   child num (4) || chain code (32) || key data (33) || checksum (4)
 	serializedBytes := make([]byte, 0, serializedKeyLen+4)
@@ -535,14 +535,14 @@ func NewMaster(seed []byte, net *chaincfg.Params) (*ExtendedKey, error) {
 // NewKeyFromString returns a new extended key instance from a base58-encoded
 // extended key.
 func NewKeyFromString(key string) (*ExtendedKey, error) {
-	// The base58-decoded extended key must consist of a serialised payload
+	// The base58-decoded extended key must consist of a serialized payload
 	// plus an additional 4 bytes for the checksum.
 	decoded := base58.Decode(key)
 	if len(decoded) != serializedKeyLen+4 {
 		return nil, ErrInvalidKeyLen
 	}
 
-	// The serialised format is:
+	// The serialized format is:
 	//   version (4) || depth (1) || parent fingerprint (4)) ||
 	//   child num (4) || chain code (32) || key data (33) || checksum (4)
 
@@ -562,7 +562,7 @@ func NewKeyFromString(key string) (*ExtendedKey, error) {
 	chainCode := payload[13:45]
 	keyData := payload[45:78]
 
-	// The key data is a private key if it starts with 0x00.  Serialised
+	// The key data is a private key if it starts with 0x00.  Serialized
 	// compressed pubkeys either start with 0x02 or 0x03.
 	isPrivate := keyData[0] == 0x00
 	if isPrivate {

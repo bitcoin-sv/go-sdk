@@ -109,7 +109,7 @@ func mustRegister(params *Params) {
 }
 
 func init() {
-	// Register all default networks when the package is initialised.
+	// Register all default networks when the package is initialized.
 	mustRegister(&MainNet)
 	mustRegister(&TestNet)
 }

@@ -1,4 +1,4 @@
-package bsm
+package compat
 
 import (
 	"bytes"

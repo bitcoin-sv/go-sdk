@@ -27,17 +27,8 @@ func ExampleEngine_Execute() {
 	input := tx.InputIdx(inputIdx)
 	prevOutput := prevTx.OutputIdx(int(input.SourceTxOutIndex))
 
-	inputASM, err := input.UnlockingScript.ToASM()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	outputASM, err := prevOutput.LockingScript.ToASM()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
+	inputASM := input.UnlockingScript.ToASM()
+	outputASM := prevOutput.LockingScript.ToASM()
 
 	fmt.Println(inputASM)
 	fmt.Println(outputASM)
@@ -135,15 +126,9 @@ func ExampleEngine_Execute_concurrent() {
 		exec := e
 		errs.Go(func() error {
 			input := exec.tx.InputIdx(exec.inputIdx)
-			inputASM, err := input.UnlockingScript.ToASM()
-			if err != nil {
-				return err
-			}
+			inputASM := input.UnlockingScript.ToASM()
 
-			outputASM, err := exec.prevTxOut.LockingScript.ToASM()
-			if err != nil {
-				return err
-			}
+			outputASM := exec.prevTxOut.LockingScript.ToASM()
 
 			fmt.Println(inputASM)
 			fmt.Println(outputASM)

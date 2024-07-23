@@ -4,7 +4,8 @@ import (
 	"testing"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	"github.com/stretchr/testify/assert" // Using testify for assertions similar to JavaScript's expect
+	"github.com/stretchr/testify/require"
+	// Using testify for assertions similar to JavaScript's expect
 )
 
 func TestSignedMessage(t *testing.T) {
@@ -14,11 +15,11 @@ func TestSignedMessage(t *testing.T) {
 
 		message := []byte{1, 2, 4, 8, 16, 32}
 		signature, err := Sign(message, senderPriv, recipientPub)
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		verified, err := Verify(message, signature, recipientPriv)
-		assert.Nil(t, err)
-		assert.True(t, verified)
+		require.NoError(t, err)
+		require.True(t, verified)
 	})
 
 	t.Run("Signs a message for anyone", func(t *testing.T) {
@@ -26,11 +27,11 @@ func TestSignedMessage(t *testing.T) {
 
 		message := []byte{1, 2, 4, 8, 16, 32}
 		signature, err := Sign(message, senderPriv, nil)
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		verified, err := Verify(message, signature, nil)
-		assert.Nil(t, err)
-		assert.True(t, verified)
+		require.NoError(t, err)
+		require.True(t, verified)
 	})
 
 	t.Run("Fails to verify a message with a wrong version", func(t *testing.T) {
@@ -42,8 +43,8 @@ func TestSignedMessage(t *testing.T) {
 		signature[0] = 1 // Alter the signature to simulate version mismatch
 
 		_, err := Verify(message, signature, recipientPriv)
-		assert.NotNil(t, err)
-		assert.Equal(t, "message version mismatch: Expected 42421033, received 01421033", err.Error())
+		require.Error(t, err)
+		require.Equal(t, "message version mismatch: Expected 42421033, received 01421033", err.Error())
 	})
 
 }

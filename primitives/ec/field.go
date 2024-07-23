@@ -5,7 +5,7 @@ package primitives
 //     http://cacr.uwaterloo.ca/hac/
 
 // All elliptic curve operations for secp256k1 are done in a finite field
-// characterised by a 256-bit prime.  Given this precision is larger than the
+// characterized by a 256-bit prime.  Given this precision is larger than the
 // biggest available native type, obviously some form of bignum math is needed.
 // This package implements specialised fixed-precision field arithmetic rather
 // than relying on an arbitrary-precision arithmetic package such as math/big
@@ -111,7 +111,7 @@ var (
 	}
 )
 
-// fieldVal implements optimised fixed-precision arithmetic over the
+// fieldVal implements optimized fixed-precision arithmetic over the
 // secp256k1 finite field.  This means all arithmetic is performed modulo
 // 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f.  It
 // represents each 256-bit value as 10 32-bit integers in base 2^26.  This
@@ -232,7 +232,7 @@ func (f *fieldVal) SetBytes(b *[32]byte) *fieldVal {
 // possible that the truncated value is less than the field prime.  It is up to
 // the caller to decide whether it needs to provide numbers of the appropriate
 // size or if it is acceptable to use this function with the described
-// truncation behaviour.
+// truncation behavior.
 //
 // The field value is returned to support chaining.  This enables syntax like:
 // f := new(fieldVal).SetByteSlice(byteSlice)
@@ -1141,7 +1141,7 @@ func (f *fieldVal) Inverse() *fieldVal {
 	// Thus, a^(p-2) is the multiplicative inverse.
 	//
 	// In order to efficiently compute a^(p-2), p-2 needs to be split into
-	// a sequence of squares and multipications that minimises the number of
+	// a sequence of squares and multipications that minimizes the number of
 	// multiplications needed (since they are more costly than squarings).
 	// Intermediate results are saved and reused as well.
 	//
@@ -1267,7 +1267,7 @@ func (f *fieldVal) SqrtVal(x *fieldVal) *fieldVal {
 	// See https://en.wikipedia.org/wiki/Exponentiation_by_squaring for more
 	// details.
 	//
-	// This can be further optimised, by observing that the value of Q in
+	// This can be further optimized, by observing that the value of Q in
 	// secp256k1 has the value:
 	//
 	//   Q = 3fffffffffffffffffffffffffffffffffffffffffffffffffffffffbfffff0c
@@ -1281,7 +1281,7 @@ func (f *fieldVal) SqrtVal(x *fieldVal) *fieldVal {
 	// Since there there are only 4 unique bytes of Q, this keeps the jump
 	// table small without the need to handle all possible 8-bit values.
 	// Further, we observe that 29 of the 32 bytes are 0xff; making the
-	// first case handle 0xff therefore optimises the hot path.
+	// first case handle 0xff therefore optimizes the hot path.
 	f.SetInt(1)
 	for _, b := range fieldQBytes {
 		switch b {

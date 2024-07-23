@@ -14,7 +14,7 @@ type engine struct{}
 
 // NewEngine returns a new script engine for the provided locking script
 // (of a previous transaction out), transaction, and input index.  The
-// flags modify the behaviour of the script engine according to the
+// flags modify the behavior of the script engine according to the
 // description provided by each flag.
 func NewEngine() Engine {
 	return &engine{}
@@ -24,23 +24,24 @@ func NewEngine() Engine {
 // for successful validation or an error if one occurred.
 //
 // Execute with tx example:
-//  if err := engine.Execute(
-//      interpreter.WithTx(tx, inputIdx, previousOutput),
-//      interpreter.WithAfterGenesis(),
-//      interpreter.WithForkID(),
-//  ); err != nil {
-//      // handle err
-//  }
+//
+//	if err := engine.Execute(
+//	    interpreter.WithTx(tx, inputIdx, previousOutput),
+//	    interpreter.WithAfterGenesis(),
+//	    interpreter.WithForkID(),
+//	); err != nil {
+//	    // handle err
+//	}
 //
 // Execute with scripts example:
-//  if err := engine.Execute(
-//      interpreter.WithScripts(lockingScript, unlockingScript),
-//      interpreter.WithAfterGenesis(),
-//      interpreter.WithForkID(),
-//  }); err != nil {
-//      // handle err
-//  }
 //
+//	if err := engine.Execute(
+//	    interpreter.WithScripts(lockingScript, unlockingScript),
+//	    interpreter.WithAfterGenesis(),
+//	    interpreter.WithForkID(),
+//	}); err != nil {
+//	    // handle err
+//	}
 func (e *engine) Execute(oo ...ExecutionOptionFunc) error {
 	opts := &execOpts{}
 	for _, o := range oo {

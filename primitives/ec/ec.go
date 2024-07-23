@@ -57,10 +57,10 @@ type KoblitzCurve struct {
 	// The next 6 values are used specifically for endomorphism
 	// optimizations in ScalarMult.
 
-	// lambda must fulfil lambda^3 = 1 mod N where N is the order of G.
+	// lambda must fulfill lambda^3 = 1 mod N where N is the order of G.
 	lambda *big.Int
 
-	// beta must fulfil beta^3 = 1 mod P where P is the prime field of the
+	// beta must fulfill beta^3 = 1 mod P where P is the prime field of the
 	// curve.
 	beta *fieldVal
 
@@ -132,7 +132,7 @@ func (curve *KoblitzCurve) IsOnCurve(x, y *big.Int) bool {
 // avoid the z value multiplications.
 func (curve *KoblitzCurve) addZ1AndZ2EqualsOne(x1, y1, z1, x2, y2, x3, y3, z3 *fieldVal) {
 	// To compute the point addition efficiently, this implementation splits
-	// the equation into intermediate elements which are used to minimise
+	// the equation into intermediate elements which are used to minimize
 	// the number of field multiplications using the method shown at:
 	// http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-mmadd-2007-bl
 	//
@@ -198,7 +198,7 @@ func (curve *KoblitzCurve) addZ1AndZ2EqualsOne(x1, y1, z1, x2, y2, x3, y3, z3 *f
 // equivalence.
 func (curve *KoblitzCurve) addZ1EqualsZ2(x1, y1, z1, x2, y2, x3, y3, z3 *fieldVal) {
 	// To compute the point addition efficiently, this implementation splits
-	// the equation into intermediate elements which are used to minimise
+	// the equation into intermediate elements which are used to minimize
 	// the number of field multiplications using a slightly modified version
 	// of the method shown at:
 	// http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-mmadd-2007-bl
@@ -267,7 +267,7 @@ func (curve *KoblitzCurve) addZ1EqualsZ2(x1, y1, z1, x2, y2, x3, y3, z3 *fieldVa
 // multiplications by the second point's z value.
 func (curve *KoblitzCurve) addZ2EqualsOne(x1, y1, z1, x2, y2, x3, y3, z3 *fieldVal) {
 	// To compute the point addition efficiently, this implementation splits
-	// the equation into intermediate elements which are used to minimise
+	// the equation into intermediate elements which are used to minimize
 	// the number of field multiplications using the method shown at:
 	// http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-madd-2007-bl
 	//
@@ -343,7 +343,7 @@ func (curve *KoblitzCurve) addZ2EqualsOne(x1, y1, z1, x2, y2, x3, y3, z3 *fieldV
 // is the slowest of the add routines due to requiring the most arithmetic.
 func (curve *KoblitzCurve) addGeneric(x1, y1, z1, x2, y2, z2, x3, y3, z3 *fieldVal) {
 	// To compute the point addition efficiently, this implementation splits
-	// the equation into intermediate elements which are used to minimise
+	// the equation into intermediate elements which are used to minimize
 	// the number of field multiplications using the method shown at:
 	// http://hyperelliptic.org/EFD/g1p/auto-shortw-jacobian-0.html#addition-add-2007-bl
 	//
@@ -495,8 +495,8 @@ func (curve *KoblitzCurve) doubleZ1EqualsOne(x1, y1, x3, y3, z3 *fieldVal) {
 	// Z3 = 2*Y1
 	//
 	// To compute the above efficiently, this implementation splits the
-	// equation into intermediate elements which are used to minimise the
-	// number of field multiplications in favour of field squarings which
+	// equation into intermediate elements which are used to minimize the
+	// number of field multiplications in favor of field squarings which
 	// are roughly 35% faster than field multiplications with the current
 	// implementation at the time this was written.
 	//
@@ -544,8 +544,8 @@ func (curve *KoblitzCurve) doubleGeneric(x1, y1, z1, x3, y3, z3 *fieldVal) {
 	// Z3 = 2*Y1*Z1
 	//
 	// To compute the above efficiently, this implementation splits the
-	// equation into intermediate elements which are used to minimise the
-	// number of field multiplications in favour of field squarings which
+	// equation into intermediate elements which are used to minimize the
+	// number of field multiplications in favor of field squarings which
 	// are roughly 35% faster than field multiplications with the current
 	// implementation at the time this was written.
 	//
@@ -631,7 +631,7 @@ func (curve *KoblitzCurve) Double(x1, y1 *big.Int) (*big.Int, *big.Int) {
 // the final equation of k = k1 + k2 * lambda (mod n) will hold.  This is
 // provable mathematically due to how a1/b1/a2/b2 are computed.
 //
-// c1 and c2 are chosen to minimise the max(k1,k2).
+// c1 and c2 are chosen to minimize the max(k1,k2).
 func (curve *KoblitzCurve) splitK(k []byte) ([]byte, []byte, int, int) {
 	// All math here is done with big.Int, which is slow.
 	// At some point, it might be useful to write something similar to
@@ -647,7 +647,7 @@ func (curve *KoblitzCurve) splitK(k []byte) ([]byte, []byte, int, int) {
 	// Rounding isn't really necessary and costs too much, hence skipped
 	c1.Mul(curve.b2, bigIntK)
 	c1.Div(c1, curve.N)
-	// c2 = round(b1 * k / n) from step 4 (sign reversed to optimise one step)
+	// c2 = round(b1 * k / n) from step 4 (sign reversed to optimize one step)
 	// Rounding isn't really necessary and costs too much, hence skipped
 	c2.Mul(curve.b1, bigIntK)
 	c2.Div(c2, curve.N)
@@ -688,7 +688,7 @@ func (curve *KoblitzCurve) moduloReduce(k []byte) []byte {
 // be.  NAF is convenient in that on average, only 1/3rd of its values are
 // non-zero.  This is algorithm 3.30 from [GECC].
 //
-// Essentially, this makes it possible to minimise the number of operations
+// Essentially, this makes it possible to minimize the number of operations
 // since the resulting ints returned will be at least 50% 0s.
 func NAF(k []byte) ([]byte, []byte) {
 	// The essence of this algorithm is that whenever we have consecutive 1s
@@ -941,7 +941,7 @@ func initS256() {
 	// Provided for convenience since this gets computed repeatedly.
 	secp256k1.byteSize = secp256k1.BitSize / 8
 
-	// Deserialise and set the pre-computed table used to accelerate scalar
+	// Deserialize and set the pre-computed table used to accelerate scalar
 	// base multiplication.  This is hard-coded data, so any errors are
 	// panics because it means something is wrong in the source code.
 	if err := loadS256BytePoints(); err != nil {

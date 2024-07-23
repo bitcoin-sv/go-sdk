@@ -10,7 +10,7 @@ import (
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 )
 
-// These constants define the lengths of serialised public keys.
+// These constants define the lengths of serialized public keys.
 const (
 	PubKeyBytesLenCompressed   = 33
 	PubKeyBytesLenUncompressed = 65
@@ -63,7 +63,7 @@ const (
 	pubkeyHybrid       byte = 0x6 // y_bit + x coord + y coord
 )
 
-// IsCompressedPubKey returns true the the passed serialised public key has
+// IsCompressedPubKey returns true the the passed serialized public key has
 // been encoded in compressed format, and false otherwise.
 func IsCompressedPubKey(pubKey []byte) bool {
 	// The public key is only compressed if it is the correct length and
@@ -134,7 +134,7 @@ func ParsePubKey(pubKeyStr []byte) (key *PublicKey, err error) {
 }
 
 // PublicKey is an ecdsa.PublicKey with additional functions to
-// serialise in uncompressed, compressed, and hybrid formats.
+// serialize in uncompressed, compressed, and hybrid formats.
 type PublicKey ecdsa.PublicKey
 
 // ToECDSA returns the public key as a *ecdsa.PublicKey.
@@ -142,17 +142,17 @@ func (p *PublicKey) ToECDSA() *ecdsa.PublicKey {
 	return (*ecdsa.PublicKey)(p)
 }
 
-// SerialiseUncompressed serialises a public key in a 65-byte uncompressed
+// SerializeUncompressed serializes a public key in a 65-byte uncompressed
 // format.
-func (p *PublicKey) SerialiseUncompressed() []byte {
+func (p *PublicKey) SerializeUncompressed() []byte {
 	b := make([]byte, 0, PubKeyBytesLenUncompressed)
 	b = append(b, pubkeyUncompressed)
 	b = paddedAppend(32, b, p.X.Bytes())
 	return paddedAppend(32, b, p.Y.Bytes())
 }
 
-// SerialiseCompressed serialises a public key in a 33-byte compressed format.
-func (p *PublicKey) SerialiseCompressed() []byte {
+// SerializeCompressed serializes a public key in a 33-byte compressed format.
+func (p *PublicKey) SerializeCompressed() []byte {
 	b := make([]byte, 0, PubKeyBytesLenCompressed)
 	format := pubkeyCompressed
 	if isOdd(p.Y) {
@@ -162,8 +162,8 @@ func (p *PublicKey) SerialiseCompressed() []byte {
 	return paddedAppend(32, b, p.X.Bytes())
 }
 
-// SerialiseHybrid serialises a public key in a 65-byte hybrid format.
-func (p *PublicKey) SerialiseHybrid() []byte {
+// SerializeHybrid serializes a public key in a 65-byte hybrid format.
+func (p *PublicKey) SerializeHybrid() []byte {
 	b := make([]byte, 0, PubKeyBytesLenHybrid)
 	format := pubkeyHybrid
 	if isOdd(p.Y) {

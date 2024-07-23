@@ -7,7 +7,7 @@ import (
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestTx_CalcInputPreimage(t *testing.T) {
@@ -57,12 +57,12 @@ func TestTx_CalcInputPreimage(t *testing.T) {
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
 			tx, err := transaction.NewTransactionFromHex(test.unsignedTx)
-			assert.NoError(t, err)
-			assert.NotNil(t, tx)
+			require.NoError(t, err)
+			require.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
 			prevScript, err := script.NewFromHex(test.previousTxScript)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			tx.InputIdx(test.index).SetPrevTxFromOutput(&transaction.TransactionOutput{
 				LockingScript: prevScript,
 				Satoshis:      test.previousTxSatoshis,
@@ -70,8 +70,8 @@ func TestTx_CalcInputPreimage(t *testing.T) {
 
 			var actualSigHash []byte
 			actualSigHash, err = tx.CalcInputPreimage(uint32(test.index), sighash.All|sighash.ForkID)
-			assert.NoError(t, err)
-			assert.Equal(t, test.expectedPreimage, hex.EncodeToString(actualSigHash))
+			require.NoError(t, err)
+			require.Equal(t, test.expectedPreimage, hex.EncodeToString(actualSigHash))
 		})
 	}
 }
@@ -150,12 +150,12 @@ func TestTx_CalcInputSignatureHash(t *testing.T) {
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
 			tx, err := transaction.NewTransactionFromHex(test.unsignedTx)
-			assert.NoError(t, err)
-			assert.NotNil(t, tx)
+			require.NoError(t, err)
+			require.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
 			prevScript, err := script.NewFromHex(test.previousTxScript)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			tx.Inputs[test.index].SetPrevTxFromOutput(&transaction.TransactionOutput{
 				LockingScript: prevScript,
 				Satoshis:      test.previousTxSatoshis,
@@ -163,8 +163,8 @@ func TestTx_CalcInputSignatureHash(t *testing.T) {
 
 			var actualSigHash []byte
 			actualSigHash, err = tx.CalcInputSignatureHash(test.index, test.sigHashType)
-			assert.NoError(t, err)
-			assert.Equal(t, test.expectedSigHash, hex.EncodeToString(actualSigHash))
+			require.NoError(t, err)
+			require.Equal(t, test.expectedSigHash, hex.EncodeToString(actualSigHash))
 		})
 	}
 }
@@ -216,12 +216,12 @@ func TestTx_CalcInputPreimageLegacy(t *testing.T) {
 	for _, test := range testVector {
 		t.Run(test.name, func(t *testing.T) {
 			tx, err := transaction.NewTransactionFromHex(test.unsignedTx)
-			assert.NoError(t, err)
-			assert.NotNil(t, tx)
+			require.NoError(t, err)
+			require.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
 			prevScript, err := script.NewFromHex(test.previousTxScript)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			tx.Inputs[test.index].SetPrevTxFromOutput(&transaction.TransactionOutput{
 				LockingScript: prevScript,
 				Satoshis:      test.previousTxSatoshis,
@@ -229,8 +229,8 @@ func TestTx_CalcInputPreimageLegacy(t *testing.T) {
 
 			var actualSigHash []byte
 			actualSigHash, err = tx.CalcInputPreimageLegacy(uint32(test.index), test.sigHashType)
-			assert.NoError(t, err)
-			assert.Equal(t, test.expectedPreimage, hex.EncodeToString(actualSigHash))
+			require.NoError(t, err)
+			require.Equal(t, test.expectedPreimage, hex.EncodeToString(actualSigHash))
 		})
 	}
 }

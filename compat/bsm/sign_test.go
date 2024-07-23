@@ -1,9 +1,10 @@
-package bsm
+package compat_test
 
 import (
 	"fmt"
 	"testing"
 
+	compat "github.com/bitcoin-sv/go-sdk/compat/bsm"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/script"
 )
@@ -17,12 +18,12 @@ func TestSigningCompression(t *testing.T) {
 	if err != nil {
 		t.Errorf("Get address err %s", err)
 	}
-	sig, err := SignMessage(testKey, testData, true)
+	sig, err := compat.SignMessage(testKey, testData, true)
 	if err != nil {
 		t.Errorf("Failed to sign compressed %s", err)
 	}
 
-	err = VerifyMessage(address.AddressString, sig, testData)
+	err = compat.VerifyMessage(address.AddressString, sig, testData)
 
 	if err != nil {
 		t.Errorf("Failed to validate compressed %s", err)
@@ -112,7 +113,7 @@ func TestSignMessage(t *testing.T) {
 
 		testPk, errKey := ec.PrivateKeyFromHex(test.inputKey)
 
-		if signature, err := SignMessage(testPk, test.inputMessage, false); err != nil && !test.expectedError {
+		if signature, err := compat.SignMessage(testPk, test.inputMessage, false); err != nil && !test.expectedError {
 			t.Fatalf("%d %s Failed: [%s] [%s] inputted and error not expected but got: %s", idx, t.Name(), test.inputKey, test.inputMessage, err.Error())
 		} else if err == nil && errKey == nil && test.expectedError {
 			t.Fatalf("%d %s Failed: [%s] [%s] inputted and error was expected", idx, t.Name(), test.inputKey, test.inputMessage)
@@ -126,7 +127,7 @@ func TestSignMessage(t *testing.T) {
 // ExampleSignMessage example using SignMessage()
 func ExampleSignMessage() {
 	pk, _ := ec.PrivateKeyFromHex("ef0b8bad0be285099534277fde328f8f19b3be9cadcd4c08e6ac0b5f863745ac")
-	signature, err := SignMessage(pk, "This is a test message", false)
+	signature, err := compat.SignMessage(pk, "This is a test message", false)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -139,6 +140,6 @@ func ExampleSignMessage() {
 func BenchmarkSignMessage(b *testing.B) {
 	key, _ := ec.NewPrivateKey()
 	for i := 0; i < b.N; i++ {
-		_, _ = SignMessage(key, "This is a test message", false)
+		_, _ = compat.SignMessage(key, "This is a test message", false)
 	}
 }

@@ -94,7 +94,10 @@ func NewTransactionFromBEEFHex(beefHex string) (*Transaction, error) {
 
 func (t *Transaction) BEEF() ([]byte, error) {
 	b := new(bytes.Buffer)
-	binary.Write(b, binary.LittleEndian, uint32(4022206465))
+	err := binary.Write(b, binary.LittleEndian, uint32(4022206465))
+	if err != nil {
+		return nil, err
+	}
 	bumps := map[uint32]*MerklePath{}
 	bumpIndex := map[uint32]int{}
 	txns := map[string]*Transaction{t.TxID(): t}
@@ -111,7 +114,10 @@ func (t *Transaction) BEEF() ([]byte, error) {
 			bumpIndex[tx.MerklePath.BlockHeight] = len(bumps)
 			bumps[tx.MerklePath.BlockHeight] = tx.MerklePath
 		} else {
-			bumps[tx.MerklePath.BlockHeight].Combine(tx.MerklePath)
+			err := bumps[tx.MerklePath.BlockHeight].Combine(tx.MerklePath)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 

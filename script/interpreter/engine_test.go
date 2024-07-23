@@ -8,7 +8,6 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	script "github.com/bitcoin-sv/go-sdk/script"
@@ -153,10 +152,10 @@ func TestValidateParams(t *testing.T) {
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -164,7 +163,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *transaction.TransactionOutput {
 					cbLockingScript, err := script.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &transaction.TransactionOutput{LockingScript: cbLockingScript, Satoshis: 0}
 				}(),
@@ -175,10 +174,10 @@ func TestValidateParams(t *testing.T) {
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "52529387", 0, nil)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					txUnlockingScript, err := script.NewFromASM("OP_4")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = txUnlockingScript
 
@@ -186,7 +185,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *transaction.TransactionOutput {
 					cbLockingScript, err := script.NewFromASM("OP_2 OP_2 OP_ADD OP_EQUAL")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &transaction.TransactionOutput{LockingScript: cbLockingScript, Satoshis: 0}
 				}(),
@@ -196,12 +195,12 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *script.Script {
 					script, err := script.NewFromHex("52529387")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				unlockingScript: func() *script.Script {
 					script, err := script.NewFromHex("54")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 			},
@@ -210,21 +209,21 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *script.Script {
 					script, err := script.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				unlockingScript: func() *script.Script {
 					script, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -232,7 +231,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *transaction.TransactionOutput {
 					script, err := script.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &transaction.TransactionOutput{LockingScript: script, Satoshis: 0}
 				}(),
@@ -242,16 +241,16 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				unlockingScript: func() *script.Script {
 					script, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -264,12 +263,12 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *script.Script {
 					script, err := script.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				previousTxOut: func() *transaction.TransactionOutput {
 					script, err := script.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &transaction.TransactionOutput{LockingScript: script, Satoshis: 0}
 				}(),
@@ -280,12 +279,12 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *script.Script {
 					script, err := script.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				unlockingScript: func() *script.Script {
 					script, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 			},
@@ -295,21 +294,21 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *script.Script {
 					script, err := script.NewFromHex("52529387")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				unlockingScript: func() *script.Script {
 					script, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -317,7 +316,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *transaction.TransactionOutput {
 					script, err := script.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &transaction.TransactionOutput{LockingScript: script, Satoshis: 0}
 				}(),
@@ -328,21 +327,21 @@ func TestValidateParams(t *testing.T) {
 			params: execOpts{
 				lockingScript: func() *script.Script {
 					script, err := script.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				unlockingScript: func() *script.Script {
 					script, err := script.NewFromHex("84")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					return script
 				}(),
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -350,7 +349,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *transaction.TransactionOutput {
 					script, err := script.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &transaction.TransactionOutput{LockingScript: script, Satoshis: 0}
 				}(),
@@ -362,10 +361,10 @@ func TestValidateParams(t *testing.T) {
 				tx: func() *transaction.Transaction {
 					tx := transaction.NewTransaction()
 					err := tx.AddInputFrom("ae81577c1a2434929a1224cf19aa63e167d88029965e2ca6de24defff014d031", 0, "76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac", 0, nil)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					uscript, err := script.NewFromHex("483045022100a4d9da733aeb29f9ba94dcaa578e71662cf29dd9742ce4b022c098211f4fdb06022041d24db4eda239fa15a12cf91229f6c352adab3c1c10091fc2aa517fe0f487c5412102454c535854802e5eaeaf5cbecd20e0aa508486063b71194dfde34744f19f1a5d")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					tx.Inputs[0].UnlockingScript = uscript
 
@@ -373,7 +372,7 @@ func TestValidateParams(t *testing.T) {
 				}(),
 				previousTxOut: func() *transaction.TransactionOutput {
 					cbLockingScript, err := script.NewFromHex("76a91454807ccc44c0eec0b0e187b3ce0e137e9c6cd65d88ac")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return &transaction.TransactionOutput{LockingScript: cbLockingScript, Satoshis: 0}
 				}(),
@@ -388,10 +387,10 @@ func TestValidateParams(t *testing.T) {
 			_, err := createThread(&test.params)
 
 			if test.expErr != nil {
-				assert.Error(t, err)
-				assert.EqualError(t, err, test.expErr.Error())
+				require.Error(t, err)
+				require.EqualError(t, err, test.expErr.Error())
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
 		})
 	}
@@ -852,16 +851,16 @@ func TestEngine_WithState(t *testing.T) {
 				SavedFirstStack:      [][]byte{},
 				Scripts: func() []ParsedScript {
 					lscript, err := script.NewFromHex("5253958852529387")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					uscript, err := script.NewFromHex("5456")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					var parser DefaultOpcodeParser
 					parsedLScript, err := parser.Parse(lscript)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					parsedUScript, err := parser.Parse(uscript)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return []ParsedScript{parsedUScript, parsedLScript}
 				}(),
@@ -891,16 +890,16 @@ func TestEngine_WithState(t *testing.T) {
 				SavedFirstStack:      [][]byte{},
 				Scripts: func() []ParsedScript {
 					lscript, err := script.NewFromHex("5253958852529387")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 					uscript, err := script.NewFromHex("5456")
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					var parser DefaultOpcodeParser
 					parsedLScript, err := parser.Parse(lscript)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					parsedUScript, err := parser.Parse(uscript)
-					assert.NoError(t, err)
+					require.NoError(t, err)
 
 					return []ParsedScript{parsedUScript, parsedLScript}
 				}(),
@@ -917,11 +916,11 @@ func TestEngine_WithState(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lscript)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			uscript, err := script.NewFromHex(test.uscript)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
-			assert.NoError(t, NewEngine().Execute(
+			require.NoError(t, NewEngine().Execute(
 				WithScripts(lscript, uscript),
 				WithForkID(),
 				WithAfterGenesis(),
@@ -973,7 +972,7 @@ func TestExecute(t *testing.T) {
 			tx, err := transaction.NewTransactionFromHex(tc.txHex)
 			require.NoError(t, err)
 
-			beforeScript, _ := tx.Inputs[0].UnlockingScript.ToASM()
+			beforeScript := tx.Inputs[0].UnlockingScript.ToASM()
 
 			prevTx, err := transaction.NewTransactionFromHex(tc.prevTxHex)
 			require.NoError(t, err)
@@ -988,7 +987,7 @@ func TestExecute(t *testing.T) {
 				WithAfterGenesis(),
 			)
 
-			afterScript, _ := tx.Inputs[0].UnlockingScript.ToASM()
+			afterScript := tx.Inputs[0].UnlockingScript.ToASM()
 
 			require.Equal(t, beforeScript, afterScript)
 

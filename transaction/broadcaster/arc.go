@@ -2,6 +2,7 @@ package broadcaster
 
 import (
 	"bytes"
+	"context"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -82,7 +83,9 @@ func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSucce
 		}
 	}
 
-	req, err := http.NewRequest(
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(
+		ctx,
 		"POST",
 		a.ApiUrl+"/tx",
 		buf,
@@ -131,8 +134,13 @@ func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSucce
 			Description: err.Error(),
 		}
 	}
-	defer resp.Body.Close()
-
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			// Handle or log the error if needed
+			// For example:
+			fmt.Println(cerr)
+		}
+	}()
 	msg, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, &transaction.BroadcastFailure{

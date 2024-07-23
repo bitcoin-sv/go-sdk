@@ -1,4 +1,4 @@
-package compat
+package compat_test
 
 import (
 	"errors"
@@ -6,7 +6,9 @@ import (
 	"strconv"
 	"testing"
 
+	compat "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_DerivePathAndDeriveSeed(t *testing.T) {
@@ -48,9 +50,9 @@ func Test_DerivePathAndDeriveSeed(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			assert.Equal(t, test.exp, DerivePath(test.counter))
+			assert.Equal(t, test.exp, compat.DerivePath(test.counter))
 			// assert the path can be converted correctly back to the seed.
-			c, _ := DeriveNumber(test.exp)
+			c, _ := compat.DeriveNumber(test.exp)
 			assert.Equal(t, test.counter, c)
 		})
 	}
@@ -96,7 +98,7 @@ func TestDeriveSeed(t *testing.T) {
 	}
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
-			_, err := DeriveNumber(test.path)
+			_, err := compat.DeriveNumber(test.path)
 			assert.Equal(t, test.err, err)
 		})
 	}
@@ -105,15 +107,15 @@ func TestDeriveSeed(t *testing.T) {
 func Test_DeriveChildFromPath(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
-		key     *ExtendedKey
+		key     *compat.ExtendedKey
 		path    string
 		expPriv string
 		expPub  string
 		err     error
 	}{
 		"successful run, 1 level child, should return no errors": {
-			key: func() *ExtendedKey {
-				k, err := NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
+			key: func() *compat.ExtendedKey {
+				k, err := compat.NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
 				assert.NoError(t, err)
 				return k
 			}(),
@@ -122,8 +124,8 @@ func Test_DeriveChildFromPath(t *testing.T) {
 			expPub:  "xpub6AvUGrnEpfvJBbfx7sQ89Q8hEMPM65UteqEX4yUbUiES2jHfjexmfJoxCGSwFMZiPBaKQT1RiKWrKfuDV4vpgVs4Xn8PpPTR2i79rwHd4Zr",
 			err:     nil,
 		}, "successful run, 2 level child, should return no errors": {
-			key: func() *ExtendedKey {
-				k, err := NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
+			key: func() *compat.ExtendedKey {
+				k, err := compat.NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
 				assert.NoError(t, err)
 				return k
 			}(),
@@ -132,8 +134,8 @@ func Test_DeriveChildFromPath(t *testing.T) {
 			expPub:  "xpub6BqyndF6risc7BcK7QFydS24Po3XGoKPuUdewYmShw4qC6bTjL4CdXEvqow6yhsfAtvU8e6kHPNFM2LzeWwKQoJm6hrYttTcxVQrk42WRE3",
 			err:     nil,
 		}, "successful run, 10 level child, should return no errors": {
-			key: func() *ExtendedKey {
-				k, err := NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
+			key: func() *compat.ExtendedKey {
+				k, err := compat.NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
 				assert.NoError(t, err)
 				return k
 			}(),
@@ -142,8 +144,8 @@ func Test_DeriveChildFromPath(t *testing.T) {
 			expPub:  "xpub6S7ViZKTZwpRbKJoU9jePJQF1eFecnzwfgXTLBtv1SBAJPh68oRYetEXq1RvGzsYnTzeikfdM5UM3WDrSZxuBrJi5nLpGxsuSE6cDE8pB2o",
 			err:     nil,
 		}, "successful run, 1 level, hardened": {
-			key: func() *ExtendedKey {
-				k, err := NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
+			key: func() *compat.ExtendedKey {
+				k, err := compat.NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
 				assert.NoError(t, err)
 				return k
 			}(),
@@ -152,8 +154,8 @@ func Test_DeriveChildFromPath(t *testing.T) {
 			expPub:  "xpub6AvUGrnPALTGMCcPe95nPWveqarh5hX1ukhXTQyg6GHgryoLK65puKJDpTcMBKJKdtXQYVwbK3zMgydcTcf5qpLpJcULu9hKUxx5rzgYhrk",
 			err:     nil,
 		}, "successful run, 3 level, hardened": {
-			key: func() *ExtendedKey {
-				k, err := NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
+			key: func() *compat.ExtendedKey {
+				k, err := compat.NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
 				assert.NoError(t, err)
 				return k
 			}(),
@@ -166,11 +168,11 @@ func Test_DeriveChildFromPath(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			k, err := test.key.DeriveChildFromPath(test.path)
-			assert.NoError(t, err)
-			assert.Equal(t, test.expPriv, k.String())
+			require.NoError(t, err)
+			require.Equal(t, test.expPriv, k.String())
 			pubKey, err := k.Neuter()
-			assert.NoError(t, err)
-			assert.Equal(t, test.expPub, pubKey.String())
+			require.NoError(t, err)
+			require.Equal(t, test.expPub, pubKey.String())
 		})
 	}
 }

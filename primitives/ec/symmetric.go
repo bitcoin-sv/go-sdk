@@ -15,12 +15,21 @@ type SymmetricKey struct {
 // Encrypt encrypts the given message using the symmetric key using AES-GCM
 func (s *SymmetricKey) Encrypt(message []byte) (ciphertext []byte, err error) {
 	iv := make([]byte, 32)
-	rand.Read(iv)
-	cipertext, tag, err := aesgcm.EncryptGCM(message, iv, s.ToBytes(), []byte{})
+	_, err = rand.Read(iv)
 	if err != nil {
 		return nil, err
 	}
-	return append(append(iv, cipertext...), tag...), nil
+	ciphertext, tag, err := aesgcm.EncryptGCM(message, iv, s.ToBytes(), []byte{})
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]byte, len(iv)+len(ciphertext)+len(tag))
+
+	copy(result, iv)
+	copy(result[len(iv):], ciphertext)
+	copy(result[len(iv)+len(ciphertext):], tag)
+	return result, nil
 }
 
 // Decrypt decrypts the given message using the symmetric key using AES-GCM
@@ -49,7 +58,7 @@ func NewSymmetricKey(key []byte) *SymmetricKey {
 
 func NewSymmetricKeyFromRandom() *SymmetricKey {
 	key := make([]byte, 32)
-	rand.Read(key)
+	_, _ = rand.Read(key)
 	return &SymmetricKey{key: key}
 }
 

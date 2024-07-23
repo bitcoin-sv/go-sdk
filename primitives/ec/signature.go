@@ -59,14 +59,14 @@ var (
 	oneInitializer = []byte{0x01}
 )
 
-// Serialise returns the ECDSA signature in the more strict DER format.  Note
-// that the serialised bytes returned do not include the appended hash type
+// Serialize returns the ECDSA signature in the more strict DER format.  Note
+// that the serialized bytes returned do not include the appended hash type
 // used in Bitcoin signature scripts.
 //
 // encoding/asn1 is broken so we hand roll this output:
 //
 // 0x30 <length> 0x02 <length r> r 0x02 <length s> s
-func (sig *Signature) Serialise() []byte {
+func (sig *Signature) Serialize() []byte {
 	// low 'S' malleability breaker
 	sigS := sig.S
 	if sigS.Cmp(S256().halfOrder) == 1 {
@@ -305,7 +305,7 @@ func hashToInt(hash []byte, c elliptic.Curve) *big.Int {
 // in the inner loop in Step 1. The counter provided is actually the j parameter
 // of the loop * 2 - on the first iteration of j we do the R case, else the -R
 // case in step 1.6. This counter is used in the bitcoin compressed signature
-// format and thus we match bitcoind's behaviour here.
+// format and thus we match bitcoind's behavior here.
 func recoverKeyFromSignature(curve *KoblitzCurve, sig *Signature, msg []byte,
 	iter int, doChecks bool) (*PublicKey, error) {
 	// Parse and validate the R and S signature components.

@@ -126,7 +126,7 @@ func GetPrivateKeyStringFromHDKey(hdKey *ExtendedKey) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return hex.EncodeToString(key.Serialise()), nil
+	return hex.EncodeToString(key.Serialize()), nil
 }
 
 // GetPublicKeyFromHDKey is a helper function to get the Public Key associated with a given hdKey

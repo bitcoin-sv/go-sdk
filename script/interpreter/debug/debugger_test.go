@@ -4,11 +4,10 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/debug"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDebugger_BeforeExecute(t *testing.T) {
@@ -43,10 +42,10 @@ func TestDebugger_BeforeExecute(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			var timesCalled int
 			debugger := debug.NewDebugger()
@@ -56,8 +55,8 @@ func TestDebugger_BeforeExecute(t *testing.T) {
 				for i, d := range state.DataStack {
 					stack[i] = hex.EncodeToString(d)
 				}
-				assert.Equal(t, test.expStack, stack)
-				assert.Equal(t, test.expOpcode, state.Opcode().Name())
+				require.Equal(t, test.expStack, stack)
+				require.Equal(t, test.expOpcode, state.Opcode().Name())
 			})
 
 			interpreter.NewEngine().Execute(
@@ -66,7 +65,7 @@ func TestDebugger_BeforeExecute(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, 1, timesCalled)
+			require.Equal(t, 1, timesCalled)
 		})
 	}
 }
@@ -139,10 +138,10 @@ func TestDebugger_BeforeStep(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -166,8 +165,8 @@ func TestDebugger_BeforeStep(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expStackHistory, history.dstack)
-			assert.Equal(t, test.expOpcodes, history.opcodes)
+			require.Equal(t, test.expStackHistory, history.dstack)
+			require.Equal(t, test.expOpcodes, history.opcodes)
 		})
 	}
 }
@@ -239,10 +238,10 @@ func TestDebugger_AfterStep(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -266,8 +265,8 @@ func TestDebugger_AfterStep(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expStackHistory, history.dstack)
-			assert.Equal(t, test.expOpcodes, history.opcodes)
+			require.Equal(t, test.expStackHistory, history.dstack)
+			require.Equal(t, test.expOpcodes, history.opcodes)
 		})
 	}
 }
@@ -340,10 +339,10 @@ func TestDebugger_BeforeExecuteOpcode(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -367,8 +366,8 @@ func TestDebugger_BeforeExecuteOpcode(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expStackHistory, history.dstack)
-			assert.Equal(t, test.expOpcodes, history.opcodes)
+			require.Equal(t, test.expStackHistory, history.dstack)
+			require.Equal(t, test.expOpcodes, history.opcodes)
 		})
 	}
 }
@@ -440,10 +439,10 @@ func TestDebugger_AfterExecuteOpcode(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -467,8 +466,8 @@ func TestDebugger_AfterExecuteOpcode(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expStackHistory, history.dstack)
-			assert.Equal(t, test.expOpcodes, history.opcodes)
+			require.Equal(t, test.expStackHistory, history.dstack)
+			require.Equal(t, test.expOpcodes, history.opcodes)
 		})
 	}
 }
@@ -523,10 +522,10 @@ func TestDebugger_BeforeScriptChange(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -553,9 +552,9 @@ func TestDebugger_BeforeScriptChange(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expStackHistory, history.dstack)
-			assert.Equal(t, test.expOpcodes, history.opcodes)
-			assert.Equal(t, test.exptimesCalled, timesCalled)
+			require.Equal(t, test.expStackHistory, history.dstack)
+			require.Equal(t, test.expOpcodes, history.opcodes)
+			require.Equal(t, test.exptimesCalled, timesCalled)
 		})
 	}
 }
@@ -610,10 +609,10 @@ func TestDebugger_AfterScriptChange(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -640,9 +639,9 @@ func TestDebugger_AfterScriptChange(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expStackHistory, history.dstack)
-			assert.Equal(t, test.expOpcodes, history.opcodes)
-			assert.Equal(t, test.exptimesCalled, timesCalled)
+			require.Equal(t, test.expStackHistory, history.dstack)
+			require.Equal(t, test.expOpcodes, history.opcodes)
+			require.Equal(t, test.exptimesCalled, timesCalled)
 		})
 	}
 }
@@ -679,10 +678,10 @@ func TestDebugger_AfterExecution(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			stack := make([]string, 0)
 			var opcode string
@@ -701,8 +700,8 @@ func TestDebugger_AfterExecution(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expStack, stack)
-			assert.Equal(t, test.expOpcode, opcode)
+			require.Equal(t, test.expStack, stack)
+			require.Equal(t, test.expOpcode, opcode)
 		})
 	}
 }
@@ -737,10 +736,10 @@ func TestDebugger_AfterError(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			stack := make([]string, 0)
 			var opcode string
@@ -761,10 +760,10 @@ func TestDebugger_AfterError(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expCalled, called)
+			require.Equal(t, test.expCalled, called)
 			if called {
-				assert.Equal(t, test.expStack, stack)
-				assert.Equal(t, test.expOpcode, opcode)
+				require.Equal(t, test.expStack, stack)
+				require.Equal(t, test.expOpcode, opcode)
 			}
 		})
 	}
@@ -803,10 +802,10 @@ func TestDebugger_AfterSuccess(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			stack := make([]string, 0)
 			var opcode string
@@ -827,10 +826,10 @@ func TestDebugger_AfterSuccess(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expCalled, called)
+			require.Equal(t, test.expCalled, called)
 			if called {
-				assert.Equal(t, test.expStack, stack)
-				assert.Equal(t, test.expOpcode, opcode)
+				require.Equal(t, test.expStack, stack)
+				require.Equal(t, test.expOpcode, opcode)
 			}
 		})
 	}
@@ -909,10 +908,10 @@ func TestDebugger_BeforeStackPush(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -938,9 +937,9 @@ func TestDebugger_BeforeStackPush(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expStackHistory, history.dstack)
-			assert.Equal(t, test.expOpcodes, history.opcodes)
-			assert.Equal(t, test.expPushData, history.entries)
+			require.Equal(t, test.expStackHistory, history.dstack)
+			require.Equal(t, test.expOpcodes, history.opcodes)
+			require.Equal(t, test.expPushData, history.entries)
 		})
 	}
 }
@@ -1018,10 +1017,10 @@ func TestDebugger_AfterStackPush(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -1047,9 +1046,9 @@ func TestDebugger_AfterStackPush(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expStackHistory, history.dstack)
-			assert.Equal(t, test.expOpcodes, history.opcodes)
-			assert.Equal(t, test.expPushData, history.entries)
+			require.Equal(t, test.expStackHistory, history.dstack)
+			require.Equal(t, test.expOpcodes, history.opcodes)
+			require.Equal(t, test.expPushData, history.entries)
 		})
 	}
 }
@@ -1119,10 +1118,10 @@ func TestDebugger_BeforeStackPop(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -1146,8 +1145,8 @@ func TestDebugger_BeforeStackPop(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expStackHistory, history.dstack)
-			assert.Equal(t, test.expOpcodes, history.opcodes)
+			require.Equal(t, test.expStackHistory, history.dstack)
+			require.Equal(t, test.expOpcodes, history.opcodes)
 		})
 	}
 }
@@ -1222,10 +1221,10 @@ func TestDebugger_AfterStackPop(t *testing.T) {
 	for name, test := range tests {
 		t.Run(name, func(t *testing.T) {
 			lscript, err := script.NewFromHex(test.lockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			uscript, err := script.NewFromHex(test.unlockingScriptHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			history := &stateHistory{
 				dstack:  make([][]string, 0),
@@ -1251,9 +1250,9 @@ func TestDebugger_AfterStackPop(t *testing.T) {
 				interpreter.WithDebugger(debugger),
 			)
 
-			assert.Equal(t, test.expStackHistory, history.dstack)
-			assert.Equal(t, test.expOpcodes, history.opcodes)
-			assert.Equal(t, test.expPopData, history.entries)
+			require.Equal(t, test.expStackHistory, history.dstack)
+			require.Equal(t, test.expOpcodes, history.opcodes)
+			require.Equal(t, test.expPopData, history.entries)
 		})
 	}
 }

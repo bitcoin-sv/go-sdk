@@ -54,7 +54,7 @@ package template
 // 	s := &script.Script{}
 // 	s.AppendOpcodes(80 + uint8(m.RequiredSigs))
 // 	for _, pubKey := range m.PubKeys {
-// 		s.AppendPushData(pubKey.SerialiseCompressed())
+// 		s.AppendPushData(pubKey.SerializeCompressed())
 // 	}
 // 	s.AppendOpcodes(80 + uint8(len(m.PubKeys)))
 // 	s.AppendOpcodes(script.OpCHECKMULTISIG)
@@ -110,7 +110,7 @@ package template
 // 					return nil, err
 // 				}
 
-// 				uscript.AppendPushData(sig.Serialise())
+// 				uscript.AppendPushData(sig.Serialize())
 // 				break
 // 			}
 // 		}

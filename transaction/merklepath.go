@@ -272,7 +272,8 @@ func (mp *MerklePath) ComputeRootBin(txidLE *[]byte) ([]byte, error) {
 	return workingHash, nil
 }
 
-// Verify checks if a given transaction ID is part of the Merkle tree at the specified block height using a chain tracker
+// Verify checks if a given transaction ID is part of the Merkle tree
+// at the specified block height using a chain tracker
 func (mp *MerklePath) Verify(txid string, ct chaintracker.ChainTracker) (bool, error) {
 	root, err := mp.ComputeRoot(&txid)
 	if err != nil {
