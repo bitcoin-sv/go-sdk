@@ -1,4 +1,4 @@
-package bsm
+package compat
 
 import (
 	"bytes"
@@ -55,9 +55,13 @@ func VerifyMessage(address, sig, data string) error {
 		return err
 	}
 
+	if !wasCompressed {
+		return fmt.Errorf("only compressed keys and signatures are supported")
+	}
+
 	// Get the address
 	var bscriptAddress *script.Address
-	if bscriptAddress, err = script.NewAddressFromPublicKey(publicKey, wasCompressed); err != nil {
+	if bscriptAddress, err = script.NewAddressFromPublicKey(publicKey, true); err != nil {
 		return err
 	}
 

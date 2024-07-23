@@ -71,8 +71,10 @@ Serialising and Deserialising Extended Keys
 Extended keys are serialised and deserialised with the String and
 NewKeyFromString functions.  The serialised key is a Base58-encoded string which
 looks like the following:
-	public key:   xpub68Gmy5EdvgibQVfPdqkBBSVxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw
-	private key:  xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7
+	public key:
+	xpub68Gmy5EdvgibQVfPdqkBBSVxA5htiqg55crXYuXoQRKfDBFA1WEjWgP6LHhwBZeNK1VTsfTFUHCdrfp1bgwQ9xv5ski8PX9rL2dZXvgGDnw
+	private key:
+	xprv9uHRZZhk6KAJC1avXpDAp4MDc3sQKNxDiPvvkX8Br5ngLNv1TxvUxt4cV1rGL5hj6KCesnDYUhd7oWgT11eZG7XnxHrnYeSvkzY7d2bhkJ7
 
 Network
 
@@ -81,5 +83,5 @@ bytes which tie them to a specific network.  The SetNet and IsForNet functions
 are provided to set and determine which network an extended key is associated
 with.
 */
-// nolint: lll
+//nolint: nolintlint //doc only
 package compat

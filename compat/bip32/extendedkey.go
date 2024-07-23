@@ -396,7 +396,7 @@ func (k *ExtendedKey) addressFromPublicKeyHash(hash []byte, mainnet bool) string
 	if !mainnet {
 		bb[0] = 111
 	}
-	// nolint:makezero // ignore
+	//nolint:makezero // ignore
 	bb = append(bb, hash...)
 	b := make([]byte, 0, len(bb)+4)
 	b = append(b, bb[:]...)

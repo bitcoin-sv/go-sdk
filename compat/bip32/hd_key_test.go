@@ -1,13 +1,15 @@
-package compat
+package compat_test
 
 import (
 	"encoding/hex"
 	"fmt"
 	"testing"
 
+	compat "github.com/bitcoin-sv/go-sdk/compat/bip32"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // TestGenerateHDKey will test the method GenerateHDKey()
@@ -24,12 +26,12 @@ func TestGenerateHDKey(t *testing.T) {
 		{1, true, true},
 		{15, true, true},
 		{65, true, true},
-		{RecommendedSeedLength, false, false},
-		{SecureSeedLength, false, false},
+		{compat.RecommendedSeedLength, false, false},
+		{compat.SecureSeedLength, false, false},
 	}
 
 	for _, test := range tests {
-		if hdKey, err := GenerateHDKey(test.inputSeed); err != nil && !test.expectedError {
+		if hdKey, err := compat.GenerateHDKey(test.inputSeed); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%d] inputted and error not expected but got: %s", t.Name(), test.inputSeed, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%d] inputted and error was expected", t.Name(), test.inputSeed)
@@ -43,7 +45,7 @@ func TestGenerateHDKey(t *testing.T) {
 
 // ExampleGenerateHDKey example using GenerateHDKey()
 func ExampleGenerateHDKey() {
-	hdKey, err := GenerateHDKey(SecureSeedLength)
+	hdKey, err := compat.GenerateHDKey(compat.SecureSeedLength)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -57,14 +59,14 @@ func ExampleGenerateHDKey() {
 // BenchmarkGenerateHDKey benchmarks the method GenerateHDKey()
 func BenchmarkGenerateHDKey(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, _ = GenerateHDKey(RecommendedSeedLength)
+		_, _ = compat.GenerateHDKey(compat.RecommendedSeedLength)
 	}
 }
 
 // BenchmarkGenerateHDKeySecure benchmarks the method GenerateHDKey()
 func BenchmarkGenerateHDKeySecure(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, _ = GenerateHDKey(SecureSeedLength)
+		_, _ = compat.GenerateHDKey(compat.SecureSeedLength)
 	}
 }
 
@@ -81,12 +83,12 @@ func TestGenerateHDKeyPair(t *testing.T) {
 		{1, true},
 		{15, true},
 		{65, true},
-		{RecommendedSeedLength, false},
-		{SecureSeedLength, false},
+		{compat.RecommendedSeedLength, false},
+		{compat.SecureSeedLength, false},
 	}
 
 	for _, test := range tests {
-		if privateKey, publicKey, err := GenerateHDKeyPair(test.inputSeed); err != nil && !test.expectedError {
+		if privateKey, publicKey, err := compat.GenerateHDKeyPair(test.inputSeed); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%d] inputted and error not expected but got: %s", t.Name(), test.inputSeed, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%d] inputted and error was expected", t.Name(), test.inputSeed)
@@ -100,7 +102,7 @@ func TestGenerateHDKeyPair(t *testing.T) {
 
 // ExampleGenerateHDKeyPair example using GenerateHDKeyPair()
 func ExampleGenerateHDKeyPair() {
-	xPrivateKey, xPublicKey, err := GenerateHDKeyPair(SecureSeedLength)
+	xPrivateKey, xPublicKey, err := compat.GenerateHDKeyPair(compat.SecureSeedLength)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -115,14 +117,14 @@ func ExampleGenerateHDKeyPair() {
 // BenchmarkGenerateHDKeyPair benchmarks the method GenerateHDKeyPair()
 func BenchmarkGenerateHDKeyPair(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, _, _ = GenerateHDKeyPair(RecommendedSeedLength)
+		_, _, _ = compat.GenerateHDKeyPair(compat.RecommendedSeedLength)
 	}
 }
 
 // BenchmarkGenerateHDKeyPairSecure benchmarks the method GenerateHDKeyPair()
 func BenchmarkGenerateHDKeyPairSecure(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		_, _, _ = GenerateHDKeyPair(SecureSeedLength)
+		_, _, _ = compat.GenerateHDKeyPair(compat.SecureSeedLength)
 	}
 }
 
@@ -132,13 +134,13 @@ func TestGetPrivateKeyByPath(t *testing.T) {
 	t.Parallel()
 
 	// Generate a valid key
-	validKey, err := GenerateHDKey(RecommendedSeedLength)
+	validKey, err := compat.GenerateHDKey(compat.RecommendedSeedLength)
 	if err != nil {
 		t.Fatalf("error occurred: %s", err.Error())
 	}
 
 	var tests = []struct {
-		inputHDKey    *ExtendedKey
+		inputHDKey    *compat.ExtendedKey
 		inputChain    uint32
 		inputNum      uint32
 		expectedNil   bool
@@ -160,7 +162,7 @@ func TestGetPrivateKeyByPath(t *testing.T) {
 
 	var privateKey *ec.PrivateKey
 	for _, test := range tests {
-		if privateKey, err = GetPrivateKeyByPath(test.inputHDKey, test.inputChain, test.inputNum); err != nil && !test.expectedError {
+		if privateKey, err = compat.GetPrivateKeyByPath(test.inputHDKey, test.inputChain, test.inputNum); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] [%d] inputted and error not expected but got: %s", t.Name(), test.inputHDKey, test.inputChain, test.inputNum, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] [%d] inputted and error was expected", t.Name(), test.inputHDKey, test.inputChain, test.inputNum)
@@ -179,7 +181,7 @@ func TestGetPrivateKeyByPathPanic(t *testing.T) {
 	t.Parallel()
 
 	assert.Panics(t, func() {
-		_, err := GetPrivateKeyByPath(nil, 0, 1)
+		_, err := compat.GetPrivateKeyByPath(nil, 0, 1)
 		assert.Error(t, err)
 	})
 }
@@ -187,7 +189,7 @@ func TestGetPrivateKeyByPathPanic(t *testing.T) {
 // ExampleGetPrivateKeyByPath example using GetPrivateKeyByPath()
 func ExampleGetPrivateKeyByPath() {
 
-	hdKey, err := GenerateHDKey(SecureSeedLength)
+	hdKey, err := compat.GenerateHDKey(compat.SecureSeedLength)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -195,7 +197,7 @@ func ExampleGetPrivateKeyByPath() {
 
 	// Get a private key at the path
 	var privateKey *ec.PrivateKey
-	privateKey, err = GetPrivateKeyByPath(hdKey, 0, 1)
+	privateKey, err = compat.GetPrivateKeyByPath(hdKey, 0, 1)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -206,9 +208,9 @@ func ExampleGetPrivateKeyByPath() {
 
 // BenchmarkGetPrivateKeyByPath benchmarks the method GetPrivateKeyByPath()
 func BenchmarkGetPrivateKeyByPath(b *testing.B) {
-	hdKey, _ := GenerateHDKey(SecureSeedLength)
+	hdKey, _ := compat.GenerateHDKey(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GetPrivateKeyByPath(hdKey, 0, 1)
+		_, _ = compat.GetPrivateKeyByPath(hdKey, 0, 1)
 	}
 }
 
@@ -218,8 +220,8 @@ func TestGetHDKeyByPath(t *testing.T) {
 	t.Parallel()
 
 	// Generate a valid key
-	validKey, err := GenerateHDKey(RecommendedSeedLength)
-	assert.NoError(t, err)
+	validKey, err := compat.GenerateHDKey(compat.RecommendedSeedLength)
+	require.NoError(t, err)
 	assert.NotNil(t, validKey)
 
 	// Max depth key
@@ -243,7 +245,7 @@ func TestGetHDKeyByPath(t *testing.T) {
 	*/
 
 	var tests = []struct {
-		inputHDKey    *ExtendedKey
+		inputHDKey    *compat.ExtendedKey
 		inputChain    uint32
 		inputNum      uint32
 		expectedNil   bool
@@ -263,7 +265,7 @@ func TestGetHDKeyByPath(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if hdKey, err := GetHDKeyByPath(test.inputHDKey, test.inputChain, test.inputNum); err != nil && !test.expectedError {
+		if hdKey, err := compat.GetHDKeyByPath(test.inputHDKey, test.inputChain, test.inputNum); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] [%d] inputted and error not expected but got: %s", t.Name(), test.inputHDKey, test.inputChain, test.inputNum, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] [%d] inputted and error was expected", t.Name(), test.inputHDKey, test.inputChain, test.inputNum)
@@ -282,7 +284,7 @@ func TestGetHDKeyByPathPanic(t *testing.T) {
 	t.Parallel()
 
 	assert.Panics(t, func() {
-		_, err := GetHDKeyByPath(nil, 0, 1)
+		_, err := compat.GetHDKeyByPath(nil, 0, 1)
 		assert.Error(t, err)
 	})
 }
@@ -290,15 +292,15 @@ func TestGetHDKeyByPathPanic(t *testing.T) {
 // ExampleGetHDKeyByPath example using GetHDKeyByPath()
 func ExampleGetHDKeyByPath() {
 
-	hdKey, err := GenerateHDKey(SecureSeedLength)
+	hdKey, err := compat.GenerateHDKey(compat.SecureSeedLength)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
 
 	// Get a child key
-	var childKey *ExtendedKey
-	childKey, err = GetHDKeyByPath(hdKey, 0, 1)
+	var childKey *compat.ExtendedKey
+	childKey, err = compat.GetHDKeyByPath(hdKey, 0, 1)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -309,9 +311,9 @@ func ExampleGetHDKeyByPath() {
 
 // BenchmarkGetHDKeyByPath benchmarks the method GetHDKeyByPath()
 func BenchmarkGetHDKeyByPath(b *testing.B) {
-	hdKey, _ := GenerateHDKey(SecureSeedLength)
+	hdKey, _ := compat.GenerateHDKey(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GetHDKeyByPath(hdKey, 0, 1)
+		_, _ = compat.GetHDKeyByPath(hdKey, 0, 1)
 	}
 }
 
@@ -321,8 +323,8 @@ func TestGetHDKeyChild(t *testing.T) {
 	t.Parallel()
 
 	// Generate a valid key
-	validKey, err := GenerateHDKey(RecommendedSeedLength)
-	assert.NoError(t, err)
+	validKey, err := compat.GenerateHDKey(compat.RecommendedSeedLength)
+	require.NoError(t, err)
 	assert.NotNil(t, validKey)
 
 	// Max depth key
@@ -352,7 +354,7 @@ func TestGetHDKeyChild(t *testing.T) {
 	*/
 
 	var tests = []struct {
-		inputHDKey    *ExtendedKey
+		inputHDKey    *compat.ExtendedKey
 		inputNum      uint32
 		expectedNil   bool
 		expectedError bool
@@ -372,7 +374,7 @@ func TestGetHDKeyChild(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if hdKey, err := GetHDKeyChild(test.inputHDKey, test.inputNum); err != nil && !test.expectedError {
+		if hdKey, err := compat.GetHDKeyChild(test.inputHDKey, test.inputNum); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] inputted and error not expected but got: %s", t.Name(), test.inputHDKey, test.inputNum, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] inputted and error was expected", t.Name(), test.inputHDKey, test.inputNum)
@@ -391,7 +393,7 @@ func TestGetHDKeyChildPanic(t *testing.T) {
 	t.Parallel()
 
 	assert.Panics(t, func() {
-		_, err := GetHDKeyChild(nil, 1)
+		_, err := compat.GetHDKeyChild(nil, 1)
 		assert.Error(t, err)
 	})
 }
@@ -399,15 +401,15 @@ func TestGetHDKeyChildPanic(t *testing.T) {
 // ExampleGetHDKeyChild example using GetHDKeyChild()
 func ExampleGetHDKeyChild() {
 
-	hdKey, err := GenerateHDKey(SecureSeedLength)
+	hdKey, err := compat.GenerateHDKey(compat.SecureSeedLength)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
 
 	// Get a child key
-	var childKey *ExtendedKey
-	childKey, err = GetHDKeyChild(hdKey, 0)
+	var childKey *compat.ExtendedKey
+	childKey, err = compat.GetHDKeyChild(hdKey, 0)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -418,9 +420,9 @@ func ExampleGetHDKeyChild() {
 
 // BenchmarkGetHDKeyChild benchmarks the method GetHDKeyChild()
 func BenchmarkGetHDKeyChild(b *testing.B) {
-	hdKey, _ := GenerateHDKey(SecureSeedLength)
+	hdKey, _ := compat.GenerateHDKey(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GetHDKeyChild(hdKey, 0)
+		_, _ = compat.GetHDKeyChild(hdKey, 0)
 	}
 }
 
@@ -442,7 +444,7 @@ func TestGenerateHDKeyFromString(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if hdKey, err := GenerateHDKeyFromString(test.input); err != nil && !test.expectedError {
+		if hdKey, err := compat.GenerateHDKeyFromString(test.input); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%s] inputted and error not expected but got: %s", t.Name(), test.input, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%s] inputted and error was expected", t.Name(), test.input)
@@ -459,7 +461,7 @@ func TestGenerateHDKeyFromString(t *testing.T) {
 // ExampleGenerateHDKeyFromString example using GenerateHDKeyFromString()
 func ExampleGenerateHDKeyFromString() {
 
-	hdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
+	hdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -471,9 +473,9 @@ func ExampleGenerateHDKeyFromString() {
 
 // BenchmarkGenerateHDKeyFromString benchmarks the method GenerateHDKeyFromString()
 func BenchmarkGenerateHDKeyFromString(b *testing.B) {
-	xPriv, _, _ := GenerateHDKeyPair(SecureSeedLength)
+	xPriv, _, _ := compat.GenerateHDKeyPair(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GenerateHDKeyFromString(xPriv)
+		_, _ = compat.GenerateHDKeyFromString(xPriv)
 	}
 }
 
@@ -481,22 +483,22 @@ func BenchmarkGenerateHDKeyFromString(b *testing.B) {
 func TestGetPrivateKeyFromHDKey(t *testing.T) {
 	t.Parallel()
 
-	validHdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
-	assert.NoError(t, err)
+	validHdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
+	require.NoError(t, err)
 	assert.NotNil(t, validHdKey)
 
 	var tests = []struct {
-		input         *ExtendedKey
+		input         *compat.ExtendedKey
 		expectedKey   string
 		expectedNil   bool
 		expectedError bool
 	}{
-		{new(ExtendedKey), "", true, true},
+		{new(compat.ExtendedKey), "", true, true},
 		{validHdKey, "8511f5e1e35ab748e7639aa68666df71857866af13fda1d081d5917948a6cd34", false, false},
 	}
 
 	for _, test := range tests {
-		if privateKey, err := GetPrivateKeyFromHDKey(test.input); err != nil && !test.expectedError {
+		if privateKey, err := compat.GetPrivateKeyFromHDKey(test.input); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error not expected but got: %s", t.Name(), test.input, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error was expected", t.Name(), test.input)
@@ -515,7 +517,7 @@ func TestGetPrivateKeyFromHDKeyPanic(t *testing.T) {
 	t.Parallel()
 
 	assert.Panics(t, func() {
-		_, err := GetPrivateKeyFromHDKey(nil)
+		_, err := compat.GetPrivateKeyFromHDKey(nil)
 		assert.Error(t, err)
 	})
 }
@@ -523,14 +525,14 @@ func TestGetPrivateKeyFromHDKeyPanic(t *testing.T) {
 // ExampleGetPrivateKeyFromHDKey example using GetPrivateKeyFromHDKey()
 func ExampleGetPrivateKeyFromHDKey() {
 
-	hdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
+	hdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
 
 	var privateKey *ec.PrivateKey
-	if privateKey, err = GetPrivateKeyFromHDKey(hdKey); err != nil {
+	if privateKey, err = compat.GetPrivateKeyFromHDKey(hdKey); err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
@@ -541,9 +543,9 @@ func ExampleGetPrivateKeyFromHDKey() {
 
 // BenchmarkGetPrivateKeyFromHDKey benchmarks the method GetPrivateKeyFromHDKey()
 func BenchmarkGetPrivateKeyFromHDKey(b *testing.B) {
-	hdKey, _ := GenerateHDKey(SecureSeedLength)
+	hdKey, _ := compat.GenerateHDKey(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GetPrivateKeyFromHDKey(hdKey)
+		_, _ = compat.GetPrivateKeyFromHDKey(hdKey)
 	}
 }
 
@@ -551,22 +553,22 @@ func BenchmarkGetPrivateKeyFromHDKey(b *testing.B) {
 func TestGetPrivateKeyStringFromHDKey(t *testing.T) {
 	t.Parallel()
 
-	validHdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
-	assert.NoError(t, err)
+	validHdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
+	require.NoError(t, err)
 	assert.NotNil(t, validHdKey)
 
 	var tests = []struct {
-		input         *ExtendedKey
+		input         *compat.ExtendedKey
 		expectedKey   string
 		expectedError bool
 	}{
-		{new(ExtendedKey), "", true},
+		{new(compat.ExtendedKey), "", true},
 		{validHdKey, "8511f5e1e35ab748e7639aa68666df71857866af13fda1d081d5917948a6cd34", false},
 	}
 
 	var privateKey string
 	for _, test := range tests {
-		if privateKey, err = GetPrivateKeyStringFromHDKey(test.input); err != nil && !test.expectedError {
+		if privateKey, err = compat.GetPrivateKeyStringFromHDKey(test.input); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error not expected but got: %s", t.Name(), test.input, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error was expected", t.Name(), test.input)
@@ -581,7 +583,7 @@ func TestGetPrivateKeyStringFromHDKeyPanic(t *testing.T) {
 	t.Parallel()
 
 	assert.Panics(t, func() {
-		_, err := GetPrivateKeyStringFromHDKey(nil)
+		_, err := compat.GetPrivateKeyStringFromHDKey(nil)
 		assert.Error(t, err)
 	})
 }
@@ -589,14 +591,14 @@ func TestGetPrivateKeyStringFromHDKeyPanic(t *testing.T) {
 // ExampleGetPrivateKeyStringFromHDKey example using GetPrivateKeyStringFromHDKey()
 func ExampleGetPrivateKeyStringFromHDKey() {
 
-	hdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
+	hdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
 
 	var privateKey string
-	if privateKey, err = GetPrivateKeyStringFromHDKey(hdKey); err != nil {
+	if privateKey, err = compat.GetPrivateKeyStringFromHDKey(hdKey); err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
@@ -607,9 +609,9 @@ func ExampleGetPrivateKeyStringFromHDKey() {
 
 // BenchmarkGetPrivateKeyStringFromHDKey benchmarks the method GetPrivateKeyStringFromHDKey()
 func BenchmarkGetPrivateKeyStringFromHDKey(b *testing.B) {
-	hdKey, _ := GenerateHDKey(SecureSeedLength)
+	hdKey, _ := compat.GenerateHDKey(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GetPrivateKeyStringFromHDKey(hdKey)
+		_, _ = compat.GetPrivateKeyStringFromHDKey(hdKey)
 	}
 }
 
@@ -617,23 +619,23 @@ func BenchmarkGetPrivateKeyStringFromHDKey(b *testing.B) {
 func TestGetPublicKeyFromHDKey(t *testing.T) {
 	t.Parallel()
 
-	validHdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
-	assert.NoError(t, err)
+	validHdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
+	require.NoError(t, err)
 	assert.NotNil(t, validHdKey)
 
 	var tests = []struct {
-		input         *ExtendedKey
+		input         *compat.ExtendedKey
 		expectedKey   string
 		expectedNil   bool
 		expectedError bool
 	}{
-		{new(ExtendedKey), "", true, true},
+		{new(compat.ExtendedKey), "", true, true},
 		{validHdKey, "02f2a2942b9d1dba033d36ab0c193e680415f5c8c1ff5d854f805c8c42ed9dd1fd", false, false},
 	}
 
 	var publicKey *ec.PublicKey
 	for _, test := range tests {
-		if publicKey, err = GetPublicKeyFromHDKey(test.input); err != nil && !test.expectedError {
+		if publicKey, err = compat.GetPublicKeyFromHDKey(test.input); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error not expected but got: %s", t.Name(), test.input, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error was expected", t.Name(), test.input)
@@ -652,7 +654,7 @@ func TestGetPublicKeyFromHDKeyPanic(t *testing.T) {
 	t.Parallel()
 
 	assert.Panics(t, func() {
-		_, err := GetPublicKeyFromHDKey(nil)
+		_, err := compat.GetPublicKeyFromHDKey(nil)
 		assert.Error(t, err)
 	})
 }
@@ -660,14 +662,14 @@ func TestGetPublicKeyFromHDKeyPanic(t *testing.T) {
 // ExampleGetPublicKeyFromHDKey example using GetPublicKeyFromHDKey()
 func ExampleGetPublicKeyFromHDKey() {
 
-	hdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
+	hdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
 
 	var publicKey *ec.PublicKey
-	if publicKey, err = GetPublicKeyFromHDKey(hdKey); err != nil {
+	if publicKey, err = compat.GetPublicKeyFromHDKey(hdKey); err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
@@ -678,9 +680,9 @@ func ExampleGetPublicKeyFromHDKey() {
 
 // BenchmarkGetPublicKeyFromHDKey benchmarks the method GetPublicKeyFromHDKey()
 func BenchmarkGetPublicKeyFromHDKey(b *testing.B) {
-	hdKey, _ := GenerateHDKey(SecureSeedLength)
+	hdKey, _ := compat.GenerateHDKey(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GetPublicKeyFromHDKey(hdKey)
+		_, _ = compat.GetPublicKeyFromHDKey(hdKey)
 	}
 }
 
@@ -688,23 +690,23 @@ func BenchmarkGetPublicKeyFromHDKey(b *testing.B) {
 func TestGetAddressFromHDKey(t *testing.T) {
 	t.Parallel()
 
-	validHdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
-	assert.NoError(t, err)
+	validHdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
+	require.NoError(t, err)
 	assert.NotNil(t, validHdKey)
 
 	var tests = []struct {
-		input           *ExtendedKey
+		input           *compat.ExtendedKey
 		expectedAddress string
 		expectedNil     bool
 		expectedError   bool
 	}{
-		{new(ExtendedKey), "", true, true},
+		{new(compat.ExtendedKey), "", true, true},
 		{validHdKey, "13xHrMdZuqa2gpweHf37w8hu6tfv3JrnaW", false, false},
 	}
 
 	var address *script.Address
 	for _, test := range tests {
-		if address, err = GetAddressFromHDKey(test.input); err != nil && !test.expectedError {
+		if address, err = compat.GetAddressFromHDKey(test.input); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error not expected but got: %s", t.Name(), test.input, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error was expected", t.Name(), test.input)
@@ -723,7 +725,7 @@ func TestGetAddressFromHDKeyPanic(t *testing.T) {
 	t.Parallel()
 
 	assert.Panics(t, func() {
-		_, err := GetAddressFromHDKey(nil)
+		_, err := compat.GetAddressFromHDKey(nil)
 		assert.Error(t, err)
 	})
 }
@@ -731,14 +733,14 @@ func TestGetAddressFromHDKeyPanic(t *testing.T) {
 // ExampleGetAddressFromHDKey example using GetAddressFromHDKey()
 func ExampleGetAddressFromHDKey() {
 
-	hdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
+	hdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
 
 	var address *script.Address
-	if address, err = GetAddressFromHDKey(hdKey); err != nil {
+	if address, err = compat.GetAddressFromHDKey(hdKey); err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
@@ -749,9 +751,9 @@ func ExampleGetAddressFromHDKey() {
 
 // BenchmarkGetAddressFromHDKey benchmarks the method GetAddressFromHDKey()
 func BenchmarkGetAddressFromHDKey(b *testing.B) {
-	hdKey, _ := GenerateHDKey(SecureSeedLength)
+	hdKey, _ := compat.GenerateHDKey(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GetAddressFromHDKey(hdKey)
+		_, _ = compat.GetAddressFromHDKey(hdKey)
 	}
 }
 
@@ -759,22 +761,22 @@ func BenchmarkGetAddressFromHDKey(b *testing.B) {
 func TestGetAddressStringFromHDKey(t *testing.T) {
 	t.Parallel()
 
-	validHdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
-	assert.NoError(t, err)
+	validHdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
+	require.NoError(t, err)
 	assert.NotNil(t, validHdKey)
 
 	var tests = []struct {
-		input           *ExtendedKey
+		input           *compat.ExtendedKey
 		expectedAddress string
 		expectedError   bool
 	}{
-		{new(ExtendedKey), "", true},
+		{new(compat.ExtendedKey), "", true},
 		{validHdKey, "13xHrMdZuqa2gpweHf37w8hu6tfv3JrnaW", false},
 	}
 
 	var address string
 	for _, test := range tests {
-		if address, err = GetAddressStringFromHDKey(test.input); err != nil && !test.expectedError {
+		if address, err = compat.GetAddressStringFromHDKey(test.input); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error not expected but got: %s", t.Name(), test.input, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error was expected", t.Name(), test.input)
@@ -789,7 +791,7 @@ func TestGetAddressStringFromHDKeyPanic(t *testing.T) {
 	t.Parallel()
 
 	assert.Panics(t, func() {
-		_, err := GetAddressStringFromHDKey(nil)
+		_, err := compat.GetAddressStringFromHDKey(nil)
 		assert.Error(t, err)
 	})
 }
@@ -797,14 +799,14 @@ func TestGetAddressStringFromHDKeyPanic(t *testing.T) {
 // ExampleGetAddressStringFromHDKey example using GetAddressStringFromHDKey()
 func ExampleGetAddressStringFromHDKey() {
 
-	hdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
+	hdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
 
 	var address string
-	if address, err = GetAddressStringFromHDKey(hdKey); err != nil {
+	if address, err = compat.GetAddressStringFromHDKey(hdKey); err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
@@ -815,9 +817,9 @@ func ExampleGetAddressStringFromHDKey() {
 
 // BenchmarkGetAddressStringFromHDKey benchmarks the method GetAddressStringFromHDKey()
 func BenchmarkGetAddressStringFromHDKey(b *testing.B) {
-	hdKey, _ := GenerateHDKey(SecureSeedLength)
+	hdKey, _ := compat.GenerateHDKey(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GetAddressStringFromHDKey(hdKey)
+		_, _ = compat.GetAddressStringFromHDKey(hdKey)
 	}
 }
 
@@ -825,19 +827,19 @@ func BenchmarkGetAddressStringFromHDKey(b *testing.B) {
 func TestGetPublicKeysForPath(t *testing.T) {
 	t.Parallel()
 
-	validHdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
-	assert.NoError(t, err)
+	validHdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
+	require.NoError(t, err)
 	assert.NotNil(t, validHdKey)
 
 	var tests = []struct {
-		input           *ExtendedKey
+		input           *compat.ExtendedKey
 		inputNum        uint32
 		expectedPubKey1 string
 		expectedPubKey2 string
 		expectedNil     bool
 		expectedError   bool
 	}{
-		{new(ExtendedKey), 1, "", "", true, true},
+		{new(compat.ExtendedKey), 1, "", "", true, true},
 		{validHdKey, 1, "03cc3334f0a6f0fae0420d1442ca0ce64fad0da76d652f2cc3b333e7ed95b97259", "02ceb23902f8dcf6fbff656597ee0343e05c907c6dfcdd8aaf6d033e14e85fd955", false, false},
 		{validHdKey, 2, "020cb908e3b9f3de7c9b40e7bcce63708c5617536d85cf4ab5635e3d3819c02c37", "030007ae60fc6eef98ea17b4f80f9b791e61ea94936e8a9e6ec343eeaa50a875e0", false, false},
 		{validHdKey, 3, "0342593453c476ac6c78eb1b1e586df00b20352e61c42536fe1b33c9fdf3bfbb6f", "03786a41dbf0b099256da26cb0019e10063628f6ce31b96801703f1bb2e1b17724", false, false},
@@ -846,7 +848,7 @@ func TestGetPublicKeysForPath(t *testing.T) {
 
 	var pubKeys []*ec.PublicKey
 	for _, test := range tests {
-		if pubKeys, err = GetPublicKeysForPath(test.input, test.inputNum); err != nil && !test.expectedError {
+		if pubKeys, err = compat.GetPublicKeysForPath(test.input, test.inputNum); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] inputted and error not expected but got: %s", t.Name(), test.input, test.inputNum, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] inputted and error was expected", t.Name(), test.input, test.inputNum)
@@ -867,7 +869,7 @@ func TestGetPublicKeysForPathPanic(t *testing.T) {
 	t.Parallel()
 
 	assert.Panics(t, func() {
-		_, err := GetPublicKeysForPath(nil, 1)
+		_, err := compat.GetPublicKeysForPath(nil, 1)
 		assert.Error(t, err)
 	})
 }
@@ -875,14 +877,14 @@ func TestGetPublicKeysForPathPanic(t *testing.T) {
 // ExampleGetPublicKeysForPath example using GetPublicKeysForPath()
 func ExampleGetPublicKeysForPath() {
 
-	hdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
+	hdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
 
 	var publicKeys []*ec.PublicKey
-	publicKeys, err = GetPublicKeysForPath(hdKey, 5)
+	publicKeys, err = compat.GetPublicKeysForPath(hdKey, 5)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -894,9 +896,9 @@ func ExampleGetPublicKeysForPath() {
 
 // BenchmarkGetPublicKeysForPath benchmarks the method GetPublicKeysForPath()
 func BenchmarkGetPublicKeysForPath(b *testing.B) {
-	hdKey, _ := GenerateHDKey(SecureSeedLength)
+	hdKey, _ := compat.GenerateHDKey(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GetPublicKeysForPath(hdKey, 5)
+		_, _ = compat.GetPublicKeysForPath(hdKey, 5)
 	}
 }
 
@@ -904,26 +906,26 @@ func BenchmarkGetPublicKeysForPath(b *testing.B) {
 func TestGetAddressesForPath(t *testing.T) {
 	t.Parallel()
 
-	validHdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
-	assert.NoError(t, err)
-	assert.NotNil(t, validHdKey)
+	validHdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
+	require.NoError(t, err)
+	require.NotNil(t, validHdKey)
 
 	var tests = []struct {
-		input            *ExtendedKey
+		input            *compat.ExtendedKey
 		inputNum         uint32
 		expectedAddress1 string
 		expectedAddress2 string
 		expectedNil      bool
 		expectedError    bool
 	}{
-		{new(ExtendedKey), 1, "", "", true, true},
+		{new(compat.ExtendedKey), 1, "", "", true, true},
 		{validHdKey, 1, "1KMxfSfRCkC1jrBAuYaLde4XBzdsWApbdH", "174DL9ZbBWx568ssAg8w2YwW6FTTBwXGEu", false, false},
 		{validHdKey, 2, "18s3peTU7fMSwgui54avpnqm1126pRVccw", "1KgZZ3NsJDw3v1GPHBj8ASnxutA1kFxo2i", false, false},
 	}
 
 	var addresses []string
 	for _, test := range tests {
-		if addresses, err = GetAddressesForPath(test.input, test.inputNum); err != nil && !test.expectedError {
+		if addresses, err = compat.GetAddressesForPath(test.input, test.inputNum); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] inputted and error not expected but got: %s", t.Name(), test.input, test.inputNum, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%v] [%d] inputted and error was expected", t.Name(), test.input, test.inputNum)
@@ -943,22 +945,22 @@ func TestGetAddressesForPath(t *testing.T) {
 func TestGetAddressesForPathPanic(t *testing.T) {
 	t.Parallel()
 
-	assert.Panics(t, func() {
-		_, err := GetAddressesForPath(nil, 1)
-		assert.Error(t, err)
+	require.Panics(t, func() {
+		_, err := compat.GetAddressesForPath(nil, 1)
+		require.Error(t, err)
 	})
 }
 
 // ExampleGetAddressesForPath example using GetAddressesForPath()
 func ExampleGetAddressesForPath() {
-	hdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
+	hdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
 
 	var addresses []string
-	addresses, err = GetAddressesForPath(hdKey, 5)
+	addresses, err = compat.GetAddressesForPath(hdKey, 5)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -969,9 +971,9 @@ func ExampleGetAddressesForPath() {
 
 // BenchmarkGetAddressesForPath benchmarks the method GetAddressesForPath()
 func BenchmarkGetAddressesForPath(b *testing.B) {
-	hdKey, _ := GenerateHDKey(SecureSeedLength)
+	hdKey, _ := compat.GenerateHDKey(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GetAddressesForPath(hdKey, 5)
+		_, _ = compat.GetAddressesForPath(hdKey, 5)
 	}
 }
 
@@ -979,22 +981,22 @@ func BenchmarkGetAddressesForPath(b *testing.B) {
 func TestGetExtendedPublicKey(t *testing.T) {
 	t.Parallel()
 
-	validHdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
-	assert.NoError(t, err)
-	assert.NotNil(t, validHdKey)
+	validHdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K4FdJCmPQe1CFUvK3PKVrcp3b5xVr5Bs3cP5ab6ytszeHggTmHoqTXpaa8CgYPxZZzigSGCDjtyWdUDJqPogb1JGWAPkBLdF")
+	require.NoError(t, err)
+	require.NotNil(t, validHdKey)
 
 	var tests = []struct {
-		input         *ExtendedKey
+		input         *compat.ExtendedKey
 		expectedKey   string
 		expectedError bool
 	}{
 		{validHdKey, "xpub661MyMwAqRbcGjhmJnvR198z2x9XnnDhz2yBtLuTdXQ2VBQj8eJ9RnxmXxKnRPhYy6nLsmabmUfVkbajvP7aZASrrnoZkzmwgyjiNskiefG", false},
-		{new(ExtendedKey), "zeroed extended key", false},
+		{new(compat.ExtendedKey), "zeroed extended key", false},
 	}
 
 	var xPub string
 	for _, test := range tests {
-		if xPub, err = GetExtendedPublicKey(test.input); err != nil && !test.expectedError {
+		if xPub, err = compat.GetExtendedPublicKey(test.input); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error not expected but got: %s", t.Name(), test.input, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%v] inputted and error was expected", t.Name(), test.input)
@@ -1008,22 +1010,22 @@ func TestGetExtendedPublicKey(t *testing.T) {
 func TestGetExtendedPublicKeyPanic(t *testing.T) {
 	t.Parallel()
 
-	assert.Panics(t, func() {
-		_, err := GetExtendedPublicKey(nil)
-		assert.Error(t, err)
+	require.Panics(t, func() {
+		_, err := compat.GetExtendedPublicKey(nil)
+		require.Error(t, err)
 	})
 }
 
 // ExampleGetExtendedPublicKey example using GetExtendedPublicKey()
 func ExampleGetExtendedPublicKey() {
-	hdKey, err := GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
+	hdKey, err := compat.GenerateHDKeyFromString("xprv9s21ZrQH143K3PZSwbEeXEYq74EbnfMngzAiMCZcfjzyRpUvt2vQJnaHRTZjeuEmLXeN6BzYRoFsEckfobxE9XaRzeLGfQoxzPzTRyRb6oE")
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
 
 	var xPub string
-	xPub, err = GetExtendedPublicKey(hdKey)
+	xPub, err = compat.GetExtendedPublicKey(hdKey)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -1034,9 +1036,9 @@ func ExampleGetExtendedPublicKey() {
 
 // BenchmarkGetExtendedPublicKey benchmarks the method GetExtendedPublicKey()
 func BenchmarkGetExtendedPublicKey(b *testing.B) {
-	hdKey, _ := GenerateHDKey(SecureSeedLength)
+	hdKey, _ := compat.GenerateHDKey(compat.SecureSeedLength)
 	for i := 0; i < b.N; i++ {
-		_, _ = GetExtendedPublicKey(hdKey)
+		_, _ = compat.GetExtendedPublicKey(hdKey)
 	}
 }
 
@@ -1077,7 +1079,7 @@ func TestGetHDKeyFromExtendedPublicKey(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if xPub, err := GetHDKeyFromExtendedPublicKey(test.input); err != nil && !test.expectedError {
+		if xPub, err := compat.GetHDKeyFromExtendedPublicKey(test.input); err != nil && !test.expectedError {
 			t.Fatalf("%s Failed: [%s] inputted and error not expected but got: %s", t.Name(), test.input, err.Error())
 		} else if err == nil && test.expectedError {
 			t.Fatalf("%s Failed: [%s] inputted and error was expected", t.Name(), test.input)
@@ -1097,7 +1099,7 @@ func ExampleGetHDKeyFromExtendedPublicKey() {
 	xPub := "xpub661MyMwAqRbcH3WGvLjupmr43L1GVH3MP2WQWvdreDraBeFJy64Xxv4LLX9ZVWWz3ZjZkMuZtSsc9qH9JZR74bR4PWkmtEvP423r6DJR8kA"
 
 	// Convert to a HD key
-	key, err := GetHDKeyFromExtendedPublicKey(xPub)
+	key, err := compat.GetHDKeyFromExtendedPublicKey(xPub)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
@@ -1111,6 +1113,8 @@ func ExampleGetHDKeyFromExtendedPublicKey() {
 func BenchmarkGetHDKeyFromExtendedPublicKey(b *testing.B) {
 	xPub := "xpub661MyMwAqRbcH3WGvLjupmr43L1GVH3MP2WQWvdreDraBeFJy64Xxv4LLX9ZVWWz3ZjZkMuZtSsc9qH9JZR74bR4PWkmtEvP423r6DJR8kA"
 	for i := 0; i < b.N; i++ {
-		_, _ = GetHDKeyFromExtendedPublicKey(xPub)
+		key, err := compat.GetHDKeyFromExtendedPublicKey(xPub)
+		require.NoError(b, err)
+		require.NotNil(b, key)
 	}
 }
