@@ -62,10 +62,10 @@ func TestBEEF(t *testing.T) {
 	t.Run("deserialize and serialize", func(t *testing.T) {
 		tx, err := transaction.NewTransactionFromBEEFHex(BRC62Hex)
 		require.NoError(t, err)
-		require.Equal(t, tx.Inputs[0].SourceTransaction.MerklePath.BlockHeight, uint32(814435))
+		require.Equal(t, uint32(814435), tx.Inputs[0].SourceTransaction.MerklePath.BlockHeight)
 		beef, err := tx.BEEFHex()
 		require.NoError(t, err)
-		require.Equal(t, beef, BRC62Hex)
+		require.Equal(t, BRC62Hex, beef)
 	})
 }
 
@@ -75,6 +75,6 @@ func TestEF(t *testing.T) {
 		require.NoError(t, err)
 		ef, err := tx.EFHex()
 		require.NoError(t, err)
-		require.Equal(t, ef, "010000000000000000ef01ac4e164f5bc16746bb0868404292ac8318bbac3800e4aad13a014da427adce3e000000006a47304402203a61a2e931612b4bda08d541cfb980885173b8dcf64a3471238ae7abcd368d6402204cbf24f04b9aa2256d8901f0ed97866603d2be8324c2bfb7a37bf8fc90edd5b441210263e2dee22b1ddc5e11f6fab8bcd2378bdd19580d640501ea956ec0e786f93e76ffffffff3e660000000000001976a9146bfd5c7fbe21529d45803dbcf0c87dd3c71efbc288ac013c660000000000001976a9146bfd5c7fbe21529d45803dbcf0c87dd3c71efbc288ac00000000")
+		require.Equal(t, "010000000000000000ef01ac4e164f5bc16746bb0868404292ac8318bbac3800e4aad13a014da427adce3e000000006a47304402203a61a2e931612b4bda08d541cfb980885173b8dcf64a3471238ae7abcd368d6402204cbf24f04b9aa2256d8901f0ed97866603d2be8324c2bfb7a37bf8fc90edd5b441210263e2dee22b1ddc5e11f6fab8bcd2378bdd19580d640501ea956ec0e786f93e76ffffffff3e660000000000001976a9146bfd5c7fbe21529d45803dbcf0c87dd3c71efbc288ac013c660000000000001976a9146bfd5c7fbe21529d45803dbcf0c87dd3c71efbc288ac00000000", ef)
 	})
 }

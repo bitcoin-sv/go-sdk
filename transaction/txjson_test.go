@@ -22,7 +22,7 @@ func TestTx_JSON(t *testing.T) {
 				require.NoError(t, err)
 				require.NotNil(t, priv)
 				unlocker, err := p2pkh.Unlock(priv, nil)
-
+				require.NoError(t, err)
 				tx := transaction.NewTransaction()
 				require.NoError(t, tx.AddInputFrom(
 					"3c8edde27cb9a9132c22038dac4391496be9db16fd21351565cc1006966fdad5",
