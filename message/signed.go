@@ -81,7 +81,8 @@ func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) 
 		}
 		recipientDER := recipient.PubKey().SerializeCompressed()
 		if !bytes.Equal(verifierDER, recipientDER) {
-			err = fmt.Errorf("the recipient public key is %x but the signature requres the recipient to have public key %x", recipientDER, verifierDER)
+			errorStr := "the recipient public key is %x but the signature requres the recipient to have public key %x"
+			err = fmt.Errorf(errorStr, recipientDER, verifierDER)
 			return false, err
 		}
 	}

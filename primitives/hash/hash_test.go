@@ -77,7 +77,7 @@ func TestHashFunctions(t *testing.T) {
 
 			// Test the expected bytes
 			hashResult := hashTest.hashFunc([]byte(hashTest.input))
-			require.Equal(t, true, bytes.Equal(hashResult, expectedBytes))
+			require.True(t, bytes.Equal(hashResult, expectedBytes))
 		})
 	}
 }
