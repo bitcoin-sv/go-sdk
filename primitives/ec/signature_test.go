@@ -11,7 +11,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"math/big"
-	"reflect"
 	"testing"
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
@@ -603,11 +602,10 @@ func TestRecoverCompact(t *testing.T) {
 		pub, _, err := RecoverCompact(sig, msg)
 
 		// Verify that returned error matches as expected.
-		if !reflect.DeepEqual(test.err, err) {
+		if (test.err == nil && err != nil) || (test.err != nil && err == nil) || (test.err != nil && err != nil && test.err.Error() != err.Error()) {
 			t.Errorf("unexpected error returned from pubkey "+
 				"recovery #%d: wanted %v, got %v",
 				i, test.err, err)
-			continue
 		}
 
 		// If check succeeded because a proper error was returned, we
