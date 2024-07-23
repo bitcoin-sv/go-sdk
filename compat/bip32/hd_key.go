@@ -3,6 +3,7 @@ package compat
 import (
 	"encoding/hex"
 
+	"github.com/bitcoin-sv/go-sdk/compat/bip39"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	chaincfg "github.com/bitcoin-sv/go-sdk/transaction/chaincfg"
@@ -46,6 +47,11 @@ func GenerateHDKey(seedLength uint8) (hdKey *ExtendedKey, err error) {
 // hierarchical deterministic keychain from an xPrivKey string
 func GenerateHDKeyFromString(xPriv string) (hdKey *ExtendedKey, err error) {
 	return NewKeyFromString(xPriv)
+}
+
+func GenerateHDKeyFromMnemonic(mnemonic string, password string, net *chaincfg.Params) (hdKey *ExtendedKey, err error) {
+	seed := bip39.NewSeed(mnemonic, password)
+	return NewMaster(seed, net)
 }
 
 // GenerateHDKeyPair will generate a new xPub HD master node (xPrivateKey & xPublicKey)
