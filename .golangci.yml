@@ -371,6 +371,10 @@ issues:
 
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
+    - path: compat/bip39/wordlists/
+      linters:
+        - misspell
+        - gosmopolitan
     # Exclude some linters from running on tests files.
     - path: _test\.go
       linters:

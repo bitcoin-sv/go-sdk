@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/compat/bip39/wordlists"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 type vector struct {
@@ -23,13 +23,13 @@ func TestGetWordList(t *testing.T) {
 func TestGetWordIndex(t *testing.T) {
 	for expectedIdx, word := range wordList {
 		actualIdx, ok := GetWordIndex(word)
-		assert.True(t, ok)
+		require.True(t, ok)
 		assertEqual(t, actualIdx, expectedIdx)
 	}
 
 	for _, word := range []string{"a", "set", "of", "invalid", "words"} {
 		actualIdx, ok := GetWordIndex(word)
-		assert.False(t, ok)
+		require.False(t, ok)
 		assertEqual(t, actualIdx, 0)
 	}
 }
@@ -37,64 +37,64 @@ func TestGetWordIndex(t *testing.T) {
 func TestNewMnemonic(t *testing.T) {
 	for _, vector := range testVectors() {
 		entropy, err := hex.DecodeString(vector.entropy)
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		mnemonic, err := NewMnemonic(entropy)
-		assert.Nil(t, err)
-		assert.Equal(t, vector.mnemonic, mnemonic)
+		require.NoError(t, err)
+		require.Equal(t, vector.mnemonic, mnemonic)
 
 		_, err = NewSeedWithErrorChecking(mnemonic, "TREZOR")
-		assert.Nil(t, err)
+		require.NoError(t, err)
 
 		seed := NewSeed(mnemonic, "TREZOR")
-		assert.Equal(t, vector.seed, hex.EncodeToString(seed))
+		require.Equal(t, vector.seed, hex.EncodeToString(seed))
 	}
 }
 
 func TestNewMnemonicInvalidEntropy(t *testing.T) {
 	_, err := NewMnemonic([]byte{})
-	assert.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestNewSeedWithErrorCheckingInvalidMnemonics(t *testing.T) {
 	for _, vector := range badMnemonicSentences() {
 		_, err := NewSeedWithErrorChecking(vector.mnemonic, "TREZOR")
-		assert.NotNil(t, err)
+		require.Error(t, err)
 	}
 }
 
 func TestIsMnemonicValid(t *testing.T) {
 	for _, vector := range badMnemonicSentences() {
-		assert.False(t, IsMnemonicValid(vector.mnemonic))
+		require.False(t, IsMnemonicValid(vector.mnemonic))
 	}
 
 	for _, vector := range testVectors() {
-		assert.True(t, IsMnemonicValid(vector.mnemonic))
+		require.True(t, IsMnemonicValid(vector.mnemonic))
 	}
 }
 
 func TestMnemonicToByteArrayWithRawIsEqualToEntropyFromMnemonic(t *testing.T) {
 	for _, vector := range testVectors() {
 		rawEntropy, err := MnemonicToByteArray(vector.mnemonic, true)
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		rawEntropy2, err := EntropyFromMnemonic(vector.mnemonic)
-		assert.Nil(t, err)
-		assert.True(t, bytes.Equal(rawEntropy, rawEntropy2))
+		require.NoError(t, err)
+		require.True(t, bytes.Equal(rawEntropy, rawEntropy2))
 	}
 }
 
 func TestMnemonicToByteArrayInvalidMnemonics(t *testing.T) {
 	for _, vector := range badMnemonicSentences() {
 		_, err := MnemonicToByteArray(vector.mnemonic)
-		assert.NotNil(t, err)
+		require.Error(t, err)
 	}
 
 	_, err := MnemonicToByteArray("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon yellow")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assertEqual(t, err, ErrChecksumIncorrect)
 
 	_, err = MnemonicToByteArray("abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon angry")
-	assert.NotNil(t, err)
+	require.Error(t, err)
 	assertEqual(t, err, ErrInvalidMnemonic)
 }
 
@@ -102,14 +102,14 @@ func TestNewEntropy(t *testing.T) {
 	// Good tests.
 	for i := 128; i <= 256; i += 32 {
 		_, err := NewEntropy(i)
-		assert.Nil(t, err)
+		require.NoError(t, err)
 	}
 
 	// Bad Values
 	for i := 0; i <= 256; i++ {
 		if i%8 != 0 {
 			_, err := NewEntropy(i)
-			assert.NotNil(t, err)
+			require.Error(t, err)
 		}
 	}
 }
@@ -146,11 +146,11 @@ func TestPadByteSlice(t *testing.T) {
 }
 
 func TestCompareByteSlices(t *testing.T) {
-	assert.True(t, compareByteSlices([]byte{}, []byte{}))
-	assert.True(t, compareByteSlices([]byte{1}, []byte{1}))
-	assert.False(t, compareByteSlices([]byte{1}, []byte{0}))
-	assert.False(t, compareByteSlices([]byte{1}, []byte{}))
-	assert.False(t, compareByteSlices([]byte{1}, nil))
+	require.True(t, compareByteSlices([]byte{}, []byte{}))
+	require.True(t, compareByteSlices([]byte{1}, []byte{1}))
+	require.False(t, compareByteSlices([]byte{1}, []byte{0}))
+	require.False(t, compareByteSlices([]byte{1}, []byte{}))
+	require.False(t, compareByteSlices([]byte{1}, nil))
 }
 
 func TestMnemonicToByteArrayForZeroLeadingSeeds(t *testing.T) {
@@ -245,15 +245,15 @@ func TestEntropyFromMnemonicInvalidMnemonicSize(t *testing.T) {
 func testEntropyFromMnemonic(t *testing.T, bitSize int) {
 	for i := 0; i < 512; i++ {
 		expectedEntropy, err := NewEntropy(bitSize)
-		assert.Nil(t, err)
-		assert.True(t, len(expectedEntropy) != 0)
+		require.NoError(t, err)
+		require.NotEmpty(t, expectedEntropy)
 
 		mnemonic, err := NewMnemonic(expectedEntropy)
-		assert.Nil(t, err)
-		assert.True(t, len(mnemonic) != 0)
+		require.NoError(t, err)
+		require.NotEmpty(t, mnemonic)
 
 		actualEntropy, err := EntropyFromMnemonic(mnemonic)
-		assert.Nil(t, err)
+		require.NoError(t, err)
 		assertEqualByteSlices(t, expectedEntropy, actualEntropy)
 	}
 }
