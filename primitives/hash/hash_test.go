@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHashFunctions(t *testing.T) {
@@ -72,11 +73,11 @@ func TestHashFunctions(t *testing.T) {
 
 			// Decode input string to byte
 			expectedBytes, err := hex.DecodeString(hashTest.expected)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 
 			// Test the expected bytes
 			hashResult := hashTest.hashFunc([]byte(hashTest.input))
-			assert.Equal(t, true, bytes.Equal(hashResult, expectedBytes))
+			require.Equal(t, true, bytes.Equal(hashResult, expectedBytes))
 		})
 	}
 }
