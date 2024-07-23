@@ -66,7 +66,7 @@ public extended key with the Neuter function.  The original extended key is not
 modified.  A public extended key is still capable of deriving non-hardened child
 public extended keys.
 
-Serialising and Deserialising Extended Keys
+Serializing and Deserializing Extended Keys
 
 Extended keys are serialized and deserialized with the String and
 NewKeyFromString functions.  The serialized key is a Base58-encoded string which

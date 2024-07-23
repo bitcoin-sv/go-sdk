@@ -2075,7 +2075,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 	pubKeys := make([][]byte, 0, numPubKeys)
 	for i := 0; i < numPubKeys; i++ {
-		pubKey, err := t.dstack.PopByteArray() //nolint:govet // ignore shadowed error
+		pubKey, err := t.dstack.PopByteArray() //nolint:nolintlint // ignore shadowed error
 		if err != nil {
 			return err
 		}
@@ -2101,7 +2101,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 	signatures := make([]*parsedSigInfo, 0, numSignatures)
 	for i := 0; i < numSignatures; i++ {
-		signature, err := t.dstack.PopByteArray() //nolint:govet // ignore shadowed error
+		signature, err := t.dstack.PopByteArray() //nolint:nolintlint // ignore shadowed error
 		if err != nil {
 			return err
 		}

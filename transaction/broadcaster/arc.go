@@ -2,6 +2,7 @@ package broadcaster
 
 import (
 	"bytes"
+	"context"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -82,7 +83,9 @@ func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSucce
 		}
 	}
 
-	req, err := http.NewRequest(
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(
+		ctx,
 		"POST",
 		a.ApiUrl+"/tx",
 		buf,
