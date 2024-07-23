@@ -47,7 +47,7 @@ var (
 	ErrFeeQuotesNotInit = errors.New("feeQuotes have not been setup, call NewFeeQuotes")
 	ErrMinerNoQuotes    = errors.New("miner has no quotes stored")
 	ErrFeeTypeNotFound  = errors.New("feetype not found")
-	ErrFeeQuoteNotInit  = errors.New("feeQuote has not been initialised, call NewFeeQuote()")
+	ErrFeeQuoteNotInit  = errors.New("feeQuote has not been initialized, call NewFeeQuote()")
 	ErrUnknownFeeType   = errors.New("unknown fee type")
 )
 

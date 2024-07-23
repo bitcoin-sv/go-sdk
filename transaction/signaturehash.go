@@ -15,9 +15,9 @@ var defaultHex = []byte{1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 
 type sigHashFunc func(inputIdx uint32, shf sighash.Flag) ([]byte, error)
 
-// sigStrat will decide which tx serialisation to use.
-// The legacy serialisation will be used for txs pre-fork
-// whereas the new serialisation will be used for post-fork
+// sigStrat will decide which tx serialization to use.
+// The legacy serialization will be used for txs pre-fork
+// whereas the new serialization will be used for post-fork
 // txs (and they should include the sighash_forkid flag).
 func (tx *Transaction) sigStrat(shf sighash.Flag) sigHashFunc {
 	if shf.Has(sighash.ForkID) {

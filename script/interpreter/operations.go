@@ -656,7 +656,7 @@ func opcodeCheckLockTimeVerify(op *ParsedOpcode, t *thread) error {
 	}
 
 	// The lock time field of a transaction is either a block height at
-	// which the transaction is finalised or a timestamp depending on if the
+	// which the transaction is finalized or a timestamp depending on if the
 	// value is before the interpreter.LockTimeThreshold.  When it is under the
 	// threshold it is a block height.
 	if err = verifyLockTime(int64(t.tx.LockTime), LockTimeThreshold, lockTime.Int64()); err != nil {
@@ -664,7 +664,7 @@ func opcodeCheckLockTimeVerify(op *ParsedOpcode, t *thread) error {
 	}
 
 	// The lock time feature can also be disabled, thereby bypassing
-	// script.OpCHECKLOCKTIMEVERIFY, if every transaction input has been finalised by
+	// script.OpCHECKLOCKTIMEVERIFY, if every transaction input has been finalized by
 	// setting its sequence to the maximum value (transaction.MaxTxInSequenceNum).  This
 	// condition would result in the transaction being allowed into the blockchain
 	// making the opcode ineffective.
@@ -674,11 +674,11 @@ func opcodeCheckLockTimeVerify(op *ParsedOpcode, t *thread) error {
 	// value).  This is sufficient to prove correctness without having to
 	// check every input.
 	//
-	// NOTE: This implies that even if the transaction is not finalised due to
+	// NOTE: This implies that even if the transaction is not finalized due to
 	// another input being unlocked, the opcode execution will still fail when the
 	// input being used by the opcode is locked.
 	if t.tx.Inputs[t.inputIdx].SequenceNumber == transaction.MaxTxInSequenceNum {
-		return errs.NewError(errs.ErrUnsatisfiedLockTime, "transaction input is finalised")
+		return errs.NewError(errs.ErrUnsatisfiedLockTime, "transaction input is finalized")
 	}
 
 	return nil

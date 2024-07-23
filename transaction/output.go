@@ -87,7 +87,7 @@ func (o *TransactionOutput) Bytes() []byte {
 	return h
 }
 
-// BytesForSigHash returns the proper serialisation
+// BytesForSigHash returns the proper serialization
 // of an output to be hashed and signed (sighash).
 func (o *TransactionOutput) BytesForSigHash() []byte {
 	buf := make([]byte, 0)

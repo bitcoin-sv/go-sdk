@@ -44,7 +44,7 @@ func (tx *Transaction) MarshalJSON() ([]byte, error) {
 	})
 }
 
-// UnmarshalJSON will unmarshall a transaction that has been marshalled with this library.
+// UnmarshalJSON will unmarshall a transaction that has been marshaled with this library.
 func (tx *Transaction) UnmarshalJSON(b []byte) error {
 	var txj txJSON
 	if err := json.Unmarshal(b, &txj); err != nil {
