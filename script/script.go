@@ -132,9 +132,9 @@ func (s *Script) String() string {
 	return hex.EncodeToString(*s)
 }
 
-func (s *Script) ToASM() (string, error) {
+func (s *Script) ToASM() string {
 	if s == nil || len(*s) == 0 {
-		return "", nil
+		return ""
 	}
 
 	asm := make([]string, 0, len(*s))
@@ -146,7 +146,7 @@ func (s *Script) ToASM() (string, error) {
 			// 	asm = append(asm, "[error]")
 			// 	break
 			// }
-			return "", nil
+			return ""
 		}
 
 		opStr := op.String()
@@ -155,7 +155,7 @@ func (s *Script) ToASM() (string, error) {
 		}
 	}
 
-	return strings.Join(asm, " "), nil
+	return strings.Join(asm, " ")
 }
 
 // IsP2PKH returns true if this is a pay to pubkey hash output script.

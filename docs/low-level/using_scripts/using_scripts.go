@@ -49,11 +49,8 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	lockingScriptASM, err := lockingScript.ToASM()
+	lockingScriptASM := lockingScript.ToASM()
 	log.Printf("Locking Script (ASM): %s\n", lockingScriptASM)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	// Serializing Scripts
 	p2pkhScript := "OP_DUP OP_HASH160 1451baa3aad777144a0759998a03538018dd7b4b OP_EQUALVERIFY OP_CHECKSIG"
@@ -67,10 +64,7 @@ func main() {
 	fmt.Println("Script as Hex:", scriptAsHex)
 
 	// Serialize script to ASM
-	scriptAsASM, err := script.ToASM()
-	if err != nil {
-		log.Fatal(err)
-	}
+	scriptAsASM := script.ToASM()
 	fmt.Println("Script as ASM:", scriptAsASM)
 
 	// Serialize script to Binary

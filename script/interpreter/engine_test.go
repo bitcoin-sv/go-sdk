@@ -972,7 +972,7 @@ func TestExecute(t *testing.T) {
 			tx, err := transaction.NewTransactionFromHex(tc.txHex)
 			require.NoError(t, err)
 
-			beforeScript, _ := tx.Inputs[0].UnlockingScript.ToASM()
+			beforeScript := tx.Inputs[0].UnlockingScript.ToASM()
 
 			prevTx, err := transaction.NewTransactionFromHex(tc.prevTxHex)
 			require.NoError(t, err)
@@ -987,7 +987,7 @@ func TestExecute(t *testing.T) {
 				WithAfterGenesis(),
 			)
 
-			afterScript, _ := tx.Inputs[0].UnlockingScript.ToASM()
+			afterScript := tx.Inputs[0].UnlockingScript.ToASM()
 
 			require.Equal(t, beforeScript, afterScript)
 
