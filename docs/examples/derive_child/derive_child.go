@@ -17,6 +17,6 @@ func main() {
 
 	child, _ := merchantPrivKey.DeriveChild(customerPubKey, invoiceNum)
 
-	fmt.Print(child.Serialize())
+	fmt.Printf("%x", child.Serialize())
 	// now use the child key to sign a message, transaction, etc
 }
