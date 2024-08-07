@@ -2,7 +2,8 @@ version: 2
 
 before:
   hooks:
-    - make all
+    - go mod tidy
+    - golangci-lint run
 
 snapshot:
   name_template: "{{ .Tag }}"
@@ -10,7 +11,7 @@ snapshot:
 changelog:
   sort: asc
   filters:
-      exclude:
+    exclude:
       - '^.github:'
       - '^test:'
 
