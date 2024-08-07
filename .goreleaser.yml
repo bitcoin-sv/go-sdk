@@ -2,6 +2,7 @@
 # ---------------------------
 # GENERAL
 # ---------------------------
+version: 2
 before:
   hooks:
     - make all
@@ -19,8 +20,9 @@ changelog:
 # ---------------------------
 build:
   skip: true
+
 # ---------------------------
-# Github Release
+# GITHUB RELEASE
 # ---------------------------
 release:
   # prerelease: true
