@@ -1437,7 +1437,7 @@ func opcodeLShift(op *ParsedOpcode, t *thread) error {
 	if err != nil {
 		return err
 	}
-	n := num.Int()
+	n := num.Int64()
 
 	if n < 0 {
 		return errs.NewError(errs.ErrNumberTooSmall, "n less than 0")
@@ -1448,13 +1448,40 @@ func opcodeLShift(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	l := len(x)
-	for i := 0; i < l-1; i++ {
-		x[i] = x[i]<<n | x[i+1]>>(8-n)
-	}
-	x[l-1] <<= n
+	// if len(x) == 0 {
+	// 	t.dstack.PushByteArray(x)
+	// 	return nil
+	// }
 
-	t.dstack.PushByteArray(x)
+	// totalBits := int64(len(x) * 8)
+
+	// if n >= totalBits {
+	// 	// If shift is greater than or equal to total bits, result is all zeros
+	// 	result := make([]byte, len(x))
+	// 	t.dstack.PushByteArray(result)
+	// 	return nil
+	// }
+
+	// Convert bytes to a single integer
+	value := big.NewInt(0)
+	value.SetBytes(x)
+
+	// Perform the left shift
+	value.Lsh(value, uint(n))
+
+	// Convert back to bytes, maintaining original length
+	result := value.Bytes()
+	// if len(result) > len(x) {
+	// 	// If the result is longer, truncate to original length
+	// 	result = result[len(result)-len(x):]
+	// } else if len(result) < len(x) {
+	// 	// If the result is shorter, pad with zeros
+	// 	padded := make([]byte, len(x))
+	// 	copy(padded[len(padded)-len(result):], result)
+	// 	result = padded
+	// }
+
+	t.dstack.PushByteArray(result)
 	return nil
 }
 
@@ -1463,7 +1490,7 @@ func opcodeRShift(op *ParsedOpcode, t *thread) error {
 	if err != nil {
 		return err
 	}
-	n := num.Int()
+	n := num.Int64()
 
 	if n < 0 {
 		return errs.NewError(errs.ErrNumberTooSmall, "n less than 0")
@@ -1474,13 +1501,36 @@ func opcodeRShift(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	l := len(x)
-	for i := l - 1; i > 0; i-- {
-		x[i] = x[i]>>n | x[i-1]<<(8-n)
+	if len(x) == 0 {
+		t.dstack.PushByteArray(x)
+		return nil
 	}
-	x[0] >>= n
 
-	t.dstack.PushByteArray(x)
+	totalBits := int64(len(x) * 8) // Use int64 to avoid type mismatch
+
+	if n >= totalBits {
+		// If shift is greater than or equal to total bits, result is all zeros
+		result := make([]byte, len(x))
+		t.dstack.PushByteArray(result)
+		return nil
+	}
+
+	// Convert bytes to a single integer
+	value := big.NewInt(0)
+	value.SetBytes(x)
+
+	// Perform the right shift
+	value.Rsh(value, uint(n))
+
+	// Convert back to bytes, maintaining original length
+	result := value.Bytes()
+	if len(result) < len(x) {
+		padded := make([]byte, len(x))
+		copy(padded[len(padded)-len(result):], result)
+		result = padded
+	}
+
+	t.dstack.PushByteArray(result)
 	return nil
 }
 

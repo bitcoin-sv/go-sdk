@@ -5,6 +5,7 @@
 package interpreter
 
 import (
+	"math/big"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -97,6 +98,72 @@ func TestParse(t *testing.T) {
 				require.Equal(t, tc.expectedParsedScript[i].op.name, p[i].op.name)
 				require.Equal(t, tc.expectedParsedScript[i].op.val, p[i].op.val)
 			}
+		})
+	}
+}
+
+func TestOpShift(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name     string
+		op       byte
+		initial  []byte
+		shift    int64
+		expected []byte
+	}{
+		{"RSHIFT 8 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 8, []byte{0x00, 0x01}},
+		{"RSHIFT 1 bit", script.OpRSHIFT, []byte{0x01, 0x02}, 1, []byte{0x00, 0x81}},
+		{"RSHIFT 9 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 9, []byte{0x00, 0x00}},
+		{"RSHIFT 16 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 16, []byte{0x00, 0x00}},
+		{"RSHIFT 0 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 0, []byte{0x01, 0x02}},
+		{"RSHIFT large shift", script.OpRSHIFT, []byte{0x01, 0x02}, 100, []byte{0x00, 0x00}},
+		{"RSHIFT 8 byte value by 1", script.OpRSHIFT, []byte{0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF}, 1, []byte{0x00, 0x91, 0xA2, 0xB3, 0xC4, 0xD5, 0xE6, 0xF7}},
+		{"LSHIFT 0 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 0, []byte{0x01, 0x02}},
+		{"LSHIFT 1 bit", script.OpLSHIFT, []byte{0x01, 0x02}, 1, []byte{0x02, 0x04}},
+		{"LSHIFT 8 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 8, []byte{0x02, 0x00}},
+		{"LSHIFT 9 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 9, []byte{0x04, 0x00}},
+		{"LSHIFT 15 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 15, []byte{0x00, 0x00}},
+		{"LSHIFT 16 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 16, []byte{0x00, 0x00}},
+		{"LSHIFT large shift", script.OpLSHIFT, []byte{0x01, 0x02}, 100, []byte{0x00, 0x00}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Create a new thread with necessary configuration
+			thread := &thread{
+				dstack:       newStack(&beforeGenesisConfig{}, false),
+				afterGenesis: true,                  // Set this according to your needs
+				cfg:          &afterGenesisConfig{}, // Use appropriate config
+				scriptParser: &DefaultOpcodeParser{},
+			}
+
+			// Push the initial value and shift amount onto the stack
+			thread.dstack.PushByteArray(tt.initial)
+
+			thread.dstack.PushInt(&scriptNumber{
+				val:          big.NewInt(tt.shift),
+				afterGenesis: thread.afterGenesis,
+			})
+
+			// Create a ParsedOpcode for the shift operation
+			pop := ParsedOpcode{op: opcodeArray[tt.op], Data: nil}
+
+			// Execute the opcode
+			var opErr error
+			if tt.op == script.OpLSHIFT {
+				opErr = opcodeLShift(&pop, thread)
+			} else {
+				opErr = opcodeRShift(&pop, thread)
+			}
+
+			// Check for errors
+			require.NoError(t, opErr)
+
+			// Check the result
+			result, err := thread.dstack.PopByteArray()
+			require.NoError(t, err)
+			require.Equal(t, tt.expected, result)
 		})
 	}
 }
