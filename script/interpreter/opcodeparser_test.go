@@ -112,27 +112,27 @@ func TestOpShift(t *testing.T) {
 		shift    int64
 		expected []byte
 	}{
-		{"RSHIFT 8 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 8, []byte{0x00, 0x01}},
-		{"RSHIFT 1 bit", script.OpRSHIFT, []byte{0x01, 0x02}, 1, []byte{0x00, 0x81}},
-		{"RSHIFT 9 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 9, []byte{0x00, 0x00}},
-		{"RSHIFT 16 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 16, []byte{0x00, 0x00}},
+		{"RSHIFT 8 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 8, []byte{0x02}},
+		{"RSHIFT 1 bit", script.OpRSHIFT, []byte{0x01, 0x02}, 1, []byte{0x00, 0x01}},
+		{"RSHIFT 9 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 9, []byte{0x01}},
+		{"RSHIFT 16 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 16, []byte{}},
 		{"RSHIFT 0 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 0, []byte{0x01, 0x02}},
-		{"RSHIFT large shift", script.OpRSHIFT, []byte{0x01, 0x02}, 100, []byte{0x00, 0x00}},
-		{"RSHIFT 8 byte value by 1", script.OpRSHIFT, []byte{0x01, 0x23, 0x45, 0x67, 0x89, 0xAB, 0xCD, 0xEF}, 1, []byte{0x00, 0x91, 0xA2, 0xB3, 0xC4, 0xD5, 0xE6, 0xF7}},
+		{"RSHIFT large shift", script.OpRSHIFT, []byte{0x01, 0x02}, 100, []byte{}},
+		{"RSHIFT 8 byte value by 1", script.OpRSHIFT, []byte{0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01}, 1, []byte{0xF7, 0xE6, 0xD5, 0xC4, 0xB3, 0xA2, 0x91, 0x00}},
 		{"LSHIFT 0 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 0, []byte{0x01, 0x02}},
 		{"LSHIFT 1 bit", script.OpLSHIFT, []byte{0x01, 0x02}, 1, []byte{0x02, 0x04}},
-		{"LSHIFT 8 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 8, []byte{0x02, 0x00}},
-		{"LSHIFT 9 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 9, []byte{0x04, 0x00}},
-		{"LSHIFT 15 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 15, []byte{0x00, 0x00}},
-		{"LSHIFT 16 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 16, []byte{0x00, 0x00}},
-		{"LSHIFT large shift", script.OpLSHIFT, []byte{0x01, 0x02}, 100, []byte{0x00, 0x00}},
+		{"LSHIFT 8 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 8, []byte{0x00, 0x01, 0x02}},
+		{"LSHIFT 9 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 9, []byte{0x00, 0x02, 0x04}},
+		{"LSHIFT 15 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 15, []byte{0x00, 0x80, 0x00, 0x01}},
+		{"LSHIFT 16 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 16, []byte{0x00, 0x00, 0x01, 0x02}},
+		{"LSHIFT large shift", script.OpLSHIFT, []byte{0x01, 0x02}, 100, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x20}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Create a new thread with necessary configuration
 			thread := &thread{
-				dstack:       newStack(&beforeGenesisConfig{}, false),
+				dstack:       newStack(&afterGenesisConfig{}, false),
 				afterGenesis: true,                  // Set this according to your needs
 				cfg:          &afterGenesisConfig{}, // Use appropriate config
 				scriptParser: &DefaultOpcodeParser{},

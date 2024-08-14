@@ -1443,45 +1443,13 @@ func opcodeLShift(op *ParsedOpcode, t *thread) error {
 		return errs.NewError(errs.ErrNumberTooSmall, "n less than 0")
 	}
 
-	x, err := t.dstack.PopByteArray()
+	x, err := t.dstack.PopInt()
 	if err != nil {
 		return err
 	}
 
-	// if len(x) == 0 {
-	// 	t.dstack.PushByteArray(x)
-	// 	return nil
-	// }
-
-	// totalBits := int64(len(x) * 8)
-
-	// if n >= totalBits {
-	// 	// If shift is greater than or equal to total bits, result is all zeros
-	// 	result := make([]byte, len(x))
-	// 	t.dstack.PushByteArray(result)
-	// 	return nil
-	// }
-
-	// Convert bytes to a single integer
-	value := big.NewInt(0)
-	value.SetBytes(x)
-
-	// Perform the left shift
-	value.Lsh(value, uint(n))
-
-	// Convert back to bytes, maintaining original length
-	result := value.Bytes()
-	// if len(result) > len(x) {
-	// 	// If the result is longer, truncate to original length
-	// 	result = result[len(result)-len(x):]
-	// } else if len(result) < len(x) {
-	// 	// If the result is shorter, pad with zeros
-	// 	padded := make([]byte, len(x))
-	// 	copy(padded[len(padded)-len(result):], result)
-	// 	result = padded
-	// }
-
-	t.dstack.PushByteArray(result)
+	x.val.Lsh(x.val, uint(n))
+	t.dstack.PushInt(x)
 	return nil
 }
 
@@ -1496,41 +1464,13 @@ func opcodeRShift(op *ParsedOpcode, t *thread) error {
 		return errs.NewError(errs.ErrNumberTooSmall, "n less than 0")
 	}
 
-	x, err := t.dstack.PopByteArray()
+	x, err := t.dstack.PopInt()
 	if err != nil {
 		return err
 	}
 
-	if len(x) == 0 {
-		t.dstack.PushByteArray(x)
-		return nil
-	}
-
-	totalBits := int64(len(x) * 8) // Use int64 to avoid type mismatch
-
-	if n >= totalBits {
-		// If shift is greater than or equal to total bits, result is all zeros
-		result := make([]byte, len(x))
-		t.dstack.PushByteArray(result)
-		return nil
-	}
-
-	// Convert bytes to a single integer
-	value := big.NewInt(0)
-	value.SetBytes(x)
-
-	// Perform the right shift
-	value.Rsh(value, uint(n))
-
-	// Convert back to bytes, maintaining original length
-	result := value.Bytes()
-	if len(result) < len(x) {
-		padded := make([]byte, len(x))
-		copy(padded[len(padded)-len(result):], result)
-		result = padded
-	}
-
-	t.dstack.PushByteArray(result)
+	x.val.Rsh(x.val, uint(n))
+	t.dstack.PushInt(x)
 	return nil
 }
 
