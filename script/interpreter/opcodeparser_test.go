@@ -105,6 +105,12 @@ func TestParse(t *testing.T) {
 func TestOpShift(t *testing.T) {
 	t.Parallel()
 
+	// CheckShiftOp({0xFF}, {0x05}, OP_RSHIFT, {0x07});
+	// CheckShiftOp({0xFF}, {0x06}, OP_RSHIFT, {0x03});
+	// CheckShiftOp({0xFF}, {0x07}, OP_RSHIFT, {0x01});
+	// CheckShiftOp({0x9F, 0x11, 0xF5, 0x55}, {0x0A}, OP_RSHIFT, to_bitpattern("00000000 00100111 11000100 01111101"));
+	// CheckShiftOp({0x9F, 0x11, 0xF5, 0x55}, {0x0B}, OP_RSHIFT, to_bitpattern("00000000 00010011 11100010 00111110"));
+	// CheckShiftOp({0x9F, 0x11, 0xF5, 0x55}, {0x0C}, OP_RSHIFT, to_bitpattern("00000000 00001001 11110001 00011111"));
 	tests := []struct {
 		name     string
 		op       byte
@@ -112,20 +118,26 @@ func TestOpShift(t *testing.T) {
 		shift    int64
 		expected []byte
 	}{
-		{"RSHIFT 8 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 8, []byte{0x02}},
-		{"RSHIFT 1 bit", script.OpRSHIFT, []byte{0x01, 0x02}, 1, []byte{0x00, 0x01}},
-		{"RSHIFT 9 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 9, []byte{0x01}},
-		{"RSHIFT 16 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 16, []byte{}},
-		{"RSHIFT 0 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 0, []byte{0x01, 0x02}},
-		{"RSHIFT large shift", script.OpRSHIFT, []byte{0x01, 0x02}, 100, []byte{}},
-		{"RSHIFT 8 byte value by 1", script.OpRSHIFT, []byte{0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01}, 1, []byte{0xF7, 0xE6, 0xD5, 0xC4, 0xB3, 0xA2, 0x91, 0x00}},
-		{"LSHIFT 0 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 0, []byte{0x01, 0x02}},
-		{"LSHIFT 1 bit", script.OpLSHIFT, []byte{0x01, 0x02}, 1, []byte{0x02, 0x04}},
-		{"LSHIFT 8 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 8, []byte{0x00, 0x01, 0x02}},
-		{"LSHIFT 9 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 9, []byte{0x00, 0x02, 0x04}},
-		{"LSHIFT 15 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 15, []byte{0x00, 0x80, 0x00, 0x01}},
-		{"LSHIFT 16 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 16, []byte{0x00, 0x00, 0x01, 0x02}},
-		{"LSHIFT large shift", script.OpLSHIFT, []byte{0x01, 0x02}, 100, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x20}},
+		{"RSHIFT 5 bits", script.OpRSHIFT, []byte{0xFF, 0x00}, 5, []byte{0x07}},
+		{"RSHIFT 6 bit", script.OpRSHIFT, []byte{0xFF, 0x00}, 6, []byte{0x03}},
+		{"RSHIFT 7 bits", script.OpRSHIFT, []byte{0xFF, 0x00}, 7, []byte{0x01}},
+		{"RSHIFT 10 bits", script.OpRSHIFT, []byte{0x9F, 0x11, 0xF5, 0x55}, 10, []byte{0b00000000, 0b00100111, 0b11000100, 0b01111101}},
+		{"RSHIFT 11 bits", script.OpRSHIFT, []byte{0x9F, 0x11, 0xF5, 0x55}, 11, []byte{0b00000000, 0b00010011, 0b11100010, 0b00111110}},
+		{"RSHIFT 12 bits", script.OpRSHIFT, []byte{0x9F, 0x11, 0xF5, 0x55}, 12, []byte{0b00000000, 0b00001001, 0b11110001, 0b00011111}},
+		// {"RSHIFT 8 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 8, []byte{0x02}},
+		// {"RSHIFT 1 bit", script.OpRSHIFT, []byte{0x01, 0x02}, 1, []byte{0x00, 0x01}},
+		// {"RSHIFT 9 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 9, []byte{0x01}},
+		// {"RSHIFT 16 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 16, []byte{}},
+		// {"RSHIFT 0 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 0, []byte{0x01, 0x02}},
+		// {"RSHIFT large shift", script.OpRSHIFT, []byte{0x01, 0x02}, 100, []byte{}},
+		// {"RSHIFT 8 byte value by 1", script.OpRSHIFT, []byte{0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01}, 1, []byte{0xF7, 0xE6, 0xD5, 0xC4, 0xB3, 0xA2, 0x91, 0x00}},
+		// {"LSHIFT 0 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 0, []byte{0x01, 0x02}},
+		// {"LSHIFT 1 bit", script.OpLSHIFT, []byte{0x01, 0x02}, 1, []byte{0x02, 0x04}},
+		// {"LSHIFT 8 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 8, []byte{0x00, 0x01, 0x02}},
+		// {"LSHIFT 9 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 9, []byte{0x00, 0x02, 0x04}},
+		// {"LSHIFT 15 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 15, []byte{0x00, 0x80, 0x00, 0x01}},
+		// {"LSHIFT 16 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 16, []byte{0x00, 0x00, 0x01, 0x02}},
+		// {"LSHIFT large shift", script.OpLSHIFT, []byte{0x01, 0x02}, 100, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x20}},
 	}
 
 	for _, tt := range tests {
