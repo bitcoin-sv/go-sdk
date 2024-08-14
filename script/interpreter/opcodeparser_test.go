@@ -105,6 +105,8 @@ func TestParse(t *testing.T) {
 func TestOpShift(t *testing.T) {
 	t.Parallel()
 
+	// More tests can be found https://github.com/bitcoin-sv/bitcoin-sv/blob/86eb5e8bdf5573c3cd844a1d81bd4fb151b909e0/src/test/opcode_tests.cpp#L640
+
 	// CheckShiftOp({0xFF}, {0x05}, OP_RSHIFT, {0x07});
 	// CheckShiftOp({0xFF}, {0x06}, OP_RSHIFT, {0x03});
 	// CheckShiftOp({0xFF}, {0x07}, OP_RSHIFT, {0x01});
