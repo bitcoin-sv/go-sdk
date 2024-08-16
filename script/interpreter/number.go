@@ -26,13 +26,13 @@ import (
 //
 // This type handles the aforementioned requirements by storing all numeric
 // operation results as an int64 to handle overflow and provides the Bytes
-// method to get the serialized representation (including values that overflow).
+// method to get the serialised representation (including values that overflow).
 //
 // Then, whenever data is interpreted as an integer, it is converted to this
 // type by using the NewNumber function which will return an error if the
 // number is out of range or not minimally encoded depending on parameters.
 // Since all numeric opcodes involve pulling data from the stack and
-// interpreting it as an integer, it provides the required behavior.
+// interpreting it as an integer, it provides the required behaviour.
 type scriptNumber struct {
 	val          *big.Int
 	afterGenesis bool
@@ -41,10 +41,10 @@ type scriptNumber struct {
 var zero = big.NewInt(0)
 var one = big.NewInt(1)
 
-// makeScriptNumber interprets the passed serialized bytes as an encoded integer
+// makeScriptNumber interprets the passed serialised bytes as an encoded integer
 // and returns the result as a Number.
 //
-// Since the consensus rules dictate that serialized bytes interpreted as integers
+// Since the consensus rules dictate that serialised bytes interpreted as integers
 // are only allowed to be in the range determined by a maximum number of bytes,
 // on a per opcode basis, an error will be returned when the provided bytes
 // would result in a number outside that range.  In particular, the range for
@@ -237,16 +237,16 @@ func (n *scriptNumber) Int() int {
 // Int32 returns the Number clamped to a valid int32.  That is to say
 // when the script number is higher than the max allowed int32, the max int32
 // value is returned and vice versa for the minimum value.  Note that this
-// behavior is different from a simple int32 cast because that truncates
+// behaviour is different from a simple int32 cast because that truncates
 // and the consensus rules dictate numbers which are directly cast to integers
-// provide this behavior.
+// provide this behaviour.
 //
 // In practice, for most opcodes, the number should never be out of range since
 // it will have been created with makeScriptNumber using the defaultScriptLen
 // value, which rejects them.  In case something in the future ends up calling
 // this function against the result of some arithmetic, which IS allowed to be
 // out of range before being reinterpreted as an integer, this will provide the
-// correct behavior.
+// correct behaviour.
 func (n *scriptNumber) Int32() int32 {
 	v := n.val.Int64()
 	if v > math.MaxInt32 {
@@ -261,16 +261,16 @@ func (n *scriptNumber) Int32() int32 {
 // Int64 returns the Number clamped to a valid int64.  That is to say
 // when the script number is higher than the max allowed int64, the max int64
 // value is returned and vice versa for the minimum value.  Note that this
-// behavior is different from a simple int64 cast because that truncates
+// behaviour is different from a simple int64 cast because that truncates
 // and the consensus rules dictate numbers which are directly cast to integers
-// provide this behavior.
+// provide this behaviour.
 //
 // In practice, for most opcodes, the number should never be out of range since
 // it will have been created with makeScriptNumber using the defaultScriptLen
 // value, which rejects them.  In case something in the future ends up calling
 // this function against the result of some arithmetic, which IS allowed to be
 // out of range before being reinterpreted as an integer, this will provide the
-// correct behavior.
+// correct behaviour.
 func (n *scriptNumber) Int64() int64 {
 	if n.GreaterThanInt(math.MaxInt64) {
 		return math.MaxInt64
@@ -287,7 +287,7 @@ func (n *scriptNumber) Set(i int64) *scriptNumber {
 	return n
 }
 
-// Bytes returns the number serialized as a little endian with a sign bit.
+// Bytes returns the number serialised as a little endian with a sign bit.
 //
 // Example encodings:
 //

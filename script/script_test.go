@@ -11,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter"
 	"github.com/bitcoin-sv/go-sdk/script/testdata"
@@ -525,7 +526,7 @@ func TestScriptValid(t *testing.T) {
 }
 
 func TestSpendValid(t *testing.T) {
-	prevTxid, _ := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000000")
+	prevTxid := &chainhash.Hash{}
 	prevIndex := uint32(0)
 	for i, v := range testdata.ValidSpends {
 		if len(v) == 1 {

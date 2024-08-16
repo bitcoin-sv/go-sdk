@@ -28,7 +28,7 @@ func NewVarIntFromBytes(bb []byte) (VarInt, int) {
 	}
 }
 
-// Length return the length of the underlying byte representation of the `bt.VarInt`.
+// Length return the length of the underlying byte representation of the `transaction.VarInt`.
 func (v VarInt) Length() int {
 	if v < 253 {
 		return 1

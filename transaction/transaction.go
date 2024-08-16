@@ -8,6 +8,7 @@ import (
 	"log"
 	"slices"
 
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	"github.com/bitcoin-sv/go-sdk/util"
 )
@@ -20,7 +21,7 @@ type Transaction struct {
 	MerklePath *MerklePath          `json:"merklePath"`
 }
 
-// Transactions a collection of *bt.Tx.
+// Transactions a collection of *transaction.Transaction.
 type Transactions []*Transaction
 
 // NewTransaction creates a new transaction object with default values.
@@ -65,7 +66,7 @@ func NewTransactionFromStream(b []byte) (*Transaction, int, error) {
 	return &tx, int(bytesRead), err
 }
 
-// ReadFrom reads from the `io.Reader` into the `bt.Tx`.
+// ReadFrom reads from the `io.Reader` into the `transaction.Transaction`.
 func (tx *Transaction) ReadFrom(r io.Reader) (int64, error) {
 	*tx = Transaction{}
 	var bytesRead int64
@@ -176,7 +177,7 @@ func (tx *Transaction) ReadFrom(r io.Reader) (int64, error) {
 	return bytesRead, nil
 }
 
-// ReadFrom txs from a block in a `bt.Txs`. This assumes a preceding varint detailing
+// ReadFrom txs from a block in a `transaction.Transactions`. This assumes a preceding varint detailing
 // the total number of txs that the reader will provide.
 func (tt *Transactions) ReadFrom(r io.Reader) (int64, error) {
 	var bytesRead int64
@@ -246,7 +247,7 @@ func (tx *Transaction) IsCoinbase() bool {
 
 	cbi := make([]byte, 32)
 
-	if !bytes.Equal(tx.Inputs[0].SourceTXID, cbi) {
+	if !bytes.Equal(tx.Inputs[0].SourceTXID.CloneBytes(), cbi) {
 		return false
 	}
 
@@ -257,17 +258,20 @@ func (tx *Transaction) IsCoinbase() bool {
 	return false
 }
 
-// TxIDBytes returns the transaction ID of the transaction as bytes
-// (which is also the transaction hash).
-func (tx *Transaction) TxIDBytes() []byte {
-	return util.ReverseBytes(crypto.Sha256d(tx.Bytes()))
+func (tx *Transaction) TxID() string {
+	return tx.TxIDChainHash().String()
 }
 
-// TxID returns the transaction ID of the transaction
-// (which is also the transaction hash).
-func (tx *Transaction) TxID() string {
-	return hex.EncodeToString(util.ReverseBytes(crypto.Sha256d(tx.Bytes())))
+func (tx *Transaction) TxIDChainHash() *chainhash.Hash {
+	txid, _ := chainhash.NewHash(crypto.Sha256d(tx.Bytes()))
+	return txid
 }
+
+// // TxID returns the transaction ID of the transaction
+// // (which is also the transaction hash).
+// func (tx *Transaction) TxID() string {
+// 	return hex.EncodeToString(util.ReverseBytes(crypto.Sha256d(tx.Bytes())))
+// }
 
 // String encodes the transaction into a hex string.
 func (tx *Transaction) String() string {
@@ -288,7 +292,7 @@ func (tx *Transaction) Bytes() []byte {
 }
 
 // EF outputs the transaction into a byte array in extended format
-// (with PreviousTxSatoshis and PreviousTXScript included)
+// (with PreviousTxSatoshis and SourceTxScript included)
 func (tx *Transaction) EF() ([]byte, error) {
 	for _, in := range tx.Inputs {
 		if in.SourceTransaction == nil {
@@ -321,6 +325,9 @@ func (tx *Transaction) Clone() *Transaction {
 	}
 
 	for i, input := range tx.Inputs {
+		// if input.SourceTransaction != nil {
+		// 	clone.Inputs[i].SourceTransaction = input.SourceTransaction.Clone()
+		// }
 		clone.Inputs[i].SourceTransaction = input.SourceTransaction
 	}
 
@@ -385,7 +392,7 @@ func (tx *Transaction) Size() int {
 
 func (tx *Transaction) AddMerkleProof(bump *MerklePath) error {
 	if !slices.ContainsFunc(bump.Path[0], func(v *PathElement) bool {
-		return bytes.Equal(v.Hash, tx.TxIDBytes())
+		return v.Hash.Equal(*tx.TxIDChainHash())
 	}) {
 		return ErrBadMerkleProof
 	}

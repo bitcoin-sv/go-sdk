@@ -11,7 +11,7 @@ import (
 	"math/big"
 	"testing"
 
-	script "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
 	"github.com/bitcoin-sv/go-sdk/transaction"
@@ -36,7 +36,7 @@ func TestScriptNumBytes(t *testing.T) {
 
 	tests := []struct {
 		num        int64
-		serialized []byte
+		serialised []byte
 	}{
 		{0, nil},
 		{1, hexToBytes("01")},
@@ -84,8 +84,8 @@ func TestScriptNumBytes(t *testing.T) {
 
 	for _, test := range tests {
 		n := &scriptNumber{val: big.NewInt(test.num)}
-		if !bytes.Equal(n.Bytes(), test.serialized) {
-			t.Errorf("Bytes: did not get expected bytes for %d - got %x, want %x", test.num, n.Bytes(), test.serialized)
+		if !bytes.Equal(n.Bytes(), test.serialised) {
+			t.Errorf("Bytes: did not get expected bytes for %d - got %x, want %x", test.num, n.Bytes(), test.serialised)
 			continue
 		}
 	}
@@ -102,7 +102,7 @@ func TestMakeScriptNum(t *testing.T) {
 	errMinimalData := errs.NewError(errs.ErrMinimalData, "")
 
 	tests := []struct {
-		serialized      []byte
+		serialised      []byte
 		num             int
 		numLen          int
 		minimalEncoding bool
@@ -200,15 +200,15 @@ func TestMakeScriptNum(t *testing.T) {
 	for _, test := range tests {
 		// Ensure the error code is of the expected type and the error
 		// code matches the value specified in the test instance.
-		gotNum, err := makeScriptNumber(test.serialized, test.numLen, test.minimalEncoding, true)
+		gotNum, err := makeScriptNumber(test.serialised, test.numLen, test.minimalEncoding, true)
 		if e := tstCheckScriptError(err, test.err); e != nil {
-			t.Errorf("makeScriptNumber(%#x): %v", test.serialized, e)
+			t.Errorf("makeScriptNumber(%#x): %v", test.serialised, e)
 			continue
 		}
 
 		if gotNum.Int() != test.num {
 			t.Errorf("makeScriptNumber(%#x): did not get expected number - got %d, want %d",
-				test.serialized, gotNum.Int64(), test.num)
+				test.serialised, gotNum.Int64(), test.num)
 			continue
 		}
 	}
@@ -335,11 +335,11 @@ func TestScriptNumInt64(t *testing.T) {
 }
 
 func TestDisasmString(t *testing.T) {
-	s, _ := script.NewFromHex("3105abcdef4280548004abcdefc2877451a0637c757451a0637c757451a0637c757451a0637c757451a0637c756868686868")
+	scr, _ := script.NewFromHex("3105abcdef4280548004abcdefc2877451a0637c757451a0637c757451a0637c757451a0637c757451a0637c756868686868")
 	prev, _ := script.NewFromHex("a91464902b04c3d9ea558b7f2edb24758b383343a2d587")
 	tx := transaction.NewTransaction()
 	in := &transaction.TransactionInput{
-		UnlockingScript: s,
+		UnlockingScript: scr,
 	}
 	tx.Inputs = append(tx.Inputs, in)
 	if err := NewEngine().Execute(

@@ -2,10 +2,10 @@ package transaction
 
 import (
 	"encoding/binary"
-	"encoding/hex"
 	"fmt"
 	"io"
 
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/pkg/errors"
@@ -30,7 +30,7 @@ const DefaultSequenceNumber uint32 = 0xFFFFFFFF
 //
 // DO NOT CHANGE ORDER - Optimized for memory via maligned
 type TransactionInput struct {
-	SourceTXID              []byte
+	SourceTXID              *chainhash.Hash
 	UnlockingScript         *script.Script
 	SourceTxOutIndex        uint32
 	SequenceNumber          uint32
@@ -52,12 +52,12 @@ func (i *TransactionInput) SourceTxSatoshis() *uint64 {
 	return &i.SourceTransaction.Outputs[i.SourceTxOutIndex].Satoshis
 }
 
-// ReadFrom reads from the `io.Reader` into the `bt.Input`.
+// ReadFrom reads from the `io.Reader` into the `transaction.TransactionInput`.
 func (i *TransactionInput) ReadFrom(r io.Reader) (int64, error) {
 	return i.readFrom(r, false)
 }
 
-// ReadFromExtended reads the `io.Reader` into the `bt.Input` when the reader is
+// ReadFromExtended reads the `io.Reader` into the `transaction.TransactionInput` when the reader is
 // consuming an extended format transaction.
 func (i *TransactionInput) ReadFromExtended(r io.Reader) (int64, error) {
 	return i.readFrom(r, true)
@@ -102,7 +102,9 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 		return bytesRead, errors.Wrapf(err, "sequence(4): got %d bytes", n)
 	}
 
-	i.SourceTXID = util.ReverseBytes(previousTxID)
+	if i.SourceTXID, err = chainhash.NewHash(previousTxID); err != nil {
+		return bytesRead, errors.Wrap(err, "failed to create chainhash from previousTxID")
+	}
 	i.SourceTxOutIndex = binary.LittleEndian.Uint32(prevIndex)
 	i.UnlockingScript = script.NewFromBytes(scriptBytes)
 	i.SequenceNumber = binary.LittleEndian.Uint32(sequence)
@@ -139,11 +141,6 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 	return bytesRead, nil
 }
 
-// PreviousTxIDStr returns the Previous TxID as a hex string.
-func (i *TransactionInput) PreviousTxIDStr() string {
-	return hex.EncodeToString(i.SourceTXID)
-}
-
 // String implements the Stringer interface and returns a string
 // representation of a transaction input.
 func (i *TransactionInput) String() string {
@@ -154,7 +151,7 @@ scriptLen:    %d
 script:       %s
 sequence:     %x
 `,
-		hex.EncodeToString(i.SourceTXID),
+		i.SourceTXID.String(),
 		i.SourceTxOutIndex,
 		len(*i.UnlockingScript),
 		i.UnlockingScript,
@@ -166,7 +163,7 @@ sequence:     %x
 func (i *TransactionInput) Bytes(clear bool) []byte {
 	h := make([]byte, 0)
 
-	h = append(h, util.ReverseBytes(i.SourceTXID)...)
+	h = append(h, i.SourceTXID.CloneBytes()...)
 	h = append(h, util.LittleEndianBytes(i.SourceTxOutIndex, 4)...)
 	if clear {
 		h = append(h, 0x00)

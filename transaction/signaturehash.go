@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"encoding/binary"
 
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
-	"github.com/bitcoin-sv/go-sdk/util"
 )
 
 // defaultHex is used to fix a bug in the original client (see if statement in the CalcInputSignatureHash func)
@@ -71,7 +71,7 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 		return nil, ErrEmptyPreviousTx
 	}
 
-	hashPreviousOuts := make([]byte, 32)
+	hashPreviousOuts := &chainhash.Hash{}
 	hashSequence := make([]byte, 32)
 	hashOutputs := make([]byte, 32)
 
@@ -103,11 +103,11 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 	buf = append(buf, v...)
 
 	// Input previousOuts/nSequence (none/all, depending on flags)
-	buf = append(buf, hashPreviousOuts...)
+	buf = append(buf, hashPreviousOuts.CloneBytes()...)
 	buf = append(buf, hashSequence...)
 
 	//  outpoint (32-byte hash + 4-byte little endian)
-	buf = append(buf, util.ReverseBytes(in.SourceTXID)...)
+	buf = append(buf, in.SourceTXID.CloneBytes()...)
 	oi := make([]byte, 4)
 	binary.LittleEndian.PutUint32(oi, in.SourceTxOutIndex)
 	buf = append(buf, oi...)
@@ -233,7 +233,7 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 
 	buf = append(buf, VarInt(uint64(len(txCopy.Inputs))).Bytes()...)
 	for _, in := range txCopy.Inputs {
-		buf = append(buf, util.ReverseBytes(in.SourceTXID)...)
+		buf = append(buf, in.SourceTXID.CloneBytes()...)
 
 		oi := make([]byte, 4)
 		binary.LittleEndian.PutUint32(oi, in.SourceTxOutIndex)

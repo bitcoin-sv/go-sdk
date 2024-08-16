@@ -8,10 +8,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
-	script "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
+	"github.com/stretchr/testify/require"
 )
 
 // TestOpcodeDisabled tests the opcodeDisabled function manually because all
@@ -71,14 +70,6 @@ func TestParse(t *testing.T) {
 					},
 					Data: nil,
 				},
-				ParsedOpcode{
-					op: opcode{
-						val:    0,
-						name:   "Unformatted Data",
-						length: 3,
-					},
-					Data: []byte{36, 220},
-				},
 			},
 		},
 	}
@@ -105,41 +96,126 @@ func TestParse(t *testing.T) {
 func TestOpShift(t *testing.T) {
 	t.Parallel()
 
-	// More tests can be found https://github.com/bitcoin-sv/bitcoin-sv/blob/86eb5e8bdf5573c3cd844a1d81bd4fb151b909e0/src/test/opcode_tests.cpp#L640
+	// Tests can be found https://github.com/bitcoin-sv/bitcoin-sv/blob/86eb5e8bdf5573c3cd844a1d81bd4fb151b909e0/src/test/opcode_tests.cpp#L640
 
-	// CheckShiftOp({0xFF}, {0x05}, OP_RSHIFT, {0x07});
-	// CheckShiftOp({0xFF}, {0x06}, OP_RSHIFT, {0x03});
-	// CheckShiftOp({0xFF}, {0x07}, OP_RSHIFT, {0x01});
-	// CheckShiftOp({0x9F, 0x11, 0xF5, 0x55}, {0x0A}, OP_RSHIFT, to_bitpattern("00000000 00100111 11000100 01111101"));
-	// CheckShiftOp({0x9F, 0x11, 0xF5, 0x55}, {0x0B}, OP_RSHIFT, to_bitpattern("00000000 00010011 11100010 00111110"));
-	// CheckShiftOp({0x9F, 0x11, 0xF5, 0x55}, {0x0C}, OP_RSHIFT, to_bitpattern("00000000 00001001 11110001 00011111"));
 	tests := []struct {
 		name     string
-		op       byte
 		initial  []byte
 		shift    int64
+		op       byte
 		expected []byte
 	}{
-		{"RSHIFT 5 bits", script.OpRSHIFT, []byte{0xFF, 0x00}, 5, []byte{0x07}},
-		{"RSHIFT 6 bit", script.OpRSHIFT, []byte{0xFF, 0x00}, 6, []byte{0x03}},
-		{"RSHIFT 7 bits", script.OpRSHIFT, []byte{0xFF, 0x00}, 7, []byte{0x01}},
-		{"RSHIFT 10 bits", script.OpRSHIFT, []byte{0x9F, 0x11, 0xF5, 0x55}, 10, []byte{0b00000000, 0b00100111, 0b11000100, 0b01111101}},
-		{"RSHIFT 11 bits", script.OpRSHIFT, []byte{0x9F, 0x11, 0xF5, 0x55}, 11, []byte{0b00000000, 0b00010011, 0b11100010, 0b00111110}},
-		{"RSHIFT 12 bits", script.OpRSHIFT, []byte{0x9F, 0x11, 0xF5, 0x55}, 12, []byte{0b00000000, 0b00001001, 0b11110001, 0b00011111}},
-		// {"RSHIFT 8 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 8, []byte{0x02}},
-		// {"RSHIFT 1 bit", script.OpRSHIFT, []byte{0x01, 0x02}, 1, []byte{0x00, 0x01}},
-		// {"RSHIFT 9 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 9, []byte{0x01}},
-		// {"RSHIFT 16 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 16, []byte{}},
-		// {"RSHIFT 0 bits", script.OpRSHIFT, []byte{0x01, 0x02}, 0, []byte{0x01, 0x02}},
-		// {"RSHIFT large shift", script.OpRSHIFT, []byte{0x01, 0x02}, 100, []byte{}},
-		// {"RSHIFT 8 byte value by 1", script.OpRSHIFT, []byte{0xEF, 0xCD, 0xAB, 0x89, 0x67, 0x45, 0x23, 0x01}, 1, []byte{0xF7, 0xE6, 0xD5, 0xC4, 0xB3, 0xA2, 0x91, 0x00}},
-		// {"LSHIFT 0 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 0, []byte{0x01, 0x02}},
-		// {"LSHIFT 1 bit", script.OpLSHIFT, []byte{0x01, 0x02}, 1, []byte{0x02, 0x04}},
-		// {"LSHIFT 8 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 8, []byte{0x00, 0x01, 0x02}},
-		// {"LSHIFT 9 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 9, []byte{0x00, 0x02, 0x04}},
-		// {"LSHIFT 15 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 15, []byte{0x00, 0x80, 0x00, 0x01}},
-		// {"LSHIFT 16 bits", script.OpLSHIFT, []byte{0x01, 0x02}, 16, []byte{0x00, 0x00, 0x01, 0x02}},
-		// {"LSHIFT large shift", script.OpLSHIFT, []byte{0x01, 0x02}, 100, []byte{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x20}},
+		{"", []byte{}, 0, script.OpRSHIFT, []byte{}},
+		{"", []byte{}, 0x01, script.OpRSHIFT, []byte{}},
+		{"", []byte{}, 0x02, script.OpRSHIFT, []byte{}},
+		{"", []byte{}, 0x07, script.OpRSHIFT, []byte{}},
+		{"", []byte{}, 0x08, script.OpRSHIFT, []byte{}},
+		{"", []byte{}, 0x09, script.OpRSHIFT, []byte{}},
+		{"", []byte{}, 0x0F, script.OpRSHIFT, []byte{}},
+		{"", []byte{}, 0x10, script.OpRSHIFT, []byte{}},
+		{"", []byte{}, 0x11, script.OpRSHIFT, []byte{}},
+
+		{"", []byte{0xFF}, 0, script.OpRSHIFT, []byte{0b11111111}},
+		{"", []byte{0xFF}, 0x01, script.OpRSHIFT, []byte{0b01111111}},
+		{"", []byte{0xFF}, 0x02, script.OpRSHIFT, []byte{0b00111111}},
+		{"", []byte{0xFF}, 0x03, script.OpRSHIFT, []byte{0b00011111}},
+		{"", []byte{0xFF}, 0x04, script.OpRSHIFT, []byte{0b00001111}},
+		{"", []byte{0xFF}, 0x05, script.OpRSHIFT, []byte{0b00000111}},
+		{"", []byte{0xFF}, 0x06, script.OpRSHIFT, []byte{0b00000011}},
+		{"", []byte{0xFF}, 0x07, script.OpRSHIFT, []byte{0b00000001}},
+		{"", []byte{0xFF}, 0x08, script.OpRSHIFT, []byte{0b00000000}},
+
+		{"", []byte{0xFF}, 0x01, script.OpRSHIFT, []byte{0x7F}},
+		{"", []byte{0xFF}, 0x02, script.OpRSHIFT, []byte{0x3F}},
+		{"", []byte{0xFF}, 0x03, script.OpRSHIFT, []byte{0x1F}},
+		{"", []byte{0xFF}, 0x04, script.OpRSHIFT, []byte{0x0F}},
+		{"", []byte{0xFF}, 0x05, script.OpRSHIFT, []byte{0x07}},
+		{"", []byte{0xFF}, 0x06, script.OpRSHIFT, []byte{0x03}},
+		{"", []byte{0xFF}, 0x07, script.OpRSHIFT, []byte{0x01}},
+
+		// bitpattern, not a number so not reduced to zero bytes
+		{"", []byte{0xFF}, 0x08, script.OpRSHIFT, []byte{0x00}},
+
+		// shift single bit over byte boundary
+		{"", []byte{0x01, 0x00}, 0x01, script.OpRSHIFT, []byte{0x00, 0x80}},
+		{"", []byte{0x01, 0x00, 0x00}, 0x01, script.OpRSHIFT, []byte{0x00, 0x80, 0x00}},
+		{"", []byte{0x00, 0x01, 0x00}, 0x01, script.OpRSHIFT, []byte{0x00, 0x00, 0x80}},
+		{"", []byte{0x00, 0x00, 0x01}, 0x01, script.OpRSHIFT, []byte{0x00, 0x00, 0x00}},
+
+		// []byte{0x9F, 0x11, 0xF5, 0x55} is a sequence of bytes that is equal to the bit pattern
+		// "1001 1111 0001 0001 1111 0101 0101 0101"
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0, script.OpRSHIFT, []byte{0b10011111, 0b00010001, 0b11110101, 0b01010101}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x01, script.OpRSHIFT, []byte{0b01001111, 0b10001000, 0b11111010, 0b10101010}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x02, script.OpRSHIFT, []byte{0b00100111, 0b11000100, 0b01111101, 0b01010101}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x03, script.OpRSHIFT, []byte{0b00010011, 0b11100010, 0b00111110, 0b10101010}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x04, script.OpRSHIFT, []byte{0b00001001, 0b11110001, 0b00011111, 0b01010101}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x05, script.OpRSHIFT, []byte{0b00000100, 0b11111000, 0b10001111, 0b10101010}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x06, script.OpRSHIFT, []byte{0b00000010, 0b01111100, 0b01000111, 0b11010101}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x07, script.OpRSHIFT, []byte{0b00000001, 0b00111110, 0b00100011, 0b11101010}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x08, script.OpRSHIFT, []byte{0b00000000, 0b10011111, 0b00010001, 0b11110101}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x09, script.OpRSHIFT, []byte{0b00000000, 0b01001111, 0b10001000, 0b11111010}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0A, script.OpRSHIFT, []byte{0b00000000, 0b00100111, 0b11000100, 0b01111101}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0B, script.OpRSHIFT, []byte{0b00000000, 0b00010011, 0b11100010, 0b00111110}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0C, script.OpRSHIFT, []byte{0b00000000, 0b00001001, 0b11110001, 0b00011111}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0D, script.OpRSHIFT, []byte{0b00000000, 0b00000100, 0b11111000, 0b10001111}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0E, script.OpRSHIFT, []byte{0b00000000, 0b00000010, 0b01111100, 0b01000111}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0F, script.OpRSHIFT, []byte{0b00000000, 0b00000001, 0b00111110, 0b00100011}},
+
+		{"", []byte{}, 0, script.OpLSHIFT, []byte{}},
+		{"", []byte{}, 0x01, script.OpLSHIFT, []byte{}},
+		{"", []byte{}, 0x02, script.OpLSHIFT, []byte{}},
+		{"", []byte{}, 0x07, script.OpLSHIFT, []byte{}},
+		{"", []byte{}, 0x08, script.OpLSHIFT, []byte{}},
+		{"", []byte{}, 0x09, script.OpLSHIFT, []byte{}},
+		{"", []byte{}, 0x0F, script.OpLSHIFT, []byte{}},
+		{"", []byte{}, 0x10, script.OpLSHIFT, []byte{}},
+		{"", []byte{}, 0x11, script.OpLSHIFT, []byte{}},
+
+		{"", []byte{0xFF}, 0, script.OpLSHIFT, []byte{0b11111111}},
+		{"", []byte{0xFF}, 0x01, script.OpLSHIFT, []byte{0b11111110}},
+		{"", []byte{0xFF}, 0x02, script.OpLSHIFT, []byte{0b11111100}},
+		{"", []byte{0xFF}, 0x03, script.OpLSHIFT, []byte{0b11111000}},
+		{"", []byte{0xFF}, 0x04, script.OpLSHIFT, []byte{0b11110000}},
+		{"", []byte{0xFF}, 0x05, script.OpLSHIFT, []byte{0b11100000}},
+		{"", []byte{0xFF}, 0x06, script.OpLSHIFT, []byte{0b11000000}},
+		{"", []byte{0xFF}, 0x07, script.OpLSHIFT, []byte{0b10000000}},
+		{"", []byte{0xFF}, 0x08, script.OpLSHIFT, []byte{0b00000000}},
+
+		{"", []byte{0xFF}, 0x01, script.OpLSHIFT, []byte{0xFE}},
+		{"", []byte{0xFF}, 0x02, script.OpLSHIFT, []byte{0xFC}},
+		{"", []byte{0xFF}, 0x03, script.OpLSHIFT, []byte{0xF8}},
+		{"", []byte{0xFF}, 0x04, script.OpLSHIFT, []byte{0xF0}},
+		{"", []byte{0xFF}, 0x05, script.OpLSHIFT, []byte{0xE0}},
+		{"", []byte{0xFF}, 0x06, script.OpLSHIFT, []byte{0xC0}},
+		{"", []byte{0xFF}, 0x07, script.OpLSHIFT, []byte{0x80}},
+
+		// bitpattern, not a number so not reduced to zero bytes
+		{"", []byte{0xFF}, 0x08, script.OpLSHIFT, []byte{0x00}},
+
+		// shift single bit over byte boundary
+		{"", []byte{0x00, 0x80}, 0x01, script.OpLSHIFT, []byte{0x01, 0x00}},
+		{"", []byte{0x00, 0x80, 0x00}, 0x01, script.OpLSHIFT, []byte{0x01, 0x00, 0x00}},
+		{"", []byte{0x00, 0x00, 0x80}, 0x01, script.OpLSHIFT, []byte{0x00, 0x01, 0x00}},
+		{"", []byte{0x80, 0x00, 0x00}, 0x01, script.OpLSHIFT, []byte{0x00, 0x00, 0x00}},
+
+		// []byte{0x9F, 0x11, 0xF5, 0x55} is a sequence of bytes that is equal to the bit pattern
+		// "1001 1111 0001 0001 1111 0101 0101 0101"
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0, script.OpLSHIFT, []byte{0b10011111, 0b00010001, 0b11110101, 0b01010101}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x01, script.OpLSHIFT, []byte{0b00111110, 0b00100011, 0b11101010, 0b10101010}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x02, script.OpLSHIFT, []byte{0b01111100, 0b01000111, 0b11010101, 0b01010100}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x03, script.OpLSHIFT, []byte{0b11111000, 0b10001111, 0b10101010, 0b10101000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x04, script.OpLSHIFT, []byte{0b11110001, 0b00011111, 0b01010101, 0b01010000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x05, script.OpLSHIFT, []byte{0b11100010, 0b00111110, 0b10101010, 0b10100000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x06, script.OpLSHIFT, []byte{0b11000100, 0b01111101, 0b01010101, 0b01000000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x07, script.OpLSHIFT, []byte{0b10001000, 0b11111010, 0b10101010, 0b10000000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x08, script.OpLSHIFT, []byte{0b00010001, 0b11110101, 0b01010101, 0b00000000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x09, script.OpLSHIFT, []byte{0b00100011, 0b11101010, 0b10101010, 0b00000000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0A, script.OpLSHIFT, []byte{0b01000111, 0b11010101, 0b01010100, 0b00000000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0B, script.OpLSHIFT, []byte{0b10001111, 0b10101010, 0b10101000, 0b00000000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0C, script.OpLSHIFT, []byte{0b00011111, 0b01010101, 0b01010000, 0b00000000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0D, script.OpLSHIFT, []byte{0b00111110, 0b10101010, 0b10100000, 0b00000000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0E, script.OpLSHIFT, []byte{0b01111101, 0b01010101, 0b01000000, 0b00000000}},
+		{"", []byte{0x9F, 0x11, 0xF5, 0x55}, 0x0F, script.OpLSHIFT, []byte{0b11111010, 0b10101010, 0b10000000, 0b00000000}},
 	}
 
 	for _, tt := range tests {

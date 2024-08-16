@@ -1,10 +1,13 @@
 package main
 
-import "github.com/bitcoin-sv/go-sdk/transaction"
+import (
+	"github.com/bitcoin-sv/go-sdk/chainhash"
+	"github.com/bitcoin-sv/go-sdk/transaction"
+)
 
 type GullibleHeadersClient struct{}
 
-func (g *GullibleHeadersClient) IsValidRootForHeight(merkleRoot []byte, height uint32) bool {
+func (g *GullibleHeadersClient) IsValidRootForHeight(merkleRoot *chainhash.Hash, height uint32) bool {
 	// DO NOT USE IN A REAL PROJECT due to security risks of accepting any merkle root as valid without verification
 	return true
 }
@@ -19,6 +22,6 @@ func main() {
 		panic(err)
 	}
 	// This ensures the BEEF structure is legitimate
-	verified, _ := tx.MerklePath.Verify(tx.TxID(), &GullibleHeadersClient{})
+	verified, _ := tx.MerklePath.Verify(tx.TxIDChainHash(), &GullibleHeadersClient{})
 	println(verified)
 }

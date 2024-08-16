@@ -1,5 +1,7 @@
 package chaintracker
 
+import "github.com/bitcoin-sv/go-sdk/chainhash"
+
 type ChainTracker interface {
-	IsValidRootForHeight(root []byte, height uint32) bool
+	IsValidRootForHeight(root *chainhash.Hash, height uint32) bool
 }

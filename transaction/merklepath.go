@@ -9,17 +9,17 @@ import (
 	"slices"
 	"sort"
 
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	"github.com/bitcoin-sv/go-sdk/transaction/chaintracker"
-	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/pkg/errors"
 )
 
 type PathElement struct {
-	Offset    uint64            `json:"offset"`
-	Hash      util.ByteStringLE `json:"hash,omitempty"`
-	Txid      *bool             `json:"txid,omitempty"`
-	Duplicate *bool             `json:"duplicate,omitempty"`
+	Offset    uint64          `json:"offset"`
+	Hash      *chainhash.Hash `json:"hash,omitempty"`
+	Txid      *bool           `json:"txid,omitempty"`
+	Duplicate *bool           `json:"duplicate,omitempty"`
 }
 
 type MerklePath struct {
@@ -43,15 +43,16 @@ func (ip IndexedPath) GetOffsetLeaf(layer int, offset uint64) *PathElement {
 	if left != nil && right != nil {
 		var digest []byte
 		if right.Duplicate != nil && *right.Duplicate {
-			digest = append(left.Hash, left.Hash...)
+			digest = append(left.Hash.CloneBytes(), left.Hash.CloneBytes()...)
 		} else {
-			digest = append(left.Hash, right.Hash...)
+			digest = append(left.Hash.CloneBytes(), right.Hash.CloneBytes()...)
 		}
 
-		return &PathElement{
+		pathElement := &PathElement{
 			Offset: offset,
-			Hash:   crypto.Sha256d(digest),
 		}
+		pathElement.Hash, _ = chainhash.NewHash(crypto.Sha256d(digest))
+		return pathElement
 	}
 	return nil
 }
@@ -135,9 +136,10 @@ func NewMerklePathFromReader(reader io.Reader) (*MerklePath, error) {
 			if dup {
 				l.Duplicate = &dup
 			} else {
-				l.Hash = make([]byte, 32)
-				_, err = reader.Read(l.Hash)
-				if err != nil {
+				hash := make([]byte, 32)
+				if _, err = reader.Read(hash); err != nil {
+					return nil, err
+				} else if l.Hash, err = chainhash.NewHash(hash); err != nil {
 					return nil, err
 				}
 			}
@@ -177,7 +179,7 @@ func (mp *MerklePath) Bytes() []byte {
 			}
 			bytes = append(bytes, flags)
 			if (flags & 1) == 0 {
-				bytes = append(bytes, leaf.Hash...)
+				bytes = append(bytes, leaf.Hash.CloneBytes()...)
 			}
 		}
 	}
@@ -189,30 +191,27 @@ func (mp *MerklePath) ToHex() string {
 	return hex.EncodeToString(mp.Bytes())
 }
 
-func (mp *MerklePath) ComputeRoot(txid *string) (string, error) {
-	var txidLE *[]byte
-	if txid != nil {
-		txidBytes, err := hex.DecodeString(*txid)
-		if err != nil {
+func (mp *MerklePath) ComputeRootHex(txidStr *string) (string, error) {
+	var txid *chainhash.Hash
+	if txidStr != nil {
+		var err error
+		if txid, err = chainhash.NewHashFromStr(*txidStr); err != nil {
 			return "", err
 		}
-		txidBytes = util.ReverseBytes(txidBytes)
-		txidLE = &txidBytes
 	}
-	root, err := mp.ComputeRootBin(txidLE)
-	if err != nil {
+	if root, err := mp.ComputeRoot(txid); err != nil {
 		return "", err
+	} else {
+		return root.String(), nil
 	}
-	return hex.EncodeToString(util.ReverseBytes(root)), nil
 }
 
 // ComputeRoot computes the Merkle root from a given transaction ID
-func (mp *MerklePath) ComputeRootBin(txidLE *[]byte) ([]byte, error) {
-	if txidLE == nil {
+func (mp *MerklePath) ComputeRoot(txid *chainhash.Hash) (*chainhash.Hash, error) {
+	if txid == nil {
 		for _, l := range mp.Path[0] {
-			if len(l.Hash) > 0 {
-				t := []byte(l.Hash)
-				txidLE = &t
+			if l.Hash != nil {
+				txid = l.Hash
 				break
 			}
 		}
@@ -220,7 +219,7 @@ func (mp *MerklePath) ComputeRootBin(txidLE *[]byte) ([]byte, error) {
 	if len(mp.Path) == 1 {
 		// if there is only one txid in the block then the root is the txid.
 		if len(mp.Path[0]) == 1 {
-			return *txidLE, nil
+			return txid, nil
 		}
 	}
 	indexedPath := make(IndexedPath, len(mp.Path))
@@ -235,13 +234,13 @@ func (mp *MerklePath) ComputeRootBin(txidLE *[]byte) ([]byte, error) {
 	// Find the index of the txid at the lowest level of the Merkle tree
 	var txLeaf *PathElement
 	for _, l := range mp.Path[0] {
-		if bytes.Equal(l.Hash, *txidLE) {
+		if l.Hash != nil && l.Hash.Equal(*txid) {
 			txLeaf = l
 			break
 		}
 	}
 	if txLeaf == nil {
-		return nil, fmt.Errorf("the BUMP does not contain the txid: %x", *txidLE)
+		return nil, fmt.Errorf("the BUMP does not contain the txid: %x", *txid)
 	}
 
 	// Calculate the root using the index as a way to determine which direction to concatenate.
@@ -257,34 +256,37 @@ func (mp *MerklePath) ComputeRootBin(txidLE *[]byte) ([]byte, error) {
 		var digest []byte
 
 		if leaf.Duplicate != nil && *leaf.Duplicate {
-			digest = append(workingHash, workingHash...)
+			digest = append(workingHash.CloneBytes(), workingHash.CloneBytes()...)
 		} else {
 			leafBytes := leaf.Hash
 			if (offset % 2) != 0 {
-				digest = append(workingHash, leafBytes...)
+				digest = append(workingHash.CloneBytes(), leafBytes.CloneBytes()...)
 			} else {
-				digest = append(leafBytes, workingHash...)
+				digest = append(leafBytes.CloneBytes(), workingHash.CloneBytes()...)
 			}
 		}
 
-		workingHash = crypto.Sha256d(digest)
+		workingHash, _ = chainhash.NewHash(crypto.Sha256d(digest))
 	}
 	return workingHash, nil
 }
 
 // Verify checks if a given transaction ID is part of the Merkle tree
 // at the specified block height using a chain tracker
-func (mp *MerklePath) Verify(txid string, ct chaintracker.ChainTracker) (bool, error) {
-	root, err := mp.ComputeRoot(&txid)
+func (mp *MerklePath) VerifyHex(txidStr string, ct chaintracker.ChainTracker) (bool, error) {
+	if txid, err := chainhash.NewHashFromStr(txidStr); err != nil {
+		return false, err
+	} else {
+		return mp.Verify(txid, ct)
+	}
+}
+
+func (mp *MerklePath) Verify(txid *chainhash.Hash, ct chaintracker.ChainTracker) (bool, error) {
+	root, err := mp.ComputeRoot(txid)
 	if err != nil {
 		return false, err
 	}
-	rootBytes, err := hex.DecodeString(root)
-	if err != nil {
-		return false, err
-	}
-	rootBytes = util.ReverseBytes(rootBytes)
-	return ct.IsValidRootForHeight(rootBytes, mp.BlockHeight), nil
+	return ct.IsValidRootForHeight(root, mp.BlockHeight), nil
 }
 
 func (m *MerklePath) Combine(other *MerklePath) (err error) {
@@ -292,11 +294,11 @@ func (m *MerklePath) Combine(other *MerklePath) (err error) {
 		return errors.New("cannot combine MerklePaths with different block heights")
 	}
 
-	root1, err := m.ComputeRoot(nil)
+	root1, err := m.ComputeRootHex(nil)
 	if err != nil {
 		return err
 	}
-	root2, err := other.ComputeRoot(nil)
+	root2, err := other.ComputeRootHex(nil)
 	if err != nil {
 		return err
 	}

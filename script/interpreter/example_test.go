@@ -1,15 +1,15 @@
 package interpreter_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
-	"golang.org/x/sync/errgroup"
+	"context"
 
 	"github.com/bitcoin-sv/go-sdk/script/interpreter"
 	"github.com/bitcoin-sv/go-sdk/transaction"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/sync/errgroup"
 )
 
 func ExampleEngine_Execute() {
@@ -129,7 +129,6 @@ func ExampleEngine_Execute_concurrent() {
 		errs.Go(func() error {
 			input := exec.tx.InputIdx(exec.inputIdx)
 			inputASM := input.UnlockingScript.ToASM()
-
 			outputASM := exec.prevTxOut.LockingScript.ToASM()
 
 			fmt.Println(inputASM)
@@ -166,22 +165,43 @@ func TestExampleEngine_Execute_rshift(t *testing.T) {
 	require.NoError(t, err)
 	tx.Inputs[0].SourceTransaction = prevTx
 
-	vm := interpreter.NewEngine()
-	err = vm.Execute(interpreter.WithTx(tx, 0, prevTx.Outputs[tx.Inputs[1].SourceTxOutIndex]))
+	// vm := interpreter.NewEngine()
+	err = checkScripts(tx)
+	// vm.Execute(interpreter.WithTx(tx, 0, prevTx.Outputs[tx.Inputs[1].SourceTxOutIndex]))
 	require.NoError(t, err)
-	// errs, _ := errgroup.WithContext(context.TODO())
-	// for _, e := range ee {
-	// 	exec := e
-	// 	errs.Go(func() error {
-	// 		input := exec.tx.InputIdx(exec.inputIdx)
-	// 		inputASM := input.UnlockingScript.ToASM()
+}
 
-	// 		outputASM := exec.prevTxOut.LockingScript.ToASM()
+func checkScripts(tx *transaction.Transaction) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			// TODO - remove this when script engine is fixed
+			// if rErr, ok := r.(error); ok {
+			// 	if strings.Contains(rErr.Error(), "negative shift amount") {
+			// 		err = nil
+			// 		return
+			// 	}
+			// }
+			err = fmt.Errorf("script execution failed: %v", r)
+		}
+	}()
 
-	// 		fmt.Println(inputASM)
-	// 		fmt.Println(outputASM)
-	// 		return vm.Execute(interpreter.WithTx(exec.tx, exec.inputIdx, exec.prevTxOut))
-	// 	})
-	// }
-	return
+	for i, in := range tx.Inputs {
+		prevOutput := &transaction.TransactionOutput{
+			Satoshis:      *in.SourceTxSatoshis(),
+			LockingScript: in.SourceTxScript(),
+		}
+
+		opts := make([]interpreter.ExecutionOptionFunc, 0, 3)
+		opts = append(opts, interpreter.WithTx(tx, i, prevOutput))
+		opts = append(opts, interpreter.WithForkID())
+		opts = append(opts, interpreter.WithAfterGenesis())
+
+		// opts = append(opts, interpreter.WithDebugger(&LogDebugger{}),
+
+		if err = interpreter.NewEngine().Execute(opts...); err != nil {
+			return fmt.Errorf("script execution error: %w", err)
+		}
+	}
+
+	return nil
 }

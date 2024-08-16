@@ -2,11 +2,10 @@ package transaction
 
 import (
 	"encoding/binary"
-	"encoding/hex"
 
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	script "github.com/bitcoin-sv/go-sdk/script"
-	"github.com/bitcoin-sv/go-sdk/util"
 )
 
 // TotalInputSatoshis returns the total Satoshis inputted to the transaction.
@@ -33,7 +32,7 @@ func (tx *Transaction) AddInputWithOutput(input *TransactionInput, output *Trans
 func (tx *Transaction) AddInputFromTx(prevTx *Transaction, vout uint32,
 	unlockingScriptTemplate UnlockingScriptTemplate) {
 	i := &TransactionInput{
-		SourceTXID:              prevTx.TxIDBytes(),
+		SourceTXID:              prevTx.TxIDChainHash(),
 		SourceTxOutIndex:        vout,
 		SourceTransaction:       prevTx,
 		SequenceNumber:          DefaultSequenceNumber, // use default finalized sequence number
@@ -49,17 +48,18 @@ func (tx *Transaction) InputCount() int {
 }
 
 // PreviousOutHash returns a byte slice of inputs outpoints, for creating a signature hash
-func (tx *Transaction) PreviousOutHash() []byte {
+func (tx *Transaction) PreviousOutHash() *chainhash.Hash {
 	buf := make([]byte, 0)
 
 	for _, in := range tx.Inputs {
-		buf = append(buf, util.ReverseBytes(in.SourceTXID)...)
+		buf = append(buf, in.SourceTXID.CloneBytes()...)
 		oi := make([]byte, 4)
 		binary.LittleEndian.PutUint32(oi, in.SourceTxOutIndex)
 		buf = append(buf, oi...)
 	}
 
-	return crypto.Sha256d(buf)
+	hash, _ := chainhash.NewHash(crypto.Sha256d(buf))
+	return hash
 }
 
 // SequenceHash returns a byte slice of inputs SequenceNumber, for creating a signature hash
@@ -84,7 +84,7 @@ func (tx *Transaction) AddInputFrom(prevTxID string, vout uint32, prevTxLockingS
 	if err != nil {
 		return err
 	}
-	pti, err := hex.DecodeString(prevTxID)
+	pti, err := chainhash.NewHashFromStr(prevTxID)
 	if err != nil {
 		return err
 	}
@@ -98,7 +98,7 @@ func (tx *Transaction) AddInputFrom(prevTxID string, vout uint32, prevTxLockingS
 	})
 }
 
-// AddInputsFromUTXOs adds a new input to the transaction from the specified *bt.UTXO fields, using the default
+// AddInputsFromUTXOs adds a new input to the transaction from the specified *transaction.UTXO fields, using the default
 // finalized sequence number (0xFFFFFFFF). If you want a different nSeq, change it manually
 // afterwards.
 func (tx *Transaction) AddInputsFromUTXOs(utxos ...*UTXO) error {
