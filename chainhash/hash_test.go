@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // mainNetGenesisHash is the hash of the first block in the block chain for the
@@ -211,11 +212,11 @@ func TestMarshalling(t *testing.T) {
 	assert.Equal(t, "24988b93623304735e42a71f5c1e161b9ee2b9c52a3be8260ea3b05fba4df22c", myData.Hash.String())
 
 	b, err := json.Marshal(myData)
-	assert.NoError(t, err)
-	assert.Equal(t, `{"hash":"24988b93623304735e42a71f5c1e161b9ee2b9c52a3be8260ea3b05fba4df22c"}`, string(b))
+	require.NoError(t, err)
+	require.Equal(t, `{"hash":"24988b93623304735e42a71f5c1e161b9ee2b9c52a3be8260ea3b05fba4df22c"}`, string(b))
 
 	var myData2 test
 	err = json.Unmarshal(b, &myData2)
-	assert.NoError(t, err)
-	assert.Equal(t, "24988b93623304735e42a71f5c1e161b9ee2b9c52a3be8260ea3b05fba4df22c", myData2.Hash.String())
+	require.NoError(t, err)
+	require.Equal(t, "24988b93623304735e42a71f5c1e161b9ee2b9c52a3be8260ea3b05fba4df22c", myData2.Hash.String())
 }

@@ -36,7 +36,7 @@ func TestScriptNumBytes(t *testing.T) {
 
 	tests := []struct {
 		num        int64
-		serialised []byte
+		serialized []byte
 	}{
 		{0, nil},
 		{1, hexToBytes("01")},
@@ -84,8 +84,8 @@ func TestScriptNumBytes(t *testing.T) {
 
 	for _, test := range tests {
 		n := &scriptNumber{val: big.NewInt(test.num)}
-		if !bytes.Equal(n.Bytes(), test.serialised) {
-			t.Errorf("Bytes: did not get expected bytes for %d - got %x, want %x", test.num, n.Bytes(), test.serialised)
+		if !bytes.Equal(n.Bytes(), test.serialized) {
+			t.Errorf("Bytes: did not get expected bytes for %d - got %x, want %x", test.num, n.Bytes(), test.serialized)
 			continue
 		}
 	}
@@ -102,7 +102,7 @@ func TestMakeScriptNum(t *testing.T) {
 	errMinimalData := errs.NewError(errs.ErrMinimalData, "")
 
 	tests := []struct {
-		serialised      []byte
+		serialized      []byte
 		num             int
 		numLen          int
 		minimalEncoding bool
@@ -200,15 +200,15 @@ func TestMakeScriptNum(t *testing.T) {
 	for _, test := range tests {
 		// Ensure the error code is of the expected type and the error
 		// code matches the value specified in the test instance.
-		gotNum, err := makeScriptNumber(test.serialised, test.numLen, test.minimalEncoding, true)
+		gotNum, err := makeScriptNumber(test.serialized, test.numLen, test.minimalEncoding, true)
 		if e := tstCheckScriptError(err, test.err); e != nil {
-			t.Errorf("makeScriptNumber(%#x): %v", test.serialised, e)
+			t.Errorf("makeScriptNumber(%#x): %v", test.serialized, e)
 			continue
 		}
 
 		if gotNum.Int() != test.num {
 			t.Errorf("makeScriptNumber(%#x): did not get expected number - got %d, want %d",
-				test.serialised, gotNum.Int64(), test.num)
+				test.serialized, gotNum.Int64(), test.num)
 			continue
 		}
 	}

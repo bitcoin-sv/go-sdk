@@ -664,7 +664,7 @@ func opcodeCheckLockTimeVerify(op *ParsedOpcode, t *thread) error {
 	}
 
 	// The lock time field of a transaction is either a block height at
-	// which the transaction is finalised or a timestamp depending on if the
+	// which the transaction is finalized or a timestamp depending on if the
 	// value is before the interpreter.LockTimeThreshold.  When it is under the
 	// threshold it is a block height.
 	if err = verifyLockTime(int64(t.tx.LockTime), LockTimeThreshold, lockTime.Int64()); err != nil {
@@ -672,7 +672,7 @@ func opcodeCheckLockTimeVerify(op *ParsedOpcode, t *thread) error {
 	}
 
 	// The lock time feature can also be disabled, thereby bypassing
-	// script.OpCHECKLOCKTIMEVERIFY, if every transaction input has been finalised by
+	// script.OpCHECKLOCKTIMEVERIFY, if every transaction input has been finalized by
 	// setting its sequence to the maximum value (transaction.MaxTxInSequenceNum).  This
 	// condition would result in the transaction being allowed into the blockchain
 	// making the opcode ineffective.
@@ -682,11 +682,11 @@ func opcodeCheckLockTimeVerify(op *ParsedOpcode, t *thread) error {
 	// value).  This is sufficient to prove correctness without having to
 	// check every input.
 	//
-	// NOTE: This implies that even if the transaction is not finalised due to
+	// NOTE: This implies that even if the transaction is not finalized due to
 	// another input being unlocked, the opcode execution will still fail when the
 	// input being used by the opcode is locked.
 	if t.tx.Inputs[t.inputIdx].SequenceNumber == transaction.MaxTxInSequenceNum {
-		return errs.NewError(errs.ErrUnsatisfiedLockTime, "transaction input is finalised")
+		return errs.NewError(errs.ErrUnsatisfiedLockTime, "transaction input is finalized")
 	}
 
 	return nil
@@ -2161,7 +2161,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 	pubKeys := make([][]byte, 0, numPubKeys)
 	for i := 0; i < numPubKeys; i++ {
-		pubKey, err := t.dstack.PopByteArray() //nolint:govet // ignore shadowed error
+		pubKey, err := t.dstack.PopByteArray()
 		if err != nil {
 			return err
 		}
@@ -2187,7 +2187,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 	signatures := make([]*parsedSigInfo, 0, numSignatures)
 	for i := 0; i < numSignatures; i++ {
-		signature, err := t.dstack.PopByteArray() //nolint:govet // ignore shadowed error
+		signature, err := t.dstack.PopByteArray()
 		if err != nil {
 			return err
 		}
@@ -2197,7 +2197,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 	// A bug in the original Satoshi client implementation means one more
 	// stack value than should be used must be popped.  Unfortunately, this
-	// buggy behaviour is now part of the consensus and a hard fork would be
+	// buggy behavior is now part of the consensus and a hard fork would be
 	// required to fix it.
 	dummy, err := t.dstack.PopByteArray()
 	if err != nil {
