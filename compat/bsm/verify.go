@@ -60,20 +60,20 @@ func VerifyMessage(address, sig, data string) error {
 	}
 
 	// Get the address
-	var bscriptAddress *script.Address
-	if bscriptAddress, err = script.NewAddressFromPublicKey(publicKey, true); err != nil {
+	var scriptAddress *script.Address
+	if scriptAddress, err = script.NewAddressFromPublicKey(publicKey, true); err != nil {
 		return err
 	}
 
 	// Return nil if addresses match.
-	if bscriptAddress.AddressString == address {
+	if scriptAddress.AddressString == address {
 		return nil
 	}
 	return fmt.Errorf(
 		"address (%s) not found - compressed: %t\n%s was found instead",
 		address,
 		wasCompressed,
-		bscriptAddress.AddressString,
+		scriptAddress.AddressString,
 	)
 }
 
