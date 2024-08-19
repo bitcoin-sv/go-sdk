@@ -57,7 +57,6 @@ func PrivateKeyFromBytes(pk []byte) (*PrivateKey, *PublicKey) {
 }
 
 // NewPrivateKey is a wrapper for ecdsa.GenerateKey that returns a PrivateKey
-// instead of the normal ecdsa.PrivateKey.
 func NewPrivateKey() (*PrivateKey, error) {
 	key, err := e.GenerateKey(S256(), rand.Reader)
 	if err != nil {
@@ -66,7 +65,7 @@ func NewPrivateKey() (*PrivateKey, error) {
 	return (*PrivateKey)(key), nil
 }
 
-// PrivateKey is an ecdsa.PrivateKey with additional functions to
+// PrivateKeyFromHex returns a private key from a hex string.
 func PrivateKeyFromHex(privKeyHex string) (*PrivateKey, error) {
 	if len(privKeyHex) == 0 {
 		return nil, errors.New("private key hex is empty")
@@ -79,7 +78,7 @@ func PrivateKeyFromHex(privKeyHex string) (*PrivateKey, error) {
 	return privKey, nil
 }
 
-// PrivateKey is an ecdsa.PrivateKey with additional functions to
+// PrivateKeyFromWif returns a private key from a WIF string.
 func PrivateKeyFromWif(wif string) (*PrivateKey, error) {
 	decoded := base58.Decode(wif)
 	decodedLen := len(decoded)
