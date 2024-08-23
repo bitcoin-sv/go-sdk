@@ -18,7 +18,7 @@ var BRC74TXID2 = "d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e
 var BRC74TXID3 = "98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e"
 
 func hexToChainhash(hexStr string) *chainhash.Hash {
-	if hash, err := chainhash.NewHashFromStr(hexStr); err != nil {
+	if hash, err := chainhash.NewHashFromHex(hexStr); err != nil {
 		log.Panicln("Error decoding hex string:", err)
 		return nil
 	} else {

@@ -132,7 +132,7 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 			return bytesRead, errors.Wrapf(err, "script(%d): got %d bytes", scriptLen.Length(), n)
 		}
 
-		i.SetPrevTxFromOutput(&TransactionOutput{
+		i.SetSourceTxFromOutput(&TransactionOutput{
 			Satoshis:      binary.LittleEndian.Uint64(prevSatoshis),
 			LockingScript: script.NewFromBytes(scriptBytes),
 		})
@@ -145,8 +145,8 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 // representation of a transaction input.
 func (i *TransactionInput) String() string {
 	return fmt.Sprintf(
-		`prevTxHash:   %s
-prevOutIndex: %d
+		`sourceTxHash:   %s
+sourceOutIndex: %d
 scriptLen:    %d
 script:       %s
 sequence:     %x
@@ -179,7 +179,7 @@ func (i *TransactionInput) Bytes(clear bool) []byte {
 	return append(h, util.LittleEndianBytes(i.SequenceNumber, 4)...)
 }
 
-func (i *TransactionInput) SetPrevTxFromOutput(txo *TransactionOutput) {
+func (i *TransactionInput) SetSourceTxFromOutput(txo *TransactionOutput) {
 	prevTx := &Transaction{}
 	prevTx.Outputs = make([]*TransactionOutput, i.SourceTxOutIndex+1)
 	prevTx.Outputs[i.SourceTxOutIndex] = txo

@@ -224,7 +224,7 @@ func checkScripts(tx *transaction.Transaction) (err error) {
 	// 		// TODO - remove this when script engine is fixed
 	// 		if rErr, ok := r.(error); ok {
 	// 			if strings.Contains(rErr.Error(), "negative shift amount") {
-	// 				// gocore.Log("RUNTIME").Errorf("negative shift amount for tx %s: %v", tx.TxIDChainHash().String(), rErr)
+	// 				// gocore.Log("RUNTIME").Errorf("negative shift amount for tx %s: %v", tx.TxID().String(), rErr)
 	// 				panic("negative shift amount")
 	// 				err = nil
 	// 				return

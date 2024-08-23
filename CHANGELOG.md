@@ -24,20 +24,20 @@ All notable changes to this project will be documented in this file. The format 
 ### Changed
 - `SourceTXID` on `TransactionInput` is now a `ChainHash` instead of `[]byte`
 - `IsValidRootForHeight` on `ChainTracker` now takes a `ChainHash` instead of `[]byte`
-- `MerklePath.ComputeRoot` now takes a `ChainHash` instead of a hex string.
-- `MerklePath.Verify` now takes a `ChainHash` instead of hex string.
-
-### Deprecated
-- (List features that are in the process of being phased out or replaced.)
+- `MerklePath.ComputeRoot` now takes a `ChainHash` instead of a hex `string`.
+- `MerklePath.Verify` now takes a `ChainHash` instead of hex `string`.
+- `Transaction.TxID` now returns a `ChainHash` instead of a hex `string`
+- `Transaction.PreviousOutHash` was renamed to `SourceOutHash`, and returns a `ChainHash` instead of `[]byte`
+- The `TxID` field of the `UTXO` struct in the `transaction` package is now a `ChainHash` instead of `[]byte`
+- Renamed `TransactionInput.SetPrevTxFromOutput` to `SetSourceTxFromOutput`
 
 ### Removed
-- `PreviousTxIDStr` on `TransactionInput`
+- `TransactionInput.PreviousTxIDStr`
+- `Transaction.TxIDBytes`
+- `UTXO.TxIDStr` in favor of `UTXO.TxID.String()`
 
 ### Fixed
-- (Document bugs that were fixed since the last release.)
-
-### Security
-- (Notify of any improvements related to security vulnerabilities or potential risks.)
+- `opcodeRShift` and `opcodeLShift` was fixed to match node logic and properly execute scripts using `OP_RSHIFT` and `OP_LSHIFT`.
 
 ---
 

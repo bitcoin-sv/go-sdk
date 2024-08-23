@@ -35,7 +35,7 @@ func (tx *Transaction) MarshalJSON() ([]byte, error) {
 		return nil, errors.Wrap(ErrTxNil, "cannot marshal tx")
 	}
 	return json.Marshal(txJSON{
-		TxID:     tx.TxIDChainHash().String(),
+		TxID:     tx.TxID().String(),
 		Hex:      tx.String(),
 		Inputs:   tx.Inputs,
 		Outputs:  tx.Outputs,
@@ -81,7 +81,7 @@ func (i *TransactionInput) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &ij); err != nil {
 		return err
 	}
-	ptxID, err := chainhash.NewHashFromStr(ij.TxID)
+	ptxID, err := chainhash.NewHashFromHex(ij.TxID)
 	if err != nil {
 		return err
 	}

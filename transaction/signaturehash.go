@@ -77,7 +77,7 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 
 	if sigHashFlag&sighash.AnyOneCanPay == 0 {
 		// This will be executed in the usual BSV case (where sigHashType = SighashAllForkID)
-		hashPreviousOuts = tx.PreviousOutHash()
+		hashPreviousOuts = tx.SourceOutHash()
 	}
 
 	if sigHashFlag&sighash.AnyOneCanPay == 0 &&
@@ -195,7 +195,7 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 			txCopy.Inputs[i].SourceTransaction = tx.Inputs[inputNumber].SourceTransaction
 		} else {
 			txCopy.Inputs[i].UnlockingScript = &script.Script{}
-			txCopy.Inputs[i].SetPrevTxFromOutput(&TransactionOutput{})
+			txCopy.Inputs[i].SetSourceTxFromOutput(&TransactionOutput{})
 		}
 	}
 

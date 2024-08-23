@@ -17,11 +17,6 @@ type UTXO struct {
 // UTXOs a collection of *transaction.UTXO.
 type UTXOs []*UTXO
 
-// TxIDStr return the tx id as a string.
-func (u *UTXO) TxIDStr() string {
-	return u.TxID.String()
-}
-
 // LockingScriptHex retur nthe locking script in hex format.
 func (u *UTXO) LockingScriptHex() string {
 	return u.LockingScript.String()
@@ -33,7 +28,7 @@ func NewUTXO(prevTxID string, vout uint32, prevTxLockingScript string, satoshis 
 	if err != nil {
 		return nil, err
 	}
-	pti, err := chainhash.NewHashFromStr(prevTxID)
+	pti, err := chainhash.NewHashFromHex(prevTxID)
 	if err != nil {
 		return nil, err
 	}

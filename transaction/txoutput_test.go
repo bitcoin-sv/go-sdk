@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewP2PKHOutputFromPubKeyHashStr(t *testing.T) {
+func TestNewP2PKHOutputFromPubKeyHashHex(t *testing.T) {
 	t.Parallel()
 
 	t.Run("valid output", func(t *testing.T) {
