@@ -8,18 +8,30 @@ All notable changes to this project will be documented in this file. The format 
 - [1.0.0 - YYYY-MM-DD](#100---yyyy-mm-dd)
 
 ## [Unreleased]
+- porting in all optimizations by Teranode team to their active go-bt fork
+- introducing chainhash to remove type coercion on tx hashes through the project
+- remove ByteStringLE (replaced by chainhash)
+- update opRshift and opLshift modeled after C code in node software and tested against failing vectors
+- add tests and vectors for txs using opRshift that were previously failing to verify
+- update examples
+- lint - change international spellings to match codebase standards, use require instead of assert, etc
+- add additional test vectors from known failing transactions
 
 ### Added
-- (Include new features or significant user-visible enhancements here.)
+- `MerkePath.ComputeRootHex`
+- `MerklePath.VerifyHex`
 
 ### Changed
-- (Detail modifications that are non-breaking but relevant to the end-users.)
+- `SourceTXID` on `TransactionInput` is now a `ChainHash` instead of `[]byte`
+- `IsValidRootForHeight` on `ChainTracker` now takes a `ChainHash` instead of `[]byte`
+- `MerklePath.ComputeRoot` now takes a `ChainHash` instead of a hex string.
+- `MerklePath.Verify` now takes a `ChainHash` instead of hex string.
 
 ### Deprecated
 - (List features that are in the process of being phased out or replaced.)
 
 ### Removed
-- (Indicate features or capabilities that were taken out of the project.)
+- `PreviousTxIDStr` on `TransactionInput`
 
 ### Fixed
 - (Document bugs that were fixed since the last release.)

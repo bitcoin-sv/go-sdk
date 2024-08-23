@@ -258,11 +258,11 @@ func (tx *Transaction) IsCoinbase() bool {
 	return false
 }
 
-func (tx *Transaction) TxID() string {
-	return tx.TxIDChainHash().String()
+func (tx *Transaction) TxIDHex() string {
+	return tx.TxID().String()
 }
 
-func (tx *Transaction) TxIDChainHash() *chainhash.Hash {
+func (tx *Transaction) TxID() *chainhash.Hash {
 	txid, _ := chainhash.NewHash(crypto.Sha256d(tx.Bytes()))
 	return txid
 }
