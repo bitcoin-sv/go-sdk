@@ -190,11 +190,6 @@ func TestExampleEngine_Execute_rshift(t *testing.T) {
 			require.NoError(t, err)
 
 			tx.Inputs[tc.inputIdx].SourceTransaction = prevTx
-			// for i := range tx.Inputs {
-			// 	tx.Inputs[i].SourceTransaction = prevTx
-			// 	err = checkScripts(tx)
-			// 	require.NoError(t, err)
-			// }
 
 			input := tx.Inputs[tc.inputIdx]
 			prevOutput := prevTx.Outputs[input.SourceTxOutIndex]
@@ -209,47 +204,4 @@ func TestExampleEngine_Execute_rshift(t *testing.T) {
 			}
 		})
 	}
-	// tx, err := transaction.NewTransactionFromHex("0100000001bb4fa8d4459cda26e50ca530d430eab1820ff43f8d06fd78abdd987c47470bb70100000097473044022019a4b23e4bbc7b2c12563ff9ca8c5769ec407f7c2e7fd63812fcd04f2dd8debb02200ed30f58bb3f18fda41ebea4863d8478f2de9718916f8e8557792b6291fb5dff4121020370f418d21765b33bc093db143aa1dd5cfefc97275652dc8396c2d567f93d6504e069a11c0481c06d5e08bf07000000000000040a00000a149fb8cb68b8850a13c7438e26e1d277b748be657affffffff01781e0000000000001976a9140bed1b97a1ec681cf100ee8b11800a54b39b9fda88ac00000000")
-	// require.NoError(t, err)
-
-	// prevTx, err := transaction.NewTransactionFromHex("01000000026baa6b3cec9cf31c672d3d9a8a31396d193f938c64d00b715542a42371cab70a040000006b483045022100b230bbb12974ee9218a75832eee17d218cae3fc6e630f7545073f4b9cb3b1dcb02204bc15fcf98bcd3ca6636764e8031af3e1be7d356af6bc3faa16c044ded3dae424121037ad4044f952698cac6f69023cc16e72d60348130dd17f4de715c6804208e5604ffffffff18f83bac9a61f310e3a2bd0468e101cfd732f20dab7d16ce47a97cc9921b1535020000006b483045022100ec25e42bea6d1fa631ab83e88d414f1aa34b41ceb5d8f372ab3b79d155c90a3802200bbd9e4ad242815468e413f025d5267a3d7e5be86cc75799c301aa884f320010412103c0581ec767697b4d7247c7fe1182539288b29cfa3c0921aa9e851b2ff34f4088ffffffff0279020000000000001976a91418b4072c1fbef09b204f541b4432c057a4dc5df288ac0f21000000000000fd760208626f6f7374706f777504000000002035b8fcb6882f93bddb928c9872198bcdf057ab93ed615ad938f24a63abde588104ffff001d14000000000000000000000000000000000000000004000000002000000000000000000000000000000000000000000000000000000000000000007e7c557a766b7e52796b557a8254887e557a8258887e7c7eaa7c6b7e7e7c8254887e6c7e7c8254887eaa8251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f766401007e7e677e76009f6301007e68686c825488537f76530121a5696b7664006a687600a0691d00000000000000000000000000000000000000000000000000000000007e6c53945895998251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f76766451996451670068677500686375677e688251947f766401007e7e677e76009f6301007e68689f6976a96c88ac00000000")
-	// require.NoError(t, err)
-	// tx.Inputs[0].SourceTransaction = prevTx
-
-	// err = checkScripts(tx)
-	// require.NoError(t, err)
-}
-
-func checkScripts(tx *transaction.Transaction) (err error) {
-	// defer func() {
-	// 	if r := recover(); r != nil {
-	// 		// TODO - remove this when script engine is fixed
-	// 		if rErr, ok := r.(error); ok {
-	// 			if strings.Contains(rErr.Error(), "negative shift amount") {
-	// 				// gocore.Log("RUNTIME").Errorf("negative shift amount for tx %s: %v", tx.TxID().String(), rErr)
-	// 				panic("negative shift amount")
-	// 				err = nil
-	// 				return
-	// 			}
-	// 		}
-	// 		// err = errors.NewTxInvalidError("script execution failed: %v", r)
-	// 	}
-	// }()
-	for i, in := range tx.Inputs {
-		prevOutput := &transaction.TransactionOutput{
-			Satoshis:      *in.SourceTxSatoshis(),
-			LockingScript: in.SourceTxScript(),
-		}
-
-		opts := make([]interpreter.ExecutionOptionFunc, 0, 3)
-		opts = append(opts, interpreter.WithTx(tx, i, prevOutput))
-		opts = append(opts, interpreter.WithForkID())
-		opts = append(opts, interpreter.WithAfterGenesis())
-
-		if err = interpreter.NewEngine().Execute(opts...); err != nil {
-			return fmt.Errorf("script execution error: %w", err)
-		}
-	}
-
-	return nil
 }
