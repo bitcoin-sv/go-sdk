@@ -237,29 +237,10 @@ func (p *PrivateKey) ToPolynomial(threshold int) (*shamir.Polynomial, error) {
  * @returns An array of shares.
  *
  * @example
- * const key = PrivateKey.fromRandom()
+ * const key = NewPrivateKey()
  * const shares = key.toKeyShares(2, 5)
  */
 func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *shamir.KeyShares, error error) {
-	// if (typeof threshold !== 'number' || typeof totalShares !== 'number') throw new Error('threshold and totalShares must be numbers')
-	// if (threshold < 2) throw new Error('threshold must be at least 2')
-	// if (totalShares < 2) throw new Error('totalShares must be at least 2')
-	// if (threshold > totalShares) throw new Error('threshold should be less than or equal to totalShares')
-
-	// const poly = Polynomial.fromPrivateKey(this, threshold)
-
-	// const points = []
-	// for (let i = 0; i < totalShares; i++) {
-	// 	const x = new BigNumber(PrivateKey.fromRandom().toArray())
-	// 	const y = poly.valueAt(x)
-	// 	points.push(new PointInFiniteField(x, y))
-	// }
-
-	// const integrity = (this.toPublicKey().toHash('hex') as string).slice(0, 8)
-
-	// return new KeyShares(points, threshold, integrity)
-
-	// TODO: Port typescript above to go
 	if threshold < 2 {
 		return nil, errors.New("threshold must be at least 2")
 	}
@@ -337,28 +318,6 @@ func PrivateKeyFromKeyShares(keyShares *shamir.KeyShares) (*PrivateKey, error) {
 	}
 	return privateKey, nil
 }
-
-//  static fromKeyShares (keyShares: KeyShares): PrivateKey {
-//   const { points, threshold, integrity } = keyShares
-//   if (threshold < 2 || threshold > 99) throw new Error('threshold should be between 2 and 99')
-//   if (points.length < threshold) throw new Error(`At least ${threshold} shares are required to reconstruct the private key`)
-//   // check to see if two points have the same x value
-//   for (let i = 0; i < threshold; i++) {
-//     for (let j = i + 1; j < threshold; j++) {
-//       if (points[i].x.eq(points[j].x)) {
-//         throw new Error('Duplicate share detected, each must be unique.')
-//       }
-//     }
-//   }
-//   const poly = new Polynomial(points, threshold)
-//   const privateKey = new PrivateKey(poly.valueAt(new BigNumber(0)).toArray())
-//   const integrityHash = privateKey.toPublicKey().toHash('hex').slice(0, 8)
-//   if (integrityHash !== integrity) {
-//     throw new Error('Integrity hash mismatch')
-//   }
-
-//   return privateKey
-// }
 
 /**
  * @method toBackupShares

@@ -446,14 +446,6 @@ func TestSameShareTwiceDuringRecovery(t *testing.T) {
 	}
 }
 
-//   it('should be able to create a backup array from a private key, and recover the same key back from the backup', () => {
-//     const key = PrivateKey.fromRandom()
-//     const backup = key.toBackupShares(3, 5)
-//     const recoveredKey = PrivateKey.fromBackupShares(backup.slice(0, 3))
-//     expect(recoveredKey.toWif()).toBe(key.toWif())
-//   })
-// })
-
 // should be able to create a backup array from a private key, and recover the same key back from the backup
 func TestBackupAndRecovery(t *testing.T) {
 	key, _ := NewPrivateKey()

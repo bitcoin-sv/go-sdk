@@ -15,22 +15,6 @@ type KeyShares struct {
 }
 
 func NewKeySharesFromBackupFormat(shares []string) (keyShares *KeyShares, error error) {
-	// let threshold = 0
-	// let integrity = ''
-	// const points = shares.map((share, idx) => {
-	// 	const shareParts = share.split('.')
-	// 	if (shareParts.length !== 4) throw Error('Invalid share format in share ' + idx + '. Expected format: "x.y.t.i" - received ' + share)
-	// 	const [x, y, t, i] = shareParts
-	// 	if (!t) throw Error('Threshold not found in share ' + idx)
-	// 	if (!i) throw Error('Integrity not found in share ' + idx)
-	// 	const tInt = parseInt(t)
-	// 	if (idx !== 0 && threshold !== tInt) throw Error('Threshold mismatch in share ' + idx)
-	// 	if (idx !== 0 && integrity !== i) throw Error('Integrity mismatch in share ' + idx)
-	// 	threshold = tInt
-	// 	integrity = i
-	// 	return PointInFiniteField.fromString([x, y].join('.'))
-	// })
-
 	var threshold int = 0
 	var integrity string = ""
 	var points []*PointInFiniteField
