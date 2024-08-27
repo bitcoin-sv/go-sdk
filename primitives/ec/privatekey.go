@@ -247,7 +247,7 @@ func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *sha
 	if totalShares < 2 {
 		return nil, errors.New("totalShares must be at least 2")
 	}
-	if threshold > int(totalShares) {
+	if threshold > totalShares {
 		return nil, errors.New("threshold should be less than or equal to totalShares")
 	}
 
@@ -256,7 +256,7 @@ func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *sha
 		return nil, err
 	}
 
-	var points []*shamir.PointInFiniteField
+	points := make([]*shamir.PointInFiniteField, 0)
 	for range totalShares {
 		pk, err := NewPrivateKey()
 		if err != nil {
@@ -301,10 +301,8 @@ func PrivateKeyFromKeyShares(keyShares *shamir.KeyShares) (*PrivateKey, error) {
 	// check to see if two points have the same x value
 	for i := 0; i < keyShares.Threshold; i++ {
 		for j := i + 1; j < keyShares.Threshold; j++ {
-			fmt.Printf("Comparing X values: Point %d (X: %s) and Point %d (X: %s)\n", i, keyShares.Points[i].X.String(), j, keyShares.Points[j].X.String())
 			if keyShares.Points[i].X.Cmp(keyShares.Points[j].X) == 0 {
-				fmt.Printf("Detected duplicate X value at indices %d and %d with values %s and %s\n", i, j, keyShares.Points[i].X.String(), keyShares.Points[j].X.String())
-				return nil, fmt.Errorf("duplicate share detected, each must be unique: %d (%s) and %d (%s)", i, keyShares.Points[i].X, j, keyShares.Points[j].X)
+				return nil, fmt.Errorf("duplicate share detected, each must be unique")
 			}
 		}
 	}

@@ -146,7 +146,7 @@ func TestPolynomialFromPrivateKey(t *testing.T) {
 	}
 }
 
-func TestFullProcess(t *testing.T) {
+func TestPolynomialFullProcess(t *testing.T) {
 	// Create a private key
 	privateKey, err := NewPrivateKey()
 	if err != nil {
@@ -190,7 +190,7 @@ func TestFullProcess(t *testing.T) {
 	}
 }
 
-func TestDifferentThresholdsAndShares(t *testing.T) {
+func TestPolynomialDifferentThresholdsAndShares(t *testing.T) {
 	testCases := []struct {
 		threshold   int
 		totalShares int
@@ -226,7 +226,7 @@ func TestDifferentThresholdsAndShares(t *testing.T) {
 	}
 }
 
-func TestEdgeCases(t *testing.T) {
+func TestPolynomialEdgeCases(t *testing.T) {
 	privateKey, _ := NewPrivateKey()
 
 	// Minimum threshold (2)
@@ -266,7 +266,7 @@ func TestEdgeCases(t *testing.T) {
 	})
 }
 
-func TestReconstructionWithDifferentSubsets(t *testing.T) {
+func TestPolynomialReconstructionWithDifferentSubsets(t *testing.T) {
 	privateKey, _ := NewPrivateKey()
 	threshold := 3
 	totalShares := 5
@@ -301,7 +301,7 @@ func TestReconstructionWithDifferentSubsets(t *testing.T) {
 	}
 }
 
-func TestErrorHandling(t *testing.T) {
+func TestPolynomialErrorHandling(t *testing.T) {
 	privateKey, _ := NewPrivateKey()
 
 	// Test with invalid threshold (too low)
@@ -326,7 +326,7 @@ func TestErrorHandling(t *testing.T) {
 	}
 }
 
-func TestConsistency(t *testing.T) {
+func TestPolynomialConsistency(t *testing.T) {
 	privateKey, _ := NewPrivateKey()
 	threshold := 3
 	totalShares := 5

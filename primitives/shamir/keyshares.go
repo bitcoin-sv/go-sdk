@@ -17,7 +17,7 @@ type KeyShares struct {
 func NewKeySharesFromBackupFormat(shares []string) (keyShares *KeyShares, error error) {
 	var threshold int = 0
 	var integrity string = ""
-	var points []*PointInFiniteField
+	points := make([]*PointInFiniteField, 0)
 	for idx, share := range shares {
 		shareParts := strings.Split(share, ".")
 		if len(shareParts) != 4 {
@@ -76,9 +76,8 @@ func NewKeySharesFromBackupFormat(shares []string) (keyShares *KeyShares, error 
  * @returns
  */
 func (k *KeyShares) ToBackupFormat() ([]string, error) {
-	var backupShares []string
+	backupShares := make([]string, 0)
 	for _, share := range k.Points {
-
 		backupShares = append(backupShares, share.String()+"."+strconv.Itoa(k.Threshold)+"."+k.Integrity)
 	}
 	return backupShares, nil

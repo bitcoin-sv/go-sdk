@@ -220,7 +220,7 @@ func (p *PublicKey) Mul(k *big.Int) *PublicKey {
 	}
 }
 
-// TODO: Rename encode to ToHash to match ts-sdk
+//nolint:unparam // only compact is used
 func (p *PublicKey) encode(compact bool) []byte {
 	byteLen := (p.Curve.Params().BitSize + 7) >> 3
 
