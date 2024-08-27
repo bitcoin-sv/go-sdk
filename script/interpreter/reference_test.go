@@ -313,7 +313,7 @@ func createSpendingTx(sigScript, pkScript *script.Script, outputValue int64) *tr
 		Version:  1,
 		LockTime: 0,
 		Inputs: []*transaction.TransactionInput{{
-			SourceTXID:       coinbaseTx.TxIDChainHash(),
+			SourceTXID:       coinbaseTx.TxID(),
 			SourceTxOutIndex: 0,
 			UnlockingScript:  sigScript,
 			SequenceNumber:   0xffffffff,
@@ -323,7 +323,7 @@ func createSpendingTx(sigScript, pkScript *script.Script, outputValue int64) *tr
 			LockingScript: script.NewFromBytes([]byte{}),
 		}},
 	}
-	spendingTx.Inputs[0].SetPrevTxFromOutput(&transaction.TransactionOutput{
+	spendingTx.Inputs[0].SetSourceTxFromOutput(&transaction.TransactionOutput{
 		LockingScript: pkScript,
 	})
 
@@ -612,7 +612,7 @@ testloop:
 
 		for k, txin := range tx.Inputs {
 			prevOut, ok := prevOuts[txIOKey{id: txin.SourceTXID.String(), idx: txin.SourceTxOutIndex}]
-			txin.SetPrevTxFromOutput(prevOut)
+			txin.SetSourceTxFromOutput(prevOut)
 			if !ok {
 				t.Errorf("bad test (missing %dth input) %d:%v",
 					k, i, test)
@@ -762,7 +762,7 @@ testloop:
 
 		for k, txin := range tx.Inputs {
 			prevOut, ok := prevOuts[txIOKey{id: txin.SourceTXID.String(), idx: txin.SourceTxOutIndex}]
-			txin.SetPrevTxFromOutput(prevOut)
+			txin.SetSourceTxFromOutput(prevOut)
 			if !ok {
 				t.Errorf("bad test (missing %dth input) %d:%v",
 					k, i, test)

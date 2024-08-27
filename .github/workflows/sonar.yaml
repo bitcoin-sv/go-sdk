@@ -1,0 +1,53 @@
+name: sonarcloud-analysis
+on:
+  pull_request:
+    branches:
+      - "master"
+  push:
+    branches:
+      - "master"
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  GO_VERSION: '1.22'  # Use the version you need
+  GOLANGCI_LINT_VERSION: v1.59  # Latest version as of my last update
+
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Install test reporter
+        run: go install github.com/ctrf-io/go-ctrf-json-reporter/cmd/go-ctrf-json-reporter@latest
+
+      - name: Run Go tests
+        run: go test -json -coverprofile=coverage.out ./... | go-ctrf-json-reporter -output ctrf-report.json
+        continue-on-error: true
+
+      - name: Publish Test Summary Results
+        run: npx github-actions-ctrf ctrf-report.json
+
+      # Re-run golangci separately without exiting on errors and generating a report for use in Sonar
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          args: --timeout=5m --issues-exit-code=0 --out-format=checkstyle:golangci-lint-report.xml
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

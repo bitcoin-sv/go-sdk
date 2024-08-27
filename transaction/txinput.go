@@ -25,16 +25,16 @@ func (tx *Transaction) AddInput(input *TransactionInput) {
 }
 
 func (tx *Transaction) AddInputWithOutput(input *TransactionInput, output *TransactionOutput) {
-	input.SetPrevTxFromOutput(output)
+	input.SetSourceTxFromOutput(output)
 	tx.Inputs = append(tx.Inputs, input)
 }
 
-func (tx *Transaction) AddInputFromTx(prevTx *Transaction, vout uint32,
+func (tx *Transaction) AddInputFromTx(sourceTx *Transaction, vout uint32,
 	unlockingScriptTemplate UnlockingScriptTemplate) {
 	i := &TransactionInput{
-		SourceTXID:              prevTx.TxIDChainHash(),
+		SourceTXID:              sourceTx.TxID(),
 		SourceTxOutIndex:        vout,
-		SourceTransaction:       prevTx,
+		SourceTransaction:       sourceTx,
 		SequenceNumber:          DefaultSequenceNumber, // use default finalized sequence number
 		UnlockingScriptTemplate: unlockingScriptTemplate,
 	}
@@ -47,8 +47,8 @@ func (tx *Transaction) InputCount() int {
 	return len(tx.Inputs)
 }
 
-// PreviousOutHash returns a byte slice of inputs outpoints, for creating a signature hash
-func (tx *Transaction) PreviousOutHash() *chainhash.Hash {
+// SourceOutHash returns a byte slice of inputs outpoints, for creating a signature hash
+func (tx *Transaction) SourceOutHash() *chainhash.Hash {
 	buf := make([]byte, 0)
 
 	for _, in := range tx.Inputs {
@@ -84,7 +84,7 @@ func (tx *Transaction) AddInputFrom(prevTxID string, vout uint32, prevTxLockingS
 	if err != nil {
 		return err
 	}
-	pti, err := chainhash.NewHashFromStr(prevTxID)
+	pti, err := chainhash.NewHashFromHex(prevTxID)
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (tx *Transaction) AddInputsFromUTXOs(utxos ...*UTXO) error {
 			SequenceNumber:          DefaultSequenceNumber, // use default finalized sequence number
 			UnlockingScriptTemplate: utxo.UnlockingScriptTemplate,
 		}
-		i.SetPrevTxFromOutput(&TransactionOutput{
+		i.SetSourceTxFromOutput(&TransactionOutput{
 			Satoshis:      utxo.Satoshis,
 			LockingScript: utxo.LockingScript,
 		})

@@ -22,6 +22,6 @@ func main() {
 		panic(err)
 	}
 	// This ensures the BEEF structure is legitimate
-	verified, _ := tx.MerklePath.Verify(tx.TxIDChainHash(), &GullibleHeadersClient{})
+	verified, _ := tx.MerklePath.Verify(tx.TxID(), &GullibleHeadersClient{})
 	println(verified)
 }

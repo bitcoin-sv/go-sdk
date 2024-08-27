@@ -33,4 +33,8 @@ Thumbs.db
 .env.test
 .env.production
 
+# SonarCloud temporary files
+coverage.out
+golangci-lint-report.xml
+
 # Ignore any other files or directories specific to your project

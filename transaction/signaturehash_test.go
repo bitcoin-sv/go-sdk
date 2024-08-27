@@ -63,7 +63,7 @@ func TestTx_CalcInputPreimage(t *testing.T) {
 			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
 			prevScript, err := script.NewFromHex(test.SourceTxScript)
 			require.NoError(t, err)
-			tx.InputIdx(test.index).SetPrevTxFromOutput(&transaction.TransactionOutput{
+			tx.InputIdx(test.index).SetSourceTxFromOutput(&transaction.TransactionOutput{
 				LockingScript: prevScript,
 				Satoshis:      test.previousTxSatoshis,
 			})
@@ -156,7 +156,7 @@ func TestTx_CalcInputSignatureHash(t *testing.T) {
 			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
 			prevScript, err := script.NewFromHex(test.SourceTxScript)
 			require.NoError(t, err)
-			tx.Inputs[test.index].SetPrevTxFromOutput(&transaction.TransactionOutput{
+			tx.Inputs[test.index].SetSourceTxFromOutput(&transaction.TransactionOutput{
 				LockingScript: prevScript,
 				Satoshis:      test.previousTxSatoshis,
 			})
@@ -222,7 +222,7 @@ func TestTx_CalcInputPreimageLegacy(t *testing.T) {
 			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
 			prevScript, err := script.NewFromHex(test.SourceTxScript)
 			require.NoError(t, err)
-			tx.Inputs[test.index].SetPrevTxFromOutput(&transaction.TransactionOutput{
+			tx.Inputs[test.index].SetSourceTxFromOutput(&transaction.TransactionOutput{
 				LockingScript: prevScript,
 				Satoshis:      test.previousTxSatoshis,
 			})

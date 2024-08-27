@@ -28,7 +28,7 @@ var mainNetGenesisHash = Hash([HashSize]byte{ // Make go vet happy.
 func TestHash(t *testing.T) {
 	// Hash of block 234439.
 	blockHashStr := "14a0810ac680a3eb3f82edc878cea25ec41d6b790744e5daeef"
-	blockHash, err := NewHashFromStr(blockHashStr)
+	blockHash, err := NewHashFromHex(blockHashStr)
 	if err != nil {
 		t.Errorf("NewHashFromStr: %v", err)
 	}
@@ -114,8 +114,8 @@ func TestHashString(t *testing.T) {
 	}
 }
 
-// TestNewHashFromStr executes tests against the NewHashFromStr function.
-func TestNewHashFromStr(t *testing.T) {
+// TestNewHashFromHex executes tests against the NewHashFromStr function.
+func TestNewHashFromHex(t *testing.T) {
 	tests := []struct {
 		in   string
 		want Hash
@@ -185,7 +185,7 @@ func TestNewHashFromStr(t *testing.T) {
 	unexpectedResultStr := "NewHashFromStr #%d got: %v want: %v"
 	t.Logf("Running %d tests", len(tests))
 	for i, test := range tests {
-		result, err := NewHashFromStr(test.in)
+		result, err := NewHashFromHex(test.in)
 		if !errors.Is(err, test.err) {
 			t.Errorf(unexpectedErrStr, i, err, test.err)
 			continue

@@ -258,11 +258,7 @@ func (tx *Transaction) IsCoinbase() bool {
 	return false
 }
 
-func (tx *Transaction) TxID() string {
-	return tx.TxIDChainHash().String()
-}
-
-func (tx *Transaction) TxIDChainHash() *chainhash.Hash {
+func (tx *Transaction) TxID() *chainhash.Hash {
 	txid, _ := chainhash.NewHash(crypto.Sha256d(tx.Bytes()))
 	return txid
 }
@@ -392,7 +388,7 @@ func (tx *Transaction) Size() int {
 
 func (tx *Transaction) AddMerkleProof(bump *MerklePath) error {
 	if !slices.ContainsFunc(bump.Path[0], func(v *PathElement) bool {
-		return v.Hash.Equal(*tx.TxIDChainHash())
+		return v.Hash.Equal(*tx.TxID())
 	}) {
 		return ErrBadMerkleProof
 	}

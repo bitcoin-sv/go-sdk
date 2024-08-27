@@ -55,7 +55,7 @@ func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
 		if err != nil {
 			return nil, err
 		}
-		txid := tx.TxIDChainHash()
+		txid := tx.TxID()
 
 		hasBump := make([]byte, 1)
 		_, err = reader.Read(hasBump)
@@ -100,7 +100,7 @@ func (t *Transaction) BEEF() ([]byte, error) {
 	}
 	bumps := map[uint32]*MerklePath{}
 	bumpIndex := map[uint32]int{}
-	txns := map[string]*Transaction{t.TxIDChainHash().String(): t}
+	txns := map[string]*Transaction{t.TxID().String(): t}
 	ancestors, err := t.collectAncestors(txns)
 	if err != nil {
 		return nil, err
@@ -149,12 +149,12 @@ func (t *Transaction) BEEFHex() (string, error) {
 
 func (t *Transaction) collectAncestors(txns map[string]*Transaction) ([]string, error) {
 	if t.MerklePath != nil {
-		return []string{t.TxIDChainHash().String()}, nil
+		return []string{t.TxID().String()}, nil
 	}
 	ancestors := make([]string, 0)
 	for _, input := range t.Inputs {
 		if input.SourceTransaction == nil {
-			return nil, fmt.Errorf("missing previous transaction for %s", t.TxIDChainHash())
+			return nil, fmt.Errorf("missing previous transaction for %s", t.TxID())
 		}
 		if _, ok := txns[input.SourceTXID.String()]; ok {
 			continue
@@ -166,6 +166,6 @@ func (t *Transaction) collectAncestors(txns map[string]*Transaction) ([]string, 
 			ancestors = append(grands, ancestors...)
 		}
 	}
-	ancestors = append(ancestors, t.TxIDChainHash().String())
+	ancestors = append(ancestors, t.TxID().String())
 	return ancestors, nil
 }

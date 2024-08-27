@@ -195,7 +195,7 @@ func (mp *MerklePath) ComputeRootHex(txidStr *string) (string, error) {
 	var txid *chainhash.Hash
 	if txidStr != nil {
 		var err error
-		if txid, err = chainhash.NewHashFromStr(*txidStr); err != nil {
+		if txid, err = chainhash.NewHashFromHex(*txidStr); err != nil {
 			return "", err
 		}
 	}
@@ -274,7 +274,7 @@ func (mp *MerklePath) ComputeRoot(txid *chainhash.Hash) (*chainhash.Hash, error)
 // Verify checks if a given transaction ID is part of the Merkle tree
 // at the specified block height using a chain tracker
 func (mp *MerklePath) VerifyHex(txidStr string, ct chaintracker.ChainTracker) (bool, error) {
-	if txid, err := chainhash.NewHashFromStr(txidStr); err != nil {
+	if txid, err := chainhash.NewHashFromHex(txidStr); err != nil {
 		return false, err
 	} else {
 		return mp.Verify(txid, ct)

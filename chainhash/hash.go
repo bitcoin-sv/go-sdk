@@ -80,7 +80,7 @@ func (hash *Hash) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &s); err != nil {
 		return err
 	}
-	h, err := NewHashFromStr(s)
+	h, err := NewHashFromHex(s)
 	if err != nil {
 		return err
 	}
@@ -104,10 +104,10 @@ func NewHash(newHash []byte) (*Hash, error) {
 // 	return sh
 // }
 
-// NewHashFromStr creates a Hash from a hash string.  The string should be
+// NewHashFromHex creates a Hash from a hash string.  The string should be
 // the hexadecimal string of a byte-reversed hash, but any missing characters
 // result in zero padding at the end of the Hash.
-func NewHashFromStr(hash string) (*Hash, error) {
+func NewHashFromHex(hash string) (*Hash, error) {
 	ret := new(Hash)
 	err := Decode(ret, hash)
 	if err != nil {
@@ -117,7 +117,7 @@ func NewHashFromStr(hash string) (*Hash, error) {
 }
 
 // func NewHashFromStrNoError(hash string) *Hash {
-// 	sh, _ := NewHashFromStr(hash)
+// 	sh, _ := NewHashFromHex(hash)
 // 	return sh
 // }
 
