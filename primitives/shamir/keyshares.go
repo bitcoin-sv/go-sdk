@@ -14,44 +14,52 @@ type KeyShares struct {
 	Integrity string
 }
 
+// decodeShare decodes the share from the backup format
+func decodeShare(share string) (*big.Int, *big.Int, int, string, error) {
+	components := strings.Split(share, ".")
+	if len(components) != 4 {
+		err := fmt.Errorf("invalid share format. Expected format: \"x.y.t.i\" - received %s", share)
+		return nil, nil, 0, "", err
+	}
+	// base64 decode x and y
+	decodedX, err := base64.StdEncoding.DecodeString(components[0])
+	if err != nil {
+		return nil, nil, 0, "", err
+	}
+	decodedY, err := base64.StdEncoding.DecodeString(components[1])
+	if err != nil {
+		return nil, nil, 0, "", err
+	}
+	var x *big.Int = big.NewInt(0).SetBytes(decodedX)
+	var y *big.Int = big.NewInt(0).SetBytes(decodedY)
+
+	t := components[2]
+	if t == "" {
+		return nil, nil, 0, "", fmt.Errorf("threshold not found")
+	}
+	i := components[3]
+	if i == "" {
+		return nil, nil, 0, "", fmt.Errorf("integrity not found")
+	}
+	tInt, err := strconv.Atoi(t)
+	if err != nil {
+		return nil, nil, 0, "", err
+	}
+	return x, y, tInt, i, nil
+}
+
+// NewKeySharesFromBackupFormat creates a new KeyShares object from a backup
 func NewKeySharesFromBackupFormat(shares []string) (keyShares *KeyShares, error error) {
 	var threshold int = 0
 	var integrity string = ""
 	points := make([]*PointInFiniteField, 0)
 	for idx, share := range shares {
-		shareParts := strings.Split(share, ".")
-		if len(shareParts) != 4 {
-			return nil, fmt.Errorf("invalid share format in share %d. Expected format: \"x.y.t.i\" - received %s", idx, share)
-		}
-		// convert parts to bigints
-		var x *big.Int = big.NewInt(0)
-		var y *big.Int = big.NewInt(0)
-		// base64 decode x and y
-		decodedX, err := base64.StdEncoding.DecodeString(shareParts[0])
+
+		x, y, tInt, i, err := decodeShare(share)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to decode share %d: %e", idx, err)
 		}
 
-		decodedY, err := base64.StdEncoding.DecodeString(shareParts[1])
-		if err != nil {
-			return nil, err
-		}
-
-		x.SetBytes(decodedX)
-		y.SetBytes(decodedY)
-
-		t := shareParts[2]
-		i := shareParts[3]
-		if t == "" {
-			return nil, fmt.Errorf("threshold not found in share %d", idx)
-		}
-		if i == "" {
-			return nil, fmt.Errorf("integrity not found in share %d", idx)
-		}
-		tInt, err := strconv.Atoi(t)
-		if err != nil {
-			return nil, err
-		}
 		if idx != 0 && threshold != tInt {
 			return nil, fmt.Errorf("threshold mismatch in share %d", idx)
 		}
