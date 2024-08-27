@@ -42,3 +42,34 @@ func TestNewKeyshares(t *testing.T) {
 		t.Errorf("Threshold mismatch. Expected %d, got %d", keyShares.Threshold, newShares.Threshold)
 	}
 }
+
+func TestInvalidBackupFormat(t *testing.T) {
+	_, err := NewKeySharesFromBackupFormat([]string{"invalid"})
+	if err == nil {
+		t.Errorf("Expected error for invalid backup format")
+	}
+
+	// test invalid x value
+	invalidX := "aGVsbG81281281281282="
+	validX := "aGVsbG8="
+	invalidY := "d29ybGQ1231231231232="
+	validY := "d29ybGQ="
+	invalidShare := invalidX + "." + validY + ".3.integrity"
+	_, err = NewKeySharesFromBackupFormat([]string{invalidShare})
+	if err == nil {
+		t.Errorf("Expected error for invalid x value")
+	}
+
+	invalidShare2 := validX + "." + invalidY + ".3.integrity"
+	_, err = NewKeySharesFromBackupFormat([]string{invalidShare2})
+	if err == nil {
+		t.Errorf("Expected error for invalid y value")
+	}
+
+	// test invalid threshold
+	invalidShare3 := validX + "." + validY + ".invalid.integrity"
+	_, err = NewKeySharesFromBackupFormat([]string{invalidShare3})
+	if err == nil {
+		t.Errorf("Expected error for invalid threshold")
+	}
+}
