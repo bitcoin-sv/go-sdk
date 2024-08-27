@@ -1,13 +1,10 @@
 package primitives
 
 import (
-	"crypto/rand"
 	"encoding/base64"
 	"fmt"
 	"math/big"
 	"strings"
-
-	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 )
 
 // Curve represents the parameters of the elliptic curve
@@ -71,35 +68,6 @@ func NewPolynomial(points []*PointInFiniteField, threshold int) *Polynomial {
 		Points:    points,
 		Threshold: threshold,
 	}
-}
-
-func PolynomialFromPrivateKey(privateKey *ec.PrivateKey, threshold int) (*Polynomial, error) {
-	// Check for invalid threshold
-	if threshold < 2 {
-		return nil, fmt.Errorf("threshold must be at least 2")
-	}
-
-	curve := NewCurve()
-	points := make([]*PointInFiniteField, threshold)
-
-	// Set the first point to (0, key)
-	keyValue := privateKey.D
-	points[0] = NewPointInFiniteField(big.NewInt(0), new(big.Int).Set(keyValue))
-
-	// Generate random points for the rest of the polynomial
-	for i := 1; i < threshold; i++ {
-		x, err := rand.Int(rand.Reader, curve.P)
-		if err != nil {
-			return nil, err
-		}
-		y, err := rand.Int(rand.Reader, curve.P)
-		if err != nil {
-			return nil, err
-		}
-		points[i] = NewPointInFiniteField(x, y)
-	}
-
-	return NewPolynomial(points, threshold), nil
 }
 
 func (p *Polynomial) ValueAt(x *big.Int) *big.Int {

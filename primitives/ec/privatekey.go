@@ -11,6 +11,7 @@ import (
 
 	base58 "github.com/bitcoin-sv/go-sdk/compat/base58"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
+	shamir "github.com/bitcoin-sv/go-sdk/primitives/shamir"
 )
 
 var (
@@ -196,4 +197,200 @@ func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*Private
 	newPrivKey.Mod(newPrivKey, S256().N)
 	privKey, _ := PrivateKeyFromBytes(newPrivKey.Bytes())
 	return privKey, nil
+}
+
+func (p *PrivateKey) ToPolynomial(threshold int) (*shamir.Polynomial, error) {
+	// Check for invalid threshold
+	if threshold < 2 {
+		return nil, fmt.Errorf("threshold must be at least 2")
+	}
+
+	curve := shamir.NewCurve()
+	points := make([]*shamir.PointInFiniteField, threshold)
+
+	// Set the first point to (0, key)
+	keyValue := p.D
+	points[0] = shamir.NewPointInFiniteField(big.NewInt(0), new(big.Int).Set(keyValue))
+
+	// Generate random points for the rest of the polynomial
+	for i := 1; i < threshold; i++ {
+		x, err := rand.Int(rand.Reader, curve.P)
+		if err != nil {
+			return nil, err
+		}
+		y, err := rand.Int(rand.Reader, curve.P)
+		if err != nil {
+			return nil, err
+		}
+		points[i] = shamir.NewPointInFiniteField(x, y)
+	}
+
+	return shamir.NewPolynomial(points, threshold), nil
+}
+
+/**
+ * Splits the private key into shares using Shamir's Secret Sharing Scheme.
+ *
+ * @param threshold The minimum number of shares required to reconstruct the private key.
+ * @param totalShares The total number of shares to generate.
+ * @param prime The prime number to be used in Shamir's Secret Sharing Scheme.
+ * @returns An array of shares.
+ *
+ * @example
+ * const key = PrivateKey.fromRandom()
+ * const shares = key.toKeyShares(2, 5)
+ */
+func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *shamir.KeyShares, error error) {
+	// if (typeof threshold !== 'number' || typeof totalShares !== 'number') throw new Error('threshold and totalShares must be numbers')
+	// if (threshold < 2) throw new Error('threshold must be at least 2')
+	// if (totalShares < 2) throw new Error('totalShares must be at least 2')
+	// if (threshold > totalShares) throw new Error('threshold should be less than or equal to totalShares')
+
+	// const poly = Polynomial.fromPrivateKey(this, threshold)
+
+	// const points = []
+	// for (let i = 0; i < totalShares; i++) {
+	// 	const x = new BigNumber(PrivateKey.fromRandom().toArray())
+	// 	const y = poly.valueAt(x)
+	// 	points.push(new PointInFiniteField(x, y))
+	// }
+
+	// const integrity = (this.toPublicKey().toHash('hex') as string).slice(0, 8)
+
+	// return new KeyShares(points, threshold, integrity)
+
+	// TODO: Port typescript above to go
+	if threshold < 2 {
+		return nil, errors.New("threshold must be at least 2")
+	}
+	if totalShares < 2 {
+		return nil, errors.New("totalShares must be at least 2")
+	}
+	if threshold > int(totalShares) {
+		return nil, errors.New("threshold should be less than or equal to totalShares")
+	}
+
+	poly, err := p.ToPolynomial(threshold)
+	if err != nil {
+		return nil, err
+	}
+
+	var points []*shamir.PointInFiniteField
+	for range totalShares {
+		pk, err := NewPrivateKey()
+		if err != nil {
+			return nil, err
+		}
+		x := new(big.Int)
+		x.Set(pk.D)
+
+		y := new(big.Int)
+		y.Set(poly.ValueAt(x))
+		points = append(points, shamir.NewPointInFiniteField(x, y))
+	}
+
+	integrity := hex.EncodeToString(p.PubKey().encode(true))[:16]
+	return shamir.NewKeyShares(points, threshold, integrity), nil
+}
+
+/**
+ * Combines shares to reconstruct the private key.
+ *
+ * @param shares An array of points (shares) to be used to reconstruct the private key.
+ * @param threshold The minimum number of shares required to reconstruct the private key.
+ *
+ * @returns The reconstructed private key.
+ *
+ * @example
+ * const share1 = '2NWeap6SDBTL5jVnvk9yUxyfLqNrDs2Bw85KNDfLJwRT.4yLtSm327NApsbuP7QXVW3CWDuBRgmS6rRiFkAkTukic'
+ * const share2 = '7NbgGA8iAsxg2s6mBLkLFtGKQrnc4aCbooHJJV31cWs4.GUgXtudthawE3Eevc1waT3Atr1Ft7j1XxdUguVo3B7x3'
+ * const reconstructedKey = PrivateKey.fromKeyShares({ shares: [share1, share2], threshold: 2, integrity: '23409547' })
+ *
+ **/
+func PrivateKeyFromKeyShares(keyShares *shamir.KeyShares) (*PrivateKey, error) {
+	// convert from ts to go
+	if keyShares.Threshold < 2 || keyShares.Threshold > 99 {
+		return nil, errors.New("threshold should be between 2 and 99")
+	}
+
+	if len(keyShares.Points) < keyShares.Threshold {
+		return nil, fmt.Errorf("at least %d shares are required to reconstruct the private key", keyShares.Threshold)
+	}
+
+	// check to see if two points have the same x value
+	for i := 0; i < keyShares.Threshold; i++ {
+		for j := i + 1; j < keyShares.Threshold; j++ {
+			fmt.Printf("Comparing X values: Point %d (X: %s) and Point %d (X: %s)\n", i, keyShares.Points[i].X.String(), j, keyShares.Points[j].X.String())
+			if keyShares.Points[i].X.Cmp(keyShares.Points[j].X) == 0 {
+				fmt.Printf("Detected duplicate X value at indices %d and %d with values %s and %s\n", i, j, keyShares.Points[i].X.String(), keyShares.Points[j].X.String())
+				return nil, fmt.Errorf("duplicate share detected, each must be unique: %d (%s) and %d (%s)", i, keyShares.Points[i].X, j, keyShares.Points[j].X)
+			}
+		}
+	}
+
+	poly := shamir.NewPolynomial(keyShares.Points, keyShares.Threshold)
+	polyBytes := poly.ValueAt(big.NewInt(0)).Bytes()
+	privateKey, publicKey := PrivateKeyFromBytes(polyBytes)
+	integrityHash := publicKey.encode(true)[:8]
+	if keyShares.Integrity != hex.EncodeToString(integrityHash) {
+		return nil, fmt.Errorf("integrity hash mismatch %s != %s", keyShares.Integrity, hex.EncodeToString(integrityHash))
+	}
+	return privateKey, nil
+}
+
+//  static fromKeyShares (keyShares: KeyShares): PrivateKey {
+//   const { points, threshold, integrity } = keyShares
+//   if (threshold < 2 || threshold > 99) throw new Error('threshold should be between 2 and 99')
+//   if (points.length < threshold) throw new Error(`At least ${threshold} shares are required to reconstruct the private key`)
+//   // check to see if two points have the same x value
+//   for (let i = 0; i < threshold; i++) {
+//     for (let j = i + 1; j < threshold; j++) {
+//       if (points[i].x.eq(points[j].x)) {
+//         throw new Error('Duplicate share detected, each must be unique.')
+//       }
+//     }
+//   }
+//   const poly = new Polynomial(points, threshold)
+//   const privateKey = new PrivateKey(poly.valueAt(new BigNumber(0)).toArray())
+//   const integrityHash = privateKey.toPublicKey().toHash('hex').slice(0, 8)
+//   if (integrityHash !== integrity) {
+//     throw new Error('Integrity hash mismatch')
+//   }
+
+//   return privateKey
+// }
+
+/**
+ * @method toBackupShares
+ *
+ * Creates a backup of the private key by splitting it into shares.
+ *
+ *
+ * @param threshold The number of shares which will be required to reconstruct the private key.
+ * @param totalShares The number of shares to generate for distribution.
+ * @returns
+ */
+func (p *PrivateKey) ToBackupShares(threshold int, shares int) ([]string, error) {
+	keyShares, err := p.ToKeyShares(threshold, shares)
+	if err != nil {
+		return nil, err
+	}
+	return keyShares.ToBackupFormat()
+}
+
+/**
+ *
+ * @method fromBackupShares
+ *
+ * Creates a private key from backup shares.
+ *
+ * @param shares
+ * @returns PrivateKey
+ */
+func PrivateKeyFromBackupShares(shares []string) (*PrivateKey, error) {
+	keyShares, err := shamir.NewKeySharesFromBackupFormat(shares)
+	if err != nil {
+		return nil, err
+	}
+	return PrivateKeyFromKeyShares(keyShares)
 }
