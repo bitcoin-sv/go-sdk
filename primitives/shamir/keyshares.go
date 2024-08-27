@@ -57,7 +57,7 @@ func NewKeySharesFromBackupFormat(shares []string) (keyShares *KeyShares, error 
 
 		x, y, tInt, i, err := decodeShare(share)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode share %d: %e", idx, err)
+			return nil, fmt.Errorf("failed to decode share %d: %w", idx, err)
 		}
 
 		if idx != 0 && threshold != tInt {
