@@ -134,12 +134,12 @@ func (o *ParsedOpcode) enforceMinimumDataPush() error {
 
 // Parse takes a *script.Script and returns a []interpreter.ParsedOp
 func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
-	sc := *s
-	parsedOps := make([]ParsedOpcode, 0, len(sc))
+	scr := *s
+	parsedOps := make([]ParsedOpcode, 0, len(scr))
 	conditionalBlock := 0
 
-	for i := 0; i < len(sc); {
-		instruction := sc[i]
+	for i := 0; i < len(scr); {
+		instruction := scr[i]
 
 		parsedOp := ParsedOpcode{op: opcodeArray[instruction]}
 		if p.ErrorOnCheckSig && parsedOp.RequiresTx() {
@@ -156,27 +156,6 @@ func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
 			// This must be the final evaluated opcode, everything after is ignored.
 			if conditionalBlock == 0 {
 				parsedOps = append(parsedOps, parsedOp)
-				// we add any remaining data as an unformatted blob so that subScript can be reconstructed
-				totalLen := len(sc)
-				if (i + 2) > totalLen {
-					// but only if there is more length to this script. If it ends in OpReturn then stop there.
-					return parsedOps, nil
-				}
-				if (i + 3) > totalLen {
-					// we have a single byte of extra data
-					parsedOps = append(parsedOps, ParsedOpcode{op: opcode{
-						name:   "Unformatted Data",
-						val:    sc[i+1],
-						length: 1,
-					}})
-					return parsedOps, nil
-				}
-				// we have multiple bytes of extra data
-				parsedOps = append(parsedOps, ParsedOpcode{op: opcode{
-					name:   "Unformatted Data",
-					val:    sc[i+1],
-					length: len(sc[i+1:]),
-				}, Data: sc[i+2:]})
 				return parsedOps, nil
 			}
 			// If we are in an conditional block, we continue parsing the other branches,
@@ -187,42 +166,42 @@ func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
 		case parsedOp.op.length == 1:
 			i++
 		case parsedOp.op.length > 1:
-			if len(sc[i:]) < parsedOp.op.length {
+			if len(scr[i:]) < parsedOp.op.length {
 				return nil, errs.NewError(errs.ErrMalformedPush, "opcode %s required %d bytes, script has %d remaining",
-					parsedOp.Name(), parsedOp.op.length, len(sc[i:]))
+					parsedOp.Name(), parsedOp.op.length, len(scr[i:]))
 			}
-			parsedOp.Data = sc[i+1 : i+parsedOp.op.length]
+			parsedOp.Data = scr[i+1 : i+parsedOp.op.length]
 			i += parsedOp.op.length
 		case parsedOp.op.length < 0:
 			var l uint
 			offset := i + 1
-			if len(sc[offset:]) < -parsedOp.op.length {
+			if len(scr[offset:]) < -parsedOp.op.length {
 				return nil, errs.NewError(errs.ErrMalformedPush, "opcode %s required %d bytes, script has %d remaining",
-					parsedOp.Name(), parsedOp.op.length, len(sc[offset:]))
+					parsedOp.Name(), parsedOp.op.length, len(scr[offset:]))
 			}
 			// Next -length bytes are little endian length of data.
 			switch parsedOp.op.length {
 			case -1:
-				l = uint(sc[offset])
+				l = uint(scr[offset])
 			case -2:
-				l = ((uint(sc[offset+1]) << 8) |
-					uint(sc[offset]))
+				l = ((uint(scr[offset+1]) << 8) |
+					uint(scr[offset]))
 			case -4:
-				l = ((uint(sc[offset+3]) << 24) |
-					(uint(sc[offset+2]) << 16) |
-					(uint(sc[offset+1]) << 8) |
-					uint(sc[offset]))
+				l = ((uint(scr[offset+3]) << 24) |
+					(uint(scr[offset+2]) << 16) |
+					(uint(scr[offset+1]) << 8) |
+					uint(scr[offset]))
 			default:
 				return nil, errs.NewError(errs.ErrMalformedPush, "invalid opcode length %d", parsedOp.op.length)
 			}
 
 			offset += -parsedOp.op.length
-			if int(l) > len(sc[offset:]) || int(l) < 0 {
+			if int(l) > len(scr[offset:]) || int(l) < 0 {
 				return nil, errs.NewError(errs.ErrMalformedPush, "opcode %s pushes %d bytes, script has %d remaining",
-					parsedOp.Name(), l, len(sc[offset:]))
+					parsedOp.Name(), l, len(scr[offset:]))
 			}
 
-			parsedOp.Data = sc[offset : offset+int(l)]
+			parsedOp.Data = scr[offset : offset+int(l)]
 			i += 1 - parsedOp.op.length + int(l)
 		}
 

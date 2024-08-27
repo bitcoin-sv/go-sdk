@@ -9,13 +9,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"math/big"
+	"os"
 	"strconv"
 	"strings"
 	"testing"
 
-	script "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/chainhash"
+	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
 	"github.com/bitcoin-sv/go-sdk/transaction"
@@ -50,7 +51,7 @@ func init() {
 //     0x14 is OP_DATA_20)
 //   - Single quoted strings are pushed as data
 //   - Anything else is an error
-func parseShortForm(s string) (*script.Script, error) {
+func parseShortForm(scriptStr string) (*script.Script, error) {
 	// Only create the short form opcode map once.
 	if shortFormOps == nil {
 		ops := make(map[string]byte)
@@ -77,9 +78,9 @@ func parseShortForm(s string) (*script.Script, error) {
 	}
 
 	// Split only does one separator so convert all \n and tab into  space.
-	s = strings.Replace(s, "\n", " ", -1)
-	s = strings.Replace(s, "\t", " ", -1)
-	tokens := strings.Split(s, " ")
+	scriptStr = strings.Replace(scriptStr, "\n", " ", -1)
+	scriptStr = strings.Replace(scriptStr, "\t", " ", -1)
+	tokens := strings.Split(scriptStr, " ")
 
 	var scr script.Script
 	for _, tok := range tokens {
@@ -105,8 +106,8 @@ func parseShortForm(s string) (*script.Script, error) {
 		} else if len(tok) >= 2 &&
 			tok[0] == '\'' && tok[len(tok)-1] == '\'' {
 			scr.AppendPushData([]byte(tok[1 : len(tok)-1]))
-		} else if opcode, ok := shortFormOps[tok]; ok {
-			scr = append(scr, opcode)
+		} else if code, ok := shortFormOps[tok]; ok {
+			scr = append(scr, code)
 		} else {
 			return nil, fmt.Errorf("bad token %q", tok)
 		}
@@ -296,27 +297,23 @@ func parseExpectedResult(expected string) ([]errs.ErrorCode, error) {
 // createSpendTx generates a basic spending transaction given the passed
 // signature and locking scripts.
 func createSpendingTx(sigScript, pkScript *script.Script, outputValue int64) *transaction.Transaction {
-
-	coinbaseTx := &transaction.Transaction{
-		Version:  1,
-		LockTime: 0,
-		Inputs: []*transaction.TransactionInput{{
-			SourceTxOutIndex: ^uint32(0),
-			UnlockingScript:  script.NewFromBytes([]byte{script.Op0, script.Op0}),
-			SequenceNumber:   0xffffffff,
-		}},
-		Outputs: []*transaction.TransactionOutput{{
-			Satoshis:      uint64(outputValue),
-			LockingScript: pkScript,
-		}},
-	}
-	coinbaseTx.Inputs[0].SourceTXID = make([]byte, 32)
+	coinbaseTx := transaction.NewTransaction()
+	coinbaseTx.AddInput(&transaction.TransactionInput{
+		SourceTXID:       &chainhash.Hash{},
+		SourceTxOutIndex: ^uint32(0),
+		UnlockingScript:  script.NewFromBytes([]byte{script.Op0, script.Op0}),
+		SequenceNumber:   0xffffffff,
+	})
+	coinbaseTx.AddOutput(&transaction.TransactionOutput{
+		Satoshis:      uint64(outputValue),
+		LockingScript: pkScript,
+	})
 
 	spendingTx := &transaction.Transaction{
 		Version:  1,
 		LockTime: 0,
 		Inputs: []*transaction.TransactionInput{{
-			SourceTXID:       coinbaseTx.TxIDBytes(),
+			SourceTXID:       coinbaseTx.TxID(),
 			SourceTxOutIndex: 0,
 			UnlockingScript:  sigScript,
 			SequenceNumber:   0xffffffff,
@@ -326,7 +323,7 @@ func createSpendingTx(sigScript, pkScript *script.Script, outputValue int64) *tr
 			LockingScript: script.NewFromBytes([]byte{}),
 		}},
 	}
-	spendingTx.Inputs[0].SetPrevTxFromOutput(&transaction.TransactionOutput{
+	spendingTx.Inputs[0].SetSourceTxFromOutput(&transaction.TransactionOutput{
 		LockingScript: pkScript,
 	})
 
@@ -336,7 +333,7 @@ func createSpendingTx(sigScript, pkScript *script.Script, outputValue int64) *tr
 // TestScripts ensures all of the tests in script_tests.json execute with the
 // expected results as defined in the test data.
 func TestScripts(t *testing.T) {
-	file, err := ioutil.ReadFile("data/script_tests.json")
+	file, err := os.ReadFile("data/script_tests.json")
 	if err != nil {
 		t.Fatalf("TestScripts: %v\n", err)
 	}
@@ -450,14 +447,14 @@ func TestScripts(t *testing.T) {
 
 		// At this point an error was expected so ensure the result of
 		// the execution matches it.
-		success := false
+		successRes := false
 		for _, code := range allowedErrorCodes {
 			if errs.IsErrorCode(err, code) {
-				success = true
+				successRes = true
 				break
 			}
 		}
-		if !success {
+		if !successRes {
 			serr := &errs.Error{}
 			if ok := errors.As(err, serr); ok {
 				t.Errorf("%s: want error codes %v, got %v", name, allowedErrorCodes, serr.ErrorCode)
@@ -489,7 +486,7 @@ type txIOKey struct {
 // TestTxInvalidTests ensures all of the tests in tx_invalid.json fail as
 // expected.
 func TestTxInvalidTests(t *testing.T) {
-	file, err := ioutil.ReadFile("data/tx_invalid.json")
+	file, err := os.ReadFile("data/tx_invalid.json")
 	if err != nil {
 		t.Fatalf("TestTxInvalidTests: %v\n", err)
 	}
@@ -507,6 +504,9 @@ func TestTxInvalidTests(t *testing.T) {
 	//	serializedTransaction, verifyFlags]
 testloop:
 	for i, test := range tests {
+		if name, ok := test[0].(string); ok {
+			t.Log(name)
+		}
 		inputs, ok := test[0].([]interface{})
 		if !ok {
 			continue
@@ -517,6 +517,7 @@ testloop:
 			continue
 
 		}
+
 		serializedhex, ok := test[1].(string)
 		if !ok {
 			t.Errorf("bad test (arg 2 not string) %d: %v", i, test)
@@ -610,7 +611,8 @@ testloop:
 		}
 
 		for k, txin := range tx.Inputs {
-			prevOut, ok := prevOuts[txIOKey{id: txin.PreviousTxIDStr(), idx: txin.SourceTxOutIndex}]
+			prevOut, ok := prevOuts[txIOKey{id: txin.SourceTXID.String(), idx: txin.SourceTxOutIndex}]
+			txin.SetSourceTxFromOutput(prevOut)
 			if !ok {
 				t.Errorf("bad test (missing %dth input) %d:%v",
 					k, i, test)
@@ -634,7 +636,7 @@ testloop:
 
 // TestTxValidTests ensures all of the tests in tx_valid.json pass as expected.
 func TestTxValidTests(t *testing.T) {
-	file, err := ioutil.ReadFile("data/tx_valid.json")
+	file, err := os.ReadFile("data/tx_valid.json")
 	if err != nil {
 		t.Fatalf("TestTxValidTests: %v\n", err)
 	}
@@ -652,6 +654,11 @@ func TestTxValidTests(t *testing.T) {
 	//	serializedTransaction, verifyFlags]
 testloop:
 	for i, test := range tests {
+		if name, ok := test[0].(string); ok {
+			t.Log(name)
+			// if name == "Coinbase of size 2" {
+			// }
+		}
 		inputs, ok := test[0].([]interface{})
 		if !ok {
 			continue
@@ -754,7 +761,8 @@ testloop:
 		}
 
 		for k, txin := range tx.Inputs {
-			prevOut, ok := prevOuts[txIOKey{id: txin.PreviousTxIDStr(), idx: txin.SourceTxOutIndex}]
+			prevOut, ok := prevOuts[txIOKey{id: txin.SourceTXID.String(), idx: txin.SourceTxOutIndex}]
+			txin.SetSourceTxFromOutput(prevOut)
 			if !ok {
 				t.Errorf("bad test (missing %dth input) %d:%v",
 					k, i, test)

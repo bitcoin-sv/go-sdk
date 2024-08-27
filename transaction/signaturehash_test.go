@@ -18,7 +18,7 @@ func TestTx_CalcInputPreimage(t *testing.T) {
 		unsignedTx         string
 		index              int
 		previousTxSatoshis uint64
-		previousTxScript   string
+		SourceTxScript     string
 		sigHashType        sighash.Flag
 		expectedPreimage   string
 	}{
@@ -61,9 +61,9 @@ func TestTx_CalcInputPreimage(t *testing.T) {
 			require.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
-			prevScript, err := script.NewFromHex(test.previousTxScript)
+			prevScript, err := script.NewFromHex(test.SourceTxScript)
 			require.NoError(t, err)
-			tx.InputIdx(test.index).SetPrevTxFromOutput(&transaction.TransactionOutput{
+			tx.InputIdx(test.index).SetSourceTxFromOutput(&transaction.TransactionOutput{
 				LockingScript: prevScript,
 				Satoshis:      test.previousTxSatoshis,
 			})
@@ -84,7 +84,7 @@ func TestTx_CalcInputSignatureHash(t *testing.T) {
 		unsignedTx         string
 		index              uint32
 		previousTxSatoshis uint64
-		previousTxScript   string
+		SourceTxScript     string
 		sigHashType        sighash.Flag
 		expectedSigHash    string
 	}{
@@ -154,9 +154,9 @@ func TestTx_CalcInputSignatureHash(t *testing.T) {
 			require.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
-			prevScript, err := script.NewFromHex(test.previousTxScript)
+			prevScript, err := script.NewFromHex(test.SourceTxScript)
 			require.NoError(t, err)
-			tx.Inputs[test.index].SetPrevTxFromOutput(&transaction.TransactionOutput{
+			tx.Inputs[test.index].SetSourceTxFromOutput(&transaction.TransactionOutput{
 				LockingScript: prevScript,
 				Satoshis:      test.previousTxSatoshis,
 			})
@@ -177,7 +177,7 @@ func TestTx_CalcInputPreimageLegacy(t *testing.T) {
 		unsignedTx         string
 		index              int
 		previousTxSatoshis uint64
-		previousTxScript   string
+		SourceTxScript     string
 		sigHashType        sighash.Flag
 		expectedPreimage   string
 	}{
@@ -220,9 +220,9 @@ func TestTx_CalcInputPreimageLegacy(t *testing.T) {
 			require.NotNil(t, tx)
 
 			// Add the UTXO amount and script (PreviousTx already in unsigned tx)
-			prevScript, err := script.NewFromHex(test.previousTxScript)
+			prevScript, err := script.NewFromHex(test.SourceTxScript)
 			require.NoError(t, err)
-			tx.Inputs[test.index].SetPrevTxFromOutput(&transaction.TransactionOutput{
+			tx.Inputs[test.index].SetSourceTxFromOutput(&transaction.TransactionOutput{
 				LockingScript: prevScript,
 				Satoshis:      test.previousTxSatoshis,
 			})

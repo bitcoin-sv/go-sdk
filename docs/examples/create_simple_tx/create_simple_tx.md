@@ -28,7 +28,7 @@ func main() {
  tx := transaction.NewTransaction()
 
  // Add the inputs
- err := tx.From(
+ err := tx.AddInputFrom(
   // Previous transaction ID (hex)
   "11b476ad8e0a48fcd40807a111a050af51114877e09283bfa7f3505081a1819d",
   // Previous transaction output index
@@ -75,7 +75,7 @@ Main Function:
 
 `transaction.NewTransaction()` creates a new, empty transaction.
 
-`tx.From(...)` adds an input to the transaction. This input includes:
+`tx.AddInputFrom(...)` adds an input to the transaction. This input includes:
 
 - The transaction ID (txid) from which the input is being spent.
 - The output index (vout) in the referenced transaction.

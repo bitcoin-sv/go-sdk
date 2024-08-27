@@ -137,6 +137,7 @@ func (s *Script) ToASM() string {
 		return ""
 	}
 
+	// var asm strings.Builder
 	asm := make([]string, 0, len(*s))
 	pos := 0
 	for pos < len(*s) {

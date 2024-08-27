@@ -11,7 +11,7 @@ import (
 	"math/big"
 	"testing"
 
-	script "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/scriptflag"
 	"github.com/bitcoin-sv/go-sdk/transaction"
@@ -335,11 +335,11 @@ func TestScriptNumInt64(t *testing.T) {
 }
 
 func TestDisasmString(t *testing.T) {
-	s, _ := script.NewFromHex("3105abcdef4280548004abcdefc2877451a0637c757451a0637c757451a0637c757451a0637c757451a0637c756868686868")
+	scr, _ := script.NewFromHex("3105abcdef4280548004abcdefc2877451a0637c757451a0637c757451a0637c757451a0637c757451a0637c756868686868")
 	prev, _ := script.NewFromHex("a91464902b04c3d9ea558b7f2edb24758b383343a2d587")
 	tx := transaction.NewTransaction()
 	in := &transaction.TransactionInput{
-		UnlockingScript: s,
+		UnlockingScript: scr,
 	}
 	tx.Inputs = append(tx.Inputs, in)
 	if err := NewEngine().Execute(

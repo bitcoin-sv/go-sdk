@@ -202,7 +202,7 @@ func PushDataPrefix(data []byte) ([]byte, error) {
 		binary.LittleEndian.PutUint16(lenBuf, uint16(len(data)))
 		b = append(b, lenBuf...)
 
-	} else if l <= 0xFFFFFFFF { // bt.DefaultSequenceNumber
+	} else if l <= 0xFFFFFFFF { // transaction.DefaultSequenceNumber
 		b = append(b, OpPUSHDATA4)
 		lenBuf := make([]byte, 4)
 		binary.LittleEndian.PutUint32(lenBuf, uint32(len(data)))

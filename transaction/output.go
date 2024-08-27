@@ -29,7 +29,7 @@ type TransactionOutput struct {
 	Change        bool           `json:"change"`
 }
 
-// ReadFrom reads from the `io.Reader` into the `bt.Output`.
+// ReadFrom reads from the `io.Reader` into the `transaction.TransactionOutput`.
 func (o *TransactionOutput) ReadFrom(r io.Reader) (int64, error) {
 	*o = TransactionOutput{}
 	var bytesRead int64

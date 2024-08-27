@@ -1,9 +1,9 @@
 package transaction
 
 import (
-	"encoding/hex"
 	"encoding/json"
 
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/pkg/errors"
 )
@@ -35,7 +35,7 @@ func (tx *Transaction) MarshalJSON() ([]byte, error) {
 		return nil, errors.Wrap(ErrTxNil, "cannot marshal tx")
 	}
 	return json.Marshal(txJSON{
-		TxID:     tx.TxID(),
+		TxID:     tx.TxID().String(),
 		Hex:      tx.String(),
 		Inputs:   tx.Inputs,
 		Outputs:  tx.Outputs,
@@ -68,7 +68,7 @@ func (tx *Transaction) UnmarshalJSON(b []byte) error {
 // input struct to add additional fields.
 func (i *TransactionInput) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&inputJSON{
-		TxID:            hex.EncodeToString(i.SourceTXID),
+		TxID:            i.SourceTXID.String(),
 		Vout:            i.SourceTxOutIndex,
 		UnlockingScript: i.UnlockingScript.String(),
 		Sequence:        i.SequenceNumber,
@@ -81,7 +81,7 @@ func (i *TransactionInput) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &ij); err != nil {
 		return err
 	}
-	ptxID, err := hex.DecodeString(ij.TxID)
+	ptxID, err := chainhash.NewHashFromHex(ij.TxID)
 	if err != nil {
 		return err
 	}

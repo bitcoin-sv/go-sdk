@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	script "github.com/bitcoin-sv/go-sdk/script"
+	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter"
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/debug"
 )

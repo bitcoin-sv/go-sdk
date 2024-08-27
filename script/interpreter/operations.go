@@ -25,6 +25,14 @@ const (
 	opCondSkip  = 2
 )
 
+var (
+	externalVerifySignatureFn func(payload, signature, publicKey []byte) bool = nil
+)
+
+func InjectExternalVerifySignatureFn(fn func(payload, signature, publicKey []byte) bool) {
+	externalVerifySignatureFn = fn
+}
+
 type opcode struct {
 	val    byte
 	name   string
@@ -1448,13 +1456,50 @@ func opcodeLShift(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	l := len(x)
-	for i := 0; i < l-1; i++ {
-		x[i] = x[i]<<n | x[i+1]>>(8-n)
-	}
-	x[l-1] <<= n
+	// uint8_t mask = make_lshift_mask(bit_shift);
+	// uint8_t overflow_mask = ~mask;
 
-	t.dstack.PushByteArray(x)
+	// valtype result(x.size(), 0x00);
+	// for (valtype::size_type index = x.size(); index > 0; index--) {
+	//     valtype::size_type i = index - 1;
+	//     // make sure that k is always >= 0
+	//     if (byte_shift <= i)
+	//     {
+	//         valtype::size_type k = i - byte_shift;
+	//         uint8_t val = (x[i] & mask);
+	//         val <<= bit_shift;
+	//         result[k] |= val;
+
+	//         if (k >= 1) {
+	//             uint8_t carryval = (x[i] & overflow_mask);
+	//             carryval >>= 8 - bit_shift;
+	//             result[k - 1] |= carryval;
+	//         }
+	//     }
+	// }
+	bitShift := n % 8
+	byteShift := n / 8
+	mask := []byte{0xFF, 0x7F, 0x3F, 0x1F, 0x0F, 0x07, 0x03, 0x01}[bitShift]
+	overflowMask := ^mask
+
+	result := make([]byte, len(x))
+	for idx := len(x); idx > 0; idx-- {
+		i := idx - 1
+		if byteShift <= i {
+			k := i - byteShift
+			val := x[i] & mask
+			val <<= bitShift
+			result[k] |= val
+
+			if k >= 1 {
+				carryval := x[i] & overflowMask
+				carryval >>= 8 - bitShift
+				result[k-1] |= carryval
+			}
+		}
+	}
+
+	t.dstack.PushByteArray(result)
 	return nil
 }
 
@@ -1474,13 +1519,27 @@ func opcodeRShift(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	l := len(x)
-	for i := l - 1; i > 0; i-- {
-		x[i] = x[i]>>n | x[i-1]<<(8-n)
-	}
-	x[0] >>= n
+	byteShift := n / 8
+	bitShift := n % 8
+	mask := []byte{0xFF, 0xFE, 0xFC, 0xF8, 0xF0, 0xE0, 0xC0, 0x80}[bitShift]
+	overflowMask := ^mask
+	result := make([]byte, len(x))
+	for i, b := range x {
+		k := i + byteShift
+		if k < len(x) {
+			val := b & mask
+			val >>= bitShift
+			result[k] |= val
+		}
 
-	t.dstack.PushByteArray(x)
+		if k+1 < len(x) {
+			carryval := b & overflowMask
+			carryval <<= 8 - bitShift
+			result[k+1] |= carryval
+		}
+	}
+
+	t.dstack.PushByteArray(result)
 	return nil
 }
 
@@ -1977,6 +2036,7 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 
 	txCopy := t.tx.Clone()
 	txCopy.Inputs[t.inputIdx].SourceTransaction.Outputs[txCopy.Inputs[t.inputIdx].SourceTxOutIndex].LockingScript = up
+	// txCopy.Inputs[t.inputIdx].SourceTxScript = up
 
 	hash, err = txCopy.CalcInputSignatureHash(uint32(t.inputIdx), shf)
 	if err != nil {
@@ -1984,24 +2044,50 @@ func opcodeCheckSig(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	pubKey, err := ec.ParsePubKey(pkBytes)
-	if err != nil {
-		t.dstack.PushBool(false)
-		return nil //nolint:nilerr // only need a false push in this case
-	}
-
-	var signature *ec.Signature
+	var sigBytesDer []byte
+	// if the signature is in DER format, we can set it here and just use it
+	// directly if an externalVerifySignatureFn is set
 	if t.hasAny(scriptflag.VerifyStrictEncoding, scriptflag.VerifyDERSignatures) {
-		signature, err = ec.ParseDERSignature(sigBytes)
-	} else {
-		signature, err = ec.ParseSignature(sigBytes)
-	}
-	if err != nil {
-		t.dstack.PushBool(false)
-		return nil //nolint:nilerr // only need a false push in this case
+		sigBytesDer = sigBytes
 	}
 
-	ok := signature.Verify(hash, pubKey)
+	var ok bool
+	var signature *ec.Signature
+
+	if externalVerifySignatureFn != nil {
+		if sigBytesDer == nil {
+			// signature is not in DER format, so we must parse it and set the bytes
+			signature, err = ec.ParseSignature(sigBytes)
+			if err != nil {
+				t.dstack.PushBool(false)
+				return nil //nolint:nilerr // only need a false push in this case
+			}
+			if sigBytesDer, err = signature.ToDER(); err != nil {
+				return err
+			}
+		}
+		ok = externalVerifySignatureFn(hash, sigBytesDer, pkBytes)
+	} else {
+		var pubKey *ec.PublicKey
+		pubKey, err = ec.ParsePubKey(pkBytes)
+		if err != nil {
+			t.dstack.PushBool(false)
+			return nil //nolint:nilerr // only need a false push in this case
+		}
+
+		if t.hasAny(scriptflag.VerifyStrictEncoding, scriptflag.VerifyDERSignatures) {
+			signature, err = ec.ParseDERSignature(sigBytes)
+		} else {
+			signature, err = ec.ParseSignature(sigBytes)
+		}
+		if err != nil {
+			t.dstack.PushBool(false)
+			return nil //nolint:nilerr // only need a false push in this case
+		}
+
+		ok = signature.Verify(hash, pubKey)
+	}
+
 	if !ok && t.hasFlag(scriptflag.VerifyNullFail) && len(sigBytes) > 0 {
 		return errs.NewError(errs.ErrNullFail, "signature not empty on failed checksig")
 	}
@@ -2075,7 +2161,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 	pubKeys := make([][]byte, 0, numPubKeys)
 	for i := 0; i < numPubKeys; i++ {
-		pubKey, err := t.dstack.PopByteArray() //nolint:nolintlint // ignore shadowed error
+		pubKey, err := t.dstack.PopByteArray()
 		if err != nil {
 			return err
 		}
@@ -2101,7 +2187,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 	signatures := make([]*parsedSigInfo, 0, numSignatures)
 	for i := 0; i < numSignatures; i++ {
-		signature, err := t.dstack.PopByteArray() //nolint:nolintlint // ignore shadowed error
+		signature, err := t.dstack.PopByteArray()
 		if err != nil {
 			return err
 		}
@@ -2125,12 +2211,12 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 		return errs.NewError(errs.ErrSigNullDummy, "multisig dummy argument has length %d instead of 0", len(dummy))
 	}
 
-	// Get s starting from the most recent s.OpCODESEPARATOR.
-	s := t.subScript()
+	// Get script starting from the most recent script.OpCODESEPARATOR.
+	scr := t.subScript()
 
 	for _, sigInfo := range signatures {
-		s = s.removeOpcodeByData(sigInfo.signature)
-		s = s.removeOpcode(script.OpCODESEPARATOR)
+		scr = scr.removeOpcodeByData(sigInfo.signature)
+		scr = scr.removeOpcode(script.OpCODESEPARATOR)
 	}
 
 	success := true
@@ -2207,7 +2293,7 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 			continue
 		}
 
-		up, err := t.scriptParser.Unparse(s)
+		up, err := t.scriptParser.Unparse(scr)
 		if err != nil {
 			t.dstack.PushBool(false)
 			return nil //nolint:nilerr // only need a false push in this case
@@ -2215,9 +2301,8 @@ func opcodeCheckMultiSig(op *ParsedOpcode, t *thread) error {
 
 		// Generate the signature hash based on the signature hash type.
 		txCopy := t.tx.Clone()
-		txCopy.Inputs[t.inputIdx].SetPrevTxFromOutput(&transaction.TransactionOutput{
-			LockingScript: up,
-		})
+		input := txCopy.Inputs[t.inputIdx]
+		input.SourceTransaction.Outputs[input.SourceTxOutIndex].LockingScript = up
 
 		signatureHash, err := txCopy.CalcInputSignatureHash(uint32(t.inputIdx), shf)
 		if err != nil {

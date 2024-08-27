@@ -73,7 +73,7 @@ package template
 // 	if tx.Inputs[params.InputIdx].SourceTransaction == nil {
 // 		return nil, transaction.ErrEmptyPreviousTx
 // 	}
-// 	s := tx.Inputs[params.InputIdx].PreviousTxScript()
+// 	s := tx.Inputs[params.InputIdx].SourceTxScript()
 
 // 	if !m.IsLockingScript(s) {
 // 		return nil, ErrBadScript

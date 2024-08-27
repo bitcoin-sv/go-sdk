@@ -1,27 +1,21 @@
 package transaction
 
 import (
-	"encoding/hex"
-
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 	script "github.com/bitcoin-sv/go-sdk/script"
 )
 
 // UTXO an unspent transaction output, used for creating inputs
 type UTXO struct {
-	TxID                    []byte                  `json:"txid"`
+	TxID                    *chainhash.Hash         `json:"txid"`
 	Vout                    uint32                  `json:"vout"`
 	LockingScript           *script.Script          `json:"locking_script"`
 	Satoshis                uint64                  `json:"satoshis"`
 	UnlockingScriptTemplate UnlockingScriptTemplate `json:"-"`
 }
 
-// UTXOs a collection of *bt.UTXO.
+// UTXOs a collection of *transaction.UTXO.
 type UTXOs []*UTXO
-
-// TxIDStr return the tx id as a string.
-func (u *UTXO) TxIDStr() string {
-	return hex.EncodeToString(u.TxID)
-}
 
 // LockingScriptHex retur nthe locking script in hex format.
 func (u *UTXO) LockingScriptHex() string {
@@ -34,7 +28,7 @@ func NewUTXO(prevTxID string, vout uint32, prevTxLockingScript string, satoshis 
 	if err != nil {
 		return nil, err
 	}
-	pti, err := hex.DecodeString(prevTxID)
+	pti, err := chainhash.NewHashFromHex(prevTxID)
 	if err != nil {
 		return nil, err
 	}

@@ -351,8 +351,8 @@ func (t *thread) apply(opts *execOpts) error {
 	t.dstack = newStack(t.cfg, t.hasFlag(scriptflag.VerifyMinimalData))
 	t.astack = newStack(t.cfg, t.hasFlag(scriptflag.VerifyMinimalData))
 
-	if t.tx != nil && !t.tx.IsCoinbase() {
-		t.tx.Inputs[t.inputIdx].SetPrevTxFromOutput(&transaction.TransactionOutput{
+	if t.tx != nil {
+		t.tx.Inputs[t.inputIdx].SetSourceTxFromOutput(&transaction.TransactionOutput{
 			LockingScript: t.prevOutput.LockingScript,
 			Satoshis:      t.prevOutput.Satoshis,
 		})
@@ -466,8 +466,8 @@ func (t *thread) Step() (bool, error) {
 				return false, err
 			}
 
-			s := t.savedFirstStack[len(t.savedFirstStack)-1]
-			pops, err := t.scriptParser.Parse(script.NewFromBytes(s))
+			scr := t.savedFirstStack[len(t.savedFirstStack)-1]
+			pops, err := t.scriptParser.Parse(script.NewFromBytes(scr))
 			if err != nil {
 				return false, err
 			}

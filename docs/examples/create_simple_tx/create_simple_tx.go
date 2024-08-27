@@ -45,7 +45,7 @@ func main() {
 		log.Fatal(err.Error())
 	}
 	tx.AddInput(&transaction.TransactionInput{
-		SourceTXID:              sourceTransaction.TxIDBytes(),
+		SourceTXID:              sourceTransaction.TxID(),
 		SourceTxOutIndex:        0,
 		SourceTransaction:       sourceTransaction,
 		UnlockingScriptTemplate: unlockingScriptTemplate,

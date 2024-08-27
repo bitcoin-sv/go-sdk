@@ -161,7 +161,7 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 // 		"simple script": {
 // 			tx: func() *transaction.Transaction {
 // 				tx := transaction.NewTransaction()
-// 				require.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529387", 15564838601))
+// 				require.NoError(t, tx.AddInputFrom("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529387", 15564838601))
 // 				return tx
 // 			}(),
 // 			unlockerFunc: func(ctx context.Context, lockingScript *script.Script) (transaction.Unlocker, error) {
@@ -182,9 +182,9 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 // 		"multiple inputs unlocked": {
 // 			tx: func() *transaction.Transaction {
 // 				tx := transaction.NewTransaction()
-// 				require.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529487", 15564838601))
-// 				require.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52589587", 15564838601))
-// 				require.NoError(t, tx.From("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "5a559687", 15564838601))
+// 				require.NoError(t, tx.AddInputFrom("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52529487", 15564838601))
+// 				require.NoError(t, tx.AddInputFrom("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "52589587", 15564838601))
+// 				require.NoError(t, tx.AddInputFrom("45be95d2f2c64e99518ffbbce03fb15a7758f20ee5eecf0df07938d977add71d", 0, "5a559687", 15564838601))
 // 				return tx
 // 			}(),
 // 			unlockerFunc: func(ctx context.Context, lockingScript *script.Script) (transaction.ScriptTemplate, error) {
@@ -283,12 +283,12 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 // 	sigHashTypes[1] = uint32(sig1HashType)
 //
 // 	var previousTxSatoshis uint64 = 99728
-// 	var previousTxScript, _ = bscript.NewFromHex("5221023ff15e2676e03b2c0af30fc17b7fb354bbfa9f549812da945194d3407dc0969b21039281958c651c013f5b3b007c78be231eeb37f130b925ceff63dc3ac8886f22a32103ac76121ffc9db556b0ce1da978021bd6cb4a5f9553c14f785e15f0e202139e3e53ae")
+// 	var SourceTxScript, _ = script.NewFromHex("5221023ff15e2676e03b2c0af30fc17b7fb354bbfa9f549812da945194d3407dc0969b21039281958c651c013f5b3b007c78be231eeb37f130b925ceff63dc3ac8886f22a32103ac76121ffc9db556b0ce1da978021bd6cb4a5f9553c14f785e15f0e202139e3e53ae")
 // 	var prevIndex uint32
 // 	var outIndex uint32
 //
 // 	for i, sig := range sigs {
-// 		sighash := signature.GetSighashForInputValidation(tx, sigHashTypes[i], outIndex, prevIndex, previousTxSatoshis, previousTxScript)
+// 		sighash := signature.GetSighashForInputValidation(tx, sigHashTypes[i], outIndex, prevIndex, previousTxSatoshis, SourceTxScript)
 // 		h, err := hex.DecodeString(sighash)
 // 		if err != nil {
 // 			t.Error(err)
@@ -359,12 +359,12 @@ func TestLocalUnlocker_ValidSignature(t *testing.T) {
 // 	sigHashTypes[1] = uint32(sig1HashType)
 //
 // 	var previousTxSatoshis uint64 = 8785040
-// 	var previousTxScript, _ = script.NewFromHex("5221021db57ae3de17143cb6c314fb206b56956e8ed45e2f1cbad3947411228b8d17f1210308b00cf7dfbb64604475e8b18e8450ac6ec04655cfa5c6d4d8a0f3f141ee419421030c7f9342ff6583599db8ee8b52383cadb4cf6fee3650c1ad8f66158a4ff0ebd953ae")
+// 	var SourceTxScript, _ = script.NewFromHex("5221021db57ae3de17143cb6c314fb206b56956e8ed45e2f1cbad3947411228b8d17f1210308b00cf7dfbb64604475e8b18e8450ac6ec04655cfa5c6d4d8a0f3f141ee419421030c7f9342ff6583599db8ee8b52383cadb4cf6fee3650c1ad8f66158a4ff0ebd953ae")
 // 	var prevIndex uint32 = 1
 // 	var outIndex uint32 = 0
 //
 // 	for i, sig := range sigs {
-// 		sighash := signature.GetSighashForInputValidation(tx, sigHashTypes[i], outIndex, prevIndex, previousTxSatoshis, previousTxScript)
+// 		sighash := signature.GetSighashForInputValidation(tx, sigHashTypes[i], outIndex, prevIndex, previousTxSatoshis, SourceTxScript)
 // 		h, err := hex.DecodeString(sighash)
 // 		if err != nil {
 // 			t.Error(err)
