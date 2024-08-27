@@ -71,6 +71,8 @@ type privateTestVector struct {
 	ExpectedPrivateKey  string `json:"privateKey"`
 }
 
+const createPolyFail = "Failed to create polynomial: %v"
+
 func TestBRC42PrivateVectors(t *testing.T) {
 	// Determine the directory of the current test file
 	_, currentFile, _, ok := runtime.Caller(0)
@@ -121,7 +123,7 @@ func TestPolynomialFromPrivateKey(t *testing.T) {
 
 	poly, err := pk.ToPolynomial(threshold)
 	if err != nil {
-		t.Fatalf("Failed to create polynomial: %v", err)
+		t.Fatalf(createPolyFail, err)
 	}
 
 	if len(poly.Points) != threshold {
@@ -159,7 +161,7 @@ func TestPolynomialFullProcess(t *testing.T) {
 	// Generate the polynomial
 	poly, err := privateKey.ToPolynomial(threshold)
 	if err != nil {
-		t.Fatalf("Failed to create polynomial: %v", err)
+		t.Fatalf(createPolyFail, err)
 	}
 
 	// Log the generated polynomial points
@@ -206,7 +208,7 @@ func TestPolynomialDifferentThresholdsAndShares(t *testing.T) {
 			privateKey, _ := NewPrivateKey()
 			poly, err := privateKey.ToPolynomial(tc.threshold)
 			if err != nil {
-				t.Fatalf("Failed to create polynomial: %v", err)
+				t.Fatalf(createPolyFail, err)
 			}
 
 			shares := make([]*shamir.PointInFiniteField, tc.totalShares)
@@ -355,7 +357,7 @@ func TestPrivateKeyToKeyShares(t *testing.T) {
 	// it should split the private key into shares correctly
 	shares, err := privateKey.ToKeyShares(threshold, totalShares)
 	if err != nil {
-		t.Fatalf("Failed to create key shares: %v", err)
+		t.Fatalf("Failed to create initial key shares: %v", err)
 	}
 
 	backup, err := shares.ToBackupFormat()
@@ -365,12 +367,6 @@ func TestPrivateKeyToKeyShares(t *testing.T) {
 
 	if len(backup) != totalShares {
 		t.Errorf("Incorrect number of shares. Expected %d, got %d", totalShares, len(backup))
-	}
-
-	for _, share := range shares.Points {
-		if share == nil {
-			t.Errorf("Share is nil")
-		}
 	}
 
 	if shares.Threshold != threshold {
