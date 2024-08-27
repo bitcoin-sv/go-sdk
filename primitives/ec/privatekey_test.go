@@ -400,6 +400,37 @@ func TestPrivateKeyToKeyShares(t *testing.T) {
 	}
 }
 
+// threshold should be between 2 and 99"
+func TestThresholdLargerThanTotalShares(t *testing.T) {
+	privateKey, _ := NewPrivateKey()
+	_, err := privateKey.ToKeyShares(100, 5)
+	if err == nil {
+		t.Errorf("Expected error for threshold must be less than total shares")
+	}
+}
+
+func TestTotalSharesLessThanTwo(t *testing.T) {
+	privateKey, _ := NewPrivateKey()
+	_, err := privateKey.ToKeyShares(2, 1)
+	if err == nil {
+		t.Errorf("Expected error for totalShares must be at least 2")
+	}
+}
+
+func TestFewerPointsThanThreshold(t *testing.T) {
+	privateKey, _ := NewPrivateKey()
+	shares, err := privateKey.ToKeyShares(3, 5)
+	if err != nil {
+		t.Fatalf("Failed to create key shares: %v", err)
+	}
+
+	shares.Points = shares.Points[:2]
+	_, err = PrivateKeyFromKeyShares(shares)
+	if err == nil {
+		t.Errorf("Expected error for fewer points than threshold")
+	}
+}
+
 // should throw an error for invalid threshold
 func TestInvalidThreshold(t *testing.T) {
 	privateKey, _ := NewPrivateKey()
