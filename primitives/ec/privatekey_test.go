@@ -488,3 +488,34 @@ func TestBackupAndRecovery(t *testing.T) {
 		t.Errorf("Recovered key does not match original key")
 	}
 }
+
+func TestExampleBackupAndRecovery(t *testing.T) {
+	share1 := "2NWeap6SDBTL5jVnvk9yUxyfLqNrDs2Bw85KNDfLJwRT.4yLtSm327NApsbuP7QXVW3CWDuBRgmS6rRiFkAkTukic"
+	share2 := "7NbgGA8iAsxg2s6mBLkLFtGKQrnc4aCbooHJJV31cWs4.GUgXtudthawE3Eevc1waT3Atr1Ft7j1XxdUguVo3B7x3"
+
+	point1, err := shamir.PointFromString(share1)
+	if err != nil {
+		t.Fatalf("Failed to create key shares from backup format: %v", err)
+	}
+	point2, err := shamir.PointFromString(share2)
+	if err != nil {
+		t.Fatalf("Failed to create key shares from backup format: %v", err)
+	}
+
+	shares := &shamir.KeyShares{
+		Points: []*shamir.PointInFiniteField{
+			point1,
+			point2,
+		},
+		Threshold: 2,
+		Integrity: "21c6a586",
+	}
+
+	recoveredKey, err := PrivateKeyFromKeyShares(shares)
+	if err != nil {
+		t.Fatalf("Failed to recover key from backup shares: %v", err)
+	}
+	if recoveredKey == nil {
+		t.Errorf("Failed to recover key from backup shares")
+	}
+}

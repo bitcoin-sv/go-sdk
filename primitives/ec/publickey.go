@@ -220,6 +220,18 @@ func (p *PublicKey) Mul(k *big.Int) *PublicKey {
 	}
 }
 
+/**
+ * Hash sha256 and ripemd160 of the public key.
+ *
+ * @returns Returns the hash of the public key.
+ *
+ * @example
+ * const publicKeyHash = pubkey.ToHash()
+ */
+func (p *PublicKey) ToHash() []byte {
+	return crypto.Ripemd160(crypto.Sha256(p.encode(true)))
+}
+
 //nolint:unparam // only compact is used
 func (p *PublicKey) encode(compact bool) []byte {
 	byteLen := (p.Curve.Params().BitSize + 7) >> 3

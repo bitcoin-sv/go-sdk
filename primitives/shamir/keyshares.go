@@ -1,9 +1,7 @@
 package primitives
 
 import (
-	"encoding/base64"
 	"fmt"
-	"math/big"
 	"strconv"
 	"strings"
 )
@@ -15,37 +13,31 @@ type KeyShares struct {
 }
 
 // decodeShare decodes the share from the backup format
-func decodeShare(share string) (*big.Int, *big.Int, int, string, error) {
+func decodeShare(share string) (*PointInFiniteField, int, string, error) {
 	components := strings.Split(share, ".")
 	if len(components) != 4 {
 		err := fmt.Errorf("invalid share format. Expected format: \"x.y.t.i\" - received %s", share)
-		return nil, nil, 0, "", err
+		return nil, 0, "", err
 	}
-	// base64 decode x and y
-	decodedX, err := base64.StdEncoding.DecodeString(components[0])
+
+	point, err := PointFromString(components[0] + "." + components[1])
 	if err != nil {
-		return nil, nil, 0, "", err
+		return nil, 0, "", err
 	}
-	decodedY, err := base64.StdEncoding.DecodeString(components[1])
-	if err != nil {
-		return nil, nil, 0, "", err
-	}
-	var x *big.Int = big.NewInt(0).SetBytes(decodedX)
-	var y *big.Int = big.NewInt(0).SetBytes(decodedY)
 
 	t := components[2]
 	if t == "" {
-		return nil, nil, 0, "", fmt.Errorf("threshold not found")
+		return nil, 0, "", fmt.Errorf("threshold not found")
 	}
 	i := components[3]
 	if i == "" {
-		return nil, nil, 0, "", fmt.Errorf("integrity not found")
+		return nil, 0, "", fmt.Errorf("integrity not found")
 	}
 	tInt, err := strconv.Atoi(t)
 	if err != nil {
-		return nil, nil, 0, "", err
+		return nil, 0, "", err
 	}
-	return x, y, tInt, i, nil
+	return point, tInt, i, nil
 }
 
 // NewKeySharesFromBackupFormat creates a new KeyShares object from a backup
@@ -54,8 +46,7 @@ func NewKeySharesFromBackupFormat(shares []string) (keyShares *KeyShares, error 
 	var integrity string = ""
 	points := make([]*PointInFiniteField, 0)
 	for idx, share := range shares {
-
-		x, y, tInt, i, err := decodeShare(share)
+		point, tInt, i, err := decodeShare(share)
 		if err != nil {
 			return nil, fmt.Errorf("failed to decode share %d: %w", idx, err)
 		}
@@ -68,7 +59,7 @@ func NewKeySharesFromBackupFormat(shares []string) (keyShares *KeyShares, error 
 		}
 		threshold = tInt
 		integrity = i
-		points = append(points, NewPointInFiniteField(x, y))
+		points = append(points, point)
 	}
 	return NewKeyShares(points, threshold, integrity), nil
 }

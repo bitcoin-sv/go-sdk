@@ -270,26 +270,12 @@ func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *sha
 		points = append(points, shamir.NewPointInFiniteField(x, y))
 	}
 
-	integrity := hex.EncodeToString(p.PubKey().encode(true))[:16]
+	integrity := hex.EncodeToString(p.PubKey().ToHash())[:8]
 	return shamir.NewKeyShares(points, threshold, integrity), nil
 }
 
-/**
- * Combines shares to reconstruct the private key.
- *
- * @param shares An array of points (shares) to be used to reconstruct the private key.
- * @param threshold The minimum number of shares required to reconstruct the private key.
- *
- * @returns The reconstructed private key.
- *
- * @example
- * const share1 = '2NWeap6SDBTL5jVnvk9yUxyfLqNrDs2Bw85KNDfLJwRT.4yLtSm327NApsbuP7QXVW3CWDuBRgmS6rRiFkAkTukic'
- * const share2 = '7NbgGA8iAsxg2s6mBLkLFtGKQrnc4aCbooHJJV31cWs4.GUgXtudthawE3Eevc1waT3Atr1Ft7j1XxdUguVo3B7x3'
- * const reconstructedKey = PrivateKey.fromKeyShares({ shares: [share1, share2], threshold: 2, integrity: '23409547' })
- *
- **/
+// PrivateKeyFromKeyShares combines shares to reconstruct the private key
 func PrivateKeyFromKeyShares(keyShares *shamir.KeyShares) (*PrivateKey, error) {
-	// convert from ts to go
 	if keyShares.Threshold < 2 || keyShares.Threshold > 99 {
 		return nil, errors.New("threshold should be between 2 and 99")
 	}
@@ -310,9 +296,9 @@ func PrivateKeyFromKeyShares(keyShares *shamir.KeyShares) (*PrivateKey, error) {
 	poly := shamir.NewPolynomial(keyShares.Points, keyShares.Threshold)
 	polyBytes := poly.ValueAt(big.NewInt(0)).Bytes()
 	privateKey, publicKey := PrivateKeyFromBytes(polyBytes)
-	integrityHash := publicKey.encode(true)[:8]
-	if keyShares.Integrity != hex.EncodeToString(integrityHash) {
-		return nil, fmt.Errorf("integrity hash mismatch %s != %s", keyShares.Integrity, hex.EncodeToString(integrityHash))
+	integrityHash := hex.EncodeToString(publicKey.ToHash())[:8]
+	if keyShares.Integrity != integrityHash {
+		return nil, fmt.Errorf("integrity hash mismatch %s != %s", keyShares.Integrity, integrityHash)
 	}
 	return privateKey, nil
 }

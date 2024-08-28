@@ -3,4 +3,4 @@
 1. `marge tagged branch to master branch`
 2. `git tag v1.0.0`
 3. `git push origin v1.0.0`
-4. `GITHUB_TOKEN=xxxxxxxx goreleaser release`
+4. `GITHUB_TOKEN=xxxxxxxx goreleaser release --clean`
