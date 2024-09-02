@@ -1,9 +1,11 @@
 package primitives
 
 import (
-	"encoding/base64"
+	"encoding/hex"
 	"math/big"
 	"testing"
+
+	base58 "github.com/bitcoin-sv/go-sdk/compat/base58"
 )
 
 func TestNewKeyshares(t *testing.T) {
@@ -13,7 +15,7 @@ func TestNewKeyshares(t *testing.T) {
 		NewPointInFiniteField(big.NewInt(2), big.NewInt(3)),
 	}
 	threshold := 3
-	integrity := base64.StdEncoding.EncodeToString([]byte("integrity"))
+	integrity := hex.EncodeToString([]byte("integrity"))
 	keyShares := NewKeyShares(points, threshold, integrity)
 	if keyShares == nil {
 		t.Errorf("Failed to create new key shares")
@@ -51,23 +53,25 @@ func TestInvalidBackupFormat(t *testing.T) {
 
 	// test invalid x value
 	invalidX := "aGVsbG81281281281282="
-	validX := "aGVsbG8="
+	// base58 encoded "hello"
+	validX := base58.Encode([]byte("hello"))
 	invalidY := "d29ybGQ1231231231232="
-	validY := "d29ybGQ="
-	invalidShare := invalidX + "." + validY + ".3.integrity"
+	validY := base58.Encode([]byte("world"))
+	integrity := hex.EncodeToString([]byte("integrity"))
+	invalidShare := invalidX + "." + validY + ".3." + integrity
 	_, err = NewKeySharesFromBackupFormat([]string{invalidShare})
 	if err == nil {
 		t.Errorf("Expected error for invalid x value")
 	}
 
-	invalidShare2 := validX + "." + invalidY + ".3.integrity"
+	invalidShare2 := validX + "." + invalidY + ".3." + integrity
 	_, err = NewKeySharesFromBackupFormat([]string{invalidShare2})
 	if err == nil {
 		t.Errorf("Expected error for invalid y value")
 	}
 
 	// test invalid threshold
-	invalidShare3 := validX + "." + validY + ".invalid.integrity"
+	invalidShare3 := validX + "." + validY + ".invalid." + integrity
 	_, err = NewKeySharesFromBackupFormat([]string{invalidShare3})
 	if err == nil {
 		t.Errorf("Expected error for invalid threshold")

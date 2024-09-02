@@ -40,7 +40,10 @@ func NewAddressFromString(addr string) (*Address, error) {
 }
 
 func addressToPubKeyHash(address string) ([]byte, error) {
-	decoded := base58.Decode(address)
+	decoded, err := base58.Decode(address)
+	if err != nil {
+		return []byte{}, fmt.Errorf("%w for '%s'", ErrEncodingBadChar, address)
+	}
 
 	if len(decoded) != 25 {
 		return []byte{}, fmt.Errorf("%w for '%s'", ErrInvalidAddressLength, address)

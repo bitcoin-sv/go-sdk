@@ -10,6 +10,7 @@ import (
 	"math/big"
 
 	base58 "github.com/bitcoin-sv/go-sdk/compat/base58"
+	bignumber "github.com/bitcoin-sv/go-sdk/primitives/bignumber"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	shamir "github.com/bitcoin-sv/go-sdk/primitives/shamir"
 )
@@ -42,7 +43,7 @@ const compressMagic byte = 0x01
 // package.
 type PrivateKey e.PrivateKey
 
-// PrivateKeyFromBytes returns a private and public key for `curve' based on the
+// PrivateKeyFromBytes returns a private and public key based on the
 // private key passed as an argument as a byte slice.
 func PrivateKeyFromBytes(pk []byte) (*PrivateKey, *PublicKey) {
 	x, y := S256().ScalarBaseMult(pk)
@@ -81,7 +82,10 @@ func PrivateKeyFromHex(privKeyHex string) (*PrivateKey, error) {
 
 // PrivateKeyFromWif returns a private key from a WIF string.
 func PrivateKeyFromWif(wif string) (*PrivateKey, error) {
-	decoded := base58.Decode(wif)
+	decoded, err := base58.Decode(wif)
+	if err != nil {
+		return nil, err
+	}
 	decodedLen := len(decoded)
 	var compress bool
 
@@ -194,8 +198,10 @@ func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*Private
 
 	newPrivKey := new(big.Int)
 	newPrivKey.Add(p.D, new(big.Int).SetBytes(hmac))
-	newPrivKey.Mod(newPrivKey, S256().N)
-	privKey, _ := PrivateKeyFromBytes(newPrivKey.Bytes())
+	bn := bignumber.NewBigNumber(newPrivKey)
+	baePointBn := bignumber.NewBigNumber(S256().N)
+	um := bn.Umod(baePointBn).ToBigInt()
+	privKey, _ := PrivateKeyFromBytes(um.Bytes())
 	return privKey, nil
 }
 
@@ -206,23 +212,26 @@ func (p *PrivateKey) ToPolynomial(threshold int) (*shamir.Polynomial, error) {
 	}
 
 	curve := shamir.NewCurve()
-	points := make([]*shamir.PointInFiniteField, threshold)
+	points := make([]*shamir.PointInFiniteField, 0)
 
 	// Set the first point to (0, key)
-	keyValue := p.D
-	points[0] = shamir.NewPointInFiniteField(big.NewInt(0), new(big.Int).Set(keyValue))
+	points = append(points, shamir.NewPointInFiniteField(big.NewInt(0), p.D))
 
 	// Generate random points for the rest of the polynomial
+	pb := bignumber.NewBigNumber(curve.P)
 	for i := 1; i < threshold; i++ {
-		x, err := rand.Int(rand.Reader, curve.P)
+		x, err := rand.Int(rand.Reader, big.NewInt(32))
 		if err != nil {
 			return nil, err
 		}
-		y, err := rand.Int(rand.Reader, curve.P)
+		bx := bignumber.NewBigNumber(x).Umod(pb)
+
+		y, err := rand.Int(rand.Reader, big.NewInt(32))
 		if err != nil {
 			return nil, err
 		}
-		points[i] = shamir.NewPointInFiniteField(x, y)
+		by := bignumber.NewBigNumber(y).Umod(pb)
+		points = append(points, shamir.NewPointInFiniteField(bx.ToBigInt(), by.ToBigInt()))
 	}
 
 	return shamir.NewPolynomial(points, threshold), nil
@@ -262,11 +271,9 @@ func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *sha
 		if err != nil {
 			return nil, err
 		}
-		x := new(big.Int)
-		x.Set(pk.D)
+		x := new(big.Int).Set(pk.D)
 
-		y := new(big.Int)
-		y.Set(poly.ValueAt(x))
+		y := new(big.Int).Set(poly.ValueAt(x))
 		points = append(points, shamir.NewPointInFiniteField(x, y))
 	}
 
@@ -276,8 +283,8 @@ func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *sha
 
 // PrivateKeyFromKeyShares combines shares to reconstruct the private key
 func PrivateKeyFromKeyShares(keyShares *shamir.KeyShares) (*PrivateKey, error) {
-	if keyShares.Threshold < 2 || keyShares.Threshold > 99 {
-		return nil, errors.New("threshold should be between 2 and 99")
+	if keyShares.Threshold < 2 {
+		return nil, errors.New("threshold should be at least 2")
 	}
 
 	if len(keyShares.Points) < keyShares.Threshold {

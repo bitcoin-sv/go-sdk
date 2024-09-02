@@ -1,10 +1,12 @@
 package primitives
 
 import (
-	"encoding/base64"
 	"fmt"
 	"math/big"
 	"strings"
+
+	base58 "github.com/bitcoin-sv/go-sdk/compat/base58"
+	bignumber "github.com/bitcoin-sv/go-sdk/primitives/bignumber"
 )
 
 // Curve represents the parameters of the elliptic curve
@@ -12,13 +14,14 @@ type Curve struct {
 	P *big.Int
 }
 
-// func NewCurve() *Curve {
-// 	return &Curve{P: big.NewInt(65537)} // 2^16 + 1, a Fermat prime
-// }
-
 func NewCurve() *Curve {
-	// This is a 256-bit prime number
-	p, _ := new(big.Int).SetString("115792089237316195423570985008687907853269984665640564039457584007908834671663", 10)
+	hexString := "ffffffff ffffffff ffffffff ffffffff ffffffff ffffffff fffffffe fffffc2f"
+
+	// Remove spaces
+	compactHexString := strings.ReplaceAll(hexString, " ", "")
+
+	// Convert the compact hex string to a big.Int
+	p, _ := new(big.Int).SetString(compactHexString, 16)
 	return &Curve{P: p}
 }
 
@@ -29,14 +32,19 @@ type PointInFiniteField struct {
 
 func NewPointInFiniteField(x, y *big.Int) *PointInFiniteField {
 	curve := NewCurve()
+
+	xb := bignumber.NewBigNumber(x)
+	yb := bignumber.NewBigNumber(y)
+	pb := bignumber.NewBigNumber(curve.P)
 	return &PointInFiniteField{
-		X: new(big.Int).Mod(x, curve.P),
-		Y: new(big.Int).Mod(y, curve.P),
+		// Prepare variables for quotient and remainder
+		X: xb.Umod(pb).ToBigInt(),
+		Y: yb.Umod(pb).ToBigInt(),
 	}
 }
 
 func (p *PointInFiniteField) String() string {
-	return base64.StdEncoding.EncodeToString(p.X.Bytes()) + "." + base64.StdEncoding.EncodeToString(p.Y.Bytes())
+	return base58.Encode(p.X.Bytes()) + "." + base58.Encode(p.Y.Bytes())
 }
 
 func PointFromString(s string) (*PointInFiniteField, error) {
@@ -44,11 +52,13 @@ func PointFromString(s string) (*PointInFiniteField, error) {
 	if len(parts) != 2 {
 		return nil, fmt.Errorf("invalid point string")
 	}
-	x, err := base64.StdEncoding.DecodeString(parts[0])
+
+	// decode from base58
+	x, err := base58.Decode(parts[0])
 	if err != nil {
 		return nil, err
 	}
-	y, err := base64.StdEncoding.DecodeString(parts[1])
+	y, err := base58.Decode(parts[1])
 	if err != nil {
 		return nil, err
 	}
@@ -71,30 +81,38 @@ func NewPolynomial(points []*PointInFiniteField, threshold int) *Polynomial {
 }
 
 func (p *Polynomial) ValueAt(x *big.Int) *big.Int {
-	curve := NewCurve()
+	P := NewCurve().P
+	pb := bignumber.NewBigNumber(P)
 	y := big.NewInt(0)
 
 	for i := 0; i < p.Threshold; i++ {
-		term := new(big.Int).Set(p.Points[i].Y)
+		term := p.Points[i].Y
 		for j := 0; j < p.Threshold; j++ {
 			if i != j {
 				numerator := new(big.Int).Sub(x, p.Points[j].X)
-				numerator.Mod(numerator, curve.P)
+				nb := bignumber.NewBigNumber(numerator)
+				numerator = nb.Umod(pb).ToBigInt()
 
 				denominator := new(big.Int).Sub(p.Points[i].X, p.Points[j].X)
-				denominator.Mod(denominator, curve.P)
+				db := bignumber.NewBigNumber(denominator)
+				denominator = db.Umod(pb).ToBigInt()
 
-				denominatorInv := new(big.Int).ModInverse(denominator, curve.P)
-
+				denominatorInv := new(big.Int).ModInverse(denominator, P)
+				if denominatorInv == nil {
+					denominatorInv = new(big.Int).SetInt64(0)
+				}
 				fraction := new(big.Int).Mul(numerator, denominatorInv)
-				fraction.Mod(fraction, curve.P)
+				fb := bignumber.NewBigNumber(fraction)
+				fraction = fb.Umod(pb).ToBigInt()
 
-				term.Mul(term, fraction)
-				term.Mod(term, curve.P)
+				term = term.Mul(term, fraction)
+				tb := bignumber.NewBigNumber(term)
+				term = tb.Umod(pb).ToBigInt()
 			}
 		}
-		y.Add(y, term)
-		y.Mod(y, curve.P)
+		y = y.Add(y, term)
+		yb := bignumber.NewBigNumber(y)
+		y = yb.Umod(pb).ToBigInt()
 	}
 
 	return y

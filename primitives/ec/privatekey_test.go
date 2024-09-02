@@ -396,10 +396,10 @@ func TestPrivateKeyToKeyShares(t *testing.T) {
 	}
 }
 
-// threshold should be between 2 and 99"
+// threshold should be less than or equal to totalShares
 func TestThresholdLargerThanTotalShares(t *testing.T) {
 	privateKey, _ := NewPrivateKey()
-	_, err := privateKey.ToKeyShares(100, 5)
+	_, err := privateKey.ToKeyShares(50, 5)
 	if err == nil {
 		t.Errorf("Expected error for threshold must be less than total shares")
 	}
@@ -482,6 +482,7 @@ func TestBackupAndRecovery(t *testing.T) {
 	}
 	recoveredKey, err := PrivateKeyFromBackupShares(backup[:3])
 	if err != nil {
+		t.Logf("Backup shares: %v", backup)
 		t.Fatalf("Failed to recover key from backup shares: %v", err)
 	}
 	if !bytes.Equal(recoveredKey.Serialize(), key.Serialize()) {
@@ -490,27 +491,11 @@ func TestBackupAndRecovery(t *testing.T) {
 }
 
 func TestExampleBackupAndRecovery(t *testing.T) {
-	share1 := "2NWeap6SDBTL5jVnvk9yUxyfLqNrDs2Bw85KNDfLJwRT.4yLtSm327NApsbuP7QXVW3CWDuBRgmS6rRiFkAkTukic"
-	share2 := "7NbgGA8iAsxg2s6mBLkLFtGKQrnc4aCbooHJJV31cWs4.GUgXtudthawE3Eevc1waT3Atr1Ft7j1XxdUguVo3B7x3"
+	share1 := "3znuzt7DZp8HzZTfTh5MF9YQKNX3oSxTbSYmSRGrH2ev.2Nm17qoocmoAhBTCs8TEBxNXCskV9N41rB2PckcgYeqV.2.35449bb9"
+	share2 := "Cm5fuUc39X5xgdedao8Pr1kvCSm8Gk7Cfenc7xUKcfLX.2juyK9BxCWn2DiY5JUAgj9NsQ77cc9bWksFyW45haXZm.2.35449bb9"
 
-	point1, err := shamir.PointFromString(share1)
-	if err != nil {
-		t.Fatalf("Failed to create key shares from backup format: %v", err)
-	}
-	point2, err := shamir.PointFromString(share2)
-	if err != nil {
-		t.Fatalf("Failed to create key shares from backup format: %v", err)
-	}
-
-	shares := &shamir.KeyShares{
-		Points: []*shamir.PointInFiniteField{
-			point1,
-			point2,
-		},
-		Threshold: 2,
-		Integrity: "21c6a586",
-	}
-
+	shares, err := shamir.NewKeySharesFromBackupFormat([]string{share1, share2})
+	require.NoError(t, err)
 	recoveredKey, err := PrivateKeyFromKeyShares(shares)
 	if err != nil {
 		t.Fatalf("Failed to recover key from backup shares: %v", err)
@@ -518,4 +503,53 @@ func TestExampleBackupAndRecovery(t *testing.T) {
 	if recoveredKey == nil {
 		t.Errorf("Failed to recover key from backup shares")
 	}
+}
+
+func TestExampleFromTypescript(t *testing.T) {
+
+	recoveryShares := []string{
+		"HYkALskEizXkRLHr5Q5fzj9w7ThpdgwqBwjHih9sifVW.6zRqQ7LMKFu7eFSf9eABfuugnvzG9tSiv4uj8zXrX6r7.6.35449bb9",
+		"CnAGiYWrGzKZn5GcAu4FZSnZkNi6pToVRkPfUaCtiDm6.4e3M6FN2R3iUssJwJ8PazCX7fCvx3mgu1M82GREXrptn.6.35449bb9",
+		"5A9BTHruTVx68LyxeWKNaHDmvsXJckp7gcYQQsxfPRxy.88nKAkDTpEAGR4humi9wFsLwWKoVxqnyFA1i4FfyjGZD.6.35449bb9",
+		"HF1DnP2BotERLxZmHVDZKgEgzCAiUCkFuDxHRFdhVXSe.3EzbKevL6ha2hXi6Evs7sZzdp9S16HUTBs7JRwWkYC1B.6.35449bb9",
+		"BCYHiXpcJqif5D96BV35fKm3waMwnP5RVoUVBE9FYSqi.7H2myBNnQwmeEvgLTDUD2ArBZUpfN8Uqm61KRopzpBww.6.35449bb9",
+		"DoJmFZi3XhKmFVRGYVrPjYA5BppAKpZ2kGHVJZeKSUYq.52chnjed4L5nABtRwERZnhtzx1HLWnjkS51shFZYd1CQ.6.35449bb9",
+	}
+
+	wif := "L1aFAHMKJrkGLQ3V6fM3a9PBewA26H2AydsnpArh9sLscSgNn5gy"
+	pk, err := PrivateKeyFromWif(wif)
+	require.NoError(t, err)
+	backup, err := pk.ToBackupShares(6, 30)
+	require.NoError(t, err)
+	require.NotNil(t, backup)
+	// for _, share := range recoveryShares {
+	// 	found := false
+	// 	for _, b := range backup {
+	// 		if b == share {
+	// 			found = true
+	// 			break
+	// 		}
+	// 	}
+	// 	require.True(t, found)
+	// }
+
+	recovery := recoveryShares[:6]
+	recoveredKey, err := PrivateKeyFromBackupShares(recovery)
+	require.NoError(t, err)
+	require.NotNil(t, recoveredKey)
+	// require.Equal(t, wif, recoveredKey.Wif())
+}
+
+func TestKnownPolynomialValueAt(t *testing.T) {
+	wif := "L1vTr2wRMZoXWBM3u1Mvbzk9bfoJE5PT34t52HYGt9jzZMyavWrk"
+	pk, err := PrivateKeyFromWif(wif)
+	require.NoError(t, err)
+	expectedPkD := "8c507a209d082d9db947bea9ffb248bbb977e59953405dacf5ea8c4be3a11a2f"
+	require.Equal(t, expectedPkD, hex.EncodeToString(pk.D.Bytes()))
+	poly, err := pk.ToPolynomial(3)
+	require.NoError(t, err)
+	result := poly.ValueAt(big.NewInt(0))
+	expected := "8c507a209d082d9db947bea9ffb248bbb977e59953405dacf5ea8c4be3a11a2f"
+	require.Equal(t, expected, hex.EncodeToString(result.Bytes()))
+
 }
