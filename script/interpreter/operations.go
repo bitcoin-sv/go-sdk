@@ -1459,27 +1459,6 @@ func opcodeLShift(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	// uint8_t mask = make_lshift_mask(bit_shift);
-	// uint8_t overflow_mask = ~mask;
-
-	// valtype result(x.size(), 0x00);
-	// for (valtype::size_type index = x.size(); index > 0; index--) {
-	//     valtype::size_type i = index - 1;
-	//     // make sure that k is always >= 0
-	//     if (byte_shift <= i)
-	//     {
-	//         valtype::size_type k = i - byte_shift;
-	//         uint8_t val = (x[i] & mask);
-	//         val <<= bit_shift;
-	//         result[k] |= val;
-
-	//         if (k >= 1) {
-	//             uint8_t carryval = (x[i] & overflow_mask);
-	//             carryval >>= 8 - bit_shift;
-	//             result[k - 1] |= carryval;
-	//         }
-	//     }
-	// }
 	bitShift := n % 8
 	byteShift := n / 8
 	mask := []byte{0xFF, 0x7F, 0x3F, 0x1F, 0x0F, 0x07, 0x03, 0x01}[bitShift]
