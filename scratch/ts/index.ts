@@ -22,7 +22,7 @@ function main() {
         sourceSatoshis: sourceOutput.satoshis!,
         lockingScript: sourceOutput.lockingScript,
         transactionVersion: tx.version,
-        otherInputs: [],
+        otherInputs: tx.inputs.splice(test.inputIdx, 1),
         outputs: tx.outputs,
         unlockingScript: input.unlockingScript!,
         inputIndex: test.inputIdx,
@@ -30,15 +30,9 @@ function main() {
         lockTime: tx.lockTime,
     })
     while(true) {
-        // try{
-            interp.step()
-        // } catch(e) {
-        //     break
-        // }
+        interp.step()
         console.log(interp.programCounter, Utils.toHex(interp.stack[interp.stack.length - 1]))
     }
 }
-
-// main().catch(console.error);
 
 main();
