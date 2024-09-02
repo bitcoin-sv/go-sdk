@@ -14,7 +14,7 @@ All notable changes to this project will be documented in this file. The format 
   - Fix OP_BIN2NUM to copy bytes and prevent stack corruption & add corresponding test
 
 ### Changed
-  - `opcodeNum2bin` now copies value before minimally encoding
+  - `opcodeBin2num` now copies value before minimally encoding
 
 ## [1.1.1] - 2024-08-28
  - Fix OP_RETURN data & add corresponding test
