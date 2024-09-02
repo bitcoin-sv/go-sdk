@@ -1069,7 +1069,10 @@ func opcodeBin2num(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	b := minimallyEncode(a)
+	b := make([]byte, len(a))
+	// Copy the bytes so that we don't corrupt the original stack value
+	copy(b, a)
+	b = minimallyEncode(b)
 	if len(b) > t.cfg.MaxScriptNumberLength() {
 		return errs.NewError(errs.ErrNumberTooBig, "script numbers are limited to %d bytes", t.cfg.MaxScriptNumberLength())
 	}
