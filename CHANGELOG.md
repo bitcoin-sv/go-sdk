@@ -31,6 +31,8 @@ All notable changes to this project will be documented in this file. The format 
   - `NewKeySharesFromBackupFormat`
   - `KeyShares.ToBackupFormat`
   - `polonomial.go` and tests for core functionality used by `KeyShares` and `PrivateKey`
+  - `util.Umod` in `util` package `big.go`
+  - `util.NewRandomBigInt` in `util` package `big.go`
 
   ### Changed
   - `base58.Decode` now returns an error in the case of invalid characters
