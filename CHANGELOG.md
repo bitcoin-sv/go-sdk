@@ -17,6 +17,7 @@ All notable changes to this project will be documented in this file. The format 
   - Added PublicKey.ToHash() - sha256 hash, then ripemd160 of the public key (matching ts implementation)`
   - Added new KeyShares and polynomial primitives, and polynomial operations to support key splitting
   - Tests for all new keyshare, private key, and polynomial operations
+  - added recommended vscode plugin and extension settings for this repo in .vscode directory
 
   ### Added
   - `PrivateKey.ToKeyShares`
