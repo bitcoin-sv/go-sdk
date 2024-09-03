@@ -14,8 +14,8 @@ import (
 	"strings"
 	"testing"
 
-	bignumber "github.com/bitcoin-sv/go-sdk/primitives/bignumber"
 	keyshares "github.com/bitcoin-sv/go-sdk/primitives/keyshares"
+	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -227,12 +227,10 @@ func TestStaticKeyShares(t *testing.T) {
 
 func TestUmod(t *testing.T) {
 	big, _ := new(big.Int).SetString("96062736363790697194862546171394473697392259359830162418218835520086413272341", 10)
-	bigg := bignumber.NewBigNumber(big)
 
-	pb := bignumber.NewBigNumber(keyshares.NewCurve().P)
-	umodded := bigg.Umod(pb)
+	umodded := util.Umod(big, keyshares.NewCurve().P)
 
-	require.Equal(t, umodded.ToBigInt(), big)
+	require.Equal(t, umodded, big)
 }
 
 func TestPolynomialDifferentThresholdsAndShares(t *testing.T) {

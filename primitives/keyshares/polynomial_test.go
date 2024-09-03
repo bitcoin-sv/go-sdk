@@ -5,7 +5,7 @@ import (
 	"math/big"
 	"testing"
 
-	bignumber "github.com/bitcoin-sv/go-sdk/primitives/bignumber"
+	"github.com/bitcoin-sv/go-sdk/util"
 	"github.com/stretchr/testify/require"
 )
 
@@ -59,11 +59,11 @@ func TestPolynomialValueAt(t *testing.T) {
 	}
 }
 
-// Test BigNumber.Umod with Curve.P
+// Test util.Umod with Curve.P
 func TestUmod(t *testing.T) {
-	require.Equal(t, 100, bignumber.NewBigNumberFromInt(100).Umod(bignumber.NewBigNumber(NewCurve().P)).ToNumber())
-	require.Equal(t, 63, bignumber.NewBigNumber(NewCurve().P).Umod(bignumber.NewBigNumberFromInt(100)).ToNumber())
-	require.Equal(t, 63, bignumber.NewBigNumber(NewCurve().P).Umod(bignumber.NewBigNumberFromInt(-100)).ToNumber())
+	require.Equal(t, int64(100), util.Umod(big.NewInt(100), NewCurve().P).Int64())
+	require.Equal(t, int64(63), util.Umod(NewCurve().P, big.NewInt(100)).Int64())
+	require.Equal(t, int64(63), util.Umod(NewCurve().P, big.NewInt(-100)).Int64())
 }
 
 func TestValueAtStaticPoly(t *testing.T) {

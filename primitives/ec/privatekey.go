@@ -10,9 +10,9 @@ import (
 	"math/big"
 
 	base58 "github.com/bitcoin-sv/go-sdk/compat/base58"
-	bignumber "github.com/bitcoin-sv/go-sdk/primitives/bignumber"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	keyshares "github.com/bitcoin-sv/go-sdk/primitives/keyshares"
+	"github.com/bitcoin-sv/go-sdk/util"
 )
 
 var (
@@ -216,11 +216,11 @@ func (p *PrivateKey) ToPolynomial(threshold int) (*keyshares.Polynomial, error) 
 	points = append(points, keyshares.NewPointInFiniteField(big.NewInt(0), p.D))
 
 	// Generate random points for the rest of the polynomial
-	pb := bignumber.NewBigNumber(curve.P)
 	for i := 1; i < threshold; i++ {
-		x := bignumber.Random(32).Umod(pb)
-		y := bignumber.Random(32).Umod(pb)
-		points = append(points, keyshares.NewPointInFiniteField(x.ToBigInt(), y.ToBigInt()))
+		x := util.Umod(util.NewRandomBigInt(32), curve.P)
+		y := util.Umod(util.NewRandomBigInt(32), curve.P)
+
+		points = append(points, keyshares.NewPointInFiniteField(x, y))
 	}
 	return keyshares.NewPolynomial(points, threshold), nil
 }

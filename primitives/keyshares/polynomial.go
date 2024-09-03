@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	base58 "github.com/bitcoin-sv/go-sdk/compat/base58"
-	bignumber "github.com/bitcoin-sv/go-sdk/primitives/bignumber"
+	"github.com/bitcoin-sv/go-sdk/util"
 )
 
 type Polynomial struct {
@@ -38,12 +38,9 @@ type PointInFiniteField struct {
 func NewPointInFiniteField(x, y *big.Int) *PointInFiniteField {
 	curve := NewCurve()
 
-	pb := bignumber.NewBigNumber(curve.P)
-	xb := bignumber.NewBigNumber(x).Umod(pb)
-	yb := bignumber.NewBigNumber(y).Umod(pb)
 	return &PointInFiniteField{
-		X: xb.ToBigInt(),
-		Y: yb.ToBigInt(),
+		X: util.Umod(x, curve.P),
+		Y: util.Umod(y, curve.P),
 	}
 }
 
@@ -81,7 +78,6 @@ func NewPolynomial(points []*PointInFiniteField, threshold int) *Polynomial {
 
 func (p *Polynomial) ValueAt(x *big.Int) *big.Int {
 	P := NewCurve().P
-	pb := bignumber.NewBigNumber(P)
 	y := big.NewInt(0)
 
 	for i := 0; i < p.Threshold; i++ {
@@ -89,12 +85,10 @@ func (p *Polynomial) ValueAt(x *big.Int) *big.Int {
 		for j := 0; j < p.Threshold; j++ {
 			if i != j {
 				numerator := new(big.Int).Sub(x, p.Points[j].X)
-				nb := bignumber.NewBigNumber(numerator)
-				numerator = nb.Umod(pb).ToBigInt()
+				numerator = util.Umod(numerator, P)
 
 				denominator := new(big.Int).Sub(p.Points[i].X, p.Points[j].X)
-				db := bignumber.NewBigNumber(denominator)
-				denominator = db.Umod(pb).ToBigInt()
+				denominator = util.Umod(denominator, P)
 
 				denominatorInv := new(big.Int).ModInverse(denominator, P)
 				if denominatorInv == nil {
@@ -102,17 +96,14 @@ func (p *Polynomial) ValueAt(x *big.Int) *big.Int {
 				}
 
 				fraction := new(big.Int).Mul(numerator, denominatorInv)
-				fb := bignumber.NewBigNumber(fraction)
-				fraction = fb.Umod(pb).ToBigInt()
+				fraction = util.Umod(fraction, P)
 
 				term = new(big.Int).Mul(term, fraction)
-				tb := bignumber.NewBigNumber(term)
-				term = tb.Umod(pb).ToBigInt()
+				term = util.Umod(term, P)
 			}
 		}
 		y = y.Add(y, term)
-		yb := bignumber.NewBigNumber(y)
-		y = yb.Umod(pb).ToBigInt()
+		y = util.Umod(y, P)
 	}
 	log.Printf("Value at x=%d: %v", x, y)
 	return y
