@@ -65,14 +65,11 @@ func NewKeySharesFromBackupFormat(shares []string) (keyShares *KeyShares, error 
 }
 
 /**
- * @method toBackupShares
+ * @method ToBackupFormat
  *
- * Creates a backup of the private key by splitting it into shares.
+ * Creates a backup of the keyshares
  *
- *
- * @param threshold The number of shares which will be required to reconstruct the private key.
- * @param totalShares The number of shares to generate for distribution.
- * @returns
+ * @returns shares in backup format
  */
 func (k *KeyShares) ToBackupFormat() ([]string, error) {
 	backupShares := make([]string, 0)

@@ -230,12 +230,11 @@ func (p *PrivateKey) ToPolynomial(threshold int) (*keyshares.Polynomial, error) 
  *
  * @param threshold The minimum number of shares required to reconstruct the private key.
  * @param totalShares The total number of shares to generate.
- * @param prime The prime number to be used in Shamir's Secret Sharing Scheme.
- * @returns An array of shares.
+ * @returns A KeyShares object containing the shares, threshold and integrity.
  *
  * @example
- * const key = NewPrivateKey()
- * const shares = key.toKeyShares(2, 5)
+ * key, _ := NewPrivateKey()
+ * shares, _ := key.ToKeyShares(2, 5)
  */
 func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *keyshares.KeyShares, error error) {
 	if threshold < 2 {
@@ -298,13 +297,13 @@ func PrivateKeyFromKeyShares(keyShares *keyshares.KeyShares) (*PrivateKey, error
 }
 
 /**
- * @method toBackupShares
+ * @method ToBackupShares
  *
  * Creates a backup of the private key by splitting it into shares.
  *
  *
  * @param threshold The number of shares which will be required to reconstruct the private key.
- * @param totalShares The number of shares to generate for distribution.
+ * @param shares The total number of shares to generate for distribution.
  * @returns
  */
 func (p *PrivateKey) ToBackupShares(threshold int, shares int) ([]string, error) {
@@ -317,11 +316,11 @@ func (p *PrivateKey) ToBackupShares(threshold int, shares int) ([]string, error)
 
 /**
  *
- * @method fromBackupShares
+ * @method PrivateKeyFromBackupShares
  *
  * Creates a private key from backup shares.
  *
- * @param shares
+ * @param shares in backup format
  * @returns PrivateKey
  */
 func PrivateKeyFromBackupShares(shares []string) (*PrivateKey, error) {
