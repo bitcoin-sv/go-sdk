@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bitcoin-sv/go-sdk/util"
@@ -33,7 +32,7 @@ func TestNewByteStringFromHex(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := util.NewByteStringFromHex(tt.input)
-			assert.Equal(t, tt.expected, result)
+			require.Equal(t, tt.expected, result)
 		})
 	}
 }
@@ -52,7 +51,7 @@ func TestByteStringMarshalJSON(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := json.Marshal(tt.input)
 			require.NoError(t, err)
-			assert.Equal(t, tt.expected, string(result))
+			require.Equal(t, tt.expected, string(result))
 		})
 	}
 }
@@ -75,10 +74,10 @@ func TestByteStringUnmarshalJSON(t *testing.T) {
 			var bs util.ByteString
 			err := json.Unmarshal([]byte(tt.input), &bs)
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expected, bs)
+				require.NoError(t, err)
+				require.Equal(t, tt.expected, bs)
 			}
 		})
 	}
@@ -97,7 +96,7 @@ func TestByteStringString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := tt.input.String()
-			assert.Equal(t, tt.expected, result)
+			require.Equal(t, tt.expected, result)
 		})
 	}
 }
@@ -116,7 +115,7 @@ func TestByteStringValue(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result, err := tt.input.Value()
 			require.NoError(t, err)
-			assert.Equal(t, tt.expected, result)
+			require.Equal(t, tt.expected, result)
 		})
 	}
 }
@@ -137,10 +136,10 @@ func TestByteStringScan(t *testing.T) {
 			var bs util.ByteString
 			err := bs.Scan(tt.input)
 			if tt.wantErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.expected, bs)
+				require.NoError(t, err)
+				require.Equal(t, tt.expected, bs)
 			}
 		})
 	}

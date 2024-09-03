@@ -65,7 +65,7 @@ func TestNewRandomBigInt(t *testing.T) {
 			b := util.NewRandomBigInt(tc.byteLen)
 			require.NotNil(t, b)
 			require.LessOrEqual(t, len(b.Bytes()), tc.byteLen)
-			require.Greater(t, b.BitLen(), 0)
+			require.Positive(t, b.BitLen())
 		})
 	}
 }

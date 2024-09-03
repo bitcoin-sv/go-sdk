@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/bitcoin-sv/go-sdk/util"
@@ -63,7 +62,7 @@ func TestLittleEndianBytes(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 			result := util.LittleEndianBytes(tc.input, tc.length)
-			assert.Equal(t, tc.expected, result)
+			require.Equal(t, tc.expected, result)
 		})
 	}
 }
@@ -74,27 +73,27 @@ func TestReverseBytes(t *testing.T) {
 	t.Run("Empty slice", func(t *testing.T) {
 		input := []byte{}
 		result := util.ReverseBytes(input)
-		assert.Equal(t, input, result)
+		require.Equal(t, input, result)
 	})
 
 	t.Run("Single byte", func(t *testing.T) {
 		input := []byte{0x01}
 		result := util.ReverseBytes(input)
-		assert.Equal(t, input, result)
+		require.Equal(t, input, result)
 	})
 
 	t.Run("Multiple bytes", func(t *testing.T) {
 		input := []byte{0x01, 0x02, 0x03, 0x04}
 		expected := []byte{0x04, 0x03, 0x02, 0x01}
 		result := util.ReverseBytes(input)
-		assert.Equal(t, expected, result)
+		require.Equal(t, expected, result)
 	})
 
 	t.Run("Odd number of bytes", func(t *testing.T) {
 		input := []byte{0x01, 0x02, 0x03, 0x04, 0x05}
 		expected := []byte{0x05, 0x04, 0x03, 0x02, 0x01}
 		result := util.ReverseBytes(input)
-		assert.Equal(t, expected, result)
+		require.Equal(t, expected, result)
 	})
 
 	t.Run("genesis hash", func(t *testing.T) {
