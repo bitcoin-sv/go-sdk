@@ -33,13 +33,12 @@ type PointInFiniteField struct {
 func NewPointInFiniteField(x, y *big.Int) *PointInFiniteField {
 	curve := NewCurve()
 
-	xb := bignumber.NewBigNumber(x)
-	yb := bignumber.NewBigNumber(y)
 	pb := bignumber.NewBigNumber(curve.P)
+	xb := bignumber.NewBigNumber(x).Umod(pb)
+	yb := bignumber.NewBigNumber(y).Umod(pb)
 	return &PointInFiniteField{
-		// Prepare variables for quotient and remainder
-		X: xb.Umod(pb).ToBigInt(),
-		Y: yb.Umod(pb).ToBigInt(),
+		X: xb.ToBigInt(),
+		Y: yb.ToBigInt(),
 	}
 }
 
@@ -92,28 +91,34 @@ func (p *Polynomial) ValueAt(x *big.Int) *big.Int {
 				numerator := new(big.Int).Sub(x, p.Points[j].X)
 				nb := bignumber.NewBigNumber(numerator)
 				numerator = nb.Umod(pb).ToBigInt()
+				// log.Printf("numerator: %v\n", numerator)
 
 				denominator := new(big.Int).Sub(p.Points[i].X, p.Points[j].X)
 				db := bignumber.NewBigNumber(denominator)
 				denominator = db.Umod(pb).ToBigInt()
+				// log.Printf("denominator: %v\n", denominator)
 
 				denominatorInv := new(big.Int).ModInverse(denominator, P)
 				if denominatorInv == nil {
 					denominatorInv = new(big.Int).SetInt64(0)
 				}
+				// log.Printf("denominatorInv: %v\n", denominatorInv)
+
 				fraction := new(big.Int).Mul(numerator, denominatorInv)
 				fb := bignumber.NewBigNumber(fraction)
 				fraction = fb.Umod(pb).ToBigInt()
+				// log.Printf("fraction: %v\n", fraction)
 
 				term = term.Mul(term, fraction)
 				tb := bignumber.NewBigNumber(term)
 				term = tb.Umod(pb).ToBigInt()
+				// log.Printf("term: %v\n", term)
 			}
 		}
 		y = y.Add(y, term)
 		yb := bignumber.NewBigNumber(y)
 		y = yb.Umod(pb).ToBigInt()
 	}
-
+	// log.Printf("Value at x=%d: %v", x, y)
 	return y
 }

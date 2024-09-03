@@ -14,6 +14,7 @@ import (
 	"strings"
 	"testing"
 
+	bignumber "github.com/bitcoin-sv/go-sdk/primitives/bignumber"
 	shamir "github.com/bitcoin-sv/go-sdk/primitives/shamir"
 	"github.com/stretchr/testify/require"
 )
@@ -150,7 +151,7 @@ func TestPolynomialFromPrivateKey(t *testing.T) {
 
 func TestPolynomialFullProcess(t *testing.T) {
 	// Create a private key
-	privateKey, err := NewPrivateKey()
+	privateKey, err := PrivateKeyFromWif("L1vTr2wRMZoXWBM3u1Mvbzk9bfoJE5PT34t52HYGt9jzZMyavWrk")
 	if err != nil {
 		t.Fatalf("Failed to generate private key: %v", err)
 	}
@@ -164,24 +165,26 @@ func TestPolynomialFullProcess(t *testing.T) {
 		t.Fatalf(createPolyFail, err)
 	}
 
+	t.Logf("Generated polynomial:")
+
 	// Log the generated polynomial points
 	t.Logf("Generated polynomial points:")
 	for i, point := range poly.Points {
-		t.Logf("Point %d: (%v, %v)", i, point.X, point.Y)
+		t.Logf("Point %d: (%s, %s)", i, point.X, point.Y)
 	}
 
 	// Generate shares
-	shares := make([]*shamir.PointInFiniteField, totalShares)
+	points := make([]*shamir.PointInFiniteField, 0)
 	t.Logf("Generated shares:")
 	for i := 0; i < totalShares; i++ {
 		x := big.NewInt(int64(i + 1))
 		y := poly.ValueAt(x)
-		shares[i] = shamir.NewPointInFiniteField(x, y)
-		t.Logf("Share %d: (%v, %v)", i, shares[i].X, shares[i].Y)
+		points = append(points, shamir.NewPointInFiniteField(x, y))
+		t.Logf("Share %d: (%s, %s)", i+1, points[i].X, points[i].Y)
 	}
 
 	// Reconstruct the secret using threshold number of shares
-	reconstructPoly := shamir.NewPolynomial(shares[:threshold], threshold)
+	reconstructPoly := shamir.NewPolynomial(points[:threshold], threshold)
 	reconstructedSecret := reconstructPoly.ValueAt(big.NewInt(0))
 
 	t.Logf("Original secret: %v", privateKey.D)
@@ -190,6 +193,46 @@ func TestPolynomialFullProcess(t *testing.T) {
 	if reconstructedSecret.Cmp(privateKey.D) != 0 {
 		t.Errorf("Secret reconstruction failed. Expected %v, got %v", privateKey.D, reconstructedSecret)
 	}
+}
+
+func TestStaticKeyShares(t *testing.T) {
+	pk, err := PrivateKeyFromWif("L1vTr2wRMZoXWBM3u1Mvbzk9bfoJE5PT34t52HYGt9jzZMyavWrk")
+	if err != nil {
+		t.Fatalf("Failed to generate private key: %v", err)
+	}
+
+	threshold := 3
+
+	bigInt1, _ := new(big.Int).SetString("96062736363790697194862546171394473697392259359830162418218835520086413272341", 10)
+	bigInt2, _ := new(big.Int).SetString("30722461044811690128856937028727798465838823013972760604497780310461152961290", 10)
+	bigInt3, _ := new(big.Int).SetString("99029341976844930668697872705368631679110273751030257450922903721724195163244", 10)
+	bigInt4, _ := new(big.Int).SetString("69399200685258027967243383183941157630666642239721524878579037738057870534877", 10)
+	bigInt5, _ := new(big.Int).SetString("57624126407367177448064453473133284173777913145687126926923766367371013747852", 10)
+
+	points := []*shamir.PointInFiniteField{{
+		X: big.NewInt(1), Y: bigInt1},
+		{X: big.NewInt(2), Y: bigInt2},
+		{X: big.NewInt(3), Y: bigInt3},
+		{X: big.NewInt(4), Y: bigInt4},
+		{X: big.NewInt(5), Y: bigInt5},
+	}
+
+	reconstructedPoly := shamir.NewPolynomial(points[1:threshold+1], threshold)
+	reconstructedSecret := reconstructedPoly.ValueAt(big.NewInt(0))
+
+	t.Logf("Original secret: %v", pk.D)
+	t.Logf("Reconstructed secret: %v", reconstructedSecret)
+	require.Equal(t, pk.D, reconstructedSecret)
+}
+
+func TestUmod(t *testing.T) {
+	big, _ := new(big.Int).SetString("96062736363790697194862546171394473697392259359830162418218835520086413272341", 10)
+	bigg := bignumber.NewBigNumber(big)
+
+	pb := bignumber.NewBigNumber(shamir.NewCurve().P)
+	umodded := bigg.Umod(pb)
+
+	require.Equal(t, umodded.ToBigInt(), big)
 }
 
 func TestPolynomialDifferentThresholdsAndShares(t *testing.T) {
@@ -522,22 +565,12 @@ func TestExampleFromTypescript(t *testing.T) {
 	backup, err := pk.ToBackupShares(6, 30)
 	require.NoError(t, err)
 	require.NotNil(t, backup)
-	// for _, share := range recoveryShares {
-	// 	found := false
-	// 	for _, b := range backup {
-	// 		if b == share {
-	// 			found = true
-	// 			break
-	// 		}
-	// 	}
-	// 	require.True(t, found)
-	// }
 
 	recovery := recoveryShares[:6]
 	recoveredKey, err := PrivateKeyFromBackupShares(recovery)
 	require.NoError(t, err)
 	require.NotNil(t, recoveredKey)
-	// require.Equal(t, wif, recoveredKey.Wif())
+	require.Equal(t, wif, recoveredKey.Wif())
 }
 
 func TestKnownPolynomialValueAt(t *testing.T) {
@@ -551,5 +584,4 @@ func TestKnownPolynomialValueAt(t *testing.T) {
 	result := poly.ValueAt(big.NewInt(0))
 	expected := "8c507a209d082d9db947bea9ffb248bbb977e59953405dacf5ea8c4be3a11a2f"
 	require.Equal(t, expected, hex.EncodeToString(result.Bytes()))
-
 }

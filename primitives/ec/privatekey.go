@@ -198,10 +198,8 @@ func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*Private
 
 	newPrivKey := new(big.Int)
 	newPrivKey.Add(p.D, new(big.Int).SetBytes(hmac))
-	bn := bignumber.NewBigNumber(newPrivKey)
-	baePointBn := bignumber.NewBigNumber(S256().N)
-	um := bn.Umod(baePointBn).ToBigInt()
-	privKey, _ := PrivateKeyFromBytes(um.Bytes())
+	newPrivKey.Mod(newPrivKey, S256().N)
+	privKey, _ := PrivateKeyFromBytes(newPrivKey.Bytes())
 	return privKey, nil
 }
 
@@ -220,20 +218,10 @@ func (p *PrivateKey) ToPolynomial(threshold int) (*shamir.Polynomial, error) {
 	// Generate random points for the rest of the polynomial
 	pb := bignumber.NewBigNumber(curve.P)
 	for i := 1; i < threshold; i++ {
-		x, err := rand.Int(rand.Reader, big.NewInt(32))
-		if err != nil {
-			return nil, err
-		}
-		bx := bignumber.NewBigNumber(x).Umod(pb)
-
-		y, err := rand.Int(rand.Reader, big.NewInt(32))
-		if err != nil {
-			return nil, err
-		}
-		by := bignumber.NewBigNumber(y).Umod(pb)
-		points = append(points, shamir.NewPointInFiniteField(bx.ToBigInt(), by.ToBigInt()))
+		x := bignumber.Random(32).Umod(pb)
+		y := bignumber.Random(32).Umod(pb)
+		points = append(points, shamir.NewPointInFiniteField(x.ToBigInt(), y.ToBigInt()))
 	}
-
 	return shamir.NewPolynomial(points, threshold), nil
 }
 
@@ -272,7 +260,6 @@ func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *sha
 			return nil, err
 		}
 		x := new(big.Int).Set(pk.D)
-
 		y := new(big.Int).Set(poly.ValueAt(x))
 		points = append(points, shamir.NewPointInFiniteField(x, y))
 	}

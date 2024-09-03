@@ -4,6 +4,9 @@ import (
 	"log"
 	"math/big"
 	"testing"
+
+	bignumber "github.com/bitcoin-sv/go-sdk/primitives/bignumber"
+	"github.com/stretchr/testify/require"
 )
 
 // TestPointInFiniteField verifies the creation and string conversion of points
@@ -54,4 +57,11 @@ func TestPolynomialValueAt(t *testing.T) {
 		// We're not checking against specific values here, just ensuring it doesn't panic
 		t.Logf("Value at x=%d: %v", tc.x, result)
 	}
+}
+
+// Test BigNumber.Umod with Curve.P
+func TestUmod(t *testing.T) {
+	require.Equal(t, 100, bignumber.NewBigNumberFromInt(100).Umod(bignumber.NewBigNumber(NewCurve().P)).ToNumber())
+	require.Equal(t, 63, bignumber.NewBigNumber(NewCurve().P).Umod(bignumber.NewBigNumberFromInt(100)).ToNumber())
+	require.Equal(t, 63, bignumber.NewBigNumber(NewCurve().P).Umod(bignumber.NewBigNumberFromInt(-100)).ToNumber())
 }

@@ -5,9 +5,30 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.0.0 - YYYY-MM-DD](#100---yyyy-mm-dd)
+- [1.1.2 - 2024-09-02](#111---2024-09-02)
+- [1.1.1 - 2024-08-28](#111---2024-08-28)
+- [1.1.0 - 2024-08-19](#110---2024-08-19)
+- [1.0.0 - 2024-06-06](#100---2024-06-06)
 
-## [Unreleased]
+## [1.1.2] - 2024-09-02
+  - Fix OP_BIN2NUM to copy bytes and prevent stack corruption & add corresponding test
+
+### Changed
+  - `opcodeBin2num` now copies value before minimally encoding
+
+## [1.1.1] - 2024-08-28
+ - Fix OP_RETURN data & add corresponding test
+ - update release instructions
+
+### Added
+  - add additional test transaction
+  - add additional script tests, fix test code
+
+### Changed
+  - `opcodeReturn` now includes any `parsedOp.Data` present after `OP_RETURN`
+  - Changed RELEASE.md instructions
+
+## [1.1.0] - 2024-08-19
 - porting in all optimizations by Teranode team to their active go-bt fork
 - introducing chainhash to remove type coercion on tx hashes through the project
 - remove ByteStringLE (replaced by chainhash)
@@ -41,7 +62,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ---
 
-## [1.0.0] - YYYY-MM-DD
+## [1.0.0] - 2024-06-06
 
 ### Added
 - Initial release

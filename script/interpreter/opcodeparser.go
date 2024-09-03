@@ -155,6 +155,10 @@ func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
 			// If we are not in a conditional block, we end script evaluation.
 			// This must be the final evaluated opcode, everything after is ignored.
 			if conditionalBlock == 0 {
+				if i+1 < len(scr) {
+					parsedOp.Data = scr[i+1:]
+					parsedOp.op.length = 1 + len(parsedOp.Data)
+				}
 				parsedOps = append(parsedOps, parsedOp)
 				return parsedOps, nil
 			}

@@ -65,10 +65,10 @@ func TestParse(t *testing.T) {
 					op: opcode{
 						val:    script.OpRETURN,
 						name:   "OP_RETURN",
-						length: 1,
+						length: 4,
 						exec:   opcodeReturn,
 					},
-					Data: nil,
+					Data: []byte{0x00, 0x24, 0xDC},
 				},
 			},
 		},
