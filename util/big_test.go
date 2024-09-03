@@ -15,5 +15,5 @@ func TestBigUmod(t *testing.T) {
 func TestBigRandomInt(t *testing.T) {
 	b := util.NewRandomBigInt(32)
 	require.NotNil(t, b)
-	require.Equal(t, 32, len(b.Bytes()))
+	require.Len(t, b.Bytes(), 32)
 }
