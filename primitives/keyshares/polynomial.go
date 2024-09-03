@@ -2,7 +2,6 @@ package primitives
 
 import (
 	"fmt"
-	"log"
 	"math/big"
 	"strings"
 
@@ -105,6 +104,5 @@ func (p *Polynomial) ValueAt(x *big.Int) *big.Int {
 		y = y.Add(y, term)
 		y = util.Umod(y, P)
 	}
-	log.Printf("Value at x=%d: %v", x, y)
 	return y
 }
