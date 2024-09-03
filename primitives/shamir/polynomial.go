@@ -2,6 +2,7 @@ package primitives
 
 import (
 	"fmt"
+	"log"
 	"math/big"
 	"strings"
 
@@ -100,6 +101,7 @@ func (p *Polynomial) ValueAt(x *big.Int) *big.Int {
 
 				denominatorInv := new(big.Int).ModInverse(denominator, P)
 				if denominatorInv == nil {
+					// log.Printf("denominatorInv: %v\n", denominatorInv)
 					denominatorInv = new(big.Int).SetInt64(0)
 				}
 				// log.Printf("denominatorInv: %v\n", denominatorInv)
@@ -109,7 +111,7 @@ func (p *Polynomial) ValueAt(x *big.Int) *big.Int {
 				fraction = fb.Umod(pb).ToBigInt()
 				// log.Printf("fraction: %v\n", fraction)
 
-				term = term.Mul(term, fraction)
+				term = new(big.Int).Mul(term, fraction)
 				tb := bignumber.NewBigNumber(term)
 				term = tb.Umod(pb).ToBigInt()
 				// log.Printf("term: %v\n", term)
@@ -119,6 +121,6 @@ func (p *Polynomial) ValueAt(x *big.Int) *big.Int {
 		yb := bignumber.NewBigNumber(y)
 		y = yb.Umod(pb).ToBigInt()
 	}
-	// log.Printf("Value at x=%d: %v", x, y)
+	log.Printf("Value at x=%d: %v", x, y)
 	return y
 }
