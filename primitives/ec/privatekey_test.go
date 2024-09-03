@@ -15,7 +15,7 @@ import (
 	"testing"
 
 	bignumber "github.com/bitcoin-sv/go-sdk/primitives/bignumber"
-	shamir "github.com/bitcoin-sv/go-sdk/primitives/shamir"
+	keyshares "github.com/bitcoin-sv/go-sdk/primitives/keyshares"
 	"github.com/stretchr/testify/require"
 )
 
@@ -174,17 +174,17 @@ func TestPolynomialFullProcess(t *testing.T) {
 	}
 
 	// Generate shares
-	points := make([]*shamir.PointInFiniteField, 0)
+	points := make([]*keyshares.PointInFiniteField, 0)
 	t.Logf("Generated shares:")
 	for i := 0; i < totalShares; i++ {
 		x := big.NewInt(int64(i + 1))
 		y := poly.ValueAt(x)
-		points = append(points, shamir.NewPointInFiniteField(x, y))
+		points = append(points, keyshares.NewPointInFiniteField(x, y))
 		t.Logf("Share %d: (%s, %s)", i+1, points[i].X, points[i].Y)
 	}
 
 	// Reconstruct the secret using threshold number of shares
-	reconstructPoly := shamir.NewPolynomial(points[:threshold], threshold)
+	reconstructPoly := keyshares.NewPolynomial(points[:threshold], threshold)
 	reconstructedSecret := reconstructPoly.ValueAt(big.NewInt(0))
 
 	t.Logf("Original secret: %v", privateKey.D)
@@ -209,7 +209,7 @@ func TestStaticKeyShares(t *testing.T) {
 	bigInt4, _ := new(big.Int).SetString("69399200685258027967243383183941157630666642239721524878579037738057870534877", 10)
 	bigInt5, _ := new(big.Int).SetString("57624126407367177448064453473133284173777913145687126926923766367371013747852", 10)
 
-	points := []*shamir.PointInFiniteField{{
+	points := []*keyshares.PointInFiniteField{{
 		X: big.NewInt(1), Y: bigInt1},
 		{X: big.NewInt(2), Y: bigInt2},
 		{X: big.NewInt(3), Y: bigInt3},
@@ -217,7 +217,7 @@ func TestStaticKeyShares(t *testing.T) {
 		{X: big.NewInt(5), Y: bigInt5},
 	}
 
-	reconstructedPoly := shamir.NewPolynomial(points[1:threshold+1], threshold)
+	reconstructedPoly := keyshares.NewPolynomial(points[1:threshold+1], threshold)
 	reconstructedSecret := reconstructedPoly.ValueAt(big.NewInt(0))
 
 	t.Logf("Original secret: %v", pk.D)
@@ -229,7 +229,7 @@ func TestUmod(t *testing.T) {
 	big, _ := new(big.Int).SetString("96062736363790697194862546171394473697392259359830162418218835520086413272341", 10)
 	bigg := bignumber.NewBigNumber(big)
 
-	pb := bignumber.NewBigNumber(shamir.NewCurve().P)
+	pb := bignumber.NewBigNumber(keyshares.NewCurve().P)
 	umodded := bigg.Umod(pb)
 
 	require.Equal(t, umodded.ToBigInt(), big)
@@ -254,14 +254,14 @@ func TestPolynomialDifferentThresholdsAndShares(t *testing.T) {
 				t.Fatalf(createPolyFail, err)
 			}
 
-			shares := make([]*shamir.PointInFiniteField, tc.totalShares)
+			shares := make([]*keyshares.PointInFiniteField, tc.totalShares)
 			for i := 0; i < tc.totalShares; i++ {
 				x := big.NewInt(int64(i + 1))
 				y := poly.ValueAt(x)
-				shares[i] = shamir.NewPointInFiniteField(x, y)
+				shares[i] = keyshares.NewPointInFiniteField(x, y)
 			}
 
-			reconstructPoly := shamir.NewPolynomial(shares[:tc.threshold], tc.threshold)
+			reconstructPoly := keyshares.NewPolynomial(shares[:tc.threshold], tc.threshold)
 			reconstructedSecret := reconstructPoly.ValueAt(big.NewInt(0))
 
 			if reconstructedSecret.Cmp(privateKey.D) != 0 {
@@ -279,13 +279,13 @@ func TestPolynomialEdgeCases(t *testing.T) {
 		threshold := 2
 		totalShares := 3
 		poly, _ := privateKey.ToPolynomial(threshold)
-		shares := make([]*shamir.PointInFiniteField, totalShares)
+		shares := make([]*keyshares.PointInFiniteField, totalShares)
 		for i := 0; i < totalShares; i++ {
 			x := big.NewInt(int64(i + 1))
 			y := poly.ValueAt(x)
-			shares[i] = shamir.NewPointInFiniteField(x, y)
+			shares[i] = keyshares.NewPointInFiniteField(x, y)
 		}
-		reconstructPoly := shamir.NewPolynomial(shares[:threshold], threshold)
+		reconstructPoly := keyshares.NewPolynomial(shares[:threshold], threshold)
 		reconstructedSecret := reconstructPoly.ValueAt(big.NewInt(0))
 		if reconstructedSecret.Cmp(privateKey.D) != 0 {
 			t.Errorf("Secret reconstruction failed for minimum threshold")
@@ -297,13 +297,13 @@ func TestPolynomialEdgeCases(t *testing.T) {
 		threshold := 10
 		totalShares := 10
 		poly, _ := privateKey.ToPolynomial(threshold)
-		shares := make([]*shamir.PointInFiniteField, totalShares)
+		shares := make([]*keyshares.PointInFiniteField, totalShares)
 		for i := 0; i < totalShares; i++ {
 			x := big.NewInt(int64(i + 1))
 			y := poly.ValueAt(x)
-			shares[i] = shamir.NewPointInFiniteField(x, y)
+			shares[i] = keyshares.NewPointInFiniteField(x, y)
 		}
-		reconstructPoly := shamir.NewPolynomial(shares, threshold)
+		reconstructPoly := keyshares.NewPolynomial(shares, threshold)
 		reconstructedSecret := reconstructPoly.ValueAt(big.NewInt(0))
 		if reconstructedSecret.Cmp(privateKey.D) != 0 {
 			t.Errorf("Secret reconstruction failed for maximum threshold")
@@ -317,11 +317,11 @@ func TestPolynomialReconstructionWithDifferentSubsets(t *testing.T) {
 	totalShares := 5
 
 	poly, _ := privateKey.ToPolynomial(threshold)
-	shares := make([]*shamir.PointInFiniteField, totalShares)
+	shares := make([]*keyshares.PointInFiniteField, totalShares)
 	for i := 0; i < totalShares; i++ {
 		x := big.NewInt(int64(i + 1))
 		y := poly.ValueAt(x)
-		shares[i] = shamir.NewPointInFiniteField(x, y)
+		shares[i] = keyshares.NewPointInFiniteField(x, y)
 	}
 
 	subsets := [][]int{
@@ -333,11 +333,11 @@ func TestPolynomialReconstructionWithDifferentSubsets(t *testing.T) {
 
 	for i, subset := range subsets {
 		t.Run(fmt.Sprintf("Subset_%d", i), func(t *testing.T) {
-			subsetShares := make([]*shamir.PointInFiniteField, threshold)
+			subsetShares := make([]*keyshares.PointInFiniteField, threshold)
 			for j, idx := range subset {
 				subsetShares[j] = shares[idx]
 			}
-			reconstructPoly := shamir.NewPolynomial(subsetShares, threshold)
+			reconstructPoly := keyshares.NewPolynomial(subsetShares, threshold)
 			reconstructedSecret := reconstructPoly.ValueAt(big.NewInt(0))
 			if reconstructedSecret.Cmp(privateKey.D) != 0 {
 				t.Errorf("Secret reconstruction failed for subset %v", subset)
@@ -358,13 +358,13 @@ func TestPolynomialErrorHandling(t *testing.T) {
 	// Test reconstruction with insufficient shares
 	threshold := 3
 	poly, _ := privateKey.ToPolynomial(threshold)
-	shares := make([]*shamir.PointInFiniteField, 2)
+	shares := make([]*keyshares.PointInFiniteField, 2)
 	for i := 0; i < 2; i++ {
 		x := big.NewInt(int64(i + 1))
 		y := poly.ValueAt(x)
-		shares[i] = shamir.NewPointInFiniteField(x, y)
+		shares[i] = keyshares.NewPointInFiniteField(x, y)
 	}
-	reconstructPoly := shamir.NewPolynomial(shares, 2)
+	reconstructPoly := keyshares.NewPolynomial(shares, 2)
 	reconstructedSecret := reconstructPoly.ValueAt(big.NewInt(0))
 	if reconstructedSecret.Cmp(privateKey.D) == 0 {
 		t.Errorf("Expected incorrect reconstruction with insufficient shares")
@@ -378,13 +378,13 @@ func TestPolynomialConsistency(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
 		poly, _ := privateKey.ToPolynomial(threshold)
-		shares := make([]*shamir.PointInFiniteField, totalShares)
+		shares := make([]*keyshares.PointInFiniteField, totalShares)
 		for j := 0; j < totalShares; j++ {
 			x := big.NewInt(int64(j + 1))
 			y := poly.ValueAt(x)
-			shares[j] = shamir.NewPointInFiniteField(x, y)
+			shares[j] = keyshares.NewPointInFiniteField(x, y)
 		}
-		reconstructPoly := shamir.NewPolynomial(shares[:threshold], threshold)
+		reconstructPoly := keyshares.NewPolynomial(shares[:threshold], threshold)
 		reconstructedSecret := reconstructPoly.ValueAt(big.NewInt(0))
 		if reconstructedSecret.Cmp(privateKey.D) != 0 {
 			t.Errorf("Inconsistent secret reconstruction in run %d", i)
@@ -425,7 +425,7 @@ func TestPrivateKeyToKeyShares(t *testing.T) {
 		}
 		backup, _ := allShares.ToBackupFormat()
 		log.Printf("backup: %v", backup)
-		someShares, err := shamir.NewKeySharesFromBackupFormat(backup[:3])
+		someShares, err := keyshares.NewKeySharesFromBackupFormat(backup[:3])
 		if err != nil {
 			t.Fatalf("Failed to create key shares from backup format: %v", err)
 		}
@@ -506,7 +506,7 @@ func TestSameShareTwiceDuringRecovery(t *testing.T) {
 		"GBmoNRbsMVsLmEK5A6G28fktUNonZkn9mDrJJ58FXgsf.HDBRkzVUCtZ38ApEu36fvZtDoDSQTv3TWmbnxwwR7kto.3.2f804d43",
 		"2gHebXBgPd7daZbsj6w9TPDta3vQzqvbkLtJG596rdN1.E7ZaHyyHNDCwR6qxZvKkPPWWXzFCiKQFentJtvSSH5Bi.3.2f804d43",
 	}
-	recovery, err := shamir.NewKeySharesFromBackupFormat([]string{backup[0], backup[1], backup[1]})
+	recovery, err := keyshares.NewKeySharesFromBackupFormat([]string{backup[0], backup[1], backup[1]})
 	if err != nil {
 		t.Fatalf("Failed to create key shares from backup format: %v", err)
 	}
@@ -537,7 +537,7 @@ func TestExampleBackupAndRecovery(t *testing.T) {
 	share1 := "3znuzt7DZp8HzZTfTh5MF9YQKNX3oSxTbSYmSRGrH2ev.2Nm17qoocmoAhBTCs8TEBxNXCskV9N41rB2PckcgYeqV.2.35449bb9"
 	share2 := "Cm5fuUc39X5xgdedao8Pr1kvCSm8Gk7Cfenc7xUKcfLX.2juyK9BxCWn2DiY5JUAgj9NsQ77cc9bWksFyW45haXZm.2.35449bb9"
 
-	shares, err := shamir.NewKeySharesFromBackupFormat([]string{share1, share2})
+	shares, err := keyshares.NewKeySharesFromBackupFormat([]string{share1, share2})
 	require.NoError(t, err)
 	recoveredKey, err := PrivateKeyFromKeyShares(shares)
 	if err != nil {

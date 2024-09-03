@@ -10,7 +10,11 @@ import (
 	bignumber "github.com/bitcoin-sv/go-sdk/primitives/bignumber"
 )
 
-// Curve represents the parameters of the elliptic curve
+type Polynomial struct {
+	Points    []*PointInFiniteField
+	Threshold int
+}
+
 type Curve struct {
 	P *big.Int
 }
@@ -65,11 +69,6 @@ func PointFromString(s string) (*PointInFiniteField, error) {
 	return NewPointInFiniteField(new(big.Int).SetBytes(x), new(big.Int).SetBytes(y)), nil
 }
 
-type Polynomial struct {
-	Points    []*PointInFiniteField
-	Threshold int
-}
-
 func NewPolynomial(points []*PointInFiniteField, threshold int) *Polynomial {
 	if threshold == 0 {
 		threshold = len(points)
@@ -92,29 +91,23 @@ func (p *Polynomial) ValueAt(x *big.Int) *big.Int {
 				numerator := new(big.Int).Sub(x, p.Points[j].X)
 				nb := bignumber.NewBigNumber(numerator)
 				numerator = nb.Umod(pb).ToBigInt()
-				// log.Printf("numerator: %v\n", numerator)
 
 				denominator := new(big.Int).Sub(p.Points[i].X, p.Points[j].X)
 				db := bignumber.NewBigNumber(denominator)
 				denominator = db.Umod(pb).ToBigInt()
-				// log.Printf("denominator: %v\n", denominator)
 
 				denominatorInv := new(big.Int).ModInverse(denominator, P)
 				if denominatorInv == nil {
-					// log.Printf("denominatorInv: %v\n", denominatorInv)
 					denominatorInv = new(big.Int).SetInt64(0)
 				}
-				// log.Printf("denominatorInv: %v\n", denominatorInv)
 
 				fraction := new(big.Int).Mul(numerator, denominatorInv)
 				fb := bignumber.NewBigNumber(fraction)
 				fraction = fb.Umod(pb).ToBigInt()
-				// log.Printf("fraction: %v\n", fraction)
 
 				term = new(big.Int).Mul(term, fraction)
 				tb := bignumber.NewBigNumber(term)
 				term = tb.Umod(pb).ToBigInt()
-				// log.Printf("term: %v\n", term)
 			}
 		}
 		y = y.Add(y, term)

@@ -12,7 +12,7 @@ import (
 	base58 "github.com/bitcoin-sv/go-sdk/compat/base58"
 	bignumber "github.com/bitcoin-sv/go-sdk/primitives/bignumber"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
-	shamir "github.com/bitcoin-sv/go-sdk/primitives/shamir"
+	keyshares "github.com/bitcoin-sv/go-sdk/primitives/keyshares"
 )
 
 var (
@@ -203,26 +203,26 @@ func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*Private
 	return privKey, nil
 }
 
-func (p *PrivateKey) ToPolynomial(threshold int) (*shamir.Polynomial, error) {
+func (p *PrivateKey) ToPolynomial(threshold int) (*keyshares.Polynomial, error) {
 	// Check for invalid threshold
 	if threshold < 2 {
 		return nil, fmt.Errorf("threshold must be at least 2")
 	}
 
-	curve := shamir.NewCurve()
-	points := make([]*shamir.PointInFiniteField, 0)
+	curve := keyshares.NewCurve()
+	points := make([]*keyshares.PointInFiniteField, 0)
 
 	// Set the first point to (0, key)
-	points = append(points, shamir.NewPointInFiniteField(big.NewInt(0), p.D))
+	points = append(points, keyshares.NewPointInFiniteField(big.NewInt(0), p.D))
 
 	// Generate random points for the rest of the polynomial
 	pb := bignumber.NewBigNumber(curve.P)
 	for i := 1; i < threshold; i++ {
 		x := bignumber.Random(32).Umod(pb)
 		y := bignumber.Random(32).Umod(pb)
-		points = append(points, shamir.NewPointInFiniteField(x.ToBigInt(), y.ToBigInt()))
+		points = append(points, keyshares.NewPointInFiniteField(x.ToBigInt(), y.ToBigInt()))
 	}
-	return shamir.NewPolynomial(points, threshold), nil
+	return keyshares.NewPolynomial(points, threshold), nil
 }
 
 /**
@@ -237,7 +237,7 @@ func (p *PrivateKey) ToPolynomial(threshold int) (*shamir.Polynomial, error) {
  * const key = NewPrivateKey()
  * const shares = key.toKeyShares(2, 5)
  */
-func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *shamir.KeyShares, error error) {
+func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *keyshares.KeyShares, error error) {
 	if threshold < 2 {
 		return nil, errors.New("threshold must be at least 2")
 	}
@@ -253,7 +253,7 @@ func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *sha
 		return nil, err
 	}
 
-	points := make([]*shamir.PointInFiniteField, 0)
+	points := make([]*keyshares.PointInFiniteField, 0)
 	for range totalShares {
 		pk, err := NewPrivateKey()
 		if err != nil {
@@ -261,15 +261,15 @@ func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *sha
 		}
 		x := new(big.Int).Set(pk.D)
 		y := new(big.Int).Set(poly.ValueAt(x))
-		points = append(points, shamir.NewPointInFiniteField(x, y))
+		points = append(points, keyshares.NewPointInFiniteField(x, y))
 	}
 
 	integrity := hex.EncodeToString(p.PubKey().ToHash())[:8]
-	return shamir.NewKeyShares(points, threshold, integrity), nil
+	return keyshares.NewKeyShares(points, threshold, integrity), nil
 }
 
 // PrivateKeyFromKeyShares combines shares to reconstruct the private key
-func PrivateKeyFromKeyShares(keyShares *shamir.KeyShares) (*PrivateKey, error) {
+func PrivateKeyFromKeyShares(keyShares *keyshares.KeyShares) (*PrivateKey, error) {
 	if keyShares.Threshold < 2 {
 		return nil, errors.New("threshold should be at least 2")
 	}
@@ -287,7 +287,7 @@ func PrivateKeyFromKeyShares(keyShares *shamir.KeyShares) (*PrivateKey, error) {
 		}
 	}
 
-	poly := shamir.NewPolynomial(keyShares.Points, keyShares.Threshold)
+	poly := keyshares.NewPolynomial(keyShares.Points, keyShares.Threshold)
 	polyBytes := poly.ValueAt(big.NewInt(0)).Bytes()
 	privateKey, publicKey := PrivateKeyFromBytes(polyBytes)
 	integrityHash := hex.EncodeToString(publicKey.ToHash())[:8]
@@ -325,7 +325,7 @@ func (p *PrivateKey) ToBackupShares(threshold int, shares int) ([]string, error)
  * @returns PrivateKey
  */
 func PrivateKeyFromBackupShares(shares []string) (*PrivateKey, error) {
-	keyShares, err := shamir.NewKeySharesFromBackupFormat(shares)
+	keyShares, err := keyshares.NewKeySharesFromBackupFormat(shares)
 	if err != nil {
 		return nil, err
 	}
