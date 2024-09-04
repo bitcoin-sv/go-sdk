@@ -116,6 +116,26 @@ func TestBRC42PrivateVectors(t *testing.T) {
 	}
 }
 
+func TestPrivateKeyFromInvalidHex(t *testing.T) {
+	hex := ""
+	_, err := PrivateKeyFromHex(hex)
+	require.Error(t, err)
+
+	wif := "L4o1GXuUSHauk19f9Cfpm1qfSXZuGLBUAC2VZM6vdmfMxRxAYkWq"
+	_, err = PrivateKeyFromHex(wif)
+	require.Error(t, err)
+}
+
+func TestPrivateKeyFromInvalidWif(t *testing.T) {
+	wif := "L401GXuUSHauk19f9Cfpm1qfSXZuGLBUAC2VZM6vdmfMxRxAYkWq"
+	_, err := PrivateKeyFromWif(wif)
+	require.Error(t, err)
+
+	wif = "L4o1GXuUSHauk19f9Cfpm1qfSXZuGLBUAC2VZM6vdmfMxRxAYkW"
+	_, err = PrivateKeyFromWif(wif)
+	require.Error(t, err)
+}
+
 // TestPolynomialFromPrivateKey checks if a polynomial is correctly created from a private key
 func TestPolynomialFromPrivateKey(t *testing.T) {
 
