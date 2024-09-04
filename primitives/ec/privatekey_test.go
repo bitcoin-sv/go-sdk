@@ -134,6 +134,8 @@ func TestPrivateKeyFromInvalidWif(t *testing.T) {
 	wif = "L4o1GXuUSHauk19f9Cfpm1qfSXZuGLBUAC2VZM6vdmfMxRxAYkW"
 	_, err = PrivateKeyFromWif(wif)
 	require.Error(t, err)
+
+	wif = "L4o1GXuUSHauk19f9Cfpm1qfSXZuGLBUAC2VZM6vdmfMxRxAYkWqL4o1GXuUSHauk19f9Cfpm1qfSXZuGLBUAC2VZM6vdmfMxRxAYkWq"
 }
 
 // TestPolynomialFromPrivateKey checks if a polynomial is correctly created from a private key

@@ -76,4 +76,34 @@ func TestInvalidBackupFormat(t *testing.T) {
 	if err == nil {
 		t.Errorf("Expected error for invalid threshold")
 	}
+
+	// test missing threshold
+	invalidShare4 := validX + "." + validY + ".." + integrity
+	_, err = NewKeySharesFromBackupFormat([]string{invalidShare4})
+	if err == nil {
+		t.Errorf("Expected error for missing threshold")
+	}
+
+	// test missing integrity
+	invalidShare5 := validX + "." + validY + ".3."
+	_, err = NewKeySharesFromBackupFormat([]string{invalidShare5})
+	if err == nil {
+		t.Errorf("Expected error for missing integrity")
+	}
+
+	// test mismatch threshold in shares
+	invalidShare6 := validX + "." + validY + ".3." + integrity
+	invalidShare7 := validX + "." + validY + ".4." + integrity
+	_, err = NewKeySharesFromBackupFormat([]string{invalidShare6, invalidShare7})
+	if err == nil {
+		t.Errorf("Expected error for mismatch threshold")
+	}
+
+	// test mismatch integrity in shares
+	invalidShare8 := validX + "." + validY + ".3." + integrity
+	invalidShare9 := validX + "." + validY + ".3." + integrity + "1"
+	_, err = NewKeySharesFromBackupFormat([]string{invalidShare8, invalidShare9})
+	if err == nil {
+		t.Errorf("Expected error for mismatch integrity")
+	}
 }
