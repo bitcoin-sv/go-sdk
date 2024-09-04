@@ -54,10 +54,15 @@ func Umod(x *big.Int, y *big.Int) *big.Int {
 
 func NewRandomBigInt(byteLen int) *big.Int {
 	b := make([]byte, byteLen)
-	_, err := rand.Read(b)
-	if err != nil {
-		panic(err)
+	maxRetries := 10
+	// gracefully handle errors in low entropy environments
+	// or extreme resource constraints, embedded systems
+	for retries := 0; retries < maxRetries; retries++ {
+		_, err := rand.Read(b)
+		if err == nil {
+			return new(big.Int).SetBytes(b)
+		}
 	}
-
-	return new(big.Int).SetBytes(b)
+	// Failure here indicates a critical error
+	panic("failed to generate random big.Int")
 }

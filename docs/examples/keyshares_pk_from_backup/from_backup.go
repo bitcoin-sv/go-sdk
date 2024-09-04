@@ -4,7 +4,6 @@ import (
 	"log"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	keyshares "github.com/bitcoin-sv/go-sdk/primitives/keyshares"
 )
 
 func main() {
@@ -17,9 +16,7 @@ func main() {
 		"BVk1tcvJEbhUfZagStg15rFRxQDeLzgSN15rWkGhNf19.CUB7p6zK3JPBkBriRRGdWj4y3Z3qCfsaCYutmMWKv1VJ.3.bbc45478",
 	}
 
-	keyshares, _ := keyshares.NewKeySharesFromBackupFormat(shares)
-
-	pk, _ := ec.PrivateKeyFromKeyShares(keyshares)
+	pk, _ := ec.PrivateKeyFromBackupShares(shares)
 
 	if pk.Wif() == expectedWif {
 		log.Println("Private key:", pk.Wif())
