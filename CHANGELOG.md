@@ -5,10 +5,40 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.1.2 - 2024-09-02](#111---2024-09-02)
+- [1.1.3 - 2024-09-04](#113---2024-09-04)
+- [1.1.2 - 2024-09-02](#112---2024-09-02)
 - [1.1.1 - 2024-08-28](#111---2024-08-28)
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
+
+## [1.1.3] - 2024-09-04
+
+  - Add shamir key splitting
+  - Added PublicKey.ToHash() - sha256 hash, then ripemd160 of the public key (matching ts implementation)`
+  - Added new KeyShares and polynomial primitives, and polynomial operations to support key splitting
+  - Tests for all new keyshare, private key, and polynomial operations
+  - added recommended vscode plugin and extension settings for this repo in .vscode directory
+  - handle base58 decode errors
+  - additional tests for script/address.go
+
+  ### Added
+  - `PrivateKey.ToKeyShares`
+  - `PrivateKey.ToPolynomial`
+  - `PrivateKey.ToBackupShares`
+  - `PrivateKeyFromKeyShares`
+  - `PrivateKeyFromBackupShares`
+  - `PublicKey.ToHash()`
+  - New tests for the new `PrivateKey` methods
+  - new primitive `keyshares`
+  - `NewKeyShares` returns a new `KeyShares` struct
+  - `NewKeySharesFromBackupFormat`
+  - `KeyShares.ToBackupFormat`
+  - `polonomial.go` and tests for core functionality used by `KeyShares` and `PrivateKey`
+  - `util.Umod` in `util` package `big.go`
+  - `util.NewRandomBigInt` in `util` package `big.go`
+
+  ### Changed
+  - `base58.Decode` now returns an error in the case of invalid characters
 
 ## [1.1.2] - 2024-09-02
   - Fix OP_BIN2NUM to copy bytes and prevent stack corruption & add corresponding test

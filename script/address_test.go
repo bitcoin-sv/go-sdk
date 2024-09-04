@@ -113,3 +113,71 @@ func TestBase58EncodeMissingChecksum(t *testing.T) {
 		script.Base58EncodeMissingChecksum(input),
 	)
 }
+
+func TestNewAddressFromPublicKeyHash(t *testing.T) {
+	t.Parallel()
+
+	t.Run("mainnet", func(t *testing.T) {
+		hash, err := hex.DecodeString(testPublicKeyHash)
+		require.NoError(t, err)
+
+		addr, err := script.NewAddressFromPublicKeyHash(hash, true)
+		require.NoError(t, err)
+		require.NotNil(t, addr)
+
+		require.Equal(t, testPublicKeyHash, addr.PublicKeyHash.String())
+		require.Equal(t, "114ZWApV4EEU8frr7zygqQcB1V2BodGZuS", addr.AddressString)
+	})
+
+	t.Run("testnet", func(t *testing.T) {
+		hash, err := hex.DecodeString(testPublicKeyHash)
+		require.NoError(t, err)
+
+		addr, err := script.NewAddressFromPublicKeyHash(hash, false)
+		require.NoError(t, err)
+		require.NotNil(t, addr)
+
+		require.Equal(t, testPublicKeyHash, addr.PublicKeyHash.String())
+		require.Equal(t, "mfaWoDuTsFfiunLTqZx4fKpVsUctiDV9jk", addr.AddressString)
+	})
+}
+
+func TestNewAddressFromPublicKeyStringInvalid(t *testing.T) {
+	t.Parallel()
+
+	addr, err := script.NewAddressFromPublicKeyString("invalid_pubkey", true)
+	require.Error(t, err)
+	require.Nil(t, addr)
+}
+
+func TestNewAddressFromPublicKeyInvalid(t *testing.T) {
+	t.Parallel()
+
+	invalidPubKeyBytes := []byte{0x00, 0x01, 0x02} // Invalid public key
+	invalidPubKey, err := ec.ParsePubKey(invalidPubKeyBytes)
+	require.Error(t, err)
+	require.Nil(t, invalidPubKey)
+}
+
+func TestBase58EncodeMissingChecksumEdgeCases(t *testing.T) {
+	t.Parallel()
+
+	t.Run("empty input", func(t *testing.T) {
+		result := script.Base58EncodeMissingChecksum([]byte{})
+		require.NotEmpty(t, result)
+	})
+
+	t.Run("single byte input", func(t *testing.T) {
+		result := script.Base58EncodeMissingChecksum([]byte{0x00})
+		require.NotEmpty(t, result)
+	})
+
+	t.Run("large input", func(t *testing.T) {
+		largeInput := make([]byte, 1000)
+		for i := range largeInput {
+			largeInput[i] = byte(i % 256)
+		}
+		result := script.Base58EncodeMissingChecksum(largeInput)
+		require.NotEmpty(t, result)
+	})
+}

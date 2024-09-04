@@ -1,0 +1,6 @@
+{
+  "sonarlint.connectedMode.project": {
+    "connectionId": "bitcoin-sv",
+    "projectKey": "bitcoin-sv_go-sdk"
+  }
+}

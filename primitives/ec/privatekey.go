@@ -11,6 +11,8 @@ import (
 
 	base58 "github.com/bitcoin-sv/go-sdk/compat/base58"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
+	keyshares "github.com/bitcoin-sv/go-sdk/primitives/keyshares"
+	"github.com/bitcoin-sv/go-sdk/util"
 )
 
 var (
@@ -41,7 +43,7 @@ const compressMagic byte = 0x01
 // package.
 type PrivateKey e.PrivateKey
 
-// PrivateKeyFromBytes returns a private and public key for `curve' based on the
+// PrivateKeyFromBytes returns a private and public key based on the
 // private key passed as an argument as a byte slice.
 func PrivateKeyFromBytes(pk []byte) (*PrivateKey, *PublicKey) {
 	x, y := S256().ScalarBaseMult(pk)
@@ -57,7 +59,6 @@ func PrivateKeyFromBytes(pk []byte) (*PrivateKey, *PublicKey) {
 }
 
 // NewPrivateKey is a wrapper for ecdsa.GenerateKey that returns a PrivateKey
-// instead of the normal ecdsa.PrivateKey.
 func NewPrivateKey() (*PrivateKey, error) {
 	key, err := e.GenerateKey(S256(), rand.Reader)
 	if err != nil {
@@ -66,7 +67,7 @@ func NewPrivateKey() (*PrivateKey, error) {
 	return (*PrivateKey)(key), nil
 }
 
-// PrivateKey is an ecdsa.PrivateKey with additional functions to
+// PrivateKeyFromHex returns a private key from a hex string.
 func PrivateKeyFromHex(privKeyHex string) (*PrivateKey, error) {
 	if len(privKeyHex) == 0 {
 		return nil, errors.New("private key hex is empty")
@@ -79,9 +80,12 @@ func PrivateKeyFromHex(privKeyHex string) (*PrivateKey, error) {
 	return privKey, nil
 }
 
-// PrivateKey is an ecdsa.PrivateKey with additional functions to
+// PrivateKeyFromWif returns a private key from a WIF string.
 func PrivateKeyFromWif(wif string) (*PrivateKey, error) {
-	decoded := base58.Decode(wif)
+	decoded, err := base58.Decode(wif)
+	if err != nil {
+		return nil, err
+	}
 	decodedLen := len(decoded)
 	var compress bool
 
@@ -197,4 +201,132 @@ func (p *PrivateKey) DeriveChild(pub *PublicKey, invoiceNumber string) (*Private
 	newPrivKey.Mod(newPrivKey, S256().N)
 	privKey, _ := PrivateKeyFromBytes(newPrivKey.Bytes())
 	return privKey, nil
+}
+
+func (p *PrivateKey) ToPolynomial(threshold int) (*keyshares.Polynomial, error) {
+	// Check for invalid threshold
+	if threshold < 2 {
+		return nil, fmt.Errorf("threshold must be at least 2")
+	}
+
+	curve := keyshares.NewCurve()
+	points := make([]*keyshares.PointInFiniteField, 0)
+
+	// Set the first point to (0, key)
+	points = append(points, keyshares.NewPointInFiniteField(big.NewInt(0), p.D))
+
+	// Generate random points for the rest of the polynomial
+	for i := 1; i < threshold; i++ {
+		x := util.Umod(util.NewRandomBigInt(32), curve.P)
+		y := util.Umod(util.NewRandomBigInt(32), curve.P)
+
+		points = append(points, keyshares.NewPointInFiniteField(x, y))
+	}
+	return keyshares.NewPolynomial(points, threshold), nil
+}
+
+/**
+ * Splits the private key into shares using Shamir's Secret Sharing Scheme.
+ *
+ * @param threshold The minimum number of shares required to reconstruct the private key.
+ * @param totalShares The total number of shares to generate.
+ * @returns A KeyShares object containing the shares, threshold and integrity.
+ *
+ * @example
+ * key, _ := NewPrivateKey()
+ * shares, _ := key.ToKeyShares(2, 5)
+ */
+func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *keyshares.KeyShares, error error) {
+	if threshold < 2 {
+		return nil, errors.New("threshold must be at least 2")
+	}
+	if totalShares < 2 {
+		return nil, errors.New("totalShares must be at least 2")
+	}
+	if threshold > totalShares {
+		return nil, errors.New("threshold should be less than or equal to totalShares")
+	}
+
+	poly, err := p.ToPolynomial(threshold)
+	if err != nil {
+		return nil, err
+	}
+
+	points := make([]*keyshares.PointInFiniteField, 0)
+	for range totalShares {
+		pk, err := NewPrivateKey()
+		if err != nil {
+			return nil, err
+		}
+		x := new(big.Int).Set(pk.D)
+		y := new(big.Int).Set(poly.ValueAt(x))
+		points = append(points, keyshares.NewPointInFiniteField(x, y))
+	}
+
+	integrity := hex.EncodeToString(p.PubKey().ToHash())[:8]
+	return keyshares.NewKeyShares(points, threshold, integrity), nil
+}
+
+// PrivateKeyFromKeyShares combines shares to reconstruct the private key
+func PrivateKeyFromKeyShares(keyShares *keyshares.KeyShares) (*PrivateKey, error) {
+	if keyShares.Threshold < 2 {
+		return nil, errors.New("threshold should be at least 2")
+	}
+
+	if len(keyShares.Points) < keyShares.Threshold {
+		return nil, fmt.Errorf("at least %d shares are required to reconstruct the private key", keyShares.Threshold)
+	}
+
+	// check to see if two points have the same x value
+	for i := 0; i < keyShares.Threshold; i++ {
+		for j := i + 1; j < keyShares.Threshold; j++ {
+			if keyShares.Points[i].X.Cmp(keyShares.Points[j].X) == 0 {
+				return nil, fmt.Errorf("duplicate share detected, each must be unique")
+			}
+		}
+	}
+
+	poly := keyshares.NewPolynomial(keyShares.Points, keyShares.Threshold)
+	polyBytes := poly.ValueAt(big.NewInt(0)).Bytes()
+	privateKey, publicKey := PrivateKeyFromBytes(polyBytes)
+	integrityHash := hex.EncodeToString(publicKey.ToHash())[:8]
+	if keyShares.Integrity != integrityHash {
+		return nil, fmt.Errorf("integrity hash mismatch %s != %s", keyShares.Integrity, integrityHash)
+	}
+	return privateKey, nil
+}
+
+/**
+ * @method ToBackupShares
+ *
+ * Creates a backup of the private key by splitting it into shares.
+ *
+ *
+ * @param threshold The number of shares which will be required to reconstruct the private key.
+ * @param shares The total number of shares to generate for distribution.
+ * @returns
+ */
+func (p *PrivateKey) ToBackupShares(threshold int, shares int) ([]string, error) {
+	keyShares, err := p.ToKeyShares(threshold, shares)
+	if err != nil {
+		return nil, err
+	}
+	return keyShares.ToBackupFormat()
+}
+
+/**
+ *
+ * @method PrivateKeyFromBackupShares
+ *
+ * Creates a private key from backup shares.
+ *
+ * @param shares in backup format
+ * @returns PrivateKey
+ */
+func PrivateKeyFromBackupShares(shares []string) (*PrivateKey, error) {
+	keyShares, err := keyshares.NewKeySharesFromBackupFormat(shares)
+	if err != nil {
+		return nil, err
+	}
+	return PrivateKeyFromKeyShares(keyShares)
 }

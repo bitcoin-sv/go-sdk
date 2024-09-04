@@ -5,6 +5,7 @@
 package compat
 
 import (
+	"errors"
 	"math/big"
 )
 
@@ -14,7 +15,7 @@ var bigRadix = big.NewInt(58)
 var bigZero = big.NewInt(0)
 
 // Decode decodes a modified base58 string to a byte slice.
-func Decode(b string) []byte {
+func Decode(b string) ([]byte, error) {
 	answer := big.NewInt(0)
 	j := big.NewInt(1)
 
@@ -22,7 +23,7 @@ func Decode(b string) []byte {
 	for i := len(b) - 1; i >= 0; i-- {
 		tmp := b58[b[i]]
 		if tmp == 255 {
-			return []byte("")
+			return []byte(""), errors.New("bad character in encoding")
 		}
 		scratch.SetInt64(int64(tmp))
 		scratch.Mul(j, scratch)
@@ -42,7 +43,7 @@ func Decode(b string) []byte {
 	val := make([]byte, flen)
 	copy(val[numZeros:], tmpval)
 
-	return val
+	return val, nil
 }
 
 // Encode encodes a byte slice to a modified base58 string.

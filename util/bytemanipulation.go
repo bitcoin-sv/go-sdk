@@ -2,8 +2,6 @@ package util
 
 import "encoding/binary"
 
-// TODO: Should this be abstracted to a different package?
-
 // ReverseBytes reverses the bytes (little endian/big endian).
 // This is used when computing merkle trees in Bitcoin, for example.
 func ReverseBytes(a []byte) []byte {
@@ -18,9 +16,7 @@ func ReverseBytes(a []byte) []byte {
 
 // LittleEndianBytes returns a byte array in little endian from an unsigned integer of 32 bytes.
 func LittleEndianBytes(v uint32, l uint32) []byte {
-	buf := make([]byte, l)
-
+	buf := make([]byte, 4)
 	binary.LittleEndian.PutUint32(buf, v)
-
-	return buf
+	return buf[:l] // Return only the first l bytes
 }

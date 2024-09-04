@@ -537,7 +537,10 @@ func NewMaster(seed []byte, net *chaincfg.Params) (*ExtendedKey, error) {
 func NewKeyFromString(key string) (*ExtendedKey, error) {
 	// The base58-decoded extended key must consist of a serialized payload
 	// plus an additional 4 bytes for the checksum.
-	decoded := base58.Decode(key)
+	decoded, err := base58.Decode(key)
+	if err != nil {
+		return nil, err
+	}
 	if len(decoded) != serializedKeyLen+4 {
 		return nil, ErrInvalidKeyLen
 	}
