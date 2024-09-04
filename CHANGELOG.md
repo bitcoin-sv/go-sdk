@@ -5,13 +5,13 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.1.3 - 2024-09-03](#113---2024-09-03)
+- [1.1.3 - 2024-09-04](#113---2024-09-04)
 - [1.1.2 - 2024-09-02](#112---2024-09-02)
 - [1.1.1 - 2024-08-28](#111---2024-08-28)
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
 
-## [1.1.3] - 2024-09-03
+## [1.1.3] - 2024-09-04
 
   - Add shamir key splitting
   - Added PublicKey.ToHash() - sha256 hash, then ripemd160 of the public key (matching ts implementation)`
