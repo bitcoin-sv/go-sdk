@@ -1,19 +1,26 @@
 package main
 
 import (
+	"encoding/hex"
 	"fmt"
 
-	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	aes "github.com/bitcoin-sv/go-sdk/primitives/aesgcm"
 )
 
+// Vanilla AES encryption and decryption
 func main() {
-	pk, _ := ec.NewPrivateKey()
+	key, _ := hex.DecodeString("000102030405060708090a0b0c0d0e0f")
 
 	// Encrypt using the public key of the given private key
-	encryptedData, _ := ec.EncryptWithPrivateKey(pk, "this is a test")
+	encryptedData, err := aes.AESEncrypt([]byte("0123456789abcdef"), key)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	// Decrypt using the private key
-	decryptedData, _ := ec.DecryptWithPrivateKey(pk, encryptedData)
-
+	decryptedData, err := aes.AESDecrypt(encryptedData, key)
+	if err != nil {
+		fmt.Println(err)
+	}
 	fmt.Printf("decryptedData: %s\n", decryptedData)
 }

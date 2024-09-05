@@ -9,6 +9,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testData = "I am a test"
+const testData2 = "this is the data I want to hash"
+
 func TestHashFunctions(t *testing.T) {
 	t.Parallel()
 
@@ -26,7 +29,7 @@ func TestHashFunctions(t *testing.T) {
 		},
 		{
 			"Test Ripemd160 String",
-			"I am a test",
+			testData,
 			"09a23f506b4a37cabab8a9e49b541de582fca96b",
 			Ripemd160,
 		},
@@ -38,7 +41,7 @@ func TestHashFunctions(t *testing.T) {
 		},
 		{
 			"Test Sha256 d String",
-			"this is the data I want to hash",
+			testData2,
 			"2209ddda5914a3fbad507ff2284c4b6e559c18a669f9fc3ad3b5826a2a999d58",
 			Sha256d,
 		},
@@ -50,7 +53,7 @@ func TestHashFunctions(t *testing.T) {
 		},
 		{
 			"Test Sha256 String",
-			"this is the data I want to hash",
+			testData2,
 			"f88eec7ecabf88f9a64c4100cac1e0c0c4581100492137d1b656ea626cad63e3",
 			Sha256,
 		},
@@ -62,9 +65,21 @@ func TestHashFunctions(t *testing.T) {
 		},
 		{
 			"Test Hash160 String",
-			"this is the data I want to hash",
+			testData2,
 			"e7fb13ef86fef4203f042fbfc2703fa628301e90",
 			Hash160,
+		},
+		{
+			"Test Sha512 Empty String",
+			"",
+			"cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e",
+			Sha512,
+		},
+		{
+			"Test Sha512 String",
+			testData2,
+			"fe917669df24482f19e9fdd305a846ab5778708d75e05bef0eb9b349c22c21c0168892058b26fe9ae0e3488f6b05b5cc6b356f4dd6093cdf9329ed800de3a165",
+			Sha512,
 		},
 	}
 
@@ -104,7 +119,6 @@ func TestSha256HMAC(t *testing.T) {
 			"a28cf43130ee696a98f14a37678b56bcfcbdd9e5cf69717fecf5480f0ebdf790",
 			Sha256HMAC,
 		},
-		// ... (Other test cases)
 	}
 
 	for _, tc := range tests {
@@ -114,6 +128,39 @@ func TestSha256HMAC(t *testing.T) {
 			expected, _ := hex.DecodeString(tc.expected)
 
 			result := Sha256HMAC(msg, key)
+			assert.Equal(t, expected, result)
+		})
+	}
+}
+
+func TestSha512HMAC(t *testing.T) {
+	tests := []struct {
+		name     string
+		keyHex   string
+		msgHex   string
+		expected string
+	}{
+		{
+			"Test case 1",
+			"0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b",
+			"4869205468657265",
+			"87aa7cdea5ef619d4ff0b4241a1d6cb02379f4e2ce4ec2787ad0b30545e17cdedaa833b7d6b8a702038b274eaea3f4e4be9d914eeb61f1702e696c203a126854",
+		},
+		{
+			"Test case 2",
+			"4a656665",
+			"7768617420646f2079612077616e7420666f72206e6f7468696e673f",
+			"164b7a7bfcf819e2e395fbe73b56e0a387bd64222e831fd610270cd7ea2505549758bf75c05a994a6d034f65f8f0e6fdcaeab1a34d4a6b4b636e070a38bce737",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			key, _ := hex.DecodeString(tc.keyHex)
+			msg, _ := hex.DecodeString(tc.msgHex)
+			expected, _ := hex.DecodeString(tc.expected)
+
+			result := Sha512HMAC(msg, key)
 			assert.Equal(t, expected, result)
 		})
 	}

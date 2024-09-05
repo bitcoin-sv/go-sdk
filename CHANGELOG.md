@@ -5,11 +5,35 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.1.4 - 2024-09-05](#113---2024-09-05)
 - [1.1.3 - 2024-09-04](#113---2024-09-04)
 - [1.1.2 - 2024-09-02](#112---2024-09-02)
 - [1.1.1 - 2024-08-28](#111---2024-08-28)
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
+
+## [1.1.4] - 2024-09-05
+
+  - Update ECIES implementation to align with
+
+  ### Added
+  - `primitives/aescbc` directory
+    -  `AESCBCEncrypt`, `AESCBCDecrypt`, `PKCS7Padd`, `PKCS7Unpad`
+  - `compat/ecies`
+    - `EncryptSingle`, `DecryptSingle`, `EncryptShared` and `DecryptShared` convenience functions that deal with strings, uses Electrum ECIES and typical defaults
+    - `ElectrumEncrypt`, `ElectrumDecrypt`, `BitcoreEncrypt`, `BitcoreDecrypt`
+  - `docs/examples`
+    - `ecies_shared`, `ecies_single`, `ecies_electrum_binary`
+  - Tests for different ECIES encryption implementations
+
+  ### Removed
+  - Previous ecies implementation
+  - Outdated ecies example
+  - encryption.go for vanilla AES encryption (to align with typescript library)
+  
+  ### Changed
+  - Renamed `message` example to `encrypt_message` for clarity
+  - Change vanilla `aes` example to use existing encrypt/decrypt functions from `aesgcm` directory
 
 ## [1.1.3] - 2024-09-04
 

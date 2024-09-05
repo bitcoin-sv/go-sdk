@@ -259,9 +259,13 @@ func (p *PublicKey) encode(compact bool) []byte {
 	return append(append([]byte{0x04}, xBytes...), yBytes...)
 }
 
-func (p *PublicKey) ToDER() string {
+func (p *PublicKey) ToDERBytes() []byte {
 	encoded := p.encode(true)
-	return hex.EncodeToString(encoded)
+	return encoded
+}
+
+func (p *PublicKey) ToDER() string {
+	return hex.EncodeToString(p.ToDERBytes())
 }
 
 func (p *PublicKey) DeriveChild(privateKey *PrivateKey, invoiceNumber string) (*PublicKey, error) {
