@@ -5,7 +5,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"errors"
-	"log"
 )
 
 // AESCBCEncrypt encrypts data using AES in CBC mode with an IV
@@ -21,7 +20,6 @@ func AESCBCEncrypt(data, key, iv []byte, concatIv bool) ([]byte, error) {
 	if concatIv {
 		cipherText = append(iv, cipherText...)
 	}
-	log.Printf("cipherText: %x", cipherText)
 	return cipherText, nil
 }
 

@@ -32,7 +32,9 @@ func TestElectrumEncryptDecryptSingle(t *testing.T) {
 	// Electrum Encrypt
 	encryptedData, err := ElectrumEncrypt([]byte(msgString), pk.PubKey(), pk, false)
 	require.NoError(t, err)
-	require.Equal(t, "QklFMQO7zpX/GS4XpthCy6/hT38ZKsBGbn8JKMGHOY5ifmaoT890Krt9cIRk/ULXaB5uC08owRICzenFbm31pZGu0gCM2uOxpofwHacKidwZ0Q7aEw==", encryptedData)
+	expectedB64, err := base64.StdEncoding.DecodeString("QklFMQO7zpX/GS4XpthCy6/hT38ZKsBGbn8JKMGHOY5ifmaoT890Krt9cIRk/ULXaB5uC08owRICzenFbm31pZGu0gCM2uOxpofwHacKidwZ0Q7aEw==")
+	require.NoError(t, err)
+	require.Equal(t, expectedB64, encryptedData)
 
 	// Electrum Decrypt
 	decryptedData, _ := ElectrumDecrypt(encryptedData, pk, nil)
@@ -93,11 +95,10 @@ func TestBitcoreEncryptDecryptSolo(t *testing.T) {
 	// Bitcore Encrypt
 	encryptedData, err := BitcoreEncrypt([]byte(msgString), pk.PubKey(), pk, nil)
 	require.NoError(t, err)
-	require.Len(t, encryptedData, 132)
-	require.Equal(t, expectedEncryptedData, encryptedData)
+	require.Equal(t, decodedExpectedEncryptedData, encryptedData)
 
 	// Bitcore Decrypt
-	decryptedData, err := BitcoreDecrypt(string(encryptedData), pk)
+	decryptedData, err := BitcoreDecrypt(encryptedData, pk)
 	require.NoError(t, err)
 	require.Equal(t, msgString, string(decryptedData))
 }
@@ -110,9 +111,10 @@ func TestBitcoreEncryptDecryptWithCounterparty(t *testing.T) {
 	// Bitcore Encrypt
 	encryptedData, err := BitcoreEncrypt([]byte(msgString), counterpartyPk.PubKey(), pk1, nil)
 	expectedEncryptedData := "A7vOlf8ZLhem2ELLr+FPfxkqwEZufwkowYc5jmJ+ZqhPAAAAAAAAAAAAAAAAAAAAAAmFslNpNc4TrjaMPmPLdooZwoP6/fE7GN3AeyLpFf2f+QGYRKIke8zbhxu8FcLOsA=="
+	decodedExpectedEncryptedData, _ := base64.StdEncoding.DecodeString(expectedEncryptedData)
 
 	require.NoError(t, err)
-	require.Equal(t, expectedEncryptedData, encryptedData)
+	require.Equal(t, decodedExpectedEncryptedData, encryptedData)
 
 	// Bitcore Decrypt
 	decryptedData, err := BitcoreDecrypt(encryptedData, counterpartyPk)

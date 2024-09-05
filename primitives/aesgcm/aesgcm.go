@@ -41,7 +41,11 @@ func AESDecrypt(ciphertext, key []byte) ([]byte, error) {
 }
 
 // EncryptGCM encrypts plaintext using AES-GCM with the provided key and additional data
-func AESGCMEncrypt(plaintext, key, initializationVector, additionalAuthenticatedData []byte) (ciphertext, authenticationTag []byte, err error) {
+func AESGCMEncrypt(plaintext,
+	key,
+	initializationVector,
+	additionalAuthenticatedData []byte,
+) (ciphertext, authenticationTag []byte, err error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, nil, err
@@ -59,7 +63,12 @@ func AESGCMEncrypt(plaintext, key, initializationVector, additionalAuthenticated
 }
 
 // DecryptGCM decrypts ciphertext using AES-GCM with the provided key, nonce, additional data, and tag
-func AESGCMDecrypt(ciphertext, key, initializationVector, additionalAuthenticatedData, authenticationTag []byte) (plaintext []byte, err error) {
+func AESGCMDecrypt(ciphertext,
+	key,
+	initializationVector,
+	additionalAuthenticatedData,
+	authenticationTag []byte,
+) (plaintext []byte, err error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
