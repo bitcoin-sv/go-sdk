@@ -3,6 +3,7 @@ package primitives
 import (
 	"crypto/hmac"
 	"crypto/sha256"
+	"crypto/sha512"
 
 	"golang.org/x/crypto/ripemd160"
 )
@@ -19,9 +20,22 @@ func Sha256d(b []byte) []byte {
 	return Sha256(first[:])
 }
 
+// Sha512 calculates hash(b) and returns the resulting 64 bytes.
+func Sha512(b []byte) []byte {
+	data := sha512.Sum512(b)
+	return data[:]
+}
+
 // Sha256HMAC - HMAC with SHA256
 func Sha256HMAC(b, key []byte) []byte {
 	mac := hmac.New(sha256.New, key)
+	mac.Write(b)
+	return mac.Sum(nil)
+}
+
+// Sha512HMAC - HMAC with SHA512
+func Sha512HMAC(b, key []byte) []byte {
+	mac := hmac.New(sha512.New, key)
 	mac.Write(b)
 	return mac.Sum(nil)
 }

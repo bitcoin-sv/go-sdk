@@ -43,18 +43,6 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 		return nil, err
 	}
 
-	// const symmetricKey = new SymmetricKey(sharedSecret.encode(true).slice(1))
-	// const encrypted = symmetricKey.encrypt(message) as number[]
-	// const senderPublicKey = sender.toPublicKey().encode(true)
-	// const version = toArray(VERSION, 'hex')
-	// return [
-	//   ...version,
-	//   ...senderPublicKey,
-	//   ...recipient.encode(true),
-	//   ...keyID,
-	//   ...encrypted
-	// ]
-
 	version, err := hex.DecodeString(VERSION)
 	if err != nil {
 		return nil, err
@@ -73,7 +61,7 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 // /**
 //   - Decrypts a message from one party to another using the BRC-78 message encryption protocol.
 //   - @param message The message to decrypt
-//   - @param sender The private key of the recipient
+//   - @param recipient The private key of the recipient
 //     *
 //   - @returns The decrypted message
 //     */
