@@ -13,10 +13,7 @@ import (
 	c "github.com/bitcoin-sv/go-sdk/primitives/hash"
 )
 
-//
-// ECIES encryption/decryption methods; AES-128-CBC with PKCS7 is used as the cipher; hmac-sha256 is used as the mac
-//
-
+// EncryptSingle is a helper that uses Electrum ECIES method to encrypt a message
 func EncryptSingle(message string, privateKey *ec.PrivateKey) (string, error) {
 	messageBytes := []byte(message)
 	if privateKey == nil {
@@ -26,6 +23,7 @@ func EncryptSingle(message string, privateKey *ec.PrivateKey) (string, error) {
 	return base64.StdEncoding.EncodeToString(decryptedBytes), nil
 }
 
+// DecryptSingle is a helper that uses Electrum ECIES method to decrypt a message
 func DecryptSingle(encryptedData string, privateKey *ec.PrivateKey) (string, error) {
 	encryptedBytes, err := base64.StdEncoding.DecodeString(encryptedData)
 	if err != nil {
@@ -38,6 +36,7 @@ func DecryptSingle(encryptedData string, privateKey *ec.PrivateKey) (string, err
 	return string(plainBytes), nil
 }
 
+// EncryptShared is a helper that uses Electrum ECIES method to encrypt a message for a target public key
 func EncryptShared(message string, toPublicKey *ec.PublicKey, fromPrivateKey *ec.PrivateKey) (string, error) {
 	messageBytes := []byte(message)
 	decryptedBytes, err := ElectrumEncrypt(messageBytes, toPublicKey, fromPrivateKey, false)
@@ -47,6 +46,7 @@ func EncryptShared(message string, toPublicKey *ec.PublicKey, fromPrivateKey *ec
 	return base64.StdEncoding.EncodeToString(decryptedBytes), nil
 }
 
+// DecryptShared is a helper that uses Electrum ECIES method to decrypt a message from a target public key
 func DecryptShared(encryptedData string, toPrivateKey *ec.PrivateKey, fromPublicKey *ec.PublicKey) (string, error) {
 	encryptedBytes, err := base64.StdEncoding.DecodeString(encryptedData)
 	if err != nil {
@@ -59,6 +59,7 @@ func DecryptShared(encryptedData string, toPrivateKey *ec.PrivateKey, fromPublic
 	return string(plainBytes), nil
 }
 
+// ElectrumEncrypt encrypts a message using ECIES	using Electrum encryption method
 func ElectrumEncrypt(message []byte,
 	toPublicKey *ec.PublicKey,
 	fromPrivateKey *ec.PrivateKey,
@@ -100,6 +101,8 @@ func ElectrumEncrypt(message []byte,
 
 	return append(encrypted, mac...), nil
 }
+
+// ElectrumDecrypt decrypts a message using ECIES using Electrum decryption method
 func ElectrumDecrypt(encryptedData []byte, toPrivateKey *ec.PrivateKey, fromPublicKey *ec.PublicKey) ([]byte, error) {
 
 	if len(encryptedData) < 52 { // Minimum length: 4 (magic) + 16 (min cipher) + 32 (mac)
@@ -152,7 +155,7 @@ func ElectrumDecrypt(encryptedData []byte, toPrivateKey *ec.PrivateKey, fromPubl
 	return plain, nil
 }
 
-// BitcoreEncrypt encrypts a message using ECIES
+// BitcoreEncrypt encrypts a message using ECIES using Bitcore encryption method
 func BitcoreEncrypt(message []byte,
 	toPublicKey *ec.PublicKey,
 	fromPrivateKey *ec.PrivateKey,
@@ -187,6 +190,7 @@ func BitcoreEncrypt(message []byte,
 	return encBuf, nil
 }
 
+// BitcoreDecrypt decrypts a message using ECIES using Bitcore decryption method
 func BitcoreDecrypt(encryptedMessage []byte, toPrivatKey *ec.PrivateKey) ([]byte, error) {
 
 	fromPublicKey, err := ec.ParsePubKey(encryptedMessage[:33])
