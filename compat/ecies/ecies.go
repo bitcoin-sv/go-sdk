@@ -19,11 +19,10 @@ import (
 
 func EncryptSingle(message string, privateKey *ec.PrivateKey) (string, error) {
 	messageBytes := []byte(message)
-
-	decryptedBytes, err := ElectrumEncrypt(messageBytes, privateKey.PubKey(), privateKey, false)
-	if err != nil {
-		return "", err
+	if privateKey == nil {
+		return "", errors.New("private key is required")
 	}
+	decryptedBytes, _ := ElectrumEncrypt(messageBytes, privateKey.PubKey(), privateKey, false)
 	return base64.StdEncoding.EncodeToString(decryptedBytes), nil
 }
 
@@ -41,7 +40,7 @@ func DecryptSingle(encryptedData string, privateKey *ec.PrivateKey) (string, err
 
 func EncryptShared(message string, toPublicKey *ec.PublicKey, fromPrivateKey *ec.PrivateKey) (string, error) {
 	messageBytes := []byte(message)
-	decryptedBytes, err := ElectrumEncrypt(messageBytes, toPublicKey, nil, false)
+	decryptedBytes, err := ElectrumEncrypt(messageBytes, toPublicKey, fromPrivateKey, false)
 	if err != nil {
 		return "", err
 	}
@@ -167,11 +166,7 @@ func BitcoreEncrypt(message []byte,
 
 	// If fromPrivateKey is not provided, generate a random one
 	if fromPrivateKey == nil {
-		var err error
-		fromPrivateKey, err = ec.NewPrivateKey()
-		if err != nil {
-			return nil, err
-		}
+		fromPrivateKey, _ = ec.NewPrivateKey()
 	}
 
 	RBuf := fromPrivateKey.PubKey().ToDERBytes()
