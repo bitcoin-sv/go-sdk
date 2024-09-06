@@ -48,13 +48,9 @@ func VerifyMessage(address string, sig, data []byte) error {
 		return err
 	}
 
-	if !wasCompressed {
-		return fmt.Errorf("only compressed keys and signatures are supported")
-	}
-
 	// Get the address
 	var scriptAddress *script.Address
-	if scriptAddress, err = script.NewAddressFromPublicKey(publicKey, true); err != nil {
+	if scriptAddress, err = script.NewAddressFromPublicKeyWithCompression(publicKey, true, wasCompressed); err != nil {
 		return err
 	}
 
