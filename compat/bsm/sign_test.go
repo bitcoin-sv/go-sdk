@@ -1,6 +1,7 @@
 package compat_test
 
 import (
+	"encoding/base64"
 	"fmt"
 	"testing"
 
@@ -11,7 +12,7 @@ import (
 
 func TestSigningCompression(t *testing.T) {
 	testKey, _ := ec.PrivateKeyFromHex("0499f8239bfe10eb0f5e53d543635a423c96529dd85fa4bad42049a0b435ebdd")
-	testData := "test message"
+	testData := []byte("test message")
 
 	// Test sign compressed
 	address, err := script.NewAddressFromPublicKey(testKey.PubKey(), true)
@@ -113,11 +114,11 @@ func TestSignMessage(t *testing.T) {
 
 		testPk, errKey := ec.PrivateKeyFromHex(test.inputKey)
 
-		if signature, err := compat.SignMessage(testPk, test.inputMessage, false); err != nil && !test.expectedError {
+		if signature, err := compat.SignMessage(testPk, []byte(test.inputMessage), false); err != nil && !test.expectedError {
 			t.Fatalf("%d %s Failed: [%s] [%s] inputted and error not expected but got: %s", idx, t.Name(), test.inputKey, test.inputMessage, err.Error())
 		} else if err == nil && errKey == nil && test.expectedError {
 			t.Fatalf("%d %s Failed: [%s] [%s] inputted and error was expected", idx, t.Name(), test.inputKey, test.inputMessage)
-		} else if signature != test.expectedSignature {
+		} else if base64.StdEncoding.EncodeToString(signature) != test.expectedSignature {
 			t.Fatalf("%d %s Failed: [%s] [%s] inputted [%s] expected but got: %s", idx, t.Name(), test.inputKey, test.inputMessage, test.expectedSignature, signature)
 		}
 
@@ -127,12 +128,12 @@ func TestSignMessage(t *testing.T) {
 // ExampleSignMessage example using SignMessage()
 func ExampleSignMessage() {
 	pk, _ := ec.PrivateKeyFromHex("ef0b8bad0be285099534277fde328f8f19b3be9cadcd4c08e6ac0b5f863745ac")
-	signature, err := compat.SignMessage(pk, "This is a test message", false)
+	signature, err := compat.SignMessage(pk, []byte("This is a test message"), false)
 	if err != nil {
 		fmt.Printf("error occurred: %s", err.Error())
 		return
 	}
-	fmt.Printf("signature created: %s", signature)
+	fmt.Printf("signature created: %s", base64.StdEncoding.EncodeToString(signature))
 	// Output:signature created: G+zZagsyz7ioC/ZOa5EwsaKice0vs2BvZ0ljgkFHxD3vGsMlGeD4sXHEcfbI4h8lP29VitSBdf4A+nHXih7svf4=
 }
 
@@ -140,6 +141,6 @@ func ExampleSignMessage() {
 func BenchmarkSignMessage(b *testing.B) {
 	key, _ := ec.NewPrivateKey()
 	for i := 0; i < b.N; i++ {
-		_, _ = compat.SignMessage(key, "This is a test message", false)
+		_, _ = compat.SignMessage(key, []byte("This is a test message"), false)
 	}
 }
