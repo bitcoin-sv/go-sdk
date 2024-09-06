@@ -2,7 +2,6 @@ package compat
 
 import (
 	"bytes"
-	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 
@@ -13,12 +12,7 @@ import (
 )
 
 // PubKeyFromSignature gets a publickey for a signature and tells you whether is was compressed
-func PubKeyFromSignature(sig, data string) (pubKey *ec.PublicKey, wasCompressed bool, err error) {
-
-	var decodedSig []byte
-	if decodedSig, err = base64.StdEncoding.DecodeString(sig); err != nil {
-		return nil, false, err
-	}
+func PubKeyFromSignature(sig, data []byte) (pubKey *ec.PublicKey, wasCompressed bool, err error) {
 
 	// Validate the signature - this just shows that it was valid at all
 	// we will compare it with the key next
@@ -32,11 +26,11 @@ func PubKeyFromSignature(sig, data string) (pubKey *ec.PublicKey, wasCompressed 
 	varInt = transaction.VarInt(len(data))
 	buf.Write(varInt.Bytes())
 	// append the data to buff
-	buf.WriteString(data)
+	buf.Write(data)
 
 	// Create the hash
 	expectedMessageHash := crypto.Sha256d(buf.Bytes())
-	return ec.RecoverCompact(decodedSig, expectedMessageHash)
+	return ec.RecoverCompact(sig, expectedMessageHash)
 }
 
 // VerifyMessage verifies a string and address against the provided
@@ -47,8 +41,7 @@ func PubKeyFromSignature(sig, data string) (pubKey *ec.PublicKey, wasCompressed 
 //
 // Error will occur if verify fails or verification is not successful (no bool)
 // Spec: https://github.com/bitcoin/bitcoin/pull/524
-func VerifyMessage(address, sig, data string) error {
-
+func VerifyMessage(address string, sig, data []byte) error {
 	// Reconstruct the pubkey
 	publicKey, wasCompressed, err := PubKeyFromSignature(sig, data)
 	if err != nil {
