@@ -101,7 +101,16 @@ func NewAddressFromPublicKeyHash(hash []byte, mainnet bool) (*Address, error) {
 // If mainnet parameter is true it will return a mainnet address (starting with a 1).
 // Otherwise, (mainnet is false) it will return a testnet address (starting with an m or n).
 func NewAddressFromPublicKey(pubKey *ec.PublicKey, mainnet bool) (*Address, error) {
-	hash := crypto.Hash160(pubKey.SerializeCompressed())
+	return NewAddressFromPublicKeyWithCompression(pubKey, mainnet, true)
+}
+
+func NewAddressFromPublicKeyWithCompression(pubKey *ec.PublicKey, mainnet bool, isCompressed bool) (*Address, error) {
+	var hash []byte
+	if isCompressed {
+		hash = crypto.Hash160(pubKey.SerializeCompressed())
+	} else {
+		hash = crypto.Hash160(pubKey.SerializeUncompressed())
+	}
 
 	// regtest := 111
 	// mainnet: 0

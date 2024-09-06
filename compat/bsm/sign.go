@@ -14,7 +14,11 @@ const hBSV = "Bitcoin Signed Message:\n"
 // SignMessage signs a string with the provided PrivateKey using Bitcoin Signed Message encoding
 // sigRefCompressedKey bool determines whether the signature will reference a compressed or uncompresed key
 // Spec: https://github.com/bitcoin/bitcoin/pull/524
-func SignMessage(privateKey *ec.PrivateKey, message []byte, sigRefCompressedKey bool) ([]byte, error) {
+func SignMessage(privateKey *ec.PrivateKey, message []byte) ([]byte, error) {
+	return SignMessageWithCompression(privateKey, message, true)
+}
+
+func SignMessageWithCompression(privateKey *ec.PrivateKey, message []byte, sigRefCompressedKey bool) ([]byte, error) {
 	if privateKey == nil {
 		return nil, errors.New("private key is required")
 	}
