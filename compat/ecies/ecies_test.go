@@ -77,6 +77,18 @@ func TestElectrumEncryptDecryptSingle(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestElectrumEphemeralEncryptDecryptSingle(t *testing.T) {
+	pk, _ := ec.PrivateKeyFromWif(wif)
+
+	// Electrum Encrypt
+	encryptedData, err := ElectrumEncrypt([]byte(msgString), pk.PubKey(), nil, false)
+	require.NoError(t, err)
+
+	// Electrum Decrypt
+	decryptedData, _ := ElectrumDecrypt(encryptedData, pk, nil)
+	require.Equal(t, []byte(msgString), decryptedData)
+}
+
 func TestElectrumEncryptDecryptSingleNokey(t *testing.T) {
 	pk, _ := ec.PrivateKeyFromWif(wif)
 
