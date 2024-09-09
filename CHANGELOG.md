@@ -18,6 +18,9 @@ All notable changes to this project will be documented in this file. The format 
   - Optimize handling of source transaction inputs. Avoid mocking up entire transaction when adding source inputs.
   - Minor alignment in ECIES helper function
 
+### Added
+  - New method `TransactionInput.SourceTxOutput()`
+  
 ### Changed
   - `SetSourceTxFromOutput` changed to be `SetSourceTxOutput`
   - Default behavior of `EncryptSingle` uses ephemeral key. Updated test.
