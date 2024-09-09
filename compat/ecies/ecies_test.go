@@ -20,7 +20,6 @@ func TestEncryptDecryptSingle(t *testing.T) {
 	// Electrum Encrypt
 	encryptedData, err := EncryptSingle(msgString, pk)
 	require.NoError(t, err)
-	require.Equal(t, "QklFMQO7zpX/GS4XpthCy6/hT38ZKsBGbn8JKMGHOY5ifmaoT890Krt9cIRk/ULXaB5uC08owRICzenFbm31pZGu0gCM2uOxpofwHacKidwZ0Q7aEw==", encryptedData)
 
 	// Electrum Decrypt
 	decryptedData, _ := DecryptSingle(encryptedData, pk)
@@ -133,7 +132,20 @@ func TestElectrumEncryptDecryptWithCounterpartyNoKey(t *testing.T) {
 	require.Equal(t, msgString, string(decryptedData))
 }
 
-func TestBitcoreEncryptDecryptSolo(t *testing.T) {
+func TestBitcoreEncryptDecryptSingle(t *testing.T) {
+	pk, _ := ec.PrivateKeyFromWif(wif)
+
+	// Bitcore Encrypt
+	encryptedData, err := BitcoreEncrypt([]byte(msgString), pk.PubKey(), nil, nil)
+	require.NoError(t, err)
+
+	// Bitcore Decrypt
+	decryptedData, err := BitcoreDecrypt(encryptedData, pk)
+	require.NoError(t, err)
+	require.Equal(t, msgString, string(decryptedData))
+}
+
+func TestBitcoreEncryptDecryptSingleWithPrivateKey(t *testing.T) {
 	expectedEncryptedData := "A7vOlf8ZLhem2ELLr+FPfxkqwEZufwkowYc5jmJ+ZqhPAAAAAAAAAAAAAAAAAAAAAB27kUY/HpNbiwhYSpEoEZZDW+wEjMmPNcAAxnc0kiuQ73FpFzf6p6afe4wwVtKAAg=="
 	decodedExpectedEncryptedData, _ := base64.StdEncoding.DecodeString(expectedEncryptedData)
 	log.Printf("Decoded expected encrypted data: %x\n", decodedExpectedEncryptedData)

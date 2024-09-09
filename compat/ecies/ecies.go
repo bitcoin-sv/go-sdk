@@ -19,7 +19,7 @@ func EncryptSingle(message string, privateKey *ec.PrivateKey) (string, error) {
 	if privateKey == nil {
 		return "", errors.New("private key is required")
 	}
-	decryptedBytes, _ := ElectrumEncrypt(messageBytes, privateKey.PubKey(), privateKey, false)
+	decryptedBytes, _ := ElectrumEncrypt(messageBytes, privateKey.PubKey(), nil, false)
 	return base64.StdEncoding.EncodeToString(decryptedBytes), nil
 }
 

@@ -5,15 +5,24 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
-- [1.1.5 - 2024-09-06](#113---2024-09-06)
-- [1.1.4 - 2024-09-05](#113---2024-09-05)
+- [1.1.6 - 2024-09-09](#116---2024-09-09)
+- [1.1.5 - 2024-09-06](#115---2024-09-06)
+- [1.1.4 - 2024-09-05](#114---2024-09-05)
 - [1.1.3 - 2024-09-04](#113---2024-09-04)
 - [1.1.2 - 2024-09-02](#112---2024-09-02)
 - [1.1.1 - 2024-08-28](#111---2024-08-28)
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
 
-## [1.1.5] - 2025-09-06
+## [1.1.6] - 2024-09-09
+  - Optimize handling of source transaction inputs. Avoid mocking up entire transaction when adding source inputs.
+  - Minor alignment in ECIES helper function
+
+### Changed
+  - `SetSourceTxFromOutput` changed to be `SetSourceTxOutput`
+  - Default behavior of `EncryptSingle` uses ephemeral key. Updated test.
+
+## [1.1.5] - 2024-09-06
   - Add test for ephemeral private key in electrum encrypt ecies
   - Add support for compression for backward compatibility and alignment with ts
 
@@ -23,7 +32,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ## [1.1.4] - 2024-09-05
 
-  - Update ECIES implementation to align with
+  - Update ECIES implementation to align with the typescript library
 
   ### Added
   - `primitives/aescbc` directory
