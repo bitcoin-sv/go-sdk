@@ -10,6 +10,7 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/chainhash"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
+	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/util"
 )
 
@@ -326,6 +327,47 @@ func (tx *Transaction) Clone() *Transaction {
 		}
 		// clone.Inputs[i].SourceTransaction = input.SourceTransaction
 		clone.Inputs[i].sourceOutput = input.sourceOutput
+	}
+
+	return clone
+}
+
+func (tx *Transaction) ShallowClone() *Transaction {
+	// Creating a new Tx from scratch is much faster than cloning from bytes
+	// ~ 420ns/op vs 2200ns/op of the above function in benchmarking
+	// this matters as we clone txs a couple of times when verifying signatures
+	clone := &Transaction{
+		Version:  tx.Version,
+		LockTime: tx.LockTime,
+		Inputs:   make([]*TransactionInput, len(tx.Inputs)),
+		Outputs:  make([]*TransactionOutput, len(tx.Outputs)),
+	}
+
+	for i, input := range tx.Inputs {
+		clone.Inputs[i] = &TransactionInput{
+			SourceTXID:       (*chainhash.Hash)(input.SourceTXID[:]),
+			SourceTxOutIndex: input.SourceTxOutIndex,
+			SequenceNumber:   input.SequenceNumber,
+		}
+		if input.UnlockingScript != nil {
+			clone.Inputs[i].UnlockingScript = input.UnlockingScript
+		}
+		sourceTxOut := input.SourceTxOutput()
+		if sourceTxOut != nil {
+			clone.Inputs[i].sourceOutput = &TransactionOutput{
+				Satoshis:      sourceTxOut.Satoshis,
+				LockingScript: script.NewFromBytes(*sourceTxOut.LockingScript),
+			}
+		}
+	}
+
+	for i, output := range tx.Outputs {
+		clone.Outputs[i] = &TransactionOutput{
+			Satoshis: output.Satoshis,
+		}
+		if output.LockingScript != nil {
+			clone.Outputs[i].LockingScript = output.LockingScript
+		}
 	}
 
 	return clone

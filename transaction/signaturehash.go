@@ -95,7 +95,7 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 		hashOutputs = tx.OutputsHash(int32(inputNumber))
 	}
 
-	buf := make([]byte, 0)
+	buf := make([]byte, 0, 256)
 
 	// Version
 	v := make([]byte, 4)
@@ -188,7 +188,7 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 		return defaultHex, nil
 	}
 
-	txCopy := tx.Clone()
+	txCopy := tx.ShallowClone()
 
 	for i := range txCopy.Inputs {
 		if i == int(inputNumber) {

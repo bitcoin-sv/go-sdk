@@ -49,11 +49,11 @@ func (tx *Transaction) InputCount() int {
 
 // SourceOutHash returns a byte slice of inputs outpoints, for creating a signature hash
 func (tx *Transaction) SourceOutHash() *chainhash.Hash {
-	buf := make([]byte, 0)
+	buf := make([]byte, 0, len(tx.Inputs)*36)
 
+	oi := make([]byte, 4)
 	for _, in := range tx.Inputs {
-		buf = append(buf, in.SourceTXID.CloneBytes()...)
-		oi := make([]byte, 4)
+		buf = append(buf, in.SourceTXID[:]...)
 		binary.LittleEndian.PutUint32(oi, in.SourceTxOutIndex)
 		buf = append(buf, oi...)
 	}
@@ -64,10 +64,10 @@ func (tx *Transaction) SourceOutHash() *chainhash.Hash {
 
 // SequenceHash returns a byte slice of inputs SequenceNumber, for creating a signature hash
 func (tx *Transaction) SequenceHash() []byte {
-	buf := make([]byte, 0)
+	buf := make([]byte, 0, len(tx.Inputs)*4)
 
+	oi := make([]byte, 4)
 	for _, in := range tx.Inputs {
-		oi := make([]byte, 4)
 		binary.LittleEndian.PutUint32(oi, in.SequenceNumber)
 		buf = append(buf, oi...)
 	}
