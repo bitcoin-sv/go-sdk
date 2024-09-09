@@ -352,7 +352,7 @@ func (t *thread) apply(opts *execOpts) error {
 	t.astack = newStack(t.cfg, t.hasFlag(scriptflag.VerifyMinimalData))
 
 	if t.tx != nil {
-		t.tx.Inputs[t.inputIdx].SetSourceTxFromOutput(&transaction.TransactionOutput{
+		t.tx.Inputs[t.inputIdx].SetSourceTxOutput(&transaction.TransactionOutput{
 			LockingScript: t.prevOutput.LockingScript,
 			Satoshis:      t.prevOutput.Satoshis,
 		})

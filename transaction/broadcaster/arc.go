@@ -67,7 +67,7 @@ func (f *ArcResponse) Scan(value interface{}) error {
 func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSuccess, *transaction.BroadcastFailure) {
 	var buf *bytes.Buffer
 	for _, input := range t.Inputs {
-		if input.SourceTransaction == nil {
+		if input.SourceTxOutput() == nil {
 			buf = bytes.NewBuffer(t.Bytes())
 			break
 		}

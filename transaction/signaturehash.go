@@ -67,7 +67,7 @@ func (tx *Transaction) CalcInputPreimage(inputNumber uint32, sigHashFlag sighash
 	if len(in.SourceTXID) == 0 {
 		return nil, ErrEmptyPreviousTxID
 	}
-	if in.SourceTransaction == nil {
+	if in.SourceTxOutput() == nil {
 		return nil, ErrEmptyPreviousTx
 	}
 
@@ -160,7 +160,7 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 	if len(in.SourceTXID) == 0 {
 		return nil, ErrEmptyPreviousTxID
 	}
-	if in.SourceTransaction == nil {
+	if in.SourceTxOutput() == nil {
 		return nil, ErrEmptyPreviousTx
 	}
 
@@ -192,10 +192,10 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 
 	for i := range txCopy.Inputs {
 		if i == int(inputNumber) {
-			txCopy.Inputs[i].SourceTransaction = tx.Inputs[inputNumber].SourceTransaction
+			txCopy.Inputs[i].sourceOutput = in.SourceTxOutput()
 		} else {
 			txCopy.Inputs[i].UnlockingScript = &script.Script{}
-			txCopy.Inputs[i].SetSourceTxFromOutput(&TransactionOutput{})
+			txCopy.Inputs[i].sourceOutput = &TransactionOutput{}
 		}
 	}
 

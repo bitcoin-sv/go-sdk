@@ -291,7 +291,7 @@ func (tx *Transaction) Bytes() []byte {
 // (with PreviousTxSatoshis and SourceTxScript included)
 func (tx *Transaction) EF() ([]byte, error) {
 	for _, in := range tx.Inputs {
-		if in.SourceTransaction == nil {
+		if in.SourceTransaction == nil && in.sourceOutput == nil {
 			return nil, ErrEmptyPreviousTx
 		}
 	}
@@ -321,10 +321,11 @@ func (tx *Transaction) Clone() *Transaction {
 	}
 
 	for i, input := range tx.Inputs {
-		// if input.SourceTransaction != nil {
-		// 	clone.Inputs[i].SourceTransaction = input.SourceTransaction.Clone()
-		// }
-		clone.Inputs[i].SourceTransaction = input.SourceTransaction
+		if input.SourceTransaction != nil {
+			clone.Inputs[i].SourceTransaction = input.SourceTransaction.Clone()
+		}
+		// clone.Inputs[i].SourceTransaction = input.SourceTransaction
+		clone.Inputs[i].sourceOutput = input.sourceOutput
 	}
 
 	return clone
@@ -352,19 +353,16 @@ func (tx *Transaction) toBytesHelper(index int, lockingScript []byte, extended b
 
 		if extended {
 			b := make([]byte, 8)
-			prevSats := uint64(0)
-			if in.SourceTxSatoshis() != nil {
-				prevSats = *in.SourceTxSatoshis()
-			}
-			binary.LittleEndian.PutUint64(b, prevSats)
-			h = append(h, b...)
-
-			prevScript := in.SourceTxScript()
-			if prevScript != nil {
-				l := uint64(len(*prevScript))
+			sourceTxOut := in.SourceTxOutput()
+			if sourceTxOut != nil {
+				binary.LittleEndian.PutUint64(b, sourceTxOut.Satoshis)
+				h = append(h, b...)
+				l := uint64(len(*sourceTxOut.LockingScript))
 				h = append(h, VarInt(l).Bytes()...)
-				h = append(h, *prevScript...)
+				h = append(h, *sourceTxOut.LockingScript...)
 			} else {
+				binary.LittleEndian.PutUint64(b, 0)
+				h = append(h, b...)
 				h = append(h, 0x00) // The length of the script is zero
 			}
 		}

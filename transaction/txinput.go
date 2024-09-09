@@ -25,7 +25,7 @@ func (tx *Transaction) AddInput(input *TransactionInput) {
 }
 
 func (tx *Transaction) AddInputWithOutput(input *TransactionInput, output *TransactionOutput) {
-	input.SetSourceTxFromOutput(output)
+	input.SetSourceTxOutput(output)
 	tx.Inputs = append(tx.Inputs, input)
 }
 
@@ -109,7 +109,7 @@ func (tx *Transaction) AddInputsFromUTXOs(utxos ...*UTXO) error {
 			SequenceNumber:          DefaultSequenceNumber, // use default finalized sequence number
 			UnlockingScriptTemplate: utxo.UnlockingScriptTemplate,
 		}
-		i.SetSourceTxFromOutput(&TransactionOutput{
+		i.SetSourceTxOutput(&TransactionOutput{
 			Satoshis:      utxo.Satoshis,
 			LockingScript: utxo.LockingScript,
 		})
