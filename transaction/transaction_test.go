@@ -1,8 +1,10 @@
 package transaction_test
 
 import (
+	"encoding/hex"
 	"testing"
 
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
@@ -57,6 +59,19 @@ func TestNewTransaction(t *testing.T) {
 	})
 }
 
+func TestIsCoinbase(t *testing.T) {
+	tx, err := transaction.NewTransactionFromHex("01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff17033f250d2f43555656452f2c903fb60859897700d02700ffffffff01d864a012000000001976a914d648686cf603c11850f39600e37312738accca8f88ac00000000")
+	require.NoError(t, err)
+	require.True(t, tx.IsCoinbase())
+}
+
+func TestIsValidTxID(t *testing.T) {
+	valid, _ := hex.DecodeString("fe77aa03d5563d3ec98455a76655ea3b58e19a4eb102baf7b2a47af37e94b295")
+	require.True(t, transaction.IsValidTxID(valid))
+	invalid, _ := hex.DecodeString("fe77aa03d5563d3ec98455a76655ea3b58e19a4eb102baf7b2a47af37e94b2")
+	require.False(t, transaction.IsValidTxID(invalid))
+}
+
 func TestBEEF(t *testing.T) {
 	t.Parallel()
 	t.Run("deserialize and serialize", func(t *testing.T) {
@@ -79,13 +94,97 @@ func TestEF(t *testing.T) {
 	})
 }
 
-func Benchmark_ShallowClone(b *testing.B) {
+func TestClone(t *testing.T) {
+	tx, err := transaction.NewTransactionFromBEEFHex(BRC62Hex)
+	require.NoError(t, err)
+
+	clone := tx.Clone()
+	require.Equal(t, tx.Bytes(), clone.Bytes())
+}
+
+func BenchmarkClone(b *testing.B) {
 	tx, _ := transaction.NewTransactionFromHex("0200000003a9bc457fdc6a54d99300fb137b23714d860c350a9d19ff0f571e694a419ff3a0010000006b48304502210086c83beb2b2663e4709a583d261d75be538aedcafa7766bd983e5c8db2f8b2fc02201a88b178624ab0ad1748b37c875f885930166237c88f5af78ee4e61d337f935f412103e8be830d98bb3b007a0343ee5c36daa48796ae8bb57946b1e87378ad6e8a090dfeffffff0092bb9a47e27bf64fc98f557c530c04d9ac25e2f2a8b600e92a0b1ae7c89c20010000006b483045022100f06b3db1c0a11af348401f9cebe10ae2659d6e766a9dcd9e3a04690ba10a160f02203f7fbd7dfcfc70863aface1a306fcc91bbadf6bc884c21a55ef0d32bd6b088c8412103e8be830d98bb3b007a0343ee5c36daa48796ae8bb57946b1e87378ad6e8a090dfeffffff9d0d4554fa692420a0830ca614b6c60f1bf8eaaa21afca4aa8c99fb052d9f398000000006b483045022100d920f2290548e92a6235f8b2513b7f693a64a0d3fa699f81a034f4b4608ff82f0220767d7d98025aff3c7bd5f2a66aab6a824f5990392e6489aae1e1ae3472d8dffb412103e8be830d98bb3b007a0343ee5c36daa48796ae8bb57946b1e87378ad6e8a090dfeffffff02807c814a000000001976a9143a6bf34ebfcf30e8541bbb33a7882845e5a29cb488ac76b0e60e000000001976a914bd492b67f90cb85918494767ebb23102c4f06b7088ac67000000")
 
 	b.Run("clone", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			clone := tx.ShallowClone()
+			clone := tx.Clone()
 			_ = clone
 		}
 	})
+}
+
+func TestUncomputedFee(t *testing.T) {
+	tx, _ := transaction.NewTransactionFromBEEFHex(BRC62Hex)
+
+	tx.AddOutput(&transaction.TransactionOutput{
+		Change:        true,
+		LockingScript: tx.Outputs[0].LockingScript,
+	})
+
+	err := tx.Sign()
+	require.Error(t, err)
+
+	err = tx.SignUnsigned()
+	require.Error(t, err)
+}
+
+func TestSignUnsigned(t *testing.T) {
+	tx, err := transaction.NewTransactionFromBEEFHex(BRC62Hex)
+	require.NoError(t, err)
+
+	cloneTx := tx.Clone()
+	pk, _ := ec.NewPrivateKey()
+
+	// Adding a script template with random key so sigs will be different
+	for i := range tx.Inputs {
+		cloneTx.Inputs[i].UnlockingScriptTemplate, err = p2pkh.Unlock(pk, nil)
+		require.NoError(t, err)
+	}
+
+	// This should do nothing because the inputs from hex are already signed
+	err = cloneTx.SignUnsigned()
+	require.NoError(t, err)
+	for i := range cloneTx.Inputs {
+		require.Equal(t, tx.Inputs[i].UnlockingScript, cloneTx.Inputs[i].UnlockingScript)
+	}
+
+	// This should sign the inputs with the incorrect key which should change the sigs
+	cloneTx.Sign()
+	for i := range tx.Inputs {
+		require.NotEqual(t, tx.Inputs[i].UnlockingScript, cloneTx.Inputs[i].UnlockingScript)
+	}
+}
+
+func TestSignUnsignedNew(t *testing.T) {
+	pk, _ := ec.PrivateKeyFromWif("L1y6DgX4TuonxXzRPuk9reK2TD2THjwQReNUwVrvWN3aRkjcbauB")
+	address, _ := script.NewAddressFromPublicKey(pk.PubKey(), true)
+	tx := transaction.NewTransaction()
+	lockingScript, err := p2pkh.Lock(address)
+	require.NoError(t, err)
+	sourceTxID, _ := chainhash.NewHashFromHex("fe77aa03d5563d3ec98455a76655ea3b58e19a4eb102baf7b2a47af37e94b295")
+	unlockingScript, _ := p2pkh.Unlock(pk, nil)
+	tx.AddInput(&transaction.TransactionInput{
+		SourceTransaction: &transaction.Transaction{
+			Outputs: []*transaction.TransactionOutput{
+				{
+					Satoshis:      1,
+					LockingScript: lockingScript,
+				},
+			},
+		},
+		SourceTXID:              sourceTxID,
+		UnlockingScriptTemplate: unlockingScript,
+	})
+
+	tx.AddOutput(&transaction.TransactionOutput{
+		Satoshis:      1,
+		LockingScript: lockingScript,
+	})
+
+	err = tx.SignUnsigned()
+	require.NoError(t, err)
+
+	for _, input := range tx.Inputs {
+		require.Positive(t, len(input.UnlockingScript.Bytes()))
+	}
 }
