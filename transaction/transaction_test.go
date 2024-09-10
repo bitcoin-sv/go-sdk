@@ -122,6 +122,9 @@ func TestUncomputedFee(t *testing.T) {
 
 	err := tx.Sign()
 	require.Error(t, err)
+
+	err = tx.SignUnsigned()
+	require.Error(t, err)
 }
 
 func TestSignUnsigned(t *testing.T) {
