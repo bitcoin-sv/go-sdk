@@ -101,3 +101,30 @@ func TestUncomputedFee(t *testing.T) {
 	err := tx.Sign()
 	require.Error(t, err)
 }
+
+func TestSignUnsigned(t *testing.T) {
+	tx, err := transaction.NewTransactionFromBEEFHex(BRC62Hex)
+	require.NoError(t, err)
+
+	cloneTx := tx.ShallowClone()
+	pk, _ := ec.NewPrivateKey()
+
+	// Adding a script template with random key so sigs will be different
+	for i := range tx.Inputs {
+		cloneTx.Inputs[i].UnlockingScriptTemplate, err = p2pkh.Unlock(pk, nil)
+		require.NoError(t, err)
+	}
+
+	// This should do nothing because the inputs from hex are already signed
+	err = cloneTx.SignUnsigned()
+	require.NoError(t, err)
+	for i := range cloneTx.Inputs {
+		require.Equal(t, tx.Inputs[i].UnlockingScript, cloneTx.Inputs[i].UnlockingScript)
+	}
+
+	// This should sign the inputs with the incorrect key which should change the sigs
+	cloneTx.Sign()
+	for i := range tx.Inputs {
+		require.NotEqual(t, tx.Inputs[i].UnlockingScript, cloneTx.Inputs[i].UnlockingScript)
+	}
+}
