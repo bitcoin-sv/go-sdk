@@ -436,6 +436,7 @@ func (tx *Transaction) AddMerkleProof(bump *MerklePath) error {
 	return nil
 }
 
+// Fee returns the fee of the transaction.
 func (tx *Transaction) Sign() error {
 	tx.checkFeeCompluted()
 	for vin, i := range tx.Inputs {
@@ -450,6 +451,7 @@ func (tx *Transaction) Sign() error {
 	return nil
 }
 
+// SignUnsigned signs the transaction without the unlocking script.
 func (tx *Transaction) SignUnsigned() error {
 	tx.checkFeeCompluted()
 	for vin, i := range tx.Inputs {
@@ -474,4 +476,5 @@ func (tx *Transaction) checkFeeCompluted() error {
 			}
 		}
 	}
+	return nil
 }
