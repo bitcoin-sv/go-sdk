@@ -288,6 +288,10 @@ func (tx *Transaction) Bytes() []byte {
 	return tx.toBytesHelper(0, nil, false)
 }
 
+func (tx *Transaction) Hex() string {
+	return hex.EncodeToString(tx.Bytes())
+}
+
 // EF outputs the transaction into a byte array in extended format
 // (with PreviousTxSatoshis and SourceTxScript included)
 func (tx *Transaction) EF() ([]byte, error) {
