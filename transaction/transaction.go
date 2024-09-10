@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"io"
+	"log"
 	"slices"
 
 	"github.com/bitcoin-sv/go-sdk/chainhash"
@@ -313,7 +314,27 @@ func (tx *Transaction) BytesWithClearedInputs(index int, lockingScript []byte) [
 	return tx.toBytesHelper(index, lockingScript, false)
 }
 
+// Clone returns a deep clone of the tx. Consider using ShallowClone if
+// you don't need to clone the source transactions.
 func (tx *Transaction) Clone() *Transaction {
+	// Ignore err as byte slice passed in is created from valid tx
+	clone, err := NewTransactionFromBytes(tx.Bytes())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for i, input := range tx.Inputs {
+		if input.SourceTransaction != nil {
+			clone.Inputs[i].SourceTransaction = input.SourceTransaction.Clone()
+		}
+		// clone.Inputs[i].SourceTransaction = input.SourceTransaction
+		clone.Inputs[i].sourceOutput = input.sourceOutput
+	}
+
+	return clone
+}
+
+func (tx *Transaction) ShallowClone() *Transaction {
 	// Creating a new Tx from scratch is much faster than cloning from bytes
 	// ~ 420ns/op vs 2200ns/op of the above function in benchmarking
 	// this matters as we clone txs a couple of times when verifying signatures

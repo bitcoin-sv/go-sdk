@@ -98,7 +98,7 @@ func TestClone(t *testing.T) {
 	tx, err := transaction.NewTransactionFromBEEFHex(BRC62Hex)
 	require.NoError(t, err)
 
-	clone := tx.Clone()
+	clone := tx.ShallowClone()
 	require.Equal(t, tx.Bytes(), clone.Bytes())
 }
 
@@ -107,7 +107,7 @@ func BenchmarkClone(b *testing.B) {
 
 	b.Run("clone", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			clone := tx.Clone()
+			clone := tx.ShallowClone()
 			_ = clone
 		}
 	})
@@ -132,7 +132,7 @@ func TestSignUnsigned(t *testing.T) {
 	tx, err := transaction.NewTransactionFromBEEFHex(BRC62Hex)
 	require.NoError(t, err)
 
-	cloneTx := tx.Clone()
+	cloneTx := tx.ShallowClone()
 	pk, _ := ec.NewPrivateKey()
 
 	// Adding a script template with random key so sigs will be different

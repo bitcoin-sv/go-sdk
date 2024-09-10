@@ -188,7 +188,7 @@ func (tx *Transaction) CalcInputPreimageLegacy(inputNumber uint32, shf sighash.F
 		return defaultHex, nil
 	}
 
-	txCopy := tx.Clone()
+	txCopy := tx.ShallowClone()
 
 	for i := range txCopy.Inputs {
 		if i == int(inputNumber) {
