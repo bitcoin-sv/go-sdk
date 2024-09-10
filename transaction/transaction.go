@@ -5,7 +5,6 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"io"
-	"log"
 	"slices"
 
 	"github.com/bitcoin-sv/go-sdk/chainhash"
@@ -314,25 +313,7 @@ func (tx *Transaction) BytesWithClearedInputs(index int, lockingScript []byte) [
 	return tx.toBytesHelper(index, lockingScript, false)
 }
 
-// Clone returns a clone of the tx
 func (tx *Transaction) Clone() *Transaction {
-	// Ignore err as byte slice passed in is created from valid tx
-	clone, err := NewTransactionFromBytes(tx.Bytes())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for i, input := range tx.Inputs {
-		if input.SourceTransaction != nil {
-			clone.Inputs[i].SourceTransaction = input.SourceTransaction.Clone()
-		}
-		clone.Inputs[i].sourceOutput = input.sourceOutput
-	}
-
-	return clone
-}
-
-func (tx *Transaction) ShallowClone() *Transaction {
 	// Creating a new Tx from scratch is much faster than cloning from bytes
 	// ~ 420ns/op vs 2200ns/op of the above function in benchmarking
 	// this matters as we clone txs a couple of times when verifying signatures
@@ -345,9 +326,10 @@ func (tx *Transaction) ShallowClone() *Transaction {
 
 	for i, input := range tx.Inputs {
 		clone.Inputs[i] = &TransactionInput{
-			SourceTXID:       (*chainhash.Hash)(input.SourceTXID[:]),
-			SourceTxOutIndex: input.SourceTxOutIndex,
-			SequenceNumber:   input.SequenceNumber,
+			SourceTXID:              (*chainhash.Hash)(input.SourceTXID[:]),
+			SourceTxOutIndex:        input.SourceTxOutIndex,
+			SequenceNumber:          input.SequenceNumber,
+			UnlockingScriptTemplate: input.UnlockingScriptTemplate,
 		}
 		if input.UnlockingScript != nil {
 			clone.Inputs[i].UnlockingScript = input.UnlockingScript
