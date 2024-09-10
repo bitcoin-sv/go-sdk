@@ -1,6 +1,7 @@
 package transaction_test
 
 import (
+	"encoding/hex"
 	"testing"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
@@ -55,6 +56,19 @@ func TestNewTransaction(t *testing.T) {
 		_, err = tx.BEEF()
 		require.NoError(t, err)
 	})
+}
+
+func TestIsCoinbase(t *testing.T) {
+	tx, err := transaction.NewTransactionFromHex("01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff17033f250d2f43555656452f2c903fb60859897700d02700ffffffff01d864a012000000001976a914d648686cf603c11850f39600e37312738accca8f88ac00000000")
+	require.NoError(t, err)
+	require.True(t, tx.IsCoinbase())
+}
+
+func TestIsValidTxID(t *testing.T) {
+	valid, _ := hex.DecodeString("fe77aa03d5563d3ec98455a76655ea3b58e19a4eb102baf7b2a47af37e94b295")
+	require.True(t, transaction.IsValidTxID(valid))
+	invalid, _ := hex.DecodeString("fe77aa03d5563d3ec98455a76655ea3b58e19a4eb102baf7b2a47af37e94b2")
+	require.False(t, transaction.IsValidTxID(invalid))
 }
 
 func TestBEEF(t *testing.T) {
