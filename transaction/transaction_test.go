@@ -4,6 +4,7 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
@@ -151,5 +152,39 @@ func TestSignUnsigned(t *testing.T) {
 	cloneTx.Sign()
 	for i := range tx.Inputs {
 		require.NotEqual(t, tx.Inputs[i].UnlockingScript, cloneTx.Inputs[i].UnlockingScript)
+	}
+}
+
+func TestSignUnsignedNew(t *testing.T) {
+	pk, _ := ec.PrivateKeyFromWif("L1y6DgX4TuonxXzRPuk9reK2TD2THjwQReNUwVrvWN3aRkjcbauB")
+	address, _ := script.NewAddressFromPublicKey(pk.PubKey(), true)
+	tx := transaction.NewTransaction()
+	lockingScript, err := p2pkh.Lock(address)
+	require.NoError(t, err)
+	sourceTxID, _ := chainhash.NewHashFromHex("fe77aa03d5563d3ec98455a76655ea3b58e19a4eb102baf7b2a47af37e94b295")
+	unlockingScript, _ := p2pkh.Unlock(pk, nil)
+	tx.AddInput(&transaction.TransactionInput{
+		SourceTransaction: &transaction.Transaction{
+			Outputs: []*transaction.TransactionOutput{
+				{
+					Satoshis:      1,
+					LockingScript: lockingScript,
+				},
+			},
+		},
+		SourceTXID:              sourceTxID,
+		UnlockingScriptTemplate: unlockingScript,
+	})
+
+	tx.AddOutput(&transaction.TransactionOutput{
+		Satoshis:      1,
+		LockingScript: lockingScript,
+	})
+
+	err = tx.SignUnsigned()
+	require.NoError(t, err)
+
+	for _, input := range tx.Inputs {
+		require.Positive(t, len(input.UnlockingScript.Bytes()))
 	}
 }
