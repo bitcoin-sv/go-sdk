@@ -17,13 +17,16 @@ All notable changes to this project will be documented in this file. The format 
 
 
 ## [1.1.7] - 2024-09-10
-  - Introduce `tx.ShallowClone()` 
+  - Rework `tx.Clone()` to be more efficient
   - Introduce SignUnsigned to sign only inputs that have not already been signed
+  - Added tests
   - Other minor performance improvements.
 
   ### Added
-  - New method `Transaction.ShallowClone()`
   - New method `Transaction.SignUnsigned()`
+
+  ### Changed
+  - `Transaction.Clone()` does not reconstitute the source transaction from bytes. Creates a new transaction.
 
 ## [1.1.6] - 2024-09-09
   - Optimize handling of source transaction inputs. Avoid mocking up entire transaction when adding source inputs.
