@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.1.7 - 2024-09-10](#117---2024-09-10)
 - [1.1.6 - 2024-09-09](#116---2024-09-09)
 - [1.1.5 - 2024-09-06](#115---2024-09-06)
 - [1.1.4 - 2024-09-05](#114---2024-09-05)
@@ -13,6 +14,16 @@ All notable changes to this project will be documented in this file. The format 
 - [1.1.1 - 2024-08-28](#111---2024-08-28)
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
+
+
+## [1.1.7] - 2024-09-10
+  - Introduce `tx.ShallowClone()` 
+  - Introduce SignUnsigned to sign only inputs that have not already been signed
+  - Other minor performance improvements.
+
+  ### Added
+  - New method `Transaction.ShallowClone()`
+  - New method `Transaction.SignUnsigned()`
 
 ## [1.1.6] - 2024-09-09
   - Optimize handling of source transaction inputs. Avoid mocking up entire transaction when adding source inputs.

@@ -12,6 +12,7 @@ import (
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/util"
+	"github.com/pkg/errors"
 )
 
 type Transaction struct {
@@ -325,7 +326,6 @@ func (tx *Transaction) Clone() *Transaction {
 		if input.SourceTransaction != nil {
 			clone.Inputs[i].SourceTransaction = input.SourceTransaction.Clone()
 		}
-		// clone.Inputs[i].SourceTransaction = input.SourceTransaction
 		clone.Inputs[i].sourceOutput = input.sourceOutput
 	}
 
@@ -437,6 +437,7 @@ func (tx *Transaction) AddMerkleProof(bump *MerklePath) error {
 }
 
 func (tx *Transaction) Sign() error {
+	tx.checkFeeCompluted()
 	for vin, i := range tx.Inputs {
 		if i.UnlockingScriptTemplate != nil {
 			unlock, err := i.UnlockingScriptTemplate.Sign(tx, uint32(vin))
@@ -447,4 +448,30 @@ func (tx *Transaction) Sign() error {
 		}
 	}
 	return nil
+}
+
+func (tx *Transaction) SignUnsigned() error {
+	tx.checkFeeCompluted()
+	for vin, i := range tx.Inputs {
+		if i.UnlockingScript == nil {
+			if i.UnlockingScriptTemplate != nil {
+				unlock, err := i.UnlockingScriptTemplate.Sign(tx, uint32(vin))
+				if err != nil {
+					return err
+				}
+				i.UnlockingScript = unlock
+			}
+		}
+	}
+	return nil
+}
+
+func (tx *Transaction) checkFeeCompluted() error {
+	for _, out := range tx.Outputs {
+		if out.Satoshis == 0 {
+			if out.Change {
+				return errors.New("There are still change outputs with uncomputed amounts. Use the Fee() method to compute the change amounts and transaction fees prior to signing.")
+			}
+		}
+	}
 }
