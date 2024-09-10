@@ -438,7 +438,10 @@ func (tx *Transaction) AddMerkleProof(bump *MerklePath) error {
 
 // Fee returns the fee of the transaction.
 func (tx *Transaction) Sign() error {
-	tx.checkFeeCompluted()
+	err := tx.checkFeeComputed()
+	if err != nil {
+		return err
+	}
 	for vin, i := range tx.Inputs {
 		if i.UnlockingScriptTemplate != nil {
 			unlock, err := i.UnlockingScriptTemplate.Sign(tx, uint32(vin))
@@ -453,7 +456,10 @@ func (tx *Transaction) Sign() error {
 
 // SignUnsigned signs the transaction without the unlocking script.
 func (tx *Transaction) SignUnsigned() error {
-	tx.checkFeeCompluted()
+	err := tx.checkFeeComputed()
+	if err != nil {
+		return err
+	}
 	for vin, i := range tx.Inputs {
 		if i.UnlockingScript == nil {
 			if i.UnlockingScriptTemplate != nil {
@@ -468,12 +474,10 @@ func (tx *Transaction) SignUnsigned() error {
 	return nil
 }
 
-func (tx *Transaction) checkFeeCompluted() error {
+func (tx *Transaction) checkFeeComputed() error {
 	for _, out := range tx.Outputs {
-		if out.Satoshis == 0 {
-			if out.Change {
-				return errors.New("There are still change outputs with uncomputed amounts. Use the Fee() method to compute the change amounts and transaction fees prior to signing.")
-			}
+		if out.Satoshis == 0 && out.Change {
+			return errors.New("fee not computed")
 		}
 	}
 	return nil
