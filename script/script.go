@@ -127,6 +127,11 @@ func (s *Script) AppendOpcodes(oo ...uint8) error {
 	return nil
 }
 
+// Bytes implements the Byte interface and returns the byte slice of script.
+func (s *Script) Bytes() []byte {
+	return *s
+}
+
 // String implements the stringer interface and returns the hex string of script.
 func (s *Script) String() string {
 	return hex.EncodeToString(*s)

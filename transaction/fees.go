@@ -24,10 +24,11 @@ func (tx *Transaction) Fee(f FeeModel, changeDistribution ChangeDistribution) er
 	}
 	satsIn := uint64(0)
 	for _, i := range tx.Inputs {
-		if i.SourceTransaction == nil {
+		sourceSats := i.SourceTxSatoshis()
+		if sourceSats == nil {
 			return ErrEmptyPreviousTx
 		}
-		satsIn += *i.SourceTxSatoshis()
+		satsIn += *sourceSats
 	}
 	satsOut := uint64(0)
 	changeOuts := uint64(0)

@@ -323,7 +323,7 @@ func createSpendingTx(sigScript, pkScript *script.Script, outputValue int64) *tr
 			LockingScript: script.NewFromBytes([]byte{}),
 		}},
 	}
-	spendingTx.Inputs[0].SetSourceTxFromOutput(&transaction.TransactionOutput{
+	spendingTx.Inputs[0].SetSourceTxOutput(&transaction.TransactionOutput{
 		LockingScript: pkScript,
 	})
 
@@ -612,7 +612,7 @@ testloop:
 
 		for k, txin := range tx.Inputs {
 			prevOut, ok := prevOuts[txIOKey{id: txin.SourceTXID.String(), idx: txin.SourceTxOutIndex}]
-			txin.SetSourceTxFromOutput(prevOut)
+			txin.SetSourceTxOutput(prevOut)
 			if !ok {
 				t.Errorf("bad test (missing %dth input) %d:%v",
 					k, i, test)
@@ -762,7 +762,7 @@ testloop:
 
 		for k, txin := range tx.Inputs {
 			prevOut, ok := prevOuts[txIOKey{id: txin.SourceTXID.String(), idx: txin.SourceTxOutIndex}]
-			txin.SetSourceTxFromOutput(prevOut)
+			txin.SetSourceTxOutput(prevOut)
 			if !ok {
 				t.Errorf("bad test (missing %dth input) %d:%v",
 					k, i, test)

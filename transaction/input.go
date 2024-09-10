@@ -35,21 +35,31 @@ type TransactionInput struct {
 	SourceTxOutIndex        uint32
 	SequenceNumber          uint32
 	SourceTransaction       *Transaction
+	sourceOutput            *TransactionOutput
 	UnlockingScriptTemplate UnlockingScriptTemplate
 }
 
-func (i *TransactionInput) SourceTxScript() *script.Script {
-	if i.SourceTransaction == nil {
-		return nil
+func (i *TransactionInput) SourceTxOutput() *TransactionOutput {
+	if i.SourceTransaction != nil {
+		return i.SourceTransaction.Outputs[i.SourceTxOutIndex]
 	}
-	return i.SourceTransaction.Outputs[i.SourceTxOutIndex].LockingScript
+	return i.sourceOutput
+}
+
+func (i *TransactionInput) SourceTxScript() *script.Script {
+	sourceTxOut := i.SourceTxOutput()
+	if sourceTxOut != nil {
+		return sourceTxOut.LockingScript
+	}
+	return nil
 }
 
 func (i *TransactionInput) SourceTxSatoshis() *uint64 {
-	if i.SourceTransaction == nil {
-		return nil
+	sourceTxOut := i.SourceTxOutput()
+	if sourceTxOut != nil {
+		return &sourceTxOut.Satoshis
 	}
-	return &i.SourceTransaction.Outputs[i.SourceTxOutIndex].Satoshis
+	return nil
 }
 
 // ReadFrom reads from the `io.Reader` into the `transaction.TransactionInput`.
@@ -132,7 +142,7 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 			return bytesRead, errors.Wrapf(err, "script(%d): got %d bytes", scriptLen.Length(), n)
 		}
 
-		i.SetSourceTxFromOutput(&TransactionOutput{
+		i.SetSourceTxOutput(&TransactionOutput{
 			Satoshis:      binary.LittleEndian.Uint64(prevSatoshis),
 			LockingScript: script.NewFromBytes(scriptBytes),
 		})
@@ -179,9 +189,6 @@ func (i *TransactionInput) Bytes(clear bool) []byte {
 	return append(h, util.LittleEndianBytes(i.SequenceNumber, 4)...)
 }
 
-func (i *TransactionInput) SetSourceTxFromOutput(txo *TransactionOutput) {
-	prevTx := &Transaction{}
-	prevTx.Outputs = make([]*TransactionOutput, i.SourceTxOutIndex+1)
-	prevTx.Outputs[i.SourceTxOutIndex] = txo
-	i.SourceTransaction = prevTx
+func (i *TransactionInput) SetSourceTxOutput(txo *TransactionOutput) {
+	i.sourceOutput = txo
 }

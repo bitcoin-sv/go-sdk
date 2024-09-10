@@ -47,7 +47,7 @@ type P2PKH struct {
 }
 
 func (p *P2PKH) Sign(tx *transaction.Transaction, inputIndex uint32) (*script.Script, error) {
-	if tx.Inputs[inputIndex].SourceTransaction == nil {
+	if tx.Inputs[inputIndex].SourceTxOutput() == nil {
 		return nil, transaction.ErrEmptyPreviousTx
 	}
 
