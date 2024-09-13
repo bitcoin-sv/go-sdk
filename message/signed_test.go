@@ -1,6 +1,8 @@
 package message
 
 import (
+	"crypto/rand"
+	"math/big"
 	"testing"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
@@ -47,4 +49,28 @@ func TestSignedMessage(t *testing.T) {
 		require.Equal(t, "message version mismatch: Expected 42421033, received 01421033", err.Error())
 	})
 
+}
+
+func TestEdgeCases(t *testing.T) {
+	signingPriv, _ := ec.PrivateKeyFromBytes([]byte{15})
+
+	message := make([]byte, 32)
+	for i := 0; i < 10000; i++ {
+		rand.Read(message)
+		signature, err := signingPriv.Sign(message)
+		require.NoError(t, err)
+
+		// Manually set R and S to edge case values (e.g., highest bit set).
+		// These values will require padding when encoded in DER.
+		signature.R = big.NewInt(0x80)                                      // Example: 128, which in binary is 10000000
+		signature.S = new(big.Int).SetBytes([]byte{0x80, 0x00, 0x00, 0x01}) // Example edge case
+
+		signatureSerialized := signature.Serialize()
+		signatureDER, err := signature.ToDER()
+		require.NoError(t, err)
+
+		require.Equal(t, signatureSerialized, signatureDER)
+		require.Equal(t, len(signatureSerialized), len(signatureDER))
+		t.Logf("Signature serialized: %d %x - %d %x\n", len(signatureDER), signatureDER, len(signatureSerialized), signatureSerialized)
+	}
 }

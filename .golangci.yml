@@ -336,7 +336,7 @@ linters:
     - dogsled
     # - revive
     - prealloc
-    - exportloopref
+    - copyloopvar
     - exhaustive
     - sqlclosecheck
     - nolintlint

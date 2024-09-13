@@ -11,7 +11,7 @@ import (
 )
 
 // BRC-78: https://github.com/bitcoin-sv/BRCs/blob/master/peer-to-peer/0078.md
-const VERSION = "42421033"
+const VERSION = "42423301"
 
 var VERSION_BYTES = []byte{0x42, 0x42, 0x10, 0x33}
 
