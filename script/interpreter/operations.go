@@ -7,7 +7,7 @@ import (
 	"hash"
 	"math/big"
 
-	"golang.org/x/crypto/ripemd160"
+	"golang.org/x/crypto/ripemd160" //nolint:gosec // required
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
@@ -1869,7 +1869,7 @@ func opcodeRipemd160(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	t.dstack.PushByteArray(calcHash(buf, ripemd160.New()))
+	t.dstack.PushByteArray(calcHash(buf, ripemd160.New())) //nolint:gosec // required
 	return nil
 }
 
@@ -1914,7 +1914,7 @@ func opcodeHash160(op *ParsedOpcode, t *thread) error {
 	}
 
 	hash := sha256.Sum256(buf)
-	t.dstack.PushByteArray(calcHash(hash[:], ripemd160.New()))
+	t.dstack.PushByteArray(calcHash(hash[:], ripemd160.New())) //nolint:gosec // required
 	return nil
 }
 

@@ -185,6 +185,6 @@ func TestSignUnsignedNew(t *testing.T) {
 	require.NoError(t, err)
 
 	for _, input := range tx.Inputs {
-		require.Positive(t, len(input.UnlockingScript.Bytes()))
+		require.NotEmpty(t, input.UnlockingScript.Bytes())
 	}
 }

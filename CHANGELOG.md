@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. The format 
 ## Table of Contents
 
 - [Unreleased](#unreleased)
+- [1.1.8 - 2024-09-17](#118---2024-09-17)
 - [1.1.7 - 2024-09-10](#117---2024-09-10)
 - [1.1.6 - 2024-09-09](#116---2024-09-09)
 - [1.1.5 - 2024-09-06](#115---2024-09-06)
@@ -15,6 +16,17 @@ All notable changes to this project will be documented in this file. The format 
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
 
+
+## [1.1.8] - 2024-09-17
+  ### Changed
+  - Restore Transaction `Clone` to its previous state, and add `ShallowClone` as a more efficient alternative
+  - Fix the version number bytes in `message`
+  - Rename `merkleproof.ToHex()` to `Hex()`
+  - Update golangci-lint version and rules
+
+  ### Added
+  - `transaction.ShallowClone`
+  - `transaction.Hex`
 
 ## [1.1.7] - 2024-09-10
   - Rework `tx.Clone()` to be more efficient

@@ -196,7 +196,7 @@ linters-settings:
     checks:
         # the list of enabled checks, see https://github.com/tommy-muehle/go-mnd/#checks for description.
       argument,case,condition,operation,return,assign
-        
+
   govet:
     # report about shadowed variables
     shadow: true
@@ -336,7 +336,7 @@ linters:
     - dogsled
     # - revive
     - prealloc
-    - exportloopref
+    - copyloopvar
     - exhaustive
     - sqlclosecheck
     - nolintlint
@@ -397,6 +397,11 @@ issues:
     - linters:
         - staticcheck
       text: "SA1019:"
+
+    # Exclude some gosec messages
+    - linters:
+        - gosec
+      text: "G115:"
 
     # Exclude lll issues for long lines with go:generate
     - linters:

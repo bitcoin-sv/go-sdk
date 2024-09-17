@@ -55,17 +55,17 @@ var BRC74JSON = MerklePath{
 
 var BRC74JSONTrimmed = `{"blockHeight":813706,"path":[[{"offset":3048,"hash":"304e737fdfcb017a1a322e78b067ecebb5e07b44f0a36ed1f01264d2014f7711"},{"offset":3049,"hash":"d888711d588021e588984e8278a2decf927298173a06737066e43f3e75534e00","txid":true},{"offset":3050,"hash":"98c9c5dd79a18f40837061d5e0395ffb52e700a2689e641d19f053fc9619445e","txid":true},{"offset":3051,"duplicate":true}],[],[{"offset":763,"duplicate":true}],[{"offset":380,"hash":"858e41febe934b4cbc1cb80a1dc8e254cb1e69acff8e4f91ecdd779bcaefb393"}],[{"offset":191,"duplicate":true}],[{"offset":94,"hash":"f80263e813c644cd71bcc88126d0463df070e28f11023a00543c97b66e828158"}],[{"offset":46,"hash":"f36f792fa2b42acfadfa043a946d4d7b6e5e1e2e0266f2cface575bbb82b7ae0"}],[{"offset":22,"hash":"7d5051f0d4ceb7d2e27a49e448aedca2b3865283ceffe0b00b9c3017faca2081"}],[{"offset":10,"hash":"43aeeb9b6a9e94a5a787fbf04380645e6fd955f8bf0630c24365f492ac592e50"}],[{"offset":4,"hash":"45be5d16ac41430e3589a579ad780e5e42cf515381cc309b48d0f4648f9fcd1c"}],[{"offset":3,"duplicate":true}],[{"offset":0,"hash":"d40cb31af3ef53dd910f5ce15e9a1c20875c009a22d25eab32c11c7ece6487af"}]]}`
 
-func TestMerklePath_ParseHex(t *testing.T) {
+func TestMerklePathParseHex(t *testing.T) {
 	t.Parallel()
 
 	t.Run("parses from hex", func(t *testing.T) {
 		mp, err := NewMerklePathFromHex(BRC74Hex)
 		require.NoError(t, err)
-		require.Equal(t, BRC74Hex, mp.ToHex())
+		require.Equal(t, BRC74Hex, mp.Hex())
 	})
 }
 
-func TestMerklePath_ToHex(t *testing.T) {
+func TestMerklePathToHex(t *testing.T) {
 	// t.Parallel()
 
 	t.Run("serializes to hex", func(t *testing.T) {
@@ -73,12 +73,12 @@ func TestMerklePath_ToHex(t *testing.T) {
 			BlockHeight: BRC74JSON.BlockHeight,
 			Path:        BRC74JSON.Path,
 		}
-		hex := path.ToHex()
+		hex := path.Hex()
 		require.Equal(t, BRC74Hex, hex)
 	})
 }
 
-func TestMerklePath_ComputeRootHex(t *testing.T) {
+func TestMerklePathComputeRootHex(t *testing.T) {
 	t.Parallel()
 
 	t.Run("computes a root", func(t *testing.T) {
@@ -120,7 +120,7 @@ func TestMerklePath_Verify(t *testing.T) {
 
 }
 
-func TestMerklePath_Combine(t *testing.T) {
+func TestMerklePathCombine(t *testing.T) {
 	t.Parallel()
 
 	t.Run("combines two paths", func(t *testing.T) {

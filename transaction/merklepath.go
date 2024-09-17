@@ -186,8 +186,8 @@ func (mp *MerklePath) Bytes() []byte {
 	return bytes
 }
 
-// ToHex converts the MerklePath to a hexadecimal string representation
-func (mp *MerklePath) ToHex() string {
+// Hex converts the MerklePath to a hexadecimal string representation
+func (mp *MerklePath) Hex() string {
 	return hex.EncodeToString(mp.Bytes())
 }
 
