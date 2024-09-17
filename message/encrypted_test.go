@@ -46,7 +46,7 @@ func TestEncryptedMessage(t *testing.T) {
 		if err == nil {
 			t.Fatalf("Expected an error, but got none")
 		}
-		expectedError := "message version mismatch: Expected 42421033, received 01421033"
+		expectedError := "message version mismatch: Expected 42423301, received 01423301"
 		if err.Error() != expectedError {
 			t.Errorf("Expected error: %s, but got: %s", expectedError, err.Error())
 		}
