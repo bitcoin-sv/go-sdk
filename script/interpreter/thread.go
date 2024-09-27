@@ -45,6 +45,11 @@ type thread struct {
 
 	afterGenesis            bool
 	earlyReturnAfterGenesis bool
+
+	// temp variables needed during calculation, much more memory efficient
+	scriptNumber1 *scriptNumber
+	scriptNumber2 *scriptNumber
+	exec          bool
 }
 
 func createThread(opts *execOpts) (*thread, error) {
@@ -53,6 +58,16 @@ func createThread(opts *execOpts) (*thread, error) {
 			ErrorOnCheckSig: opts.tx == nil || opts.previousTxOut == nil,
 		},
 		cfg: &beforeGenesisConfig{},
+
+		// initialize temp variables
+		scriptNumber1: &scriptNumber{
+			val:          new(big.Int),
+			afterGenesis: false,
+		},
+		scriptNumber2: &scriptNumber{
+			val:          new(big.Int),
+			afterGenesis: false,
+		},
 	}
 
 	if err := th.apply(opts); err != nil {
@@ -149,16 +164,16 @@ func (t *thread) isBranchExecuting() bool {
 // executeOpcode performs execution on the passed opcode. It takes into account
 // whether it is hidden by conditionals, but some rules still must be
 // tested in this case.
-func (t *thread) executeOpcode(pop ParsedOpcode) error {
-	if len(pop.Data) > t.cfg.MaxScriptElementSize() {
+func (t *thread) executeOpcode(pop ParsedOpcode) (err error) {
+	if pop.DataLength > t.cfg.MaxScriptElementSize() {
 		return errs.NewError(errs.ErrElementTooBig,
-			"element size %d exceeds max allowed size %d", len(pop.Data), t.cfg.MaxScriptElementSize())
+			"element size %d exceeds max allowed size %d", pop.DataLength, t.cfg.MaxScriptElementSize())
 	}
 
-	exec := t.shouldExec(pop)
+	t.exec = t.shouldExec(pop)
 
 	// Disabled opcodes are fail on program counter.
-	if pop.IsDisabled() && (!t.afterGenesis || exec) {
+	if pop.IsDisabled() && (!t.afterGenesis || t.exec) {
 		return errs.NewError(errs.ErrDisabledOpcode, "attempt to execute disabled opcode %s", pop.Name())
 	}
 
@@ -176,9 +191,9 @@ func (t *thread) executeOpcode(pop ParsedOpcode) error {
 
 	}
 
-	if len(pop.Data) > t.cfg.MaxScriptElementSize() {
+	if pop.DataLength > t.cfg.MaxScriptElementSize() {
 		return errs.NewError(errs.ErrElementTooBig,
-			"element size %d exceeds max allowed size %d", len(pop.Data), t.cfg.MaxScriptElementSize())
+			"element size %d exceeds max allowed size %d", pop.DataLength, t.cfg.MaxScriptElementSize())
 	}
 
 	// Nothing left to do when this is not a conditional opcode, and it is
@@ -189,15 +204,15 @@ func (t *thread) executeOpcode(pop ParsedOpcode) error {
 
 	// Ensure all executed data push opcodes use the minimal encoding when
 	// the minimal data verification flag is set.
-	if t.dstack.verifyMinimalData && t.isBranchExecuting() && pop.op.val <= script.OpPUSHDATA4 && exec {
-		if err := pop.enforceMinimumDataPush(); err != nil {
+	if t.dstack.verifyMinimalData && t.isBranchExecuting() && pop.op.val <= script.OpPUSHDATA4 && t.exec {
+		if err = pop.enforceMinimumDataPush(); err != nil {
 			return err
 		}
 	}
 
 	// If we have already reached an OP_RETURN, we don't execute the next comment, unless it is a conditional,
 	// in which case we need to evaluate it as to check for correct if/else balances
-	if !exec && !pop.IsConditional() {
+	if !t.exec && !pop.IsConditional() {
 		return nil
 	}
 
@@ -795,41 +810,61 @@ func (t *thread) shiftScript() {
 }
 
 func (t *thread) beforeExecute() {
-	t.debug.BeforeExecute(t.state.State())
+	if t.debug.Debugging() {
+		t.debug.BeforeExecute(t.state.State())
+	}
 }
 
 func (t *thread) afterExecute() {
-	t.debug.AfterExecute(t.state.State())
+	if t.debug.Debugging() {
+		t.debug.AfterExecute(t.state.State())
+	}
 }
 
 func (t *thread) beforeStep() {
-	t.debug.BeforeStep(t.state.State())
+	if t.debug.Debugging() {
+		t.debug.BeforeStep(t.state.State())
+	}
 }
 
 func (t *thread) afterStep() {
-	t.debug.AfterStep(t.state.State())
+	if t.debug.Debugging() {
+		t.debug.AfterStep(t.state.State())
+	}
 }
 
 func (t *thread) beforeExecuteOpcode() {
-	t.debug.BeforeExecuteOpcode(t.state.State())
+	if t.debug.Debugging() {
+		t.debug.BeforeExecuteOpcode(t.state.State())
+	}
 }
 
 func (t *thread) afterExecuteOpcode() {
-	t.debug.AfterExecuteOpcode(t.state.State())
+	if t.debug.Debugging() {
+		t.debug.AfterExecuteOpcode(t.state.State())
+	}
 }
 
 func (t *thread) beforeScriptChange() {
-	t.debug.BeforeScriptChange(t.state.State())
+	if t.debug.Debugging() {
+		t.debug.BeforeScriptChange(t.state.State())
+	}
 }
 
 func (t *thread) afterScriptChange() {
-	t.debug.AfterScriptChange(t.state.State())
+	if t.debug.Debugging() {
+		t.debug.AfterScriptChange(t.state.State())
+	}
 }
 
 func (t *thread) afterError(err error) {
-	t.debug.AfterError(t.state.State(), err)
+	if t.debug.Debugging() {
+		t.debug.AfterError(t.state.State(), err)
+	}
 }
 
 func (t *thread) afterSuccess() {
-	t.debug.AfterSuccess(t.state.State())
+	if t.debug.Debugging() {
+		t.debug.AfterSuccess(t.state.State())
+	}
 }
