@@ -369,7 +369,7 @@ func opcodeFalse(op *ParsedOpcode, t *thread) error {
 // opcodePushData is a common handler for the vast majority of opcodes that push
 // raw data (bytes) to the data stack.
 func opcodePushData(op *ParsedOpcode, t *thread) error {
-	t.dstack.PushByteArray((*op.DataSource)[op.DataOffsetStart:op.DataOffsetEnd])
+	t.dstack.PushByteArray(op.Data)
 	return nil
 }
 

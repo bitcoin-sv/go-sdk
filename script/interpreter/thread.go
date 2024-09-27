@@ -165,9 +165,9 @@ func (t *thread) isBranchExecuting() bool {
 // whether it is hidden by conditionals, but some rules still must be
 // tested in this case.
 func (t *thread) executeOpcode(pop ParsedOpcode) (err error) {
-	if pop.DataLength > t.cfg.MaxScriptElementSize() {
+	if len(pop.Data) > t.cfg.MaxScriptElementSize() {
 		return errs.NewError(errs.ErrElementTooBig,
-			"element size %d exceeds max allowed size %d", pop.DataLength, t.cfg.MaxScriptElementSize())
+			"element size %d exceeds max allowed size %d", len(pop.Data), t.cfg.MaxScriptElementSize())
 	}
 
 	t.exec = t.shouldExec(pop)
@@ -191,9 +191,9 @@ func (t *thread) executeOpcode(pop ParsedOpcode) (err error) {
 
 	}
 
-	if pop.DataLength > t.cfg.MaxScriptElementSize() {
+	if len(pop.Data) > t.cfg.MaxScriptElementSize() {
 		return errs.NewError(errs.ErrElementTooBig,
-			"element size %d exceeds max allowed size %d", pop.DataLength, t.cfg.MaxScriptElementSize())
+			"element size %d exceeds max allowed size %d", len(pop.Data), t.cfg.MaxScriptElementSize())
 	}
 
 	// Nothing left to do when this is not a conditional opcode, and it is
