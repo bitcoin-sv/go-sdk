@@ -76,17 +76,20 @@ See the [Go Doc](https://pkg.go.dev/github.com/bitcoin-sv/go-sdk) for a complete
 
 ### Examples
 
-Check out the [examples folder](https://github.com/bitcoin-sv/go-sdk/tree/master/examples) for more advanced examples.
+Check out the [examples folder](https://github.com/bitcoin-sv/go-sdk/tree/master/docs/examples) for more advanced examples.
 
-## Features & Deliverables
+## Features
 
-- **Sound Cryptographic Primitives**: Secure key management, signature computations, and encryption protocols.
+- **Performance Oriented**: Designed to deliver performant functionality for large scale / high demand systems.
+- **Cryptographic Primitives**: Secure key management, signature computations, and encryption protocols.
 - **Script Level Constructs**: Network-compliant script interpreter with support for custom scripts and serialization formats.
 - **Transaction Construction and Signing**: Comprehensive transaction builder API, ensuring versatile and secure transaction creation.
 - **Transaction Broadcast Management**: Mechanisms to send transactions to both miners and overlays, ensuring extensibility and future-proofing.
 - **Merkle Proof Verification**: Tools for representing and verifying merkle proofs, adhering to various serialization standards.
 - **Serializable SPV Structures**: Structures and interfaces for full SPV verification.
 - **Secure Encryption and Signed Messages**: Enhanced mechanisms for encryption and digital signatures, replacing outdated methods.
+- **Shamir Key Splitting & Recombining**: Allows private keys to be split into N shares, and recombined by providing M of N shares.
+- **Compatability Packages**: Supports additional / deprecated features like ECIES, Bitcoin Signed Message, and BIP32 style key derivation.
 
 ## Documentation
 
@@ -111,7 +114,7 @@ For information on past releases, check out the [changelog](./CHANGELOG.md). For
 
 Project Owners: Thomas Giacomo and Darren Kellenschwiler
 
-Development Team Lead: TBD
+Development Team Lead: Luke Rohenaz
 
 For questions, bug reports, or feature requests, please open an issue on GitHub or contact us directly.
 
