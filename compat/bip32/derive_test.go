@@ -195,9 +195,9 @@ func TestDerivePublicKeyFromPath(t *testing.T) {
 			expectedPubKey: func() []byte {
 				xpubStr := "xpub6AvUGrnEpfvJBbfx7sQ89Q8hEMPM65UteqEX4yUbUiES2jHfjexmfJoxCGSwFMZiPBaKQT1RiKWrKfuDV4vpgVs4Xn8PpPTR2i79rwHd4Zr"
 				xpubKey, err := compat.NewKeyFromString(xpubStr)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				pubKey, err := xpubKey.ECPubKey()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return pubKey.SerializeCompressed()
 			}(),
 			expectedErr: nil,
@@ -212,9 +212,9 @@ func TestDerivePublicKeyFromPath(t *testing.T) {
 			expectedPubKey: func() []byte {
 				xpubStr := "xpub6EagAesgan9f8xaZrxrDhPXZ1BKeKvNYWS56asqvFmC7CaAZ19TkdLvHDrzubSMiC6tAqTMcumVFkgT2duhZncV3KieshEDHNc4jPWkRMGD"
 				xpubKey, err := compat.NewKeyFromString(xpubStr)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				pubKey, err := xpubKey.ECPubKey()
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				return pubKey.SerializeCompressed()
 			}(),
 			expectedErr: nil,
