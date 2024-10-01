@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_DerivePathAndDeriveSeed(t *testing.T) {
+func TestDerivePathAndDeriveSeed(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
 		counter      uint64
@@ -104,7 +104,7 @@ func TestDeriveSeed(t *testing.T) {
 	}
 }
 
-func Test_DeriveChildFromPath(t *testing.T) {
+func TestDeriveChildFromPath(t *testing.T) {
 	t.Parallel()
 	tests := map[string]struct {
 		key     *compat.ExtendedKey
@@ -173,6 +173,63 @@ func Test_DeriveChildFromPath(t *testing.T) {
 			pubKey, err := k.Neuter()
 			require.NoError(t, err)
 			require.Equal(t, test.expPub, pubKey.String())
+		})
+	}
+}
+
+func TestDerivePublicKeyFromPath(t *testing.T) {
+	t.Parallel()
+	tests := map[string]struct {
+		key            *compat.ExtendedKey
+		path           string
+		expectedPubKey []byte
+		expectedErr    error
+	}{
+		"successful run, 1 level child, should return expected public key": {
+			key: func() *compat.ExtendedKey {
+				k, err := compat.NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
+				assert.NoError(t, err)
+				return k
+			}(),
+			path: "0/1",
+			expectedPubKey: func() []byte {
+				xpubStr := "xpub6AvUGrnEpfvJBbfx7sQ89Q8hEMPM65UteqEX4yUbUiES2jHfjexmfJoxCGSwFMZiPBaKQT1RiKWrKfuDV4vpgVs4Xn8PpPTR2i79rwHd4Zr"
+				xpubKey, err := compat.NewKeyFromString(xpubStr)
+				assert.NoError(t, err)
+				pubKey, err := xpubKey.ECPubKey()
+				assert.NoError(t, err)
+				return pubKey.SerializeCompressed()
+			}(),
+			expectedErr: nil,
+		},
+		"successful run, 3 level hardened child, should return expected public key": {
+			key: func() *compat.ExtendedKey {
+				k, err := compat.NewKeyFromString("xprv9s21ZrQH143K3QTDL4LXw2F7HEK3wJUD2nW2nRk4stbPy6cq3jPPqjiChkVvvNKmPGJxWUtg6LnF5kejMRNNU3TGtRBeJgk33yuGBxrMPHi")
+				assert.NoError(t, err)
+				return k
+			}(),
+			path: "10/1'/1000'/15'",
+			expectedPubKey: func() []byte {
+				xpubStr := "xpub6EagAesgan9f8xaZrxrDhPXZ1BKeKvNYWS56asqvFmC7CaAZ19TkdLvHDrzubSMiC6tAqTMcumVFkgT2duhZncV3KieshEDHNc4jPWkRMGD"
+				xpubKey, err := compat.NewKeyFromString(xpubStr)
+				assert.NoError(t, err)
+				pubKey, err := xpubKey.ECPubKey()
+				assert.NoError(t, err)
+				return pubKey.SerializeCompressed()
+			}(),
+			expectedErr: nil,
+		},
+	}
+
+	for name, test := range tests {
+		t.Run(name, func(t *testing.T) {
+			pubKeyBytes, err := test.key.DerivePublicKeyFromPath(test.path)
+			if test.expectedErr != nil {
+				require.EqualError(t, err, test.expectedErr.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, test.expectedPubKey, pubKeyBytes)
+			}
 		})
 	}
 }
