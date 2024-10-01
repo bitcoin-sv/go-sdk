@@ -12,8 +12,8 @@ permissions:
   pull-requests: read
 
 env:
-  GO_VERSION: '1.22'  # Use the version you need
-  GOLANGCI_LINT_VERSION: v1.59  # Latest version as of my last update
+  GO_VERSION: '1.22'
+  GOLANGCI_LINT_VERSION: v1.61.0 
 
 jobs:
   sonarcloud:
