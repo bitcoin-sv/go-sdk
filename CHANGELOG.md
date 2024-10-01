@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ## Table of Contents
 
-- [Unreleased](#unreleased)
+- [1.1.9 - 2024-10-01](#118---2024-10-01)
 - [1.1.8 - 2024-09-17](#118---2024-09-17)
 - [1.1.7 - 2024-09-10](#117---2024-09-10)
 - [1.1.6 - 2024-09-09](#116---2024-09-09)
@@ -16,6 +16,11 @@ All notable changes to this project will be documented in this file. The format 
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
 
+## [1.1.9] - 2024-10-01
+  ### Changed
+  - Updated readme
+  - Improved test coverage
+  - Update golangci-lint version in sonar workflow
 
 ## [1.1.8] - 2024-09-17
   ### Changed
