@@ -94,11 +94,19 @@ func TestEF(t *testing.T) {
 	})
 }
 
-func TestClone(t *testing.T) {
+func TestShallowClone(t *testing.T) {
 	tx, err := transaction.NewTransactionFromBEEFHex(BRC62Hex)
 	require.NoError(t, err)
 
 	clone := tx.ShallowClone()
+	require.Equal(t, tx.Bytes(), clone.Bytes())
+}
+
+func TestClone(t *testing.T) {
+	tx, err := transaction.NewTransactionFromBEEFHex(BRC62Hex)
+	require.NoError(t, err)
+
+	clone := tx.Clone()
 	require.Equal(t, tx.Bytes(), clone.Bytes())
 }
 
