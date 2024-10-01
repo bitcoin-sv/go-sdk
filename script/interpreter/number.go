@@ -36,6 +36,12 @@ import (
 type scriptNumber struct {
 	val          *big.Int
 	afterGenesis bool
+
+	// helper variables used to reduce memory footprint
+	bb         []byte
+	result     []byte
+	bigInt     *big.Int
+	isNegative bool
 }
 
 var zero = big.NewInt(0)
@@ -128,6 +134,70 @@ func makeScriptNumber(bb []byte, scriptNumLen int, requireMinimal, afterGenesis 
 		val:          v,
 		afterGenesis: afterGenesis,
 	}, nil
+}
+
+func populateScriptNumber(sn *scriptNumber, bb []byte, scriptNumLen int, requireMinimal, afterGenesis bool, s *stack) error {
+	// Interpreting data requires that it is not larger than the passed scriptNumLen value.
+	if len(bb) > scriptNumLen {
+		sn.val.SetInt64(0)
+		sn.afterGenesis = false
+		return errs.NewError(
+			errs.ErrNumberTooBig,
+			"numeric value encoded as %x is %d bytes which exceeds the max allowed of %d",
+			bb, len(bb), scriptNumLen,
+		)
+	}
+
+	// Enforce minimal encoded if requested.
+	if requireMinimal {
+		if err := checkMinimalDataEncoding(bb); err != nil {
+			sn.val = big.NewInt(0)
+			sn.afterGenesis = false
+			return err
+		}
+	}
+
+	// Zero is encoded as an empty byte slice.
+	if len(bb) == 0 {
+		sn.val.SetInt64(0)
+		sn.afterGenesis = afterGenesis
+		return nil
+	}
+
+	// Decode from little endian.
+	//
+	// The following is the equivalent of:
+	//    var v int64
+	//    for i, b := range bb {
+	//        v |= int64(b) << uint8(8*i)
+	//    }
+	sn.val.SetUint64(0)
+	for i, b := range bb {
+		s.bigInt1.SetUint64(0)
+		s.bigInt2.SetUint64(0)
+		sn.val.Or(sn.val, s.bigInt1.Lsh(s.bigInt2.SetBytes([]byte{b}), uint(8*i)))
+	}
+
+	// When the most significant byte of the input bytes has the sign bit
+	// set, the result is negative.  So, remove the sign bit from the result
+	// and make it negative.
+	//
+	// The following is the equivalent of:
+	//    if bb[len(bb)-1]&0x80 != 0 {
+	//        v &= ^(int64(0x80) << uint8(8*(len(bb)-1)))
+	//        return -v, nil
+	//    }
+	if bb[len(bb)-1]&0x80 != 0 {
+		// The maximum length of bb has already been determined to be 4
+		// above, so uint8 is enough to cover the max possible shift
+		// value of 24.
+		s.bigInt3.SetInt64(0x80)
+		s.bigInt3.Not(s.bigInt3.Lsh(s.bigInt3, uint(8*(len(bb)-1))))
+		sn.val.And(sn.val, s.bigInt3).Neg(sn.val)
+	}
+
+	sn.afterGenesis = afterGenesis
+	return nil
 }
 
 // Add adds the receiver and the number, sets the result over the receiver and returns.
@@ -316,17 +386,16 @@ func (n *scriptNumber) Bytes() []byte {
 		n.Neg()
 	}
 
-	var bb []byte
 	if !n.afterGenesis {
 		v := n.val.Int64()
 		if v > math.MaxInt32 {
-			bb = big.NewInt(int64(math.MaxInt32)).Bytes()
+			n.bb = big.NewInt(int64(math.MaxInt32)).Bytes()
 		} else if v < math.MinInt32 {
-			bb = big.NewInt(int64(math.MinInt32)).Bytes()
+			n.bb = big.NewInt(int64(math.MinInt32)).Bytes()
 		}
 	}
-	if bb == nil {
-		bb = n.val.Bytes()
+	if n.bb == nil {
+		n.bb = n.val.Bytes()
 	}
 
 	// Encode to little endian.  The maximum number of encoded bytes is len(bb)+1
@@ -338,10 +407,10 @@ func (n *scriptNumber) Bytes() []byte {
 	//        result = append(result, byte(n&0xff))
 	//        n >>= 8
 	//    }
-	result := make([]byte, 0, len(bb)+1)
+	n.result = make([]byte, 0, len(n.bb)+1)
 	cpy := new(big.Int).SetBytes(n.val.Bytes())
 	for cpy.Cmp(zero) == 1 {
-		result = append(result, byte(cpy.Int64()&0xff))
+		n.result = append(n.result, byte(cpy.Int64()&0xff))
 		cpy.Rsh(cpy, 8)
 	}
 
@@ -352,17 +421,91 @@ func (n *scriptNumber) Bytes() []byte {
 	//
 	// Otherwise, when the most significant byte does not already have the
 	// high bit set, use it to indicate the value is negative, if needed.
-	if result[len(result)-1]&0x80 != 0 {
-		extraByte := byte(0x00)
+	if n.result[len(n.result)-1]&0x80 != 0 {
 		if isNegative {
-			extraByte = 0x80
+			n.result = append(n.result, 0x80)
+		} else {
+			n.result = append(n.result, 0x00)
 		}
-		result = append(result, extraByte)
 	} else if isNegative {
-		result[len(result)-1] |= 0x80
+		n.result[len(n.result)-1] |= 0x80
 	}
 
-	return result
+	return n.result
+}
+
+func (n *scriptNumber) BytesInto(b *[]byte) {
+	// Zero encodes as an empty byte slice.
+	if n.IsZero() {
+		*b = (*b)[:0]
+		return
+	}
+
+	// Take the absolute value and keep track of whether it was originally
+	// negative.
+	n.isNegative = n.val.Cmp(zero) == -1
+	if n.isNegative {
+		n.Neg()
+	}
+
+	// we are reusing n.bigInt to reduce memory footprint, but have to make sure it is initialized
+	if n.bigInt == nil {
+		n.bigInt = new(big.Int)
+	}
+
+	if !n.afterGenesis {
+		if n.val.Int64() > math.MaxInt32 {
+			n.bigInt.SetInt64(int64(math.MaxInt32)).BytesInto(&n.bb)
+		} else if n.val.Int64() < math.MinInt32 {
+			n.bigInt.SetInt64(int64(math.MinInt32)).BytesInto(&n.bb)
+		}
+	}
+	if n.bb == nil {
+		n.val.BytesInto(&n.bb)
+	}
+
+	// Encode to little endian.  The maximum number of encoded bytes is len(bb)+1
+	// (8 bytes for max int64 plus a potential byte for sign extension).
+	//
+	// The following is the equivalent of:
+	//    result := make([]byte, 0, len(bb)+1)
+	//    for n > 0 {
+	//        result = append(result, byte(n&0xff))
+	//        n >>= 8
+	//    }
+
+	// check we have enough capacity, otherwise allocate more
+	if cap(*b) < len(n.bb)+1 {
+		*b = make([]byte, 0, len(n.bb)+1)
+	}
+
+	// reset the byte slice
+	*b = make([]byte, 0, len(*b))
+	//*b = (*b)[:0] // Why TF does this not work?!
+	n.bigInt.SetBytes(n.val.Bytes())
+	for n.bigInt.Cmp(zero) == 1 {
+		*b = append(*b, byte(n.bigInt.Int64()&0xff))
+		n.bigInt.Rsh(n.bigInt, 8)
+	}
+
+	// When the most significant byte already has the high bit set, an
+	// additional high byte is required to indicate whether the number is
+	// negative or positive.  The additional byte is removed when converting
+	// back to an integral and its high bit is used to denote the sign.
+	//
+	// Otherwise, when the most significant byte does not already have the
+	// high bit set, use it to indicate the value is negative, if needed.
+	if (*b)[len(*b)-1]&0x80 != 0 {
+		if n.isNegative {
+			*b = append(*b, 0x80)
+		} else {
+			*b = append(*b, 0x00)
+		}
+	} else if n.isNegative {
+		(*b)[len(*b)-1] |= 0x80
+	}
+
+	return
 }
 
 func minimallyEncode(data []byte) []byte {
