@@ -63,6 +63,10 @@ type debugger struct {
 	afterStackPopFns  []StackFunc
 }
 
+func (n *debugger) Debugging() bool {
+	return true
+}
+
 // NewDebugger returns an empty debugger which is to be configured with the `Attach`
 // functions.
 //
