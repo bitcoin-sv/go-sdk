@@ -454,14 +454,16 @@ func (n *scriptNumber) BytesInto(b *[]byte) {
 	}
 
 	if !n.afterGenesis {
-		if n.val.Int64() > math.MaxInt32 {
-			n.bigInt.SetInt64(int64(math.MaxInt32)).BytesInto(&n.bb)
-		} else if n.val.Int64() < math.MinInt32 {
-			n.bigInt.SetInt64(int64(math.MinInt32)).BytesInto(&n.bb)
-		}
+		copy(n.bb, n.bigInt.SetInt64(int64(math.MaxInt32)).Bytes())
+		// if n.val.Int64() > math.MaxInt32 {
+		// 	n.bigInt.SetInt64(int64(math.MaxInt32)).BytesInto(&n.bb)
+		// } else if n.val.Int64() < math.MinInt32 {
+		// 	n.bigInt.SetInt64(int64(math.MinInt32)).BytesInto(&n.bb)
+		// }
 	}
 	if n.bb == nil {
-		n.val.BytesInto(&n.bb)
+		copy(n.bb, n.val.Bytes())
+		// n.val.BytesInto(&n.bb)
 	}
 
 	// Encode to little endian.  The maximum number of encoded bytes is len(bb)+1
