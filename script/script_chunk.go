@@ -215,7 +215,7 @@ func PushDataPrefix(data []byte) ([]byte, error) {
 	return b, nil
 }
 
-// DecodeStringParts takes a hex string and decodes the opcodes in it
+// DecodeScriptHex takes a hex string and decodes the opcodes in it
 // returning an array of opcode parts (which could be opcodes or data
 // pushed to the stack).
 func DecodeScriptHex(s string) ([]*ScriptChunk, error) {
