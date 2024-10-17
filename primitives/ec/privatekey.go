@@ -253,7 +253,7 @@ func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *key
 	}
 
 	points := make([]*keyshares.PointInFiniteField, 0)
-	for range totalShares {
+	for i := 0; i < totalShares; i++ {
 		pk, err := NewPrivateKey()
 		if err != nil {
 			return nil, err
