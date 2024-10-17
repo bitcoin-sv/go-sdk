@@ -8,8 +8,7 @@ import (
 	"github.com/bitcoin-sv/go-sdk/util"
 )
 
-// MerkleTreeParentStr returns the Merkle Tree parent of two Merkle
-// Tree children using hex strings instead of just bytes.
+// MerkleTreeParentStr returns the Merkle Tree parent of two Merkle Tree children using hex strings instead of just bytes.
 func MerkleTreeParentStr(leftNode, rightNode string) (string, error) {
 	l, err := hex.DecodeString(leftNode)
 	if err != nil {
@@ -23,8 +22,7 @@ func MerkleTreeParentStr(leftNode, rightNode string) (string, error) {
 	return hex.EncodeToString(MerkleTreeParent(l, r)), nil
 }
 
-// MerkleTreeParent returns the Merkle Tree parent of two Merkle
-// Tree children.
+// MerkleTreeParent returns the Merkle Tree parent of two MerkleTree children.
 func MerkleTreeParent(leftNode, rightNode []byte) []byte {
 	// swap endianness before concatenating
 	l := util.ReverseBytes(leftNode)
