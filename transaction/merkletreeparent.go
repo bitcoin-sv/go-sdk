@@ -8,7 +8,7 @@ import (
 	"github.com/bitcoin-sv/go-sdk/util"
 )
 
-// MerkleTreeParentStr returns the Merkle Tree parent of two Merkle Tree children using hex strings instead of just bytes.
+// MerkleTreeParentStr returns the Merkle Tree parent of two MerkleTree children using hex strings instead of just bytes.
 func MerkleTreeParentStr(leftNode, rightNode string) (string, error) {
 	l, err := hex.DecodeString(leftNode)
 	if err != nil {
@@ -24,18 +24,27 @@ func MerkleTreeParentStr(leftNode, rightNode string) (string, error) {
 
 // MerkleTreeParent returns the Merkle Tree parent of two MerkleTree children.
 func MerkleTreeParent(leftNode, rightNode []byte) []byte {
-	// swap endianness before concatenating
-	l := util.ReverseBytes(leftNode)
-	r := util.ReverseBytes(rightNode)
+	concatenated := flipTwoArrays(leftNode, rightNode)
 
-	// concatenate leaves
-	concat := append(l, r...)
+	hash := crypto.Sha256d(concatenated)
 
-	// hash the concatenation
-	hash := crypto.Sha256d(concat)
+	util.ReverseBytesInPlace(hash)
 
-	// swap endianness at the end and convert to hex string
-	return util.ReverseBytes(hash)
+	return hash
+}
+
+// flipTwoArrays reverses two byte arrays individually and returns as one concatenated slice
+// example:
+// for a=[a, b, c], b=[d, e, f] the result is [c, b, a, f, e, d]
+func flipTwoArrays(a, b []byte) []byte {
+	result := make([]byte, 0, len(a)+len(b))
+	for i := len(a) - 1; i >= 0; i-- {
+		result = append(result, a[i])
+	}
+	for i := len(b) - 1; i >= 0; i-- {
+		result = append(result, b[i])
+	}
+	return result
 }
 
 // MerkleTreeParentBytes returns the Merkle Tree parent of two Merkle Tree children.
