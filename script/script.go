@@ -349,6 +349,7 @@ func (s *Script) GetParts() ([]*ScriptChunk, error) {
 	return DecodeScript([]byte(*s))
 }
 
+// GetPublicKey extracts the public key from a P2PK script.
 func (s *Script) GetPublicKey() (string, error) {
 	if !s.IsP2PK() {
 		return "", errors.New("script is not of type ScriptTypePubKey")
