@@ -7,6 +7,8 @@ import (
 	"math/big"
 	"math/bits"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // ScriptKey types.
@@ -340,6 +342,31 @@ func MinPushSize(bb []byte) int {
 
 	// OP_PUSHDATA4 + four length bytes + data
 	return l + 5
+}
+
+// GetParts extracts the decoded chunks from the script.
+func (s *Script) GetParts() ([]*ScriptChunk, error) {
+	return DecodeScript([]byte(*s))
+}
+
+func (s *Script) GetPublicKey() (string, error) {
+	if !s.IsP2PK() {
+		return "", errors.New("script is not of type ScriptTypePubKey")
+	}
+
+	parts, err := s.GetParts()
+	if err != nil {
+		return "", err
+	}
+
+	if len(parts) == 0 || parts[0] == nil {
+		return "", errors.New("invalid script parts or missing public key part")
+	}
+
+	pubKey := parts[0].Data
+	pubKeyHex := hex.EncodeToString(pubKey)
+
+	return pubKeyHex, nil
 }
 
 // MarshalJSON convert script into json.
