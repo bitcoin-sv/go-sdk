@@ -2,10 +2,13 @@ package script_test
 
 import (
 	"bytes"
+	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/big"
+	"strings"
 	"testing"
 
 	"github.com/pkg/errors"
@@ -771,4 +774,229 @@ func TestScriptAddresses(t *testing.T) {
 			require.Equal(t, tt.expectedAddresses[0], address.AddressString)
 		})
 	}
+}
+
+func TestScriptAppendPushDataString(t *testing.T) {
+	t.Parallel()
+
+	s := &script.Script{}
+
+	// Test with a simple string
+	err := s.AppendPushDataString("hello")
+	require.NoError(t, err)
+
+	// The script should contain the PUSHDATA opcode and the data
+	expectedScriptHex := "0568656c6c6f"
+	require.Equal(t, expectedScriptHex, s.String())
+
+	// Test with an empty string
+	s = &script.Script{}
+	err = s.AppendPushDataString("")
+	require.NoError(t, err)
+	// Empty data should be represented as OP_0 (0x00)
+	expectedScriptHex = "00"
+	require.Equal(t, expectedScriptHex, s.String())
+
+	// Test with a long string (>75 bytes to trigger PUSHDATA1)
+	longStr := strings.Repeat("a", 80)
+	s = &script.Script{}
+	err = s.AppendPushDataString(longStr)
+	require.NoError(t, err)
+
+	// Since length is >75 and <=255, should use PUSHDATA1 (opcode 0x4c)
+	expectedScriptBytes := append([]byte{script.OpPUSHDATA1, 0x50}, []byte(longStr)...)
+	expectedScriptHex = hex.EncodeToString(expectedScriptBytes)
+	require.Equal(t, expectedScriptHex, s.String())
+
+	// Test with a very long string (>255 bytes to trigger PUSHDATA2)
+	veryLongStr := strings.Repeat("b", 300)
+	s = &script.Script{}
+	err = s.AppendPushDataString(veryLongStr)
+	require.NoError(t, err)
+
+	// Should use PUSHDATA2 (opcode 0x4d)
+	lengthBytes := make([]byte, 2)
+	binary.LittleEndian.PutUint16(lengthBytes, uint16(300))
+	expectedScriptBytes = append([]byte{script.OpPUSHDATA2}, lengthBytes...)
+	expectedScriptBytes = append(expectedScriptBytes, []byte(veryLongStr)...)
+	expectedScriptHex = hex.EncodeToString(expectedScriptBytes)
+	require.Equal(t, expectedScriptHex, s.String())
+}
+
+func TestScriptAppendPushDataArray(t *testing.T) {
+	t.Parallel()
+
+	s := &script.Script{}
+
+	dataArray := [][]byte{
+		[]byte("hello"),
+		[]byte("world"),
+		[]byte("test"),
+	}
+
+	err := s.AppendPushDataArray(dataArray)
+	require.NoError(t, err)
+
+	// The script should contain the correct PUSHDATA prefixes and data
+	expectedScriptHex := "0568656c6c6f05776f726c640474657374"
+	require.Equal(t, expectedScriptHex, s.String())
+
+	// Test with an empty array
+	s = &script.Script{}
+	err = s.AppendPushDataArray([][]byte{})
+	require.NoError(t, err)
+	// Script should be empty
+	require.Equal(t, "", s.String())
+
+	// Test with data that requires PUSHDATA1
+	longData := []byte(strings.Repeat("a", 80)) // 80 bytes
+	dataArray = [][]byte{longData}
+	s = &script.Script{}
+	err = s.AppendPushDataArray(dataArray)
+	require.NoError(t, err)
+
+	expectedScriptBytes := append([]byte{script.OpPUSHDATA1, 0x50}, longData...)
+	expectedScriptHex = hex.EncodeToString(expectedScriptBytes)
+	require.Equal(t, expectedScriptHex, s.String())
+
+	// Test with data that requires PUSHDATA2
+	veryLongData := []byte(strings.Repeat("b", 300))
+	dataArray = [][]byte{veryLongData}
+	s = &script.Script{}
+	err = s.AppendPushDataArray(dataArray)
+	require.NoError(t, err)
+
+	lengthBytes := make([]byte, 2)
+	binary.LittleEndian.PutUint16(lengthBytes, uint16(300))
+	expectedScriptBytes = append([]byte{script.OpPUSHDATA2}, lengthBytes...)
+	expectedScriptBytes = append(expectedScriptBytes, veryLongData...)
+	expectedScriptHex = hex.EncodeToString(expectedScriptBytes)
+	require.Equal(t, expectedScriptHex, s.String())
+}
+
+func TestScriptAppendBigInt(t *testing.T) {
+	t.Parallel()
+
+	s := &script.Script{}
+
+	var bInt big.Int
+	bInt.SetInt64(1234567890)
+
+	err := s.AppendBigInt(bInt)
+	require.NoError(t, err)
+
+	// The script should contain the correct PUSHDATA prefix and data
+	data := bInt.Bytes()
+	dataLen := len(data)
+	expectedScriptBytes := append([]byte{byte(dataLen)}, data...)
+	expectedScriptHex := hex.EncodeToString(expectedScriptBytes)
+	require.Equal(t, expectedScriptHex, s.String())
+
+	// Test with zero
+	bInt.SetInt64(0)
+	s = &script.Script{}
+	err = s.AppendBigInt(bInt)
+	require.NoError(t, err)
+	// Zero should be represented as OP_0 (0x00)
+	require.Equal(t, "00", s.String())
+
+	// Test with a negative big.Int
+	bInt.SetInt64(-123456)
+	s = &script.Script{}
+	err = s.AppendBigInt(bInt)
+	require.NoError(t, err)
+	data = bInt.Bytes() // Negative numbers are represented in two's complement
+	dataLen = len(data)
+	expectedScriptBytes = append([]byte{byte(dataLen)}, data...)
+	expectedScriptHex = hex.EncodeToString(expectedScriptBytes)
+	require.Equal(t, expectedScriptHex, s.String())
+}
+
+func TestScriptAppendPushDataStrings(t *testing.T) {
+	t.Parallel()
+
+	s := &script.Script{}
+
+	dataStrings := []string{"hello", "world", "test"}
+	err := s.AppendPushDataStrings(dataStrings)
+	require.NoError(t, err)
+
+	// The script should contain the correct PUSHDATA prefixes and data
+	expectedScriptHex := "0568656c6c6f05776f726c640474657374"
+	require.Equal(t, expectedScriptHex, s.String())
+
+	// Test with an empty array
+	s = &script.Script{}
+	err = s.AppendPushDataStrings([]string{})
+	require.NoError(t, err)
+	// Script should be empty
+	require.Equal(t, "", s.String())
+
+	// Test with strings that require PUSHDATA1
+	longStrings := []string{strings.Repeat("a", 80), strings.Repeat("b", 80)}
+	s = &script.Script{}
+	err = s.AppendPushDataStrings(longStrings)
+	require.NoError(t, err)
+
+	expectedScriptBytes := []byte{}
+	for _, str := range longStrings {
+		data := []byte(str)
+		dataLen := len(data)
+		if dataLen <= 75 {
+			expectedScriptBytes = append(expectedScriptBytes, byte(dataLen))
+		} else if dataLen <= 255 {
+			expectedScriptBytes = append(expectedScriptBytes, script.OpPUSHDATA1, byte(dataLen))
+		}
+		expectedScriptBytes = append(expectedScriptBytes, data...)
+	}
+	expectedScriptHex = hex.EncodeToString(expectedScriptBytes)
+	require.Equal(t, expectedScriptHex, s.String())
+}
+
+func TestScriptPubKey(t *testing.T) {
+	t.Parallel()
+
+	// Valid P2PK script
+	s, err := script.NewFromHex("2102f0d97c290e79bf2a8660c406aa56b6f189ff79f2245cc5aff82808b58131b4d5ac")
+	require.NoError(t, err)
+	require.NotNil(t, s)
+	pubKey, err := s.PubKey()
+	require.NoError(t, err)
+	require.NotNil(t, pubKey)
+
+	// The public key bytes should match the expected value
+	pubKeyBytes := pubKey.Compressed()
+	expectedPubKeyHex := "02f0d97c290e79bf2a8660c406aa56b6f189ff79f2245cc5aff82808b58131b4d5"
+	require.Equal(t, expectedPubKeyHex, hex.EncodeToString(pubKeyBytes))
+
+	// Non-P2PK script
+	s, err = script.NewFromHex("76a9149df0707f3f8e534441c055aca4bb816fbc1eadf488ac")
+	require.NoError(t, err)
+	require.NotNil(t, s)
+	pubKey, err = s.PubKey()
+	require.Error(t, err)
+	require.EqualError(t, err, "script is not of type ScriptTypePubKey")
+	require.Nil(t, pubKey)
+
+	// Script with missing parts
+	s = &script.Script{}
+	err = s.AppendPushData([]byte{}) // Empty data
+	require.NoError(t, err)
+	pubKey, err = s.PubKey()
+	require.Error(t, err)
+	require.EqualError(t, err, "script is not of type ScriptTypePubKey")
+	require.Nil(t, pubKey)
+
+	// Create a P2PK script with an invalid public key (correct length but invalid content)
+	s = &script.Script{}
+	invalidPubKey := append([]byte{0x02}, bytes.Repeat([]byte{0x00}, 32)...) // 33 bytes, but invalid
+	err = s.AppendPushData(invalidPubKey)
+	require.NoError(t, err)
+	err = s.AppendOpcodes(script.OpCHECKSIG)
+	require.NoError(t, err)
+	require.True(t, s.IsP2PK())
+	pubKey, err = s.PubKey()
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "invalid square root")
+	require.Nil(t, pubKey)
 }

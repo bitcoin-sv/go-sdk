@@ -32,9 +32,9 @@ All notable changes to this project will be documented in this file. The format 
   - `transaction.Verify` which uses `merklepath.Verify` and ``
   - `publickey.ToDERHex()` returns a hex encoded public key
   - `script.Chunks` helper method for `DecodeScript(scriptBytes)`
-  - `script.PubKey` returns a `*ec.PublicKey`
-  - `script.PubKeyHex`
-  - `script.Address`
+  - `script.PubKey()` returns a `*ec.PublicKey`
+  - `script.PubKeyHex()` returns a hex string
+  - `script.Address()` and `script.Addresses()` helpers
   - file `transaction.merkletreeparent.go` which contains helper functions
     - `transaction.MerkleTreeParentStr`
     - `transaction.MerkleTreeParentBytes`
