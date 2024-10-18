@@ -350,6 +350,18 @@ func (s *Script) Chunks() ([]*ScriptChunk, error) {
 	return DecodeScript([]byte(*s))
 }
 
+// Address extracts the address from a P2PKH script.
+func (s *Script) Address() (*Address, error) {
+	if !s.IsP2PKH() {
+		return nil, errors.New("script is not of type ScriptTypePubKeyHash")
+	}
+	parts, err := s.Chunks()
+	if err != nil {
+		return nil, err
+	}
+	return NewAddressFromPublicKeyHash(parts[2].Data, true)
+}
+
 // PubKey extracts the public key from a P2PK script.
 func (s *Script) PubKey() (*ec.PublicKey, error) {
 	if !s.IsP2PK() {
