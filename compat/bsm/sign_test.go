@@ -31,7 +31,7 @@ func TestSigningCompression(t *testing.T) {
 	}
 }
 
-// TestSignMessage will test the method SignMessage()
+// TestSignMessage will test the method SignMessage() and SignMessageString()
 func TestSignMessage(t *testing.T) {
 	t.Parallel()
 	var tests = []struct {
@@ -108,14 +108,26 @@ func TestSignMessage(t *testing.T) {
 		},
 	}
 
+	const failedUnexpectedError = "%d %s Failed: [%s] [%s] inputted and error not expected but got: %s"
+	const failedExpectedError = "%d %s Failed: [%s] [%s] inputted and error was expected"
+	const failedExpectedSignature = "%d %s Failed: [%s] [%s] inputted [%s] expected but got: %s"
+
 	for idx, test := range tests {
 		testPk, errKey := ec.PrivateKeyFromHex(test.inputKey)
 		if signature, err := compat.SignMessage(testPk, []byte(test.inputMessage)); err != nil && !test.expectedError {
-			t.Fatalf("%d %s Failed: [%s] [%s] inputted and error not expected but got: %s", idx, t.Name(), test.inputKey, test.inputMessage, err.Error())
+			t.Fatalf(failedUnexpectedError, idx, t.Name(), test.inputKey, test.inputMessage, err.Error())
 		} else if err == nil && errKey == nil && test.expectedError {
-			t.Fatalf("%d %s Failed: [%s] [%s] inputted and error was expected", idx, t.Name(), test.inputKey, test.inputMessage)
+			t.Fatalf(failedExpectedError, idx, t.Name(), test.inputKey, test.inputMessage)
 		} else if base64.StdEncoding.EncodeToString(signature) != test.expectedSignature {
-			t.Fatalf("%d %s Failed: [%s] [%s] inputted [%s] expected but got: %s", idx, t.Name(), test.inputKey, test.inputMessage, test.expectedSignature, signature)
+			t.Fatalf(failedExpectedSignature, idx, t.Name(), test.inputKey, test.inputMessage, test.expectedSignature, signature)
+		}
+
+		if sigStr, err := compat.SignMessageString(testPk, []byte(test.inputMessage)); err != nil && !test.expectedError {
+			t.Fatalf(failedUnexpectedError, idx, t.Name(), test.inputKey, test.inputMessage, err.Error())
+		} else if err == nil && errKey == nil && test.expectedError {
+			t.Fatalf(failedExpectedError, idx, t.Name(), test.inputKey, test.inputMessage)
+		} else if sigStr != test.expectedSignature {
+			t.Fatalf(failedExpectedSignature, idx, t.Name(), test.inputKey, test.inputMessage, test.expectedSignature, sigStr)
 		}
 
 	}
