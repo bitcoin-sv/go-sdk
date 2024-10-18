@@ -24,14 +24,23 @@ All notable changes to this project will be documented in this file. The format 
   - `pubKey.ToDER()` now returns bytes
   - `pubKey.ToHash()` is now `pubKey.Hash()` 
   - `pubKey.SerializeCompressed()` is now `pubKey.Compressed()`
+  - `pubKey.SerializeUncompressed()` is now `pubKey.Uncompressed()`
   - `pubKey.SerializeHybrid()` is now `pubKey.Hybrid()`
+  - updated `merklepath.go` to use new helper functions from `transaction.merkletreeparent.go`
   
   ### Added
+  - `transaction.Verify` which uses `merklepath.Verify` and ``
   - `publickey.ToDERHex()` returns a hex encoded public key
   - `script.Chunks` helper method for `DecodeScript(scriptBytes)`
   - `script.PubKey` returns a `*ec.PublicKey`
   - `script.PubKeyHex`
   - `script.Address`
+  - file `transaction.merkletreeparent.go` which contains helper functions
+    - `transaction.MerkleTreeParentStr`
+    - `transaction.MerkleTreeParentBytes`
+    - `transaction.MerkleTreeParents`
+  - file `transaction/chaintracker/whatsonchain.go` - chain tracker for whatsonchain.com
+  - Example - using the whatsonchain chain tracker
   - Example - get address and p2pkh pubkey from script
 
 ## [1.1.9] - 2024-10-01

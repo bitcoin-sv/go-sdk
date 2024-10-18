@@ -348,3 +348,39 @@ func TestBRC42PublicVectors(t *testing.T) {
 		})
 	}
 }
+
+func TestToDERHex(t *testing.T) {
+	for _, test := range pubKeyTests {
+		pk, err := ParsePubKey(test.key)
+		if err != nil {
+			if test.isValid {
+				t.Errorf("%s pubkey failed when shouldn't %v",
+					test.name, err)
+			}
+			continue
+		}
+		derHex := pk.ToDERHex()
+		if derHex != hex.EncodeToString(pk.ToDER()) {
+			t.Errorf("%s pubkey: ToDERHex does not match ToDER.",
+				test.name)
+		}
+	}
+}
+
+func TestToDER(t *testing.T) {
+	for _, test := range pubKeyTests {
+		pk, err := ParsePubKey(test.key)
+		if err != nil {
+			if test.isValid {
+				t.Errorf("%s pubkey failed when shouldn't %v",
+					test.name, err)
+			}
+			continue
+		}
+		der := pk.ToDER()
+		if !bytes.Equal(der, pk.ToDER()) {
+			t.Errorf("%s pubkey: ToDER does not match itself.",
+				test.name)
+		}
+	}
+}
