@@ -565,7 +565,7 @@ func TestSpendValid(t *testing.T) {
 		})
 	}
 }
-func TestScript_GetParts(t *testing.T) {
+func TestScript_Chunks(t *testing.T) {
 	t.Parallel()
 
 	t.Run("simple", func(t *testing.T) {
