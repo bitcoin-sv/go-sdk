@@ -238,11 +238,11 @@ func TestPubKeys(t *testing.T) {
 		var pkStr []byte
 		switch test.format {
 		case pubkeyUncompressed:
-			pkStr = pk.SerializeUncompressed()
+			pkStr = pk.Uncompressed()
 		case pubkeyCompressed:
-			pkStr = pk.SerializeCompressed()
+			pkStr = pk.Compressed()
 		case pubkeyHybrid:
-			pkStr = pk.SerializeHybrid()
+			pkStr = pk.Hybrid()
 		}
 		if !bytes.Equal(test.key, pkStr) {
 			t.Errorf("%s pubkey: serialized keys do not match.",
@@ -341,10 +341,46 @@ func TestBRC42PublicVectors(t *testing.T) {
 			}
 
 			// Convert derived public key to string/hex and compare
-			derivedStr := hex.EncodeToString(derived.SerializeCompressed())
+			derivedStr := hex.EncodeToString(derived.Compressed())
 			if derivedStr != v.ExpectedPublicKey {
 				t.Errorf("Derived public key does not match expected: got %v, want %v", derivedStr, v.ExpectedPublicKey)
 			}
 		})
+	}
+}
+
+func TestToDERHex(t *testing.T) {
+	for _, test := range pubKeyTests {
+		pk, err := ParsePubKey(test.key)
+		if err != nil {
+			if test.isValid {
+				t.Errorf("%s pubkey failed when shouldn't %v",
+					test.name, err)
+			}
+			continue
+		}
+		derHex := pk.ToDERHex()
+		if derHex != hex.EncodeToString(pk.ToDER()) {
+			t.Errorf("%s pubkey: ToDERHex does not match ToDER.",
+				test.name)
+		}
+	}
+}
+
+func TestToDER(t *testing.T) {
+	for _, test := range pubKeyTests {
+		pk, err := ParsePubKey(test.key)
+		if err != nil {
+			if test.isValid {
+				t.Errorf("%s pubkey failed when shouldn't %v",
+					test.name, err)
+			}
+			continue
+		}
+		der := pk.ToDER()
+		if !bytes.Equal(der, pk.ToDER()) {
+			t.Errorf("%s pubkey: ToDER does not match itself.",
+				test.name)
+		}
 	}
 }

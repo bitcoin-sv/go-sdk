@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
+	"github.com/stretchr/testify/require"
 )
 
 type signatureTest struct {
@@ -702,6 +703,8 @@ func TestRFC6979(t *testing.T) {
 				wantSigBytes)
 			continue
 		}
+
+		require.True(t, privKey.PubKey().Verify([]byte(test.msg), gotSig))
 	}
 }
 
@@ -724,4 +727,5 @@ func TestSignatureIsEqual(t *testing.T) {
 		t.Fatalf("value of IsEqual is incorrect, %v is not "+
 			"equal to %v", sig1, sig2)
 	}
+
 }

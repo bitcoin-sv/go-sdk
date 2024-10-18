@@ -40,11 +40,11 @@ func Sign(message []byte, signer *ec.PrivateKey, verifier *ec.PublicKey) ([]byte
 	}
 	senderPublicKey := signer.PubKey()
 
-	sig := append(VERSION_BYTES, senderPublicKey.SerializeCompressed()...)
+	sig := append(VERSION_BYTES, senderPublicKey.Compressed()...)
 	if recipientAnyone {
 		sig = append(sig, 0)
 	} else {
-		sig = append(sig, verifier.SerializeCompressed()...)
+		sig = append(sig, verifier.Compressed()...)
 	}
 	sig = append(sig, keyID...)
 	signatureDER, err := signature.ToDER()
@@ -79,7 +79,7 @@ func Verify(message []byte, sig []byte, recipient *ec.PrivateKey) (bool, error) 
 		if recipient == nil {
 			return false, nil
 		}
-		recipientDER := recipient.PubKey().SerializeCompressed()
+		recipientDER := recipient.PubKey().Compressed()
 		if !bytes.Equal(verifierDER, recipientDER) {
 			errorStr := "the recipient public key is %x but the signature requres the recipient to have public key %x"
 			err = fmt.Errorf(errorStr, recipientDER, verifierDER)

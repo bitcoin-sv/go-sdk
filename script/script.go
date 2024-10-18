@@ -7,6 +7,9 @@ import (
 	"math/big"
 	"math/bits"
 	"strings"
+
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
+	"github.com/pkg/errors"
 )
 
 // ScriptKey types.
@@ -340,6 +343,63 @@ func MinPushSize(bb []byte) int {
 
 	// OP_PUSHDATA4 + four length bytes + data
 	return l + 5
+}
+
+// Chunks extracts the decoded chunks from the script.
+func (s *Script) Chunks() ([]*ScriptChunk, error) {
+	return DecodeScript([]byte(*s))
+}
+
+// Address extracts the address from a P2PKH script.
+func (s *Script) Address() (*Address, error) {
+	if !s.IsP2PKH() {
+		return nil, errors.New("script is not of type ScriptTypePubKeyHash")
+	}
+	parts, err := s.Chunks()
+	if err != nil {
+		return nil, err
+	}
+	return NewAddressFromPublicKeyHash(parts[2].Data, true)
+}
+
+// PubKey extracts the public key from a P2PK script.
+func (s *Script) PubKey() (*ec.PublicKey, error) {
+	if !s.IsP2PK() {
+		return nil, errors.New("script is not of type ScriptTypePubKey")
+	}
+
+	parts, err := s.Chunks()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(parts) == 0 || parts[0] == nil {
+		return nil, errors.New("invalid script parts or missing public key part")
+	}
+
+	pubKey := parts[0].Data
+	return ec.ParsePubKey(pubKey)
+}
+
+// PubKeyHex extracts the public key from a P2PK script.
+func (s *Script) PubKeyHex() (string, error) {
+	if !s.IsP2PK() {
+		return "", errors.New("script is not of type ScriptTypePubKey")
+	}
+
+	parts, err := s.Chunks()
+	if err != nil {
+		return "", err
+	}
+
+	if len(parts) == 0 || parts[0] == nil {
+		return "", errors.New("invalid script parts or missing public key part")
+	}
+
+	pubKey := parts[0].Data
+	pubKeyHex := hex.EncodeToString(pubKey)
+
+	return pubKeyHex, nil
 }
 
 // MarshalJSON convert script into json.

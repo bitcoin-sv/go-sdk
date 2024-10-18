@@ -88,7 +88,7 @@ func (k *ExtendedKey) DerivePublicKeyFromPath(derivationPath string) ([]byte, er
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate public key %w", err)
 	}
-	return pubKey.SerializeCompressed(), nil
+	return pubKey.Compressed(), nil
 }
 
 func childInt(child string) (uint32, error) {

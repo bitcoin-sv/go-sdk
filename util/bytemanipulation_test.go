@@ -119,3 +119,33 @@ func TestReverseBytes(t *testing.T) {
 		)
 	})
 }
+
+func TestReverseBytesInPlace(t *testing.T) {
+	t.Parallel()
+
+	t.Run("Empty slice", func(t *testing.T) {
+		input := []byte{}
+		util.ReverseBytesInPlace(input)
+		require.Equal(t, []byte{}, input)
+	})
+
+	t.Run("Single byte", func(t *testing.T) {
+		input := []byte{0x01}
+		util.ReverseBytesInPlace(input)
+		require.Equal(t, []byte{0x01}, input)
+	})
+
+	t.Run("Multiple bytes", func(t *testing.T) {
+		input := []byte{0x01, 0x02, 0x03, 0x04}
+		expected := []byte{0x04, 0x03, 0x02, 0x01}
+		util.ReverseBytesInPlace(input)
+		require.Equal(t, expected, input)
+	})
+
+	t.Run("Odd number of bytes", func(t *testing.T) {
+		input := []byte{0x01, 0x02, 0x03, 0x04, 0x05}
+		expected := []byte{0x05, 0x04, 0x03, 0x02, 0x01}
+		util.ReverseBytesInPlace(input)
+		require.Equal(t, expected, input)
+	})
+}

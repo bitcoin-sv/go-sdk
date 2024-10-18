@@ -35,6 +35,7 @@ func TestNewTransaction(t *testing.T) {
 		// Create a new P2PKH unlocker from the private key
 		unlocker, err := p2pkh.Unlock(priv, nil)
 		require.NoError(t, err)
+
 		// Add an input
 		tx.AddInputFromTx(sourceTransaction, 0, unlocker)
 
