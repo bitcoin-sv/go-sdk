@@ -142,17 +142,17 @@ func (p *PublicKey) ToECDSA() *ecdsa.PublicKey {
 	return (*ecdsa.PublicKey)(p)
 }
 
-// SerializeUncompressed serializes a public key in a 65-byte uncompressed
+// Uncompressed serializes a public key in a 65-byte uncompressed
 // format.
-func (p *PublicKey) SerializeUncompressed() []byte {
+func (p *PublicKey) Uncompressed() []byte {
 	b := make([]byte, 0, PubKeyBytesLenUncompressed)
 	b = append(b, pubkeyUncompressed)
 	b = paddedAppend(32, b, p.X.Bytes())
 	return paddedAppend(32, b, p.Y.Bytes())
 }
 
-// SerializeCompressed serializes a public key in a 33-byte compressed format.
-func (p *PublicKey) SerializeCompressed() []byte {
+// Compressed serializes a public key in a 33-byte compressed format.
+func (p *PublicKey) Compressed() []byte {
 	b := make([]byte, 0, PubKeyBytesLenCompressed)
 	format := pubkeyCompressed
 	if isOdd(p.Y) {
@@ -162,8 +162,8 @@ func (p *PublicKey) SerializeCompressed() []byte {
 	return paddedAppend(32, b, p.X.Bytes())
 }
 
-// SerializeHybrid serializes a public key in a 65-byte hybrid format.
-func (p *PublicKey) SerializeHybrid() []byte {
+// Hybrid serializes a public key in a 65-byte hybrid format.
+func (p *PublicKey) Hybrid() []byte {
 	b := make([]byte, 0, PubKeyBytesLenHybrid)
 	format := pubkeyHybrid
 	if isOdd(p.Y) {
@@ -226,9 +226,9 @@ func (p *PublicKey) Mul(k *big.Int) *PublicKey {
  * @returns Returns the hash of the public key.
  *
  * @example
- * const publicKeyHash = pubkey.ToHash()
+ * const publicKeyHash = pubkey.Hash()
  */
-func (p *PublicKey) ToHash() []byte {
+func (p *PublicKey) Hash() []byte {
 	return crypto.Ripemd160(crypto.Sha256(p.encode(true)))
 }
 
@@ -259,13 +259,13 @@ func (p *PublicKey) encode(compact bool) []byte {
 	return append(append([]byte{0x04}, xBytes...), yBytes...)
 }
 
-func (p *PublicKey) ToDERBytes() []byte {
+func (p *PublicKey) ToDER() []byte {
 	encoded := p.encode(true)
 	return encoded
 }
 
-func (p *PublicKey) ToDER() string {
-	return hex.EncodeToString(p.ToDERBytes())
+func (p *PublicKey) ToDERHex() string {
+	return hex.EncodeToString(p.ToDER())
 }
 
 func (p *PublicKey) DeriveChild(privateKey *PrivateKey, invoiceNumber string) (*PublicKey, error) {

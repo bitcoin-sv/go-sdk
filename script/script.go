@@ -8,6 +8,7 @@ import (
 	"math/bits"
 	"strings"
 
+	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/pkg/errors"
 )
 
@@ -344,18 +345,37 @@ func MinPushSize(bb []byte) int {
 	return l + 5
 }
 
-// GetParts extracts the decoded chunks from the script.
-func (s *Script) GetParts() ([]*ScriptChunk, error) {
+// Chunks extracts the decoded chunks from the script.
+func (s *Script) Chunks() ([]*ScriptChunk, error) {
 	return DecodeScript([]byte(*s))
 }
 
-// GetPublicKey extracts the public key from a P2PK script.
-func (s *Script) GetPublicKey() (string, error) {
+// PubKey extracts the public key from a P2PK script.
+func (s *Script) PubKey() (*ec.PublicKey, error) {
+	if !s.IsP2PK() {
+		return nil, errors.New("script is not of type ScriptTypePubKey")
+	}
+
+	parts, err := s.Chunks()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(parts) == 0 || parts[0] == nil {
+		return nil, errors.New("invalid script parts or missing public key part")
+	}
+
+	pubKey := parts[0].Data
+	return ec.ParsePubKey(pubKey)
+}
+
+// PubKeyHex extracts the public key from a P2PK script.
+func (s *Script) PubKeyHex() (string, error) {
 	if !s.IsP2PK() {
 		return "", errors.New("script is not of type ScriptTypePubKey")
 	}
 
-	parts, err := s.GetParts()
+	parts, err := s.Chunks()
 	if err != nil {
 		return "", err
 	}

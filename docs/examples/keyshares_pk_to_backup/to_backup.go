@@ -9,7 +9,7 @@ import (
 
 func main() {
 	pk, _ := ec.PrivateKeyFromWif("KxPEP4DCP2a4g3YU5amfXjFH4kWmz8EHWrTugXocGWgWBbhGsX7a")
-	log.Println("Private key:", hex.EncodeToString(pk.PubKey().ToHash())[:8])
+	log.Println("Private key:", hex.EncodeToString(pk.PubKey().Hash())[:8])
 	totalShares := 5
 	threshold := 3
 	shares, _ := pk.ToBackupShares(threshold, totalShares)

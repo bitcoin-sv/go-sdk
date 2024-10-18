@@ -574,7 +574,7 @@ func TestScript_GetParts(t *testing.T) {
 		require.NoError(t, err)
 
 		s := script.NewFromBytes(scriptBytes)
-		parts, err := s.GetParts()
+		parts, err := s.Chunks()
 		require.NoError(t, err)
 		require.Len(t, parts, 3)
 	})
@@ -585,7 +585,7 @@ func TestScript_GetParts(t *testing.T) {
 		require.NoError(t, err)
 
 		s := script.NewFromBytes(scriptBytes)
-		parts, err := s.GetParts()
+		parts, err := s.Chunks()
 		require.NoError(t, err)
 		require.Empty(t, parts)
 	})
@@ -596,7 +596,7 @@ func TestScript_GetParts(t *testing.T) {
 		require.NoError(t, err)
 
 		s := script.NewFromBytes(scriptBytes)
-		parts, err := s.GetParts()
+		parts, err := s.Chunks()
 		require.NoError(t, err)
 		require.Len(t, parts, 5)
 	})
@@ -607,7 +607,7 @@ func TestScript_GetParts(t *testing.T) {
 		require.NoError(t, err)
 
 		s := script.NewFromBytes(scriptBytes)
-		_, err = s.GetParts()
+		_, err = s.Chunks()
 		require.Error(t, err)
 		require.EqualError(t, err, "not enough data")
 	})
@@ -618,7 +618,7 @@ func TestScript_GetParts(t *testing.T) {
 		require.NoError(t, err)
 
 		s := script.NewFromBytes(scriptBytes)
-		_, err = s.GetParts()
+		_, err = s.Chunks()
 		require.Error(t, err)
 		require.EqualError(t, err, "not enough data")
 	})
@@ -629,7 +629,7 @@ func TestScript_GetParts(t *testing.T) {
 		scriptBytes = append(scriptBytes, []byte(scriptHex)...)
 
 		s := script.NewFromBytes(scriptBytes)
-		parts, err := s.GetParts()
+		parts, err := s.Chunks()
 		require.NoError(t, err)
 		require.Len(t, parts, 1)
 	})
@@ -638,7 +638,7 @@ func TestScript_GetParts(t *testing.T) {
 		scriptBytes := []byte{script.OpPUSHDATA1}
 
 		s := script.NewFromBytes(scriptBytes)
-		_, err := s.GetParts()
+		_, err := s.Chunks()
 		require.Error(t, err)
 	})
 
@@ -648,7 +648,7 @@ func TestScript_GetParts(t *testing.T) {
 		scriptBytes = append(scriptBytes, []byte(scriptHex)...)
 
 		s := script.NewFromBytes(scriptBytes)
-		_, err := s.GetParts()
+		_, err := s.Chunks()
 		require.Error(t, err)
 	})
 
@@ -656,7 +656,7 @@ func TestScript_GetParts(t *testing.T) {
 		scriptBytes := []byte{script.OpPUSHDATA2}
 
 		s := script.NewFromBytes(scriptBytes)
-		_, err := s.GetParts()
+		_, err := s.Chunks()
 		require.Error(t, err)
 	})
 
@@ -666,7 +666,7 @@ func TestScript_GetParts(t *testing.T) {
 		scriptBytes = append(scriptBytes, []byte(scriptHex)...)
 
 		s := script.NewFromBytes(scriptBytes)
-		_, err := s.GetParts()
+		_, err := s.Chunks()
 		require.Error(t, err)
 	})
 
@@ -674,7 +674,7 @@ func TestScript_GetParts(t *testing.T) {
 		scriptBytes := []byte{script.OpPUSHDATA4}
 
 		s := script.NewFromBytes(scriptBytes)
-		_, err := s.GetParts()
+		_, err := s.Chunks()
 		require.Error(t, err)
 	})
 
@@ -723,7 +723,7 @@ func TestScript_GetPublicKey(t *testing.T) {
 			s, err := script.NewFromHex(tt.scriptHex)
 			require.NoError(t, err)
 
-			pubKey, err := s.GetPublicKey()
+			pubKey, err := s.PubKeyHex()
 
 			if tt.expectError {
 				require.Error(t, err)
