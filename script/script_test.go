@@ -565,7 +565,7 @@ func TestSpendValid(t *testing.T) {
 		})
 	}
 }
-func TestScript_Chunks(t *testing.T) {
+func TestScriptChunks(t *testing.T) {
 	t.Parallel()
 
 	t.Run("simple", func(t *testing.T) {
@@ -685,7 +685,7 @@ func TestScript_Chunks(t *testing.T) {
 	})
 }
 
-func TestScript_GetPublicKey(t *testing.T) {
+func TestScriptPubKeyHex(t *testing.T) {
 	tests := []struct {
 		name           string
 		scriptHex      string
@@ -723,15 +723,52 @@ func TestScript_GetPublicKey(t *testing.T) {
 			s, err := script.NewFromHex(tt.scriptHex)
 			require.NoError(t, err)
 
-			pubKey, err := s.PubKeyHex()
+			pubKeyHex, err := s.PubKeyHex()
 
 			if tt.expectError {
 				require.Error(t, err)
-				require.Empty(t, pubKey)
+				require.Empty(t, pubKeyHex)
 			} else {
 				require.NoError(t, err)
-				require.Equal(t, tt.expectedPubKey, pubKey)
+				require.Equal(t, tt.expectedPubKey, pubKeyHex)
 			}
+		})
+	}
+}
+
+func TestScriptAddresses(t *testing.T) {
+	tests := []struct {
+		name              string
+		scriptHex         string
+		expectedAddresses []string
+		expectError       bool
+	}{
+		{
+			name:              "Valid P2PK Script",
+			scriptHex:         "76a9149df0707f3f8e534441c055aca4bb816fbc1eadf488ac",
+			expectedAddresses: []string{"1FQ789GuMRYki3t79XK3AWQ8gxzVNLzvXr"},
+			expectError:       false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s, err := script.NewFromHex(tt.scriptHex)
+			require.NoError(t, err)
+
+			addresses, err := s.Addresses()
+
+			if tt.expectError {
+				require.Error(t, err)
+				require.Empty(t, addresses)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tt.expectedAddresses, addresses)
+			}
+
+			address, err := s.Address()
+			require.NoError(t, err)
+			require.Equal(t, tt.expectedAddresses[0], address.AddressString)
 		})
 	}
 }
