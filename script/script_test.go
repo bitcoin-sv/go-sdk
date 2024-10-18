@@ -565,3 +565,173 @@ func TestSpendValid(t *testing.T) {
 		})
 	}
 }
+func TestScript_GetParts(t *testing.T) {
+	t.Parallel()
+
+	t.Run("simple", func(t *testing.T) {
+		scriptHex := "05000102030401FF02ABCD"
+		scriptBytes, err := hex.DecodeString(scriptHex)
+		require.NoError(t, err)
+
+		s := script.NewFromBytes(scriptBytes)
+		parts, err := s.GetParts()
+		require.NoError(t, err)
+		require.Len(t, parts, 3)
+	})
+
+	t.Run("empty parts", func(t *testing.T) {
+		scriptHex := ""
+		scriptBytes, err := hex.DecodeString(scriptHex)
+		require.NoError(t, err)
+
+		s := script.NewFromBytes(scriptBytes)
+		parts, err := s.GetParts()
+		require.NoError(t, err)
+		require.Empty(t, parts)
+	})
+
+	t.Run("complex parts", func(t *testing.T) {
+		scriptHex := "524c53ff0488b21e000000000000000000362f7a9030543db8751401c387d6a71e870f1895b3a62569d455e8ee5f5f5e5f03036624c6df96984db6b4e625b6707c017eb0e0d137cd13a0c989bfa77a4473fd000000004c53ff0488b21e0000000000000000008b20425398995f3c866ea6ce5c1828a516b007379cf97b136bffbdc86f75df14036454bad23b019eae34f10aff8b8d6d8deb18cb31354e5a169ee09d8a4560e8250000000052ae"
+		scriptBytes, err := hex.DecodeString(scriptHex)
+		require.NoError(t, err)
+
+		s := script.NewFromBytes(scriptBytes)
+		parts, err := s.GetParts()
+		require.NoError(t, err)
+		require.Len(t, parts, 5)
+	})
+
+	t.Run("bad parts", func(t *testing.T) {
+		scriptHex := "05000000"
+		scriptBytes, err := hex.DecodeString(scriptHex)
+		require.NoError(t, err)
+
+		s := script.NewFromBytes(scriptBytes)
+		_, err = s.GetParts()
+		require.Error(t, err)
+		require.EqualError(t, err, "not enough data")
+	})
+
+	t.Run("invalid script", func(t *testing.T) {
+		scriptHex := "4c05000000"
+		scriptBytes, err := hex.DecodeString(scriptHex)
+		require.NoError(t, err)
+
+		s := script.NewFromBytes(scriptBytes)
+		_, err = s.GetParts()
+		require.Error(t, err)
+		require.EqualError(t, err, "not enough data")
+	})
+
+	t.Run("decode using PUSHDATA1", func(t *testing.T) {
+		scriptHex := "testing"
+		scriptBytes := append([]byte{script.OpPUSHDATA1}, byte(len(scriptHex)))
+		scriptBytes = append(scriptBytes, []byte(scriptHex)...)
+
+		s := script.NewFromBytes(scriptBytes)
+		parts, err := s.GetParts()
+		require.NoError(t, err)
+		require.Len(t, parts, 1)
+	})
+
+	t.Run("invalid PUSHDATA1 - missing data payload", func(t *testing.T) {
+		scriptBytes := []byte{script.OpPUSHDATA1}
+
+		s := script.NewFromBytes(scriptBytes)
+		_, err := s.GetParts()
+		require.Error(t, err)
+	})
+
+	t.Run("invalid PUSHDATA2 - payload too small", func(t *testing.T) {
+		scriptHex := "testing PUSHDATA2"
+		scriptBytes := append([]byte{script.OpPUSHDATA2}, byte(len(scriptHex)))
+		scriptBytes = append(scriptBytes, []byte(scriptHex)...)
+
+		s := script.NewFromBytes(scriptBytes)
+		_, err := s.GetParts()
+		require.Error(t, err)
+	})
+
+	t.Run("invalid PUSHDATA2 - missing data payload", func(t *testing.T) {
+		scriptBytes := []byte{script.OpPUSHDATA2}
+
+		s := script.NewFromBytes(scriptBytes)
+		_, err := s.GetParts()
+		require.Error(t, err)
+	})
+
+	t.Run("invalid PUSHDATA4 - payload too small", func(t *testing.T) {
+		scriptHex := "testing PUSHDATA4"
+		scriptBytes := append([]byte{script.OpPUSHDATA4}, byte(len(scriptHex)))
+		scriptBytes = append(scriptBytes, []byte(scriptHex)...)
+
+		s := script.NewFromBytes(scriptBytes)
+		_, err := s.GetParts()
+		require.Error(t, err)
+	})
+
+	t.Run("invalid PUSHDATA4 - missing data payload", func(t *testing.T) {
+		scriptBytes := []byte{script.OpPUSHDATA4}
+
+		s := script.NewFromBytes(scriptBytes)
+		_, err := s.GetParts()
+		require.Error(t, err)
+	})
+
+	t.Run("panic case", func(t *testing.T) {
+		scriptHex := "006a046d657461226e3465394d57576a416f576b727646344674724e783252507533584d53344d786570201ed64f8e4ddb6843121dc11e1db6d07c62e59c621f047e1be0a9dd910ca606d04cfe080000000b00045479706503070006706f7374616c000355736503070004686f6d650006526567696f6e030700057374617465000a506f7374616c436f64650307000432383238000b44617465437265617465640d070018323032302d30362d32325431323a32343a32362e3337315a00035f69640307002f302e34623836326165372d323533352d346136312d386461322d3962616231633336353038312e302e342e31332e30000443697479030700046369747900054c696e65300307000474657374000b436f756e747279436f646503070002414500054c696e653103070005746573743200084469737472696374030700086469737472696374"
+		_, err := script.NewFromHex(scriptHex)
+		require.NoError(t, err)
+	})
+}
+
+func TestScript_GetPublicKey(t *testing.T) {
+	tests := []struct {
+		name           string
+		scriptHex      string
+		expectedPubKey string
+		expectError    bool
+	}{
+		{
+			name:           "Valid P2PK Script",
+			scriptHex:      "2102f0d97c290e79bf2a8660c406aa56b6f189ff79f2245cc5aff82808b58131b4d5ac",
+			expectedPubKey: "02f0d97c290e79bf2a8660c406aa56b6f189ff79f2245cc5aff82808b58131b4d5",
+			expectError:    false,
+		},
+		{
+			name:           "Invalid Data Script",
+			scriptHex:      "006a04ac1eed884d53027b2276657273696f6e223a22302e31222c22686569676874223a3634323436302c22707265764d696e65724964223a22303365393264336535633366376264393435646662663438653761393933393362316266623366313166333830616533306432383665376666326165633561323730222c22707265764d696e65724964536967223a2233303435303232313030643736333630653464323133333163613836663031386330343665353763393338663139373735303734373333333533363062653337303438636165316166333032323030626536363034353430323162663934363465393966356139353831613938633963663439353430373539386335396234373334623266646234383262663937222c226d696e65724964223a22303365393264336535633366376264393435646662663438653761393933393362316266623366313166333830616533306432383665376666326165633561323730222c2276637478223a7b2274784964223a2235373962343335393235613930656533396133376265336230306239303631653734633330633832343133663664306132303938653162656137613235313566222c22766f7574223a307d2c226d696e6572436f6e74616374223a7b22656d61696c223a22696e666f407461616c2e636f6d222c226e616d65223a225441414c20446973747269627574656420496e666f726d6174696f6e20546563686e6f6c6f67696573222c226d65726368616e74415049456e64506f696e74223a2268747470733a2f2f6d65726368616e746170692e7461616c2e636f6d2f227d7d46304402206fd1c6d6dd32cc85ddd2f30bc068445dd901c6bd85e394e45bb254716d2bb228022041f0f8b1b33c2e3702aee4ad47155548045ed945738b43dc0faed2e86faa12e4",
+			expectedPubKey: "",
+			expectError:    true,
+		},
+		{
+			name:           "Empty Script",
+			scriptHex:      "",
+			expectedPubKey: "",
+			expectError:    true,
+		},
+		{
+			name:           "Invalid Script (too short)",
+			scriptHex:      "05000000",
+			expectedPubKey: "",
+			expectError:    true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s, err := script.NewFromHex(tt.scriptHex)
+			require.NoError(t, err)
+
+			pubKey, err := s.GetPublicKey()
+
+			if tt.expectError {
+				require.Error(t, err)
+				require.Empty(t, pubKey)
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tt.expectedPubKey, pubKey)
+			}
+		})
+	}
+}

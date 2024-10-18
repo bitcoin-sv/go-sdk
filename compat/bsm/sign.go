@@ -2,6 +2,7 @@ package compat
 
 import (
 	"bytes"
+	"encoding/base64"
 	"errors"
 
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
@@ -42,4 +43,14 @@ func SignMessageWithCompression(privateKey *ec.PrivateKey, message []byte, sigRe
 
 	// Sign
 	return ec.SignCompact(ec.S256(), privateKey, messageHash, sigRefCompressedKey)
+}
+
+// SignMessageString signs the message and returns the signature as a base64-encoded string
+func SignMessageString(privateKey *ec.PrivateKey, message []byte) (string, error) {
+	sigBytes, err := SignMessageWithCompression(privateKey, message, true)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(sigBytes), nil
 }
