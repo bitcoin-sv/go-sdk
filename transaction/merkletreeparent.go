@@ -19,11 +19,11 @@ func MerkleTreeParentStr(leftNode, rightNode string) (string, error) {
 		return "", err
 	}
 
-	return hex.EncodeToString(MerkleTreeParent(l, r)), nil
+	return hex.EncodeToString(MerkleTreeParentBytes(l, r)), nil
 }
 
-// MerkleTreeParent returns the Merkle Tree parent of two MerkleTree children.
-func MerkleTreeParent(leftNode, rightNode []byte) []byte {
+// MerkleTreeParentBytes returns the Merkle Tree parent of two MerkleTree children.
+func MerkleTreeParentBytes(leftNode, rightNode []byte) []byte {
 	concatenated := flipTwoArrays(leftNode, rightNode)
 
 	hash := crypto.Sha256d(concatenated)
@@ -47,9 +47,9 @@ func flipTwoArrays(a, b []byte) []byte {
 	return result
 }
 
-// MerkleTreeParentBytes returns the Merkle Tree parent of two Merkle Tree children.
+// MerkleTreeParent returns the Merkle Tree parent of two Merkle Tree children.
 // The expectation is that the bytes are not reversed.
-func MerkleTreeParentBytes(l *chainhash.Hash, r *chainhash.Hash) *chainhash.Hash {
+func MerkleTreeParents(l *chainhash.Hash, r *chainhash.Hash) *chainhash.Hash {
 	concatenated := make([]byte, len(l)+len(r))
 	copy(concatenated, l[:])
 	copy(concatenated[len(l):], r[:])

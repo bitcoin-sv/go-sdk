@@ -26,7 +26,7 @@ func TestGetMerkleTreeParent(t *testing.T) {
 
 	expected, _ := hex.DecodeString("b0d537b3ee52e472507f453df3d69561720346118a5a8c4d85ca0de73bc792be")
 
-	parent := transaction.MerkleTreeParent(leftNode, rightNode)
+	parent := transaction.MerkleTreeParentBytes(leftNode, rightNode)
 
 	require.Equal(t, expected, parent)
 }
