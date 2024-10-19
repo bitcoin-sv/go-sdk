@@ -9,10 +9,12 @@ import (
 )
 
 // TotalInputSatoshis returns the total Satoshis inputted to the transaction.
-func (tx *Transaction) TotalInputSatoshis() (total uint64) {
+func (tx *Transaction) TotalInputSatoshis() (total uint64, err error) {
 	for _, in := range tx.Inputs {
 		prevSats := uint64(0)
-		if in.SourceTxSatoshis() != nil {
+		if in.SourceTxSatoshis() == nil {
+			return 0, ErrEmptyPreviousTx
+		} else {
 			prevSats = *in.SourceTxSatoshis()
 		}
 		total += prevSats

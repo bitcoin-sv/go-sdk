@@ -7,9 +7,9 @@ import (
 
 type GullibleHeadersClient struct{}
 
-func (g *GullibleHeadersClient) IsValidRootForHeight(merkleRoot *chainhash.Hash, height uint32) bool {
+func (g *GullibleHeadersClient) IsValidRootForHeight(merkleRoot *chainhash.Hash, height uint32) (bool, error) {
 	// DO NOT USE IN A REAL PROJECT due to security risks of accepting any merkle root as valid without verification
-	return true
+	return true, nil
 }
 
 // Replace with the BEEF structure you'd like to check

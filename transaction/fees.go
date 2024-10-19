@@ -65,3 +65,11 @@ func (tx *Transaction) Fee(f FeeModel, changeDistribution ChangeDistribution) er
 	}
 	return nil
 }
+
+func (tx *Transaction) GetFee() (total uint64, err error) {
+	if totalIn, err := tx.TotalInputSatoshis(); err != nil {
+		return 0, err
+	} else {
+		return totalIn - tx.TotalOutputSatoshis(), nil
+	}
+}

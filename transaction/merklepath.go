@@ -278,7 +278,7 @@ func (mp *MerklePath) Verify(txid *chainhash.Hash, ct chaintracker.ChainTracker)
 	if err != nil {
 		return false, err
 	}
-	return ct.IsValidRootForHeight(root, mp.BlockHeight), nil
+	return ct.IsValidRootForHeight(root, mp.BlockHeight)
 }
 
 func (m *MerklePath) Combine(other *MerklePath) (err error) {
