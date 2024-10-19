@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ## Table of Contents
 
-- [1.1.10 - 2024-10-18](#119---2024-10-18)
+- [1.1.10 - 2024-10-19](#119---2024-10-19)
 - [1.1.9 - 2024-10-01](#118---2024-10-01)
 - [1.1.8 - 2024-09-17](#118---2024-09-17)
 - [1.1.7 - 2024-09-10](#117---2024-09-10)
@@ -17,7 +17,7 @@ All notable changes to this project will be documented in this file. The format 
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
 
-## [1.1.10] - 2024-10-18
+## [1.1.10] - 2024-10-19
   Big thanks for contributions from @wregulski and @siggi
 
   ### Changed
@@ -29,16 +29,16 @@ All notable changes to this project will be documented in this file. The format 
   - updated `merklepath.go` to use new helper functions from `transaction.merkletreeparent.go`
   
   ### Added
-  - `transaction.Verify` which uses `merklepath.Verify` and ``
+  - `spv.Verify()` ensures transaction scripts, merkle paths and fees are valid
   - `publickey.ToDERHex()` returns a hex encoded public key
-  - `script.Chunks` helper method for `DecodeScript(scriptBytes)`
+  - `script.Chunks()` helper method for `DecodeScript(scriptBytes)`
   - `script.PubKey()` returns a `*ec.PublicKey`
   - `script.PubKeyHex()` returns a hex string
   - `script.Address()` and `script.Addresses()` helpers
   - file `transaction.merkletreeparent.go` which contains helper functions
-    - `transaction.MerkleTreeParentStr`
-    - `transaction.MerkleTreeParentBytes`
-    - `transaction.MerkleTreeParents`
+    - `transaction.MerkleTreeParentStr()`
+    - `transaction.MerkleTreeParentBytes()`
+    - `transaction.MerkleTreeParents()`
   - file `transaction/chaintracker/whatsonchain.go` - chain tracker for whatsonchain.com
   - Example - using the whatsonchain chain tracker
   - Example - get address and p2pkh pubkey from script
