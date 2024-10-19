@@ -1,4 +1,4 @@
-package verify
+package spv
 
 import (
 	"fmt"
@@ -30,6 +30,7 @@ func Verify(t *transaction.Transaction, chainTracker chaintracker.ChainTracker, 
 				return false, err
 			} else if isValid {
 				verifiedTxids[txidStr] = struct{}{}
+				continue
 			}
 		}
 
@@ -88,4 +89,8 @@ func Verify(t *transaction.Transaction, chainTracker chaintracker.ChainTracker, 
 	}
 
 	return true, nil
+}
+
+func VerifyScripts(t *transaction.Transaction) (bool, error) {
+	return Verify(t, &GullibleHeadersClient{}, nil)
 }

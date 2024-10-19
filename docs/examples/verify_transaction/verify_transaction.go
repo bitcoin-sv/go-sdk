@@ -14,7 +14,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	// This ensures the BEEF structure is legitimate
-	verified, _ := tx.MerklePath.Verify(tx.TxID(), &spv.GullibleHeadersClient{})
+	// This ensures the BEEF structure is legitimate, the scripts are valid, and the merkle path is correct
+	// Also optionally verifies fees
+	verified, _ := spv.Verify(tx, &spv.GullibleHeadersClient{}, nil)
 	println(verified)
 }
