@@ -29,7 +29,9 @@ All notable changes to this project will be documented in this file. The format 
   - updated `merklepath.go` to use new helper functions from `transaction.merkletreeparent.go`
   
   ### Added
-  - `spv.Verify()` ensures transaction scripts, merkle paths and fees are valid
+  - file `spv/verify.go` - chain tracker for whatsonchain.com
+    - `spv.Verify()` ensures transaction scripts, merkle paths and fees are valid
+    - `spv.VerifyScripts()` ensures transaction scripts are valid
   - `publickey.ToDERHex()` returns a hex encoded public key
   - `script.Chunks()` helper method for `DecodeScript(scriptBytes)`
   - `script.PubKey()` returns a `*ec.PublicKey`
@@ -40,6 +42,7 @@ All notable changes to this project will be documented in this file. The format 
     - `transaction.MerkleTreeParentBytes()`
     - `transaction.MerkleTreeParents()`
   - file `transaction/chaintracker/whatsonchain.go` - chain tracker for whatsonchain.com
+    - `chaintracker.NewWhatsOnChain` chaintracker
   - Example - using the whatsonchain chain tracker
   - Example - get address and p2pkh pubkey from script
 
