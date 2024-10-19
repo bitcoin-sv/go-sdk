@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file. The format 
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
 
 ## [1.1.10] - 2024-10-19
-  Big thanks for contributions from @wregulski and @siggi
+  Big thanks for contributions from @wregulski
 
   ### Changed
   - `pubKey.ToDER()` now returns bytes
