@@ -67,13 +67,6 @@ func Verify(t *transaction.Transaction,
 				txQueue = append(txQueue, input.SourceTransaction)
 			}
 
-			// otherInputs := make([]*transaction.TransactionInput, 0, len(tx.Inputs)-1)
-			// for i, otherInput := range tx.Inputs {
-			// 	if i != vin {
-			// 		otherInputs = append(otherInputs, otherInput)
-			// 	}
-			// }
-
 			if input.SourceTXID == nil {
 				input.SourceTXID = input.SourceTransaction.TxID()
 			}
@@ -86,7 +79,6 @@ func Verify(t *transaction.Transaction,
 				fmt.Println(err)
 				return false, err
 			}
-
 		}
 	}
 
