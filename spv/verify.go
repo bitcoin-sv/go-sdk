@@ -47,7 +47,7 @@ func Verify(t *transaction.Transaction,
 				return false, err
 			} else if cloneFee, err := clone.GetFee(); err != nil {
 				return false, err
-			} else if txFee < cloneFee {
+			} else if cloneFee < txFee {
 				return false, fmt.Errorf("fee is too low")
 			}
 		}
@@ -67,12 +67,12 @@ func Verify(t *transaction.Transaction,
 				txQueue = append(txQueue, input.SourceTransaction)
 			}
 
-			otherInputs := make([]*transaction.TransactionInput, 0, len(tx.Inputs)-1)
-			for i, otherInput := range tx.Inputs {
-				if i != vin {
-					otherInputs = append(otherInputs, otherInput)
-				}
-			}
+			// otherInputs := make([]*transaction.TransactionInput, 0, len(tx.Inputs)-1)
+			// for i, otherInput := range tx.Inputs {
+			// 	if i != vin {
+			// 		otherInputs = append(otherInputs, otherInput)
+			// 	}
+			// }
 
 			if input.SourceTXID == nil {
 				input.SourceTXID = input.SourceTransaction.TxID()
