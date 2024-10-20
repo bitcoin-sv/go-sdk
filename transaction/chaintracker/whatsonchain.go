@@ -1,7 +1,7 @@
 package chaintracker
 
 import (
-	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -39,29 +39,41 @@ func NewWhatsOnChain(network Network, apiKey string) *WhatsOnChain {
 	}
 }
 
-func (w *WhatsOnChain) GetBlockHeader(height uint32) (*BlockHeader, error) {
-	if req, err := http.NewRequest("GET", fmt.Sprintf("https://api.whatsonchain.com/v1/bsv/%s/block/%d/header", w.Network, height), bytes.NewBuffer([]byte{})); err != nil {
+// Assuming BlockHeader is defined elsewhere
+func (w *WhatsOnChain) GetBlockHeader(height uint32) (header *BlockHeader, err error) {
+	url := fmt.Sprintf("https://api.whatsonchain.com/v1/bsv/%s/block/%d/header", w.Network, height)
+	req, err := http.NewRequestWithContext(context.Background(), "GET", url, nil)
+	if err != nil {
 		return nil, err
-	} else {
-		req.Header.Set("Authorization", w.ApiKey)
-		if resp, err := http.DefaultClient.Do(req); err != nil {
-			return nil, err
-		} else {
-			defer resp.Body.Close()
-			if resp.StatusCode == 404 {
-				return nil, nil
-			}
-			if resp.StatusCode != 200 {
-				return nil, fmt.Errorf("failed to verify merkleroot for height %d because of an error: %v", height, resp.Status)
-			}
-			header := &BlockHeader{}
-			if err := json.NewDecoder(resp.Body).Decode(header); err != nil {
-				return nil, err
-			}
-
-			return header, nil
-		}
 	}
+
+	req.Header.Set("Authorization", w.ApiKey)
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	// Ensure resp.Body.Close() is called and its error is handled
+	defer func() {
+		closeErr := resp.Body.Close()
+		if closeErr != nil && err == nil {
+			err = closeErr
+		}
+	}()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return nil, nil
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("failed to verify merkleroot for height %d: %v", height, resp.Status)
+	}
+
+	header = &BlockHeader{}
+	if err := json.NewDecoder(resp.Body).Decode(header); err != nil {
+		return nil, err
+	}
+
+	return header, nil
 }
 
 func (w *WhatsOnChain) IsValidRootForHeight(root *chainhash.Hash, height uint32) (bool, error) {

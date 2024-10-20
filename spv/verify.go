@@ -8,7 +8,9 @@ import (
 	"github.com/bitcoin-sv/go-sdk/transaction/chaintracker"
 )
 
-func Verify(t *transaction.Transaction, chainTracker chaintracker.ChainTracker, feeModel transaction.FeeModel) (bool, error) {
+func Verify(t *transaction.Transaction,
+	chainTracker chaintracker.ChainTracker,
+	feeModel transaction.FeeModel) (bool, error) {
 	verifiedTxids := make(map[string]struct{})
 	txQueue := []*transaction.Transaction{t}
 	if chainTracker == nil {
