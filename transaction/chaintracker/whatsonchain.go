@@ -30,18 +30,22 @@ var (
 type WhatsOnChain struct {
 	Network Network
 	ApiKey  string
+	baseURL string
+	client  *http.Client
 }
 
 func NewWhatsOnChain(network Network, apiKey string) *WhatsOnChain {
 	return &WhatsOnChain{
 		Network: network,
 		ApiKey:  apiKey,
+		baseURL: fmt.Sprintf("https://api.whatsonchain.com/v1/bsv/%s", network),
+		client:  http.DefaultClient,
 	}
 }
 
 // Assuming BlockHeader is defined elsewhere
 func (w *WhatsOnChain) GetBlockHeader(height uint32) (header *BlockHeader, err error) {
-	url := fmt.Sprintf("https://api.whatsonchain.com/v1/bsv/%s/block/%d/header", w.Network, height)
+	url := fmt.Sprintf("%s/block/%d/header", w.baseURL, height)
 	req, err := http.NewRequestWithContext(context.Background(), "GET", url, nil)
 	if err != nil {
 		return nil, err

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/transaction"
+	feemodel "github.com/bitcoin-sv/go-sdk/transaction/fee_model"
 	"github.com/stretchr/testify/require"
 )
 
@@ -26,6 +27,22 @@ func TestSPVVerifyScripts(t *testing.T) {
 	tx, err := transaction.NewTransactionFromBEEF(buf)
 	require.NoError(t, err)
 	verified, err := VerifyScripts(tx)
+	require.NoError(t, err)
+	require.True(t, verified)
+}
+
+func TestSPVVerifyWithSufficientFee(t *testing.T) {
+	// Create or load your transaction
+	tx, err := transaction.NewTransactionFromBEEFHex(BRC62Hex)
+	require.NoError(t, err)
+
+	// Create a fee model with a reasonable fee rate
+	feeModel := &feemodel.SatoshisPerKilobyte{
+		Satoshis: 10,
+	}
+
+	// Call Verify with the fee model
+	verified, err := Verify(tx, &GullibleHeadersClient{}, feeModel)
 	require.NoError(t, err)
 	require.True(t, verified)
 }
