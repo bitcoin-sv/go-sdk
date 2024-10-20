@@ -75,7 +75,7 @@ func ElectrumEncrypt(message []byte,
 
 	// Derive ECDH key
 	x, y := toPublicKey.Curve.ScalarMult(toPublicKey.X, toPublicKey.Y, ephemeralPrivateKey.D.Bytes())
-	ecdhKey := (&ec.PublicKey{X: x, Y: y}).SerializeCompressed()
+	ecdhKey := (&ec.PublicKey{X: x, Y: y}).Compressed()
 
 	// SHA512(ECDH_KEY)
 	key := c.Sha512(ecdhKey)
@@ -94,7 +94,7 @@ func ElectrumEncrypt(message []byte,
 		encrypted = append([]byte("BIE1"), cipherText...)
 	} else {
 		// encrypted = magic_bytes(4 bytes) + ephemeral_public_key(33 bytes) + cipher
-		encrypted = append(append([]byte("BIE1"), ephemeralPublicKey.SerializeCompressed()...), cipherText...)
+		encrypted = append(append([]byte("BIE1"), ephemeralPublicKey.Compressed()...), cipherText...)
 	}
 
 	mac := c.Sha256HMAC(encrypted, keyM)
@@ -119,7 +119,7 @@ func ElectrumDecrypt(encryptedData []byte, toPrivateKey *ec.PrivateKey, fromPubl
 	if fromPublicKey != nil {
 		// Use counterparty public key to derive shared secret
 		x, y := toPrivateKey.Curve.ScalarMult(fromPublicKey.X, fromPublicKey.Y, toPrivateKey.D.Bytes())
-		sharedSecret = (&ec.PublicKey{X: x, Y: y}).SerializeCompressed()
+		sharedSecret = (&ec.PublicKey{X: x, Y: y}).Compressed()
 		if len(encryptedData) > 69 { // 4 (magic) + 33 (pubkey) + 32 (mac)
 			cipherText = encryptedData[37 : len(encryptedData)-32]
 		} else {
@@ -132,7 +132,7 @@ func ElectrumDecrypt(encryptedData []byte, toPrivateKey *ec.PrivateKey, fromPubl
 			return nil, err
 		}
 		x, y := ephemeralPublicKey.Curve.ScalarMult(ephemeralPublicKey.X, ephemeralPublicKey.Y, toPrivateKey.D.Bytes())
-		sharedSecret = (&ec.PublicKey{X: x, Y: y}).SerializeCompressed()
+		sharedSecret = (&ec.PublicKey{X: x, Y: y}).Compressed()
 		cipherText = encryptedData[37 : len(encryptedData)-32]
 	}
 
@@ -172,7 +172,7 @@ func BitcoreEncrypt(message []byte,
 		fromPrivateKey, _ = ec.NewPrivateKey()
 	}
 
-	RBuf := fromPrivateKey.PubKey().ToDERBytes()
+	RBuf := fromPrivateKey.PubKey().ToDER()
 	P := toPublicKey.Mul(fromPrivateKey.D)
 
 	Sbuf := P.X.Bytes()

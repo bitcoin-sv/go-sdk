@@ -10,7 +10,6 @@ import (
 	"sort"
 
 	"github.com/bitcoin-sv/go-sdk/chainhash"
-	crypto "github.com/bitcoin-sv/go-sdk/primitives/hash"
 	"github.com/bitcoin-sv/go-sdk/transaction/chaintracker"
 	"github.com/pkg/errors"
 )
@@ -41,17 +40,14 @@ func (ip IndexedPath) GetOffsetLeaf(layer int, offset uint64) *PathElement {
 	left := ip.GetOffsetLeaf(layer-1, prevOffset)
 	right := ip.GetOffsetLeaf(layer-1, prevOffset+1)
 	if left != nil && right != nil {
-		var digest []byte
-		if right.Duplicate != nil && *right.Duplicate {
-			digest = append(left.Hash.CloneBytes(), left.Hash.CloneBytes()...)
-		} else {
-			digest = append(left.Hash.CloneBytes(), right.Hash.CloneBytes()...)
-		}
-
 		pathElement := &PathElement{
 			Offset: offset,
 		}
-		pathElement.Hash, _ = chainhash.NewHash(crypto.Sha256d(digest))
+		if right.Duplicate != nil && *right.Duplicate {
+			pathElement.Hash = MerkleTreeParent(left.Hash, left.Hash)
+		} else {
+			pathElement.Hash = MerkleTreeParent(left.Hash, right.Hash)
+		}
 		return pathElement
 	}
 	return nil
@@ -253,20 +249,16 @@ func (mp *MerklePath) ComputeRoot(txid *chainhash.Hash) (*chainhash.Hash, error)
 		if leaf == nil {
 			return nil, fmt.Errorf("we do not have a hash for this index at height: %v", height)
 		}
-		var digest []byte
-
 		if leaf.Duplicate != nil && *leaf.Duplicate {
-			digest = append(workingHash.CloneBytes(), workingHash.CloneBytes()...)
+			workingHash = MerkleTreeParent(workingHash, workingHash)
 		} else {
 			leafBytes := leaf.Hash
 			if (offset % 2) != 0 {
-				digest = append(workingHash.CloneBytes(), leafBytes.CloneBytes()...)
+				workingHash = MerkleTreeParent(workingHash, leafBytes)
 			} else {
-				digest = append(leafBytes.CloneBytes(), workingHash.CloneBytes()...)
+				workingHash = MerkleTreeParent(leafBytes, workingHash)
 			}
 		}
-
-		workingHash, _ = chainhash.NewHash(crypto.Sha256d(digest))
 	}
 	return workingHash, nil
 }
@@ -286,7 +278,7 @@ func (mp *MerklePath) Verify(txid *chainhash.Hash, ct chaintracker.ChainTracker)
 	if err != nil {
 		return false, err
 	}
-	return ct.IsValidRootForHeight(root, mp.BlockHeight), nil
+	return ct.IsValidRootForHeight(root, mp.BlockHeight)
 }
 
 func (m *MerklePath) Combine(other *MerklePath) (err error) {

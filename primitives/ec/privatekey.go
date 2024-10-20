@@ -263,7 +263,7 @@ func (p *PrivateKey) ToKeyShares(threshold int, totalShares int) (keyShares *key
 		points = append(points, keyshares.NewPointInFiniteField(x, y))
 	}
 
-	integrity := hex.EncodeToString(p.PubKey().ToHash())[:8]
+	integrity := hex.EncodeToString(p.PubKey().Hash())[:8]
 	return keyshares.NewKeyShares(points, threshold, integrity), nil
 }
 
@@ -289,7 +289,7 @@ func PrivateKeyFromKeyShares(keyShares *keyshares.KeyShares) (*PrivateKey, error
 	poly := keyshares.NewPolynomial(keyShares.Points, keyShares.Threshold)
 	polyBytes := poly.ValueAt(big.NewInt(0)).Bytes()
 	privateKey, publicKey := PrivateKeyFromBytes(polyBytes)
-	integrityHash := hex.EncodeToString(publicKey.ToHash())[:8]
+	integrityHash := hex.EncodeToString(publicKey.Hash())[:8]
 	if keyShares.Integrity != integrityHash {
 		return nil, fmt.Errorf("integrity hash mismatch %s != %s", keyShares.Integrity, integrityHash)
 	}

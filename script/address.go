@@ -107,9 +107,9 @@ func NewAddressFromPublicKey(pubKey *ec.PublicKey, mainnet bool) (*Address, erro
 func NewAddressFromPublicKeyWithCompression(pubKey *ec.PublicKey, mainnet bool, isCompressed bool) (*Address, error) {
 	var hash []byte
 	if isCompressed {
-		hash = crypto.Hash160(pubKey.SerializeCompressed())
+		hash = pubKey.Hash()
 	} else {
-		hash = crypto.Hash160(pubKey.SerializeUncompressed())
+		hash = crypto.Hash160(pubKey.Uncompressed())
 	}
 
 	// regtest := 111

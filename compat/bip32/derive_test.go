@@ -198,7 +198,7 @@ func TestDerivePublicKeyFromPath(t *testing.T) {
 				require.NoError(t, err)
 				pubKey, err := xpubKey.ECPubKey()
 				require.NoError(t, err)
-				return pubKey.SerializeCompressed()
+				return pubKey.Compressed()
 			}(),
 			expectedErr: nil,
 		},
@@ -215,7 +215,7 @@ func TestDerivePublicKeyFromPath(t *testing.T) {
 				require.NoError(t, err)
 				pubKey, err := xpubKey.ECPubKey()
 				require.NoError(t, err)
-				return pubKey.SerializeCompressed()
+				return pubKey.Compressed()
 			}(),
 			expectedErr: nil,
 		},

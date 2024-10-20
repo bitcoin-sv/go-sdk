@@ -36,7 +36,7 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 		return nil, err
 	}
 
-	priv := ec.NewSymmetricKey(sharedSecret.SerializeCompressed()[1:])
+	priv := ec.NewSymmetricKey(sharedSecret.Compressed()[1:])
 	skey := ec.NewSymmetricKey(priv.ToBytes())
 	ciphertext, err := skey.Encrypt(message)
 	if err != nil {
@@ -48,8 +48,8 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 		return nil, err
 	}
 
-	senderPublicKey := sender.PubKey().SerializeCompressed()
-	recipientDER := recipient.SerializeCompressed()
+	senderPublicKey := sender.PubKey().Compressed()
+	recipientDER := recipient.Compressed()
 
 	encryptedMessage := append(version, senderPublicKey...)
 	encryptedMessage = append(encryptedMessage, recipientDER...)
@@ -91,7 +91,7 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	actualRecipientDER := recipient.PubKey().SerializeCompressed()
+	actualRecipientDER := recipient.PubKey().Compressed()
 	if !bytes.Equal(expectedRecipientDER, actualRecipientDER) {
 		errorStr := "the encrypted message expects a recipient public key of %x, but the provided key is %x"
 		return nil, fmt.Errorf(errorStr, expectedRecipientDER, actualRecipientDER)
@@ -120,7 +120,7 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 		return nil, err
 	}
 
-	priv := ec.NewSymmetricKey(sharedSecret.SerializeCompressed()[1:])
+	priv := ec.NewSymmetricKey(sharedSecret.Compressed()[1:])
 	skey := ec.NewSymmetricKey(priv.ToBytes())
 	return skey.Decrypt(encrypted)
 }

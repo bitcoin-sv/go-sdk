@@ -17,6 +17,7 @@ type FeeModel interface {
 	ComputeFee(tx *Transaction) (uint64, error)
 }
 
+// Fee computes the fee for the transaction.
 func (tx *Transaction) Fee(f FeeModel, changeDistribution ChangeDistribution) error {
 	fee, err := f.ComputeFee(tx)
 	if err != nil {
@@ -63,4 +64,12 @@ func (tx *Transaction) Fee(f FeeModel, changeDistribution ChangeDistribution) er
 		}
 	}
 	return nil
+}
+
+func (tx *Transaction) GetFee() (total uint64, err error) {
+	if totalIn, err := tx.TotalInputSatoshis(); err != nil {
+		return 0, err
+	} else {
+		return totalIn - tx.TotalOutputSatoshis(), nil
+	}
 }

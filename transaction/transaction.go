@@ -443,7 +443,7 @@ func (tx *Transaction) AddMerkleProof(bump *MerklePath) error {
 	return nil
 }
 
-// Fee returns the fee of the transaction.
+// Sign signs the transaction with the unlocking script.
 func (tx *Transaction) Sign() error {
 	err := tx.checkFeeComputed()
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/script"
 	"github.com/bitcoin-sv/go-sdk/transaction"
+	feemodel "github.com/bitcoin-sv/go-sdk/transaction/fee_model"
 	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
 	"github.com/stretchr/testify/require"
 )
@@ -35,6 +36,7 @@ func TestNewTransaction(t *testing.T) {
 		// Create a new P2PKH unlocker from the private key
 		unlocker, err := p2pkh.Unlock(priv, nil)
 		require.NoError(t, err)
+
 		// Add an input
 		tx.AddInputFromTx(sourceTransaction, 0, unlocker)
 
@@ -195,4 +197,98 @@ func TestSignUnsignedNew(t *testing.T) {
 	for _, input := range tx.Inputs {
 		require.NotEmpty(t, input.UnlockingScript.Bytes())
 	}
+}
+
+func TestTransactionGetFee(t *testing.T) {
+	// Use the BRC62Hex transaction
+	tx, err := transaction.NewTransactionFromBEEFHex(BRC62Hex)
+	require.NoError(t, err)
+
+	// Get the fee
+	fee, err := tx.GetFee()
+	require.NoError(t, err)
+
+	// Calculate expected fee
+	totalInputSatoshis, err := tx.TotalInputSatoshis()
+	require.NoError(t, err)
+	totalOutputSatoshis := tx.TotalOutputSatoshis()
+	expectedFee := totalInputSatoshis - totalOutputSatoshis
+
+	// Verify the fee matches the expected fee
+	require.Equal(t, expectedFee, fee)
+}
+
+func TestTransactionFee(t *testing.T) {
+	// Example WIF and associated address
+	privKeyWIF := "KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS"
+	privKey, err := ec.PrivateKeyFromWif(privKeyWIF)
+	require.NoError(t, err)
+
+	address, err := script.NewAddressFromPublicKey(privKey.PubKey(), true)
+	require.NoError(t, err)
+
+	// Source transaction data (a real transaction)
+	sourceRawTx := "0100000001b1e5bf6e0649f299bb2b20964090b5b0a02e96db182eecedb0a9e4e7af03e06e000000006b483045022100ca75f7f664fa3086a3430b0f5d4a531d26e8d2ef3a72f086e890c5618d858fed022006e9a3c9f08e1743b033a55c27fb9d6c6cf1a1f6e0c40090e229d4ff8e5ecb31412102798913bc057b344de675dac34faafe3dc2f312c758cd9068209f810877306d66ffffffff01b0f9d804000000001976a9144bd8c375bdac70fb6eb7261d6e6c70450787e6af88ac00000000"
+
+	sourceTx, err := transaction.NewTransactionFromHex(sourceRawTx)
+	require.NoError(t, err)
+
+	// Create a new transaction
+	tx := transaction.NewTransaction()
+
+	// Create a P2PKH unlocker
+	unlocker, err := p2pkh.Unlock(privKey, nil)
+	require.NoError(t, err)
+
+	// Add an input from the source transaction
+	tx.AddInputFromTx(sourceTx, 0, unlocker)
+
+	// Create a P2PKH locking script
+	lockScript, err := p2pkh.Lock(address)
+	require.NoError(t, err)
+
+	// Add an output (sending 1,000,000 satoshis)
+	tx.AddOutput(&transaction.TransactionOutput{
+		LockingScript: lockScript,
+		Satoshis:      1000000, // 0.01 BSV
+	})
+
+	// Add a change output
+	tx.AddOutput(&transaction.TransactionOutput{
+		LockingScript: lockScript,
+		Change:        true,
+	})
+
+	// Create a fee model with 500 satoshis per kilobyte
+	feeModel := &feemodel.SatoshisPerKilobyte{
+		Satoshis: 500, // Fee rate
+	}
+
+	// Compute the fee
+	err = tx.Fee(feeModel, transaction.ChangeDistributionEqual)
+	require.NoError(t, err)
+
+	// Sign the transaction
+	err = tx.Sign()
+	require.NoError(t, err)
+
+	// Get the actual fee from the transaction
+	fee, err := tx.GetFee()
+	require.NoError(t, err)
+
+	// Compute the expected fee using the fee model
+	expectedFee, err := feeModel.ComputeFee(tx)
+	require.NoError(t, err)
+
+	// Verify that the actual fee matches the expected fee
+	require.Equal(t, expectedFee, fee)
+
+	// Verify that total inputs >= total outputs + fee
+	totalInputs, err := tx.TotalInputSatoshis()
+	require.NoError(t, err)
+	totalOutputs := tx.TotalOutputSatoshis()
+	require.GreaterOrEqual(t, totalInputs, totalOutputs+fee)
+
+	// Print the fee for informational purposes
+	t.Logf("Computed fee: %d satoshis", fee)
 }

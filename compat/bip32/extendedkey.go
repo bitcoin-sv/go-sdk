@@ -158,7 +158,7 @@ func (k *ExtendedKey) pubKeyBytes() []byte {
 		if len(k.pubKey) == 0 {
 			pkx, pky := ec.S256().ScalarBaseMult(k.key)
 			pubKey := ec.PublicKey{Curve: ec.S256(), X: pkx, Y: pky}
-			k.pubKey = pubKey.SerializeCompressed()
+			k.pubKey = pubKey.Compressed()
 		}
 	})
 
@@ -324,7 +324,7 @@ func (k *ExtendedKey) Child(i uint32) (*ExtendedKey, error) {
 		// childKey = serP(point(parse256(Il)) + parentKey)
 		childX, childY := ec.S256().Add(ilx, ily, pubKey.X, pubKey.Y)
 		pk := ec.PublicKey{Curve: ec.S256(), X: childX, Y: childY}
-		childKey = pk.SerializeCompressed()
+		childKey = pk.Compressed()
 	}
 
 	// The fingerprint of the parent for the derived child is the first 4
