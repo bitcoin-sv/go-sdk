@@ -287,7 +287,7 @@ func TestTransactionFee(t *testing.T) {
 	totalInputs, err := tx.TotalInputSatoshis()
 	require.NoError(t, err)
 	totalOutputs := tx.TotalOutputSatoshis()
-	require.True(t, totalInputs >= totalOutputs+fee)
+	require.GreaterOrEqual(t, totalInputs, totalOutputs+fee)
 
 	// Print the fee for informational purposes
 	t.Logf("Computed fee: %d satoshis", fee)
