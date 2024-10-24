@@ -54,13 +54,10 @@ func Verify(t *transaction.Transaction,
 
 		inputTotal := uint64(0)
 		for vin, input := range tx.Inputs {
-			if input.SourceTransaction == nil {
+			sourceOutput := input.SourceTxOutput()
+			if sourceOutput == nil {
 				return false, fmt.Errorf("input %d has no source transaction", vin)
 			}
-			if input.UnlockingScript == nil || len(*input.UnlockingScript) == 0 {
-				return false, fmt.Errorf("input %d has no unlocking script", vin)
-			}
-			sourceOutput := input.SourceTransaction.Outputs[input.SourceTxOutIndex]
 			inputTotal += sourceOutput.Satoshis
 			sourceTxid := input.SourceTransaction.TxID().String()
 			if _, ok := verifiedTxids[sourceTxid]; !ok {
