@@ -18,15 +18,24 @@ var (
 	WOCTestnet WOCNetwork = "test"
 )
 
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 type WhatsOnChain struct {
 	Network WOCNetwork
 	ApiKey  string
+	Client  HTTPClient
 }
 
 func (b *WhatsOnChain) Broadcast(t *transaction.Transaction) (
 	*transaction.BroadcastSuccess,
 	*transaction.BroadcastFailure,
 ) {
+	if b.Client == nil {
+		b.Client = http.DefaultClient
+	}
+
 	bodyMap := map[string]interface{}{
 		"txhex": t.Hex(),
 	}
@@ -55,7 +64,7 @@ func (b *WhatsOnChain) Broadcast(t *transaction.Transaction) (
 			req.Header.Set("Authorization", "Bearer "+b.ApiKey)
 		}
 
-		if resp, err := http.DefaultClient.Do(req); err != nil {
+		if resp, err := b.Client.Do(req); err != nil {
 			return nil, &transaction.BroadcastFailure{
 				Code:        "500",
 				Description: err.Error(),
