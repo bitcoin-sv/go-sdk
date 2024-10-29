@@ -11,10 +11,14 @@ func main() {
 	hexTx := "010000000100"
 	tx, _ := transaction.NewTransactionFromHex(hexTx)
 
+	// Use the WOC API broadcaster
+	b := &broadcaster.WhatsOnChain{
+		ApiKey:  "",
+		Network: broadcaster.WOCMainnet,
+	}
+
 	// Broadcast the transaction
-	success, failure := tx.Broadcast(&broadcaster.Arc{
-		ApiUrl: "https://api.whatsonchain.com/v1/bsv/main/tx/raw",
-	})
+	success, failure := tx.Broadcast(b)
 
 	// Check for errors
 	if failure != nil {

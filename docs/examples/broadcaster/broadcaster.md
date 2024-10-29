@@ -20,11 +20,24 @@ func main() {
         hexTx := "010000000100"
         tx, _ := transaction.NewTransactionFromHex(hexTx)
 
-        // Broadcast the transaction
-        success, failure := tx.Broadcast(&broadcaster.Arc{
+        broadcaster := &broadcaster.Arc{
             ApiUrl: "https://arc.gorillapool.io",
             ApiKey: "",
-        })
+        }
+
+        // To use TAAL API
+        // broadcaster := &broadcaster.Taal{
+        //     ApiKey: "",
+        // }
+
+        // To use Whats on Chain API
+        // broadcaster := &broadcaster.WhatsOnChain{
+        //     ApiKey: "",
+        //     Network: broadcaster.WOCMainnet
+        // }
+
+        // Broadcast the transaction
+        success, failure := tx.Broadcast(broadcaster)
 
         // Check for errors
         if failure != nil {

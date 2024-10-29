@@ -14,16 +14,16 @@ import (
 type WOCNetwork string
 
 var (
-	Mainnet WOCNetwork = "main"
-	Testnet WOCNetwork = "test"
+	WOCMainnet WOCNetwork = "main"
+	WOCTestnet WOCNetwork = "test"
 )
 
-type WhatsOnChainBroadcast struct {
+type WhatsOnChain struct {
 	Network WOCNetwork
 	ApiKey  string
 }
 
-func (b *WhatsOnChainBroadcast) Broadcast(ctx context.Context, t *transaction.Transaction) (*transaction.BroadcastSuccess, *transaction.BroadcastFailure) {
+func (b *WhatsOnChain) Broadcast(ctx context.Context, t *transaction.Transaction) (*transaction.BroadcastSuccess, *transaction.BroadcastFailure) {
 	bodyMap := map[string]interface{}{
 		"txhex": t.Hex(),
 	}

@@ -11,11 +11,15 @@ func main() {
 	hexTx := "010000000100"
 	tx, _ := transaction.NewTransactionFromHex(hexTx)
 
-	// Broadcast the transaction
-	success, failure := tx.Broadcast(&broadcaster.Arc{
+	// Use the GP Arc Broadcaster
+
+	b := &broadcaster.Arc{
 		ApiUrl: "https://arc.gorillapool.io",
 		ApiKey: "",
-	})
+	}
+
+	// Broadcast the transaction
+	success, failure := tx.Broadcast(b)
 
 	// Check for errors
 	if failure != nil {
