@@ -23,7 +23,10 @@ type WhatsOnChain struct {
 	ApiKey  string
 }
 
-func (b *WhatsOnChain) Broadcast(ctx context.Context, t *transaction.Transaction) (*transaction.BroadcastSuccess, *transaction.BroadcastFailure) {
+func (b *WhatsOnChain) Broadcast(t *transaction.Transaction) (
+	*transaction.BroadcastSuccess,
+	*transaction.BroadcastFailure,
+) {
 	bodyMap := map[string]interface{}{
 		"txhex": t.Hex(),
 	}
@@ -34,6 +37,7 @@ func (b *WhatsOnChain) Broadcast(ctx context.Context, t *transaction.Transaction
 		}
 	} else {
 		url := fmt.Sprintf("https://api.whatsonchain.com/v1/bsv/%s/tx/raw", b.Network)
+		ctx := context.Background()
 		req, err := http.NewRequestWithContext(
 			ctx,
 			"POST",
@@ -57,7 +61,7 @@ func (b *WhatsOnChain) Broadcast(ctx context.Context, t *transaction.Transaction
 				Description: err.Error(),
 			}
 		} else {
-			defer resp.Body.Close()
+			defer resp.Body.Close() //nolint:errcheck // standard http client pattern
 			if resp.StatusCode != 200 {
 				if body, err := io.ReadAll(resp.Body); err != nil {
 					return nil, &transaction.BroadcastFailure{

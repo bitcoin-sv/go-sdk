@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/bitcoin-sv/go-sdk/transaction"
@@ -21,9 +21,14 @@ type TAALBroadcast struct {
 	ApiKey string
 }
 
-func (b *TAALBroadcast) Broadcast(ctx context.Context, t *transaction.Transaction) (*transaction.BroadcastSuccess, *transaction.BroadcastFailure) {
+func (b *TAALBroadcast) Broadcast(t *transaction.Transaction) (
+	*transaction.BroadcastSuccess,
+	*transaction.BroadcastFailure,
+) {
 	buf := bytes.NewBuffer(t.Bytes())
 	url := "https://api.taal.com/api/v1/broadcast"
+
+	ctx := context.Background()
 	req, err := http.NewRequestWithContext(
 		ctx,
 		"POST",
@@ -46,17 +51,17 @@ func (b *TAALBroadcast) Broadcast(ctx context.Context, t *transaction.Transactio
 			Description: err.Error(),
 		}
 	} else {
-		defer resp.Body.Close()
+		defer resp.Body.Close() //nolint:errcheck // standard http client pattern
 		var taalResp TAALResponse
 		if err := json.NewDecoder(resp.Body).Decode(&taalResp); err != nil {
 			return nil, &transaction.BroadcastFailure{
-				Code:        fmt.Sprintf("%d", resp.StatusCode),
+				Code:        strconv.Itoa(resp.StatusCode),
 				Description: "unknown error",
 			}
 		} else if resp.StatusCode != 200 && !strings.Contains(taalResp.Err, "txn-already-known") {
 			return nil, &transaction.BroadcastFailure{
-				Code:        fmt.Sprintf("%d", resp.StatusCode),
-				Description: string(taalResp.Err),
+				Code:        strconv.Itoa(resp.StatusCode),
+				Description: taalResp.Err,
 			}
 		} else {
 			return &transaction.BroadcastSuccess{
