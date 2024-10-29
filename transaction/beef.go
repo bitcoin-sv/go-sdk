@@ -7,6 +7,8 @@ import (
 	"fmt"
 )
 
+const BEEF_VERSION = uint32(4022206465)
+
 func (t *Transaction) FromBEEF(beef []byte) error {
 	tx, err := NewTransactionFromBEEF(beef)
 	*t = *tx
@@ -21,8 +23,8 @@ func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
 	if err != nil {
 		return nil, err
 	}
-	if version != 4022206465 {
-		return nil, fmt.Errorf("invalid BEEF version. expected 4022206465, received %d", version)
+	if version != BEEF_VERSION {
+		return nil, fmt.Errorf("invalid BEEF version. expected %d, received %d", BEEF_VERSION, version)
 	}
 
 	// Read the BUMPs
@@ -94,7 +96,7 @@ func NewTransactionFromBEEFHex(beefHex string) (*Transaction, error) {
 
 func (t *Transaction) BEEF() ([]byte, error) {
 	b := new(bytes.Buffer)
-	err := binary.Write(b, binary.LittleEndian, uint32(4022206465))
+	err := binary.Write(b, binary.LittleEndian, BEEF_VERSION)
 	if err != nil {
 		return nil, err
 	}
