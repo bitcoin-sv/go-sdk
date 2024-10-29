@@ -19,6 +19,7 @@ type TAALResponse struct {
 
 type TAALBroadcast struct {
 	ApiKey string
+	Client HTTPClient
 }
 
 func (b *TAALBroadcast) Broadcast(t *transaction.Transaction) (
@@ -45,7 +46,7 @@ func (b *TAALBroadcast) Broadcast(t *transaction.Transaction) (
 	if b.ApiKey != "" {
 		req.Header.Set("Authorization", b.ApiKey)
 	}
-	if resp, err := http.DefaultClient.Do(req); err != nil {
+	if resp, err := b.Client.Do(req); err != nil {
 		return nil, &transaction.BroadcastFailure{
 			Code:        "500",
 			Description: err.Error(),
