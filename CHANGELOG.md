@@ -6,8 +6,10 @@ All notable changes to this project will be documented in this file. The format 
 
 - [CHANGELOG](#changelog)
   - [Table of Contents](#table-of-contents)
-  - [\[1.1.11\] - 2024-10-23](#1111---2024-10-23)
+  - [\[1.1.12\] - 2024-10-31](#1112---2024-10-31)
     - [Fixed](#fixed)
+  - [\[1.1.11\] - 2024-10-23](#1111---2024-10-23)
+    - [Fixed](#fixed-1)
   - [\[1.1.10\] - 2024-10-20](#1110---2024-10-20)
     - [Changed](#changed)
     - [Added](#added)
@@ -40,16 +42,19 @@ All notable changes to this project will be documented in this file. The format 
     - [Added](#added-8)
     - [Changed](#changed-9)
     - [Removed](#removed-1)
-    - [Fixed](#fixed-1)
+    - [Fixed](#fixed-2)
   - [\[1.0.0\] - 2024-06-06](#100---2024-06-06)
     - [Added](#added-9)
     - [Template for New Releases:](#template-for-new-releases)
 
+## [1.1.12] - 2024-10-31
+  ### Fixed
+  - fix `spv.Verify()` to work with source output (separate fix from 1.1.11)
+  
 ## [1.1.11] - 2024-10-23
-  Big thanks for contributions from @wregulski
   ### Fixed
   - fix `spv.Verify()` to work with source output 
-  - 
+  
 ## [1.1.10] - 2024-10-20
   Big thanks for contributions from @wregulski
 
