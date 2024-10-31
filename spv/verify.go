@@ -59,13 +59,11 @@ func Verify(t *transaction.Transaction,
 				return false, fmt.Errorf("input %d has no source transaction", vin)
 			}
 			inputTotal += sourceOutput.Satoshis
-			sourceTxid := input.SourceTransaction.TxID().String()
-			if _, ok := verifiedTxids[sourceTxid]; !ok {
-				txQueue = append(txQueue, input.SourceTransaction)
-			}
 
-			if input.SourceTXID == nil {
-				input.SourceTXID = input.SourceTransaction.TxID()
+			if input.SourceTransaction != nil {
+				if _, ok := verifiedTxids[input.SourceTransaction.TxID().String()]; !ok {
+					txQueue = append(txQueue, input.SourceTransaction)
+				}
 			}
 
 			if err := interpreter.NewEngine().Execute(
