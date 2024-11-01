@@ -20,7 +20,6 @@ All notable changes to this project will be documented in this file. The format 
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
 
-
 ## [1.1.13] - 2024-11-01
   ### Changed
   - Broadcaster examples
@@ -33,7 +32,7 @@ All notable changes to this project will be documented in this file. The format 
 ## [1.1.12] - 2024-10-31
   ### Fixed
   - fix `spv.Verify()` to work with source output (separate fix from 1.1.11)
-
+  
 ## [1.1.11] - 2024-10-23
   ### Fixed
   - fix `spv.Verify()` to work with source output 
