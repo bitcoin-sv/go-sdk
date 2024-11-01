@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ## Table of Contents
 
+- [1.1.14 - 2024-11-01](#1114---2024-11-01)
 - [1.1.13 - 2024-11-01](#1113---2024-11-01)
 - [1.1.12 - 2024-10-31](#1112---2024-10-31)
 - [1.1.11 - 2024-10-23](#1111---2024-10-23)
@@ -19,6 +20,10 @@ All notable changes to this project will be documented in this file. The format 
 - [1.1.1 - 2024-08-28](#111---2024-08-28)
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
+
+## [1.1.14] - 2024-11-01
+  ### Changed
+  - Update examples and documentation to reflect `tx.Sign` using script templates
 
 ## [1.1.13] - 2024-11-01
   ### Changed
