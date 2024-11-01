@@ -3,8 +3,10 @@
 package broadcaster
 
 import (
+	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -32,6 +34,87 @@ func (m *MockTAALSuccessClient) Do(req *http.Request) (*http.Response, error) {
 		StatusCode: 200,
 		Body:       io.NopCloser(strings.NewReader(`{"txid":"4d76b00f29e480e0a933cef9d9ffe303d6ab919e2cdb265dd2cea41089baa85a","status":1,"error":""}`)),
 	}, nil
+}
+
+// Mock client that simulates network error
+type MockTAALNetworkErrorClient struct{}
+
+func (m *MockTAALNetworkErrorClient) Do(req *http.Request) (*http.Response, error) {
+	return nil, fmt.Errorf("network error")
+}
+
+// Mock client that returns invalid JSON
+type MockTAALInvalidJSONClient struct{}
+
+func (m *MockTAALInvalidJSONClient) Do(req *http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: 200,
+		Body:       io.NopCloser(strings.NewReader(`invalid json`)),
+	}, nil
+}
+
+// Mock client that returns a non-200 status code and specific error message
+type MockTAALErrorClient struct{}
+
+func (m *MockTAALErrorClient) Do(req *http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: 400,
+		Body:       io.NopCloser(strings.NewReader(`{"txid":"","status":0,"error":"Some error message"}`)),
+	}, nil
+}
+
+// Test for error during HTTP client's Do method
+func TestTAALBroadcastDoError(t *testing.T) {
+	tx := &transaction.Transaction{
+		// Populate with valid data
+	}
+
+	b := &TAALBroadcast{
+		ApiKey: "",
+		Client: &MockTAALNetworkErrorClient{},
+	}
+
+	success, failure := b.Broadcast(tx)
+	require.Nil(t, success)
+	require.NotNil(t, failure)
+	require.Equal(t, "500", failure.Code)
+	require.Contains(t, failure.Description, "network error")
+}
+
+// Test for error decoding the response body
+func TestTAALBroadcastDecodeError(t *testing.T) {
+	tx := &transaction.Transaction{
+		// Populate with valid data
+	}
+
+	b := &TAALBroadcast{
+		ApiKey: "",
+		Client: &MockTAALInvalidJSONClient{},
+	}
+
+	success, failure := b.Broadcast(tx)
+	require.Nil(t, success)
+	require.NotNil(t, failure)
+	require.Equal(t, strconv.Itoa(200), failure.Code)
+	require.Equal(t, "unknown error", failure.Description)
+}
+
+// Test for error response with non-200 status code
+func TestTAALBroadcastErrorResponse(t *testing.T) {
+	tx := &transaction.Transaction{
+		// Populate with valid data
+	}
+
+	b := &TAALBroadcast{
+		ApiKey: "",
+		Client: &MockTAALErrorClient{},
+	}
+
+	success, failure := b.Broadcast(tx)
+	require.Nil(t, success)
+	require.NotNil(t, failure)
+	require.Equal(t, strconv.Itoa(400), failure.Code)
+	require.Equal(t, "Some error message", failure.Description)
 }
 
 // TestTAALBroadcast tests the Broadcast method of TAALBroadcast.
