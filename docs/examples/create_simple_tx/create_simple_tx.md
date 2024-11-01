@@ -25,44 +25,35 @@ import (
 // https://goplay.tools/snippet/bnsS-pA56ob
 func main() {
  // Create a new transaction
- tx := transaction.NewTransaction()
+   tx := transaction.NewTransaction()
 
- // Add the inputs
- err := tx.AddInputFrom(
-  // Previous transaction ID (hex)
-  "11b476ad8e0a48fcd40807a111a050af51114877e09283bfa7f3505081a1819d",
-  // Previous transaction output index
-  0,
-  // Previous transaction script (hex)
-  "76a9144bca0c466925b875875a8e1355698bdcc0b2d45d88ac",
-  // Previous transaction output value in satoshis
-  1500,
- )
- 
- if err!= nil {
-    log.Fatal(err.Error())
- }
+   // Add the inputs
+   unlockingScriptTemplate, _ := p2pkh.Unlock(priv, nil)
+   if err := tx.AddInputFrom(
+		"11b476ad8e0a48fcd40807a111a050af51114877e09283bfa7f3505081a1819d",
+		0,
+		"76a9144bca0c466925b875875a8e1355698bdcc0b2d45d88ac",
+		1500,
+		unlockingScriptTemplate,
+	); err!= nil {
+      log.Fatal(err.Error())
+   }
 
- // Add the outputs
- _ = tx.PayToAddress(
-  // Destination address
-  "1NRoySJ9Lvby6DuE2UQYnyT67AASwNZxGb",
-  // Value in satoshis
-  1000,
- )
+   // Add the outputs
+   _ = tx.PayToAddress(
+      // Destination address
+      "1NRoySJ9Lvby6DuE2UQYnyT67AASwNZxGb",
+      // Value in satoshis
+      1000,
+   )
 
- // Fill all inputs with the given private key
- decodedWif, _ := wif.DecodeWIF("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
+   priv, _ := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 
- // Sign the transaction
- if err := tx.FillAllInputs(
-  // The default context which is empty but can be 
-  // used to control cancellations and timeouts.
-  context.Background(), 
-  &unlocker.Getter{PrivateKey: decodedWif.PrivKey}); err != nil {
-   log.Fatal(err.Error())
- }
- log.Printf("tx: %s\n", tx)
+   // Sign the transaction
+   if err := tx.Sign(); err != nil {
+		log.Fatal(err.Error())
+	}
+   log.Printf("tx: %s\n", tx)
 }
 
 ```
@@ -81,19 +72,20 @@ Main Function:
 - The output index (vout) in the referenced transaction.
 - A script (locking script) representing the locking conditions under which the output can be spent.
 - The number of satoshis from the output that is being spent.
+- UnlockingScriptTemplate used to sign input
 
 `tx.PayToAddress(...)` adds an output to the transaction, specifying:
 
 - The recipient's Bitcoin SV address.
 - The amount of satoshis to send to that address.
 
-`wif.DecodeWIF(...)` decodes a WIF-encoded private key. This is necessary for signing the transaction inputs.
+`ec.PrivateKeyFromWif(...)` decodes a WIF-encoded private key. This is necessary for signing the transaction inputs.
 
-`tx.FillAllInputs(...)` attempts to sign all inputs of the transaction using the private key provided. This is essential for validating the transaction on the network.
+`tx.Sign(...)` attempts to sign all inputs of the transaction using the script templates provided. This is essential for validating the transaction on the network.
 
 The context passed `(context.Background())` is the default context which is empty but can be used to control cancellations and timeouts.
 Error Handling and Logging:
 
-If `tx.FillAllInputs(...)` returns an error, the program logs the error and terminates using `log.Fatal(...)`.
+If `tx.Sign(...)` returns an error, the program logs the error and terminates using `log.Fatal(...)`.
 
 If no error occurs, it logs the serialized form of the transaction, which is ready to be broadcasted to the network.
