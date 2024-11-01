@@ -53,18 +53,22 @@ import (
 func main() {
 	tx := transaction.NewTransaction()
 
-	_ = tx.AddInputFrom(
+	unlockingScriptTemplate, _ := p2pkh.Unlock(priv, nil)
+   if err := tx.AddInputFrom(
 		"11b476ad8e0a48fcd40807a111a050af51114877e09283bfa7f3505081a1819d",
 		0,
-		"76a914eb0bd5edba389198e73f8efabddfc61666969ff788ac6a0568656c6c6f",
+		"76a9144bca0c466925b875875a8e1355698bdcc0b2d45d88ac",
 		1500,
-	)
+		unlockingScriptTemplate,
+	); err!= nil {
+      log.Fatal(err.Error())
+   }
 
 	_ = tx.PayToAddress("1AdZmoAQUw4XCsCihukoHMvNWXcsd8jDN6", 1000)
 
-	decodedWif, _ := wif.DecodeWIF("KzH8frNSgsKtmPQ2oMFnwD3DK347PY3YJUzE1dCKNKLaWSfHaXGC")
+	priv, _ := ec.PrivateKeyFromWif("KznvCNc6Yf4iztSThoMH6oHWzH9EgjfodKxmeuUGPq5DEX5maspS")
 
-	if err := tx.FillAllInputs(context.Background(), &unlocker.Getter{PrivateKey: decodedWif.PrivKey}); err != nil {
+	if err := tx.Sign(); err != nil {
 		log.Fatal(err.Error())
 	}
 	log.Printf("tx: %s\n", tx)
