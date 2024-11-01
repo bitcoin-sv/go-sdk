@@ -4,10 +4,12 @@ go 1.22
 
 require (
 	github.com/davecgh/go-spew v1.1.1
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 	golang.org/x/crypto v0.21.0
 	golang.org/x/sync v0.6.0
 )
+
+require github.com/stretchr/objx v0.5.2 // indirect
 
 require (
 	github.com/pkg/errors v0.9.1

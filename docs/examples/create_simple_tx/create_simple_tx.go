@@ -71,9 +71,11 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	// BEEF format
 	beef, _ := tx.BEEF()
 	log.Printf("beef: %s\n", hex.EncodeToString(beef))
 
+	// Extended format
 	ef, _ := tx.EF()
 	log.Printf("ef: %s\n", hex.EncodeToString(ef))
 }
