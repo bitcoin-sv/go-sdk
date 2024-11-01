@@ -4,8 +4,9 @@ All notable changes to this project will be documented in this file. The format 
 
 ## Table of Contents
 
-- [1.1.12 - 2024-20-23](#1112---2024-10-29)
-- [1.1.11 - 2024-20-23](#1111---2024-10-23)
+- [1.1.13 - 2024-11-01](#1113---2024-11-01)
+- [1.1.12 - 2024-10-31](#1112---2024-10-31)
+- [1.1.11 - 2024-10-23](#1111---2024-10-23)
 - [1.1.10 - 2024-10-20](#1110---2024-10-20)
 - [1.1.9 - 2024-10-01](#119---2024-10-01)
 - [1.1.8 - 2024-09-17](#118---2024-09-17)
@@ -19,20 +20,24 @@ All notable changes to this project will be documented in this file. The format 
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
 
-## [1.1.12] - 2024-10-29
 
+## [1.1.13] - 2024-11-01
   ### Changed
   - Broadcaster examples
 
   ### Added
   - WOC Broadcaster
   - TAAL Broadcaster
-  
-## [1.1.11] - 2024-10-23
+  - Tests for woc, taal, and arc broadcasters
 
+## [1.1.12] - 2024-10-31
+  ### Fixed
+  - fix `spv.Verify()` to work with source output (separate fix from 1.1.11)
+
+## [1.1.11] - 2024-10-23
   ### Fixed
   - fix `spv.Verify()` to work with source output 
-  - 
+  
 ## [1.1.10] - 2024-10-20
   Big thanks for contributions from @wregulski
 
