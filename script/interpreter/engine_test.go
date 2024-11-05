@@ -16,6 +16,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const errMsgCreateLockingScript = "failed to create locking script %e"
+
 // TestBadPC sets the pc to a deliberately bad result then confirms that Step()
 // and Disasm fail correctly.
 func TestBadPC(t *testing.T) {
@@ -48,7 +50,7 @@ func TestBadPC(t *testing.T) {
 
 	lscript, err := script.NewFromASM("OP_NOP")
 	if err != nil {
-		t.Errorf("failed to created locking script %e", err)
+		t.Errorf(errMsgCreateLockingScript, err)
 	}
 	txOut := &transaction.TransactionOutput{
 		LockingScript: lscript,
@@ -77,11 +79,6 @@ func TestBadPC(t *testing.T) {
 			t.Errorf("Step with invalid pc (%v) succeeds!", test)
 			continue
 		}
-
-		if err == nil {
-			t.Errorf("DisasmPC with invalid pc (%v) succeeds!",
-				test)
-		}
 	}
 }
 
@@ -105,7 +102,7 @@ func TestCheckErrorCondition(t *testing.T) {
 
 	lscript, err := script.NewFromASM("OP_NOP OP_NOP OP_NOP OP_NOP OP_NOP OP_NOP OP_NOP OP_NOP OP_NOP OP_NOP OP_TRUE")
 	if err != nil {
-		t.Errorf("failed to created locking script %e", err)
+		t.Errorf(errMsgCreateLockingScript, err)
 	}
 	txOut := &transaction.TransactionOutput{
 		LockingScript: lscript,
@@ -424,7 +421,7 @@ func TestInvalidFlagCombinations(t *testing.T) {
 
 	lscript, err := script.NewFromASM("OP_NOP")
 	if err != nil {
-		t.Errorf("failed to created locking script %e", err)
+		t.Errorf(errMsgCreateLockingScript, err)
 	}
 	txOut := &transaction.TransactionOutput{
 		LockingScript: lscript,
@@ -826,7 +823,7 @@ func TestCheckHashTypeEncoding(t *testing.T) {
 	}
 }
 
-func TestEngine_WithState(t *testing.T) {
+func TestEngineWithState(t *testing.T) {
 	tests := map[string]struct {
 		lscript string
 		uscript string
