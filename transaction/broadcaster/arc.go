@@ -128,6 +128,9 @@ func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSucce
 		req.Header.Set("X-WaitForStatus", string(a.WaitForStatus))
 	}
 
+	if a.Client == nil {
+		a.Client = http.DefaultClient
+	}
 	resp, err := a.Client.Do(req)
 	if err != nil {
 		return nil, &transaction.BroadcastFailure{
