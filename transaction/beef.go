@@ -100,7 +100,7 @@ func (t *Transaction) BEEF() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	bumps := map[uint32]*MerklePath{}
+	bumps := []*MerklePath{}
 	bumpIndex := map[uint32]int{}
 	txns := map[string]*Transaction{t.TxID().String(): t}
 	ancestors, err := t.collectAncestors(txns)
@@ -112,11 +112,11 @@ func (t *Transaction) BEEF() ([]byte, error) {
 		if tx.MerklePath == nil {
 			continue
 		}
-		if _, ok := bumps[tx.MerklePath.BlockHeight]; !ok {
+		if _, ok := bumpIndex[tx.MerklePath.BlockHeight]; !ok {
 			bumpIndex[tx.MerklePath.BlockHeight] = len(bumps)
-			bumps[tx.MerklePath.BlockHeight] = tx.MerklePath
+			bumps = append(bumps, tx.MerklePath)
 		} else {
-			err := bumps[tx.MerklePath.BlockHeight].Combine(tx.MerklePath)
+			err := bumps[bumpIndex[tx.MerklePath.BlockHeight]].Combine(tx.MerklePath)
 			if err != nil {
 				return nil, err
 			}
