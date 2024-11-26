@@ -17,27 +17,32 @@ import (
 type ArcStatus string
 
 const (
-	RECEIVED             ArcStatus = "2"
-	STORED               ArcStatus = "3"
-	ANNOUNCED_TO_NETWORK ArcStatus = "4"
-	REQUESTED_BY_NETWORK ArcStatus = "5"
-	SENT_TO_NETWORK      ArcStatus = "6"
-	ACCEPTED_BY_NETWORK  ArcStatus = "7"
-	SEEN_ON_NETWORK      ArcStatus = "8"
+	REJECTED             ArcStatus = "REJECTED"
+	QUEUED               ArcStatus = "QUEUED"
+	RECEIVED             ArcStatus = "RECEIVED"
+	STORED               ArcStatus = "STORED"
+	ANNOUNCED_TO_NETWORK ArcStatus = "ANNOUNCED_TO_NETWORK"
+	REQUESTED_BY_NETWORK ArcStatus = "REQUESTED_BY_NETWORK"
+	SENT_TO_NETWORK      ArcStatus = "SENT_TO_NETWORK"
+	ACCEPTED_BY_NETWORK  ArcStatus = "ACCEPTED_BY_NETWORK"
+	SEEN_ON_NETWORK      ArcStatus = "SEEN_ON_NETWORK"
 )
 
 type Arc struct {
-	ApiUrl               string
-	ApiKey               string
-	CallbackUrl          *string
-	CallbackToken        *string
-	FullStatusUpdates    bool
-	MaxTimeout           *int
-	SkipFeeValidation    bool
-	SkipScriptValidation bool
-	SkipTxValidation     bool
-	WaitForStatus        ArcStatus
-	Client               HTTPClient // Added for testing
+	ApiUrl                  string
+	ApiKey                  string
+	CallbackUrl             *string
+	CallbackToken           *string
+	CallbackBatch           bool
+	FullStatusUpdates       bool
+	MaxTimeout              *int
+	SkipFeeValidation       bool
+	SkipScriptValidation    bool
+	SkipTxValidation        bool
+	CumulativeFeeValidation bool
+	WaitForStatus           string
+	WaitFor                 ArcStatus
+	Client                  HTTPClient // Added for testing
 }
 
 type ArcResponse struct {
@@ -109,6 +114,9 @@ func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSucce
 	if a.CallbackToken != nil {
 		req.Header.Set("X-CallbackToken", *a.CallbackToken)
 	}
+	if a.CallbackBatch {
+		req.Header.Set("X-CallbackBatch", "true")
+	}
 	if a.FullStatusUpdates {
 		req.Header.Set("X-FullStatusUpdates", "true")
 	}
@@ -124,8 +132,14 @@ func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSucce
 	if a.SkipTxValidation {
 		req.Header.Set("X-SkipTxValidation", "true")
 	}
+	if a.CumulativeFeeValidation {
+		req.Header.Set("X-CumulativeFeeValidation", "true")
+	}
 	if a.WaitForStatus != "" {
-		req.Header.Set("X-WaitForStatus", string(a.WaitForStatus))
+		req.Header.Set("X-WaitForStatus", a.WaitForStatus)
+	}
+	if a.WaitFor != "" {
+		req.Header.Set("X-WaitFor", string(a.WaitFor))
 	}
 
 	resp, err := a.Client.Do(req)
@@ -159,6 +173,12 @@ func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSucce
 		}
 	}
 
+	if response.TxStatus != nil && *response.TxStatus == REJECTED {
+		return nil, &transaction.BroadcastFailure{
+			Code:        "400",
+			Description: response.ExtraInfo,
+		}
+	}
 	if response.Status == 200 {
 		return &transaction.BroadcastSuccess{
 			Txid:    response.Txid,
