@@ -9,8 +9,6 @@ require (
 	golang.org/x/sync v0.6.0
 )
 
-require github.com/stretchr/objx v0.5.2 // indirect
-
 require (
 	github.com/pkg/errors v0.9.1
 	github.com/pmezard/go-difflib v1.0.0 // indirect
