@@ -3,9 +3,7 @@ package broadcaster
 import (
 	"bytes"
 	"context"
-	"database/sql/driver"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -58,18 +56,6 @@ type ArcResponse struct {
 	Instance    *string    `json:"instance,omitempty"`
 	Txid        string     `json:"txid,omitempty"`
 	Detail      *string    `json:"detail,omitempty"`
-}
-
-func (ts ArcResponse) Value() (driver.Value, error) {
-	return json.Marshal(ts)
-}
-
-func (f *ArcResponse) Scan(value interface{}) error {
-	b, ok := value.([]byte)
-	if !ok {
-		return errors.New("type assertion to []byte failed")
-	}
-	return json.Unmarshal(b, &f)
 }
 
 func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSuccess, *transaction.BroadcastFailure) {
