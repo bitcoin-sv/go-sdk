@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -43,6 +44,7 @@ type Arc struct {
 	WaitForStatus           string
 	WaitFor                 ArcStatus
 	Client                  HTTPClient // Added for testing
+	Verbose                 bool
 }
 
 type ArcResponse struct {
@@ -165,6 +167,9 @@ func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSucce
 	}
 
 	response := &ArcResponse{}
+	if a.Verbose {
+		log.Println("msg", string(msg))
+	}
 	err = json.Unmarshal(msg, &response)
 	if err != nil {
 		return nil, &transaction.BroadcastFailure{
