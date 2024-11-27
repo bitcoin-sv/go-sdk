@@ -56,6 +56,7 @@ type ArcResponse struct {
 	Instance    *string    `json:"instance,omitempty"`
 	Txid        string     `json:"txid,omitempty"`
 	Detail      *string    `json:"detail,omitempty"`
+	MerklePath  string     `json:"merklePath,omitempty"`
 }
 
 func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSuccess, *transaction.BroadcastFailure) {
@@ -184,4 +185,48 @@ func (a *Arc) Broadcast(t *transaction.Transaction) (*transaction.BroadcastSucce
 		Code:        fmt.Sprintf("%d", response.Status),
 		Description: response.Title,
 	}
+}
+
+func (a *Arc) Status(txid string) (*ArcResponse, error) {
+	ctx := context.Background()
+	req, err := http.NewRequestWithContext(
+		ctx,
+		"GET",
+		a.ApiUrl+"/tx/"+txid,
+		nil,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if a.ApiKey != "" {
+		req.Header.Set("Authorization", "Bearer "+a.ApiKey)
+	}
+
+	if a.Client == nil {
+		a.Client = http.DefaultClient
+	}
+	resp, err := a.Client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if cerr := resp.Body.Close(); cerr != nil {
+			// Handle or log the error if needed
+			// For example:
+			fmt.Println(cerr)
+		}
+	}()
+	msg, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ArcResponse{}
+	err = json.Unmarshal(msg, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
 }
