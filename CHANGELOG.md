@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ## Table of Contents
 
+- [1.1.16 - 2024-12-01](#1116---2024-12-01)
 - [1.1.15 - 2024-11-26](#1115---2024-11-26)
 - [1.1.14 - 2024-11-01](#1114---2024-11-01)
 - [1.1.13 - 2024-11-01](#1113---2024-11-01)
@@ -21,6 +22,10 @@ All notable changes to this project will be documented in this file. The format 
 - [1.1.1 - 2024-08-28](#111---2024-08-28)
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
+
+## [1.1.16] - 2024-12-01
+  ### Added
+  - ArcBroadcaster Status
 
 ## [1.1.15] - 2024-11-26
   ### Changed
