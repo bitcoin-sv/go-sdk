@@ -6,6 +6,7 @@ package interpreter
 
 import (
 	"encoding/hex"
+	"math/big"
 
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 )
@@ -43,6 +44,13 @@ type stack struct {
 	verifyMinimalData bool
 	debug             Debugger
 	sh                StateHandler
+
+	// temporary variables to reduce memory allocations
+	tempBytes []byte
+	bigInt1   *big.Int
+	bigInt2   *big.Int
+	bigInt3   *big.Int
+	sz        int32
 }
 
 func newStack(cfg config, verifyMinimalData bool) stack {
@@ -52,6 +60,10 @@ func newStack(cfg config, verifyMinimalData bool) stack {
 		verifyMinimalData: verifyMinimalData,
 		debug:             &nopDebugger{},
 		sh:                &nopStateHandler{},
+		tempBytes:         make([]byte, 0, 64),
+		bigInt1:           new(big.Int),
+		bigInt2:           new(big.Int),
+		bigInt3:           new(big.Int),
 	}
 }
 
@@ -74,7 +86,8 @@ func (s *stack) PushByteArray(so []byte) {
 //
 // Stack transformation: [... x1 x2] -> [... x1 x2 int]
 func (s *stack) PushInt(n *scriptNumber) {
-	s.PushByteArray(n.Bytes())
+	n.BytesInto(&s.tempBytes)
+	s.PushByteArray(s.tempBytes)
 }
 
 // PushBool converts the provided boolean to a suitable byte array then pushes
@@ -98,6 +111,20 @@ func (s *stack) PopByteArray() ([]byte, error) {
 	return data, nil
 }
 
+// PopByteArrayIn pops the value off the top of the stack and puts it into the data var
+//
+// Stack transformation: [... x1 x2 x3] -> [... x1 x2]
+func (s *stack) PopByteArrayIntoTempBytes() (err error) {
+	s.beforeStackPop()
+	err = s.nipNIntoTempBytes(0)
+	if err != nil {
+		return err
+	}
+	s.afterStackPop(s.tempBytes)
+
+	return nil
+}
+
 // PopInt pops the value off the top of the stack, converts it into a scriptNumber,
 // and returns it.  The act of converting to a script num enforces the
 // consensus rules imposed on data interpreted as numbers.
@@ -110,6 +137,15 @@ func (s *stack) PopInt() (*scriptNumber, error) {
 	}
 
 	return makeScriptNumber(so, s.maxNumLength, s.verifyMinimalData, s.afterGenesis)
+}
+
+func (s *stack) PopIntIntoVar(sn *scriptNumber) (err error) {
+	err = s.PopByteArrayIntoTempBytes()
+	if err != nil {
+		return err
+	}
+
+	return populateScriptNumber(sn, s.tempBytes, s.maxNumLength, s.verifyMinimalData, s.afterGenesis, s)
 }
 
 // PopBool pops the value off the top of the stack, converts it into a bool, and
@@ -183,6 +219,39 @@ func (s *stack) nipN(idx int32) ([]byte, error) {
 		s.stk = append(s.stk, s1...)
 	}
 	return so, nil
+}
+
+func (s *stack) nipNIntoTempBytes(idx int32) error {
+	s.sz = int32(len(s.stk))
+	if idx < 0 || idx > s.sz-1 {
+		return errs.NewError(errs.ErrInvalidStackOperation, "index %d is invalid for stack size %d", idx, s.sz)
+	}
+
+	if len(s.tempBytes) < len(s.stk[s.sz-idx-1]) {
+		// resize the byte slice, if necessary
+		s.tempBytes = make([]byte, 0, len(s.stk[s.sz-idx-1]))
+	} else {
+		//*b = make([]byte, 0, len(*b))
+		//s.tempBytes = s.tempBytes[:0]
+		//clear(s.tempBytes)
+		s.tempBytes = make([]byte, 0, len(s.tempBytes))
+	}
+
+	s.tempBytes = append(s.tempBytes, s.stk[s.sz-idx-1]...)
+
+	if idx == 0 {
+		s.stk = s.stk[:s.sz-1]
+	} else if idx == s.sz-1 {
+		//s1 := make([][]byte, s.sz-1)
+		//copy(s1, s.stk[1:])
+		s.stk = s.stk[1:]
+	} else {
+		//s1 := s.stk[s.sz-idx : s.sz]
+		//s.stk = s.stk[:s.sz-idx-1]
+		s.stk = append(s.stk[:s.sz-idx-1], s.stk[s.sz-idx:s.sz]...)
+	}
+
+	return nil
 }
 
 // NipN removes the Nth object on the stack
@@ -374,19 +443,27 @@ func (s *stack) String() string {
 }
 
 func (s *stack) beforeStackPush(bb []byte) {
-	s.debug.BeforeStackPush(s.sh.State(), bb)
+	if s.debug.Debugging() {
+		s.debug.BeforeStackPush(s.sh.State(), bb)
+	}
 }
 
 func (s *stack) afterStackPush(bb []byte) {
-	s.debug.AfterStackPush(s.sh.State(), bb)
+	if s.debug.Debugging() {
+		s.debug.AfterStackPush(s.sh.State(), bb)
+	}
 }
 
 func (s *stack) beforeStackPop() {
-	s.debug.BeforeStackPop(s.sh.State())
+	if s.debug.Debugging() {
+		s.debug.BeforeStackPop(s.sh.State())
+	}
 }
 
 func (s *stack) afterStackPop(bb []byte) {
-	s.debug.AfterStackPop(s.sh.State(), bb)
+	if s.debug.Debugging() {
+		s.debug.AfterStackPop(s.sh.State(), bb)
+	}
 }
 
 type boolStack interface {
