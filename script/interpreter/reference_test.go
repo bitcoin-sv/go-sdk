@@ -94,7 +94,7 @@ func parseShortForm(scriptStr string) (*script.Script, error) {
 			} else if num == -1 || (1 <= num && num <= 16) {
 				scr.AppendOpcodes((script.Op1 - 1) + byte(num))
 			} else {
-				n := &scriptNumber{val: big.NewInt(num)}
+				n := &ScriptNumber{Val: big.NewInt(num)}
 				scr.AppendPushData(n.Bytes())
 			}
 			continue

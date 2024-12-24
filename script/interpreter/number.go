@@ -7,7 +7,7 @@ import (
 	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
 )
 
-// scriptNumber represents a numeric value used in the scripting engine with
+// ScriptNumber represents a numeric value used in the scripting engine with
 // special handling to deal with the subtle semantics required by consensus.
 //
 // All numbers are stored on the data and alternate stacks encoded as little
@@ -33,15 +33,15 @@ import (
 // number is out of range or not minimally encoded depending on parameters.
 // Since all numeric opcodes involve pulling data from the stack and
 // interpreting it as an integer, it provides the required behavior.
-type scriptNumber struct {
-	val          *big.Int
-	afterGenesis bool
+type ScriptNumber struct {
+	Val          *big.Int
+	AfterGenesis bool
 }
 
-var zero = big.NewInt(0)
-var one = big.NewInt(1)
+var Zero = big.NewInt(0)
+var One = big.NewInt(1)
 
-// makeScriptNumber interprets the passed serialized bytes as an encoded integer
+// MakeScriptNumber interprets the passed serialized bytes as an encoded integer
 // and returns the result as a Number.
 //
 // Since the consensus rules dictate that serialized bytes interpreted as integers
@@ -67,10 +67,10 @@ var one = big.NewInt(1)
 // overflows.
 //
 // See the Bytes function documentation for example encodings.
-func makeScriptNumber(bb []byte, scriptNumLen int, requireMinimal, afterGenesis bool) (*scriptNumber, error) {
+func MakeScriptNumber(bb []byte, scriptNumLen int, requireMinimal, afterGenesis bool) (*ScriptNumber, error) {
 	// Interpreting data requires that it is not larger than the passed scriptNumLen value.
 	if len(bb) > scriptNumLen {
-		return &scriptNumber{val: big.NewInt(0), afterGenesis: false}, errs.NewError(
+		return &ScriptNumber{Val: big.NewInt(0), AfterGenesis: false}, errs.NewError(
 			errs.ErrNumberTooBig,
 			"numeric value encoded as %x is %d bytes which exceeds the max allowed of %d",
 			bb, len(bb), scriptNumLen,
@@ -79,19 +79,19 @@ func makeScriptNumber(bb []byte, scriptNumLen int, requireMinimal, afterGenesis 
 
 	// Enforce minimal encoded if requested.
 	if requireMinimal {
-		if err := checkMinimalDataEncoding(bb); err != nil {
-			return &scriptNumber{
-				val:          big.NewInt(0),
-				afterGenesis: false,
+		if err := CheckMinimalDataEncoding(bb); err != nil {
+			return &ScriptNumber{
+				Val:          big.NewInt(0),
+				AfterGenesis: false,
 			}, err
 		}
 	}
 
 	// Zero is encoded as an empty byte slice.
 	if len(bb) == 0 {
-		return &scriptNumber{
-			afterGenesis: afterGenesis,
-			val:          big.NewInt(0),
+		return &ScriptNumber{
+			AfterGenesis: afterGenesis,
+			Val:          big.NewInt(0),
 		}, nil
 	}
 
@@ -124,114 +124,114 @@ func makeScriptNumber(bb []byte, scriptNumLen int, requireMinimal, afterGenesis 
 		shift.Not(shift.Lsh(shift, uint(8*(len(bb)-1))))
 		v.And(v, shift).Neg(v)
 	}
-	return &scriptNumber{
-		val:          v,
-		afterGenesis: afterGenesis,
+	return &ScriptNumber{
+		Val:          v,
+		AfterGenesis: afterGenesis,
 	}, nil
 }
 
 // Add adds the receiver and the number, sets the result over the receiver and returns.
-func (n *scriptNumber) Add(o *scriptNumber) *scriptNumber {
-	*n.val = *new(big.Int).Add(n.val, o.val)
+func (n *ScriptNumber) Add(o *ScriptNumber) *ScriptNumber {
+	*n.Val = *new(big.Int).Add(n.Val, o.Val)
 	return n
 }
 
 // Sub subtracts the number from the receiver, sets the result over the receiver and returns.
-func (n *scriptNumber) Sub(o *scriptNumber) *scriptNumber {
-	*n.val = *new(big.Int).Sub(n.val, o.val)
+func (n *ScriptNumber) Sub(o *ScriptNumber) *ScriptNumber {
+	*n.Val = *new(big.Int).Sub(n.Val, o.Val)
 	return n
 }
 
 // Mul multiplies the receiver by the number, sets the result over the receiver and returns.
-func (n *scriptNumber) Mul(o *scriptNumber) *scriptNumber {
-	*n.val = *new(big.Int).Mul(n.val, o.val)
+func (n *ScriptNumber) Mul(o *ScriptNumber) *ScriptNumber {
+	*n.Val = *new(big.Int).Mul(n.Val, o.Val)
 	return n
 }
 
 // Div divides the receiver by the number, sets the result over the receiver and returns.
-func (n *scriptNumber) Div(o *scriptNumber) *scriptNumber {
-	*n.val = *new(big.Int).Quo(n.val, o.val)
+func (n *ScriptNumber) Div(o *ScriptNumber) *ScriptNumber {
+	*n.Val = *new(big.Int).Quo(n.Val, o.Val)
 	return n
 }
 
 // Mod divides the receiver by the number, sets the remainder over the receiver and returns.
-func (n *scriptNumber) Mod(o *scriptNumber) *scriptNumber {
-	*n.val = *new(big.Int).Rem(n.val, o.val)
+func (n *ScriptNumber) Mod(o *ScriptNumber) *ScriptNumber {
+	*n.Val = *new(big.Int).Rem(n.Val, o.Val)
 	return n
 }
 
 // LessThanInt returns true if the receiver is smaller than the integer passed.
-func (n *scriptNumber) LessThanInt(i int64) bool {
-	return n.LessThan(&scriptNumber{val: big.NewInt(i)})
+func (n *ScriptNumber) LessThanInt(i int64) bool {
+	return n.LessThan(&ScriptNumber{Val: big.NewInt(i)})
 }
 
 // LessThan returns true if the receiver is smaller than the number passed.
-func (n *scriptNumber) LessThan(o *scriptNumber) bool {
-	return n.val.Cmp(o.val) == -1
+func (n *ScriptNumber) LessThan(o *ScriptNumber) bool {
+	return n.Val.Cmp(o.Val) == -1
 }
 
 // LessThanOrEqual returns ture if the receiver is smaller or equal to the number passed.
-func (n *scriptNumber) LessThanOrEqual(o *scriptNumber) bool {
-	return n.val.Cmp(o.val) < 1
+func (n *ScriptNumber) LessThanOrEqual(o *ScriptNumber) bool {
+	return n.Val.Cmp(o.Val) < 1
 }
 
 // GreaterThanInt returns true if the receiver is larger than the integer passed.
-func (n *scriptNumber) GreaterThanInt(i int64) bool {
-	return n.GreaterThan(&scriptNumber{val: big.NewInt(i)})
+func (n *ScriptNumber) GreaterThanInt(i int64) bool {
+	return n.GreaterThan(&ScriptNumber{Val: big.NewInt(i)})
 }
 
 // GreaterThan returns true if the receiver is larger than the number passed.
-func (n *scriptNumber) GreaterThan(o *scriptNumber) bool {
-	return n.val.Cmp(o.val) == 1
+func (n *ScriptNumber) GreaterThan(o *ScriptNumber) bool {
+	return n.Val.Cmp(o.Val) == 1
 }
 
 // GreaterThanOrEqual returns true if the receiver is larger or equal to the number passed.
-func (n *scriptNumber) GreaterThanOrEqual(o *scriptNumber) bool {
-	return n.val.Cmp(o.val) > -1
+func (n *ScriptNumber) GreaterThanOrEqual(o *ScriptNumber) bool {
+	return n.Val.Cmp(o.Val) > -1
 }
 
 // EqualInt returns true if the receiver is equal to the integer passed.
-func (n *scriptNumber) EqualInt(i int64) bool {
-	return n.Equal(&scriptNumber{val: big.NewInt(i)})
+func (n *ScriptNumber) EqualInt(i int64) bool {
+	return n.Equal(&ScriptNumber{Val: big.NewInt(i)})
 }
 
 // Equal returns true if the receiver is equal to the number passed.
-func (n *scriptNumber) Equal(o *scriptNumber) bool {
-	return n.val.Cmp(o.val) == 0
+func (n *ScriptNumber) Equal(o *ScriptNumber) bool {
+	return n.Val.Cmp(o.Val) == 0
 }
 
 // IsZero return strue if hte receiver equals zero.
-func (n *scriptNumber) IsZero() bool {
-	return n.val.Cmp(zero) == 0
+func (n *ScriptNumber) IsZero() bool {
+	return n.Val.Cmp(Zero) == 0
 }
 
 // Incr increment the receiver by one.
-func (n *scriptNumber) Incr() *scriptNumber {
-	*n.val = *new(big.Int).Add(n.val, one)
+func (n *ScriptNumber) Incr() *ScriptNumber {
+	*n.Val = *new(big.Int).Add(n.Val, One)
 	return n
 }
 
 // Decr decrement the receiver by one.
-func (n *scriptNumber) Decr() *scriptNumber {
-	*n.val = *new(big.Int).Sub(n.val, one)
+func (n *ScriptNumber) Decr() *ScriptNumber {
+	*n.Val = *new(big.Int).Sub(n.Val, One)
 	return n
 }
 
 // Neg sets the receiver to the negative of the receiver.
-func (n *scriptNumber) Neg() *scriptNumber {
-	*n.val = *new(big.Int).Neg(n.val)
+func (n *ScriptNumber) Neg() *ScriptNumber {
+	*n.Val = *new(big.Int).Neg(n.Val)
 	return n
 }
 
 // Abs sets the receiver to the absolute value of hte receiver.
-func (n *scriptNumber) Abs() *scriptNumber {
-	*n.val = *new(big.Int).Abs(n.val)
+func (n *ScriptNumber) Abs() *ScriptNumber {
+	*n.Val = *new(big.Int).Abs(n.Val)
 	return n
 }
 
 // Int returns the receivers value as an int.
-func (n *scriptNumber) Int() int {
-	return int(n.val.Int64())
+func (n *ScriptNumber) Int() int {
+	return int(n.Val.Int64())
 }
 
 // Int32 returns the Number clamped to a valid int32.  That is to say
@@ -247,8 +247,8 @@ func (n *scriptNumber) Int() int {
 // this function against the result of some arithmetic, which IS allowed to be
 // out of range before being reinterpreted as an integer, this will provide the
 // correct behavior.
-func (n *scriptNumber) Int32() int32 {
-	v := n.val.Int64()
+func (n *ScriptNumber) Int32() int32 {
+	v := n.Val.Int64()
 	if v > math.MaxInt32 {
 		return math.MaxInt32
 	}
@@ -271,19 +271,19 @@ func (n *scriptNumber) Int32() int32 {
 // this function against the result of some arithmetic, which IS allowed to be
 // out of range before being reinterpreted as an integer, this will provide the
 // correct behavior.
-func (n *scriptNumber) Int64() int64 {
+func (n *ScriptNumber) Int64() int64 {
 	if n.GreaterThanInt(math.MaxInt64) {
 		return math.MaxInt64
 	}
 	if n.LessThanInt(math.MinInt64) {
 		return math.MinInt64
 	}
-	return n.val.Int64()
+	return n.Val.Int64()
 }
 
 // Set the value of the receiver.
-func (n *scriptNumber) Set(i int64) *scriptNumber {
-	*n.val = *new(big.Int).SetInt64(i)
+func (n *ScriptNumber) Set(i int64) *ScriptNumber {
+	*n.Val = *new(big.Int).SetInt64(i)
 	return n
 }
 
@@ -303,7 +303,7 @@ func (n *scriptNumber) Set(i int64) *scriptNumber {
 //	-32767 -> [0xff 0xff]
 //	 32768 -> [0x00 0x80 0x00]
 //	-32768 -> [0x00 0x80 0x80]
-func (n *scriptNumber) Bytes() []byte {
+func (n *ScriptNumber) Bytes() []byte {
 	// Zero encodes as an empty byte slice.
 	if n.IsZero() {
 		return []byte{}
@@ -311,14 +311,14 @@ func (n *scriptNumber) Bytes() []byte {
 
 	// Take the absolute value and keep track of whether it was originally
 	// negative.
-	isNegative := n.val.Cmp(zero) == -1
+	isNegative := n.Val.Cmp(Zero) == -1
 	if isNegative {
 		n.Neg()
 	}
 
 	var bb []byte
-	if !n.afterGenesis {
-		v := n.val.Int64()
+	if !n.AfterGenesis {
+		v := n.Val.Int64()
 		if v > math.MaxInt32 {
 			bb = big.NewInt(int64(math.MaxInt32)).Bytes()
 		} else if v < math.MinInt32 {
@@ -326,7 +326,7 @@ func (n *scriptNumber) Bytes() []byte {
 		}
 	}
 	if bb == nil {
-		bb = n.val.Bytes()
+		bb = n.Val.Bytes()
 	}
 
 	// Encode to little endian.  The maximum number of encoded bytes is len(bb)+1
@@ -339,8 +339,8 @@ func (n *scriptNumber) Bytes() []byte {
 	//        n >>= 8
 	//    }
 	result := make([]byte, 0, len(bb)+1)
-	cpy := new(big.Int).SetBytes(n.val.Bytes())
-	for cpy.Cmp(zero) == 1 {
+	cpy := new(big.Int).SetBytes(n.Val.Bytes())
+	for cpy.Cmp(Zero) == 1 {
 		result = append(result, byte(cpy.Int64()&0xff))
 		cpy.Rsh(cpy, 8)
 	}
@@ -365,7 +365,7 @@ func (n *scriptNumber) Bytes() []byte {
 	return result
 }
 
-func minimallyEncode(data []byte) []byte {
+func MinimallyEncode(data []byte) []byte {
 	if len(data) == 0 {
 		return data
 	}
@@ -399,9 +399,9 @@ func minimallyEncode(data []byte) []byte {
 	return []byte{}
 }
 
-// checkMinimalDataEncoding returns whether the passed byte array adheres
+// CheckMinimalDataEncoding returns whether the passed byte array adheres
 // to the minimal encoding requirements.
-func checkMinimalDataEncoding(v []byte) error {
+func CheckMinimalDataEncoding(v []byte) error {
 	if len(v) == 0 {
 		return nil
 	}
