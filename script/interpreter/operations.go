@@ -375,9 +375,9 @@ func opcodePushData(op *ParsedOpcode, t *thread) error {
 
 // opcode1Negate pushes -1, encoded as a number, to the data stack.
 func opcode1Negate(op *ParsedOpcode, t *thread) error {
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(-1),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(-1),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -651,7 +651,7 @@ func opcodeCheckLockTimeVerify(op *ParsedOpcode, t *thread) error {
 	if err != nil {
 		return err
 	}
-	lockTime, err := makeScriptNumber(so, 5, t.dstack.verifyMinimalData, t.afterGenesis)
+	lockTime, err := MakeScriptNumber(so, 5, t.dstack.verifyMinimalData, t.afterGenesis)
 	if err != nil {
 		return err
 	}
@@ -721,7 +721,7 @@ func opcodeCheckSequenceVerify(op *ParsedOpcode, t *thread) error {
 	if err != nil {
 		return err
 	}
-	stackSequence, err := makeScriptNumber(so, 5, t.dstack.verifyMinimalData, t.afterGenesis)
+	stackSequence, err := MakeScriptNumber(so, 5, t.dstack.verifyMinimalData, t.afterGenesis)
 	if err != nil {
 		return err
 	}
@@ -864,9 +864,9 @@ func opcodeIfDup(op *ParsedOpcode, t *thread) error {
 // Example with 2 items: [x1 x2] -> [x1 x2 2]
 // Example with 3 items: [x1 x2 x3] -> [x1 x2 x3 3]
 func opcodeDepth(op *ParsedOpcode, t *thread) error {
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(int64(t.dstack.Depth())),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(int64(t.dstack.Depth())),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -1028,7 +1028,7 @@ func opcodeNum2bin(op *ParsedOpcode, t *thread) error {
 
 	// encode a as a script num so that we we take the bytes it
 	// will be minimally encoded.
-	sn, err := makeScriptNumber(a, len(a), false, t.afterGenesis)
+	sn, err := MakeScriptNumber(a, len(a), false, t.afterGenesis)
 	if err != nil {
 		return err
 	}
@@ -1072,7 +1072,7 @@ func opcodeBin2num(op *ParsedOpcode, t *thread) error {
 	b := make([]byte, len(a))
 	// Copy the bytes so that we don't corrupt the original stack value
 	copy(b, a)
-	b = minimallyEncode(b)
+	b = MinimallyEncode(b)
 	if len(b) > t.cfg.MaxScriptNumberLength() {
 		return errs.NewError(errs.ErrNumberTooBig, "script numbers are limited to %d bytes", t.cfg.MaxScriptNumberLength())
 	}
@@ -1091,9 +1091,9 @@ func opcodeSize(op *ParsedOpcode, t *thread) error {
 		return err
 	}
 
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(int64(len(so))),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(int64(len(so))),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -1313,9 +1313,9 @@ func opcodeNot(op *ParsedOpcode, t *thread) error {
 		n = 1
 	}
 
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(n),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(n),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -1548,9 +1548,9 @@ func opcodeBoolAnd(op *ParsedOpcode, t *thread) error {
 		n = 1
 	}
 
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(n),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(n),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -1578,9 +1578,9 @@ func opcodeBoolOr(op *ParsedOpcode, t *thread) error {
 		n = 1
 	}
 
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(n),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(n),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -1606,9 +1606,9 @@ func opcodeNumEqual(op *ParsedOpcode, t *thread) error {
 		n = 1
 	}
 
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(n),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(n),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -1650,9 +1650,9 @@ func opcodeNumNotEqual(op *ParsedOpcode, t *thread) error {
 		n = 1
 	}
 
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(n),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(n),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -1678,9 +1678,9 @@ func opcodeLessThan(op *ParsedOpcode, t *thread) error {
 		n = 1
 	}
 
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(n),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(n),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -1706,9 +1706,9 @@ func opcodeGreaterThan(op *ParsedOpcode, t *thread) error {
 		n = 1
 	}
 
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(n),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(n),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -1734,9 +1734,9 @@ func opcodeLessThanOrEqual(op *ParsedOpcode, t *thread) error {
 		n = 1
 	}
 
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(n),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(n),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -1762,9 +1762,9 @@ func opcodeGreaterThanOrEqual(op *ParsedOpcode, t *thread) error {
 		n = 1
 	}
 
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(n),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(n),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }
@@ -1846,9 +1846,9 @@ func opcodeWithin(op *ParsedOpcode, t *thread) error {
 		n = 1
 	}
 
-	t.dstack.PushInt(&scriptNumber{
-		val:          big.NewInt(n),
-		afterGenesis: t.afterGenesis,
+	t.dstack.PushInt(&ScriptNumber{
+		Val:          big.NewInt(n),
+		AfterGenesis: t.afterGenesis,
 	})
 	return nil
 }

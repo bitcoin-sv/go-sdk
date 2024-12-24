@@ -231,9 +231,9 @@ func TestOpShift(t *testing.T) {
 			// Push the initial value and shift amount onto the stack
 			thread.dstack.PushByteArray(tt.initial)
 
-			thread.dstack.PushInt(&scriptNumber{
-				val:          big.NewInt(tt.shift),
-				afterGenesis: thread.afterGenesis,
+			thread.dstack.PushInt(&ScriptNumber{
+				Val:          big.NewInt(tt.shift),
+				AfterGenesis: thread.afterGenesis,
 			})
 
 			// Create a ParsedOpcode for the shift operation
