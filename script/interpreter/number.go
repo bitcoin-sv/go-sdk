@@ -38,8 +38,8 @@ type ScriptNumber struct {
 	AfterGenesis bool
 }
 
-var zero = big.NewInt(0)
-var one = big.NewInt(1)
+var Zero = big.NewInt(0)
+var One = big.NewInt(1)
 
 // MakeScriptNumber interprets the passed serialized bytes as an encoded integer
 // and returns the result as a Number.
@@ -202,18 +202,18 @@ func (n *ScriptNumber) Equal(o *ScriptNumber) bool {
 
 // IsZero return strue if hte receiver equals zero.
 func (n *ScriptNumber) IsZero() bool {
-	return n.Val.Cmp(zero) == 0
+	return n.Val.Cmp(Zero) == 0
 }
 
 // Incr increment the receiver by one.
 func (n *ScriptNumber) Incr() *ScriptNumber {
-	*n.Val = *new(big.Int).Add(n.Val, one)
+	*n.Val = *new(big.Int).Add(n.Val, One)
 	return n
 }
 
 // Decr decrement the receiver by one.
 func (n *ScriptNumber) Decr() *ScriptNumber {
-	*n.Val = *new(big.Int).Sub(n.Val, one)
+	*n.Val = *new(big.Int).Sub(n.Val, One)
 	return n
 }
 
@@ -311,7 +311,7 @@ func (n *ScriptNumber) Bytes() []byte {
 
 	// Take the absolute value and keep track of whether it was originally
 	// negative.
-	isNegative := n.Val.Cmp(zero) == -1
+	isNegative := n.Val.Cmp(Zero) == -1
 	if isNegative {
 		n.Neg()
 	}
@@ -340,7 +340,7 @@ func (n *ScriptNumber) Bytes() []byte {
 	//    }
 	result := make([]byte, 0, len(bb)+1)
 	cpy := new(big.Int).SetBytes(n.Val.Bytes())
-	for cpy.Cmp(zero) == 1 {
+	for cpy.Cmp(Zero) == 1 {
 		result = append(result, byte(cpy.Int64()&0xff))
 		cpy.Rsh(cpy, 8)
 	}
