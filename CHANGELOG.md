@@ -24,7 +24,7 @@ All notable changes to this project will be documented in this file. The format 
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
 
-## [1.1.16] - 2024-12-24
+## [1.1.17] - 2024-12-24
   ### Added
   - `ScriptNumber` type
 
