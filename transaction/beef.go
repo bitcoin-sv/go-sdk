@@ -5,9 +5,38 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
+
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 )
 
-const BEEF_VERSION = uint32(4022206465)
+type Beef struct {
+	Version      uint32
+	BUMPs        []*MerklePath
+	Transactions map[string]*TxOrId
+}
+
+// TODO: add methods
+// makeTxidOnly
+// findTxid
+// findBump
+// findAtomicTransaction
+
+type DataFormat int
+
+const (
+	RawTx DataFormat = iota
+	RawTxAndBumpIndex
+	TxIDOnly
+)
+
+type txOrId struct {
+	dataFormat  DataFormat
+	KnownTxID   *chainhash.Hash
+	Transaction *Transaction
+}
+
+const BEEF_V1 = uint32(4022206465) // BRC-64
+const BEEF_V2 = uint32(4022206466) // BRC-96
 
 func (t *Transaction) FromBEEF(beef []byte) error {
 	tx, err := NewTransactionFromBEEF(beef)
@@ -15,21 +44,75 @@ func (t *Transaction) FromBEEF(beef []byte) error {
 	return err
 }
 
-func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
+func NewBEEFFromBytes(beef []byte) (*Beef, error) {
 	reader := bytes.NewReader(beef)
 
-	var version uint32
-	err := binary.Read(reader, binary.LittleEndian, &version)
+	version, err := readVersion(reader)
 	if err != nil {
 		return nil, err
 	}
-	if version != BEEF_VERSION {
-		return nil, fmt.Errorf("invalid BEEF version. expected %d, received %d", BEEF_VERSION, version)
+
+	if version == BEEF_V1 {
+		return nil, fmt.Errorf("Use NewTransactionFromBEEF to parse V1 BEEF")
 	}
 
-	// Read the BUMPs
+	BUMPs, err := readBUMPs(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	txs, err := readTxOrIds(reader, BUMPs)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Beef{
+		Version:      version,
+		BUMPs:        BUMPs,
+		Transactions: txs,
+	}, nil
+}
+
+func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
+	reader := bytes.NewReader(beef)
+
+	version, err := readVersion(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	if version != BEEF_V1 {
+		return nil, fmt.Errorf("Use NewBEEFFromBytes to parse anything which isn't V1 BEEF")
+	}
+
+	BUMPs, err := readBUMPs(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	transaction, err := readTransactions(reader, BUMPs)
+	if err != nil {
+		return nil, err
+	}
+
+	return transaction, nil
+}
+
+func readVersion(reader *bytes.Reader) (uint32, error) {
+	var version uint32
+	err := binary.Read(reader, binary.LittleEndian, &version)
+	if err != nil {
+		return 0, err
+	}
+	if version != BEEF_V1 && version != BEEF_V2 {
+		return 0, fmt.Errorf("invalid BEEF version. expected %d or %d, received %d", BEEF_V1, BEEF_V2, version)
+	}
+	return version, nil
+}
+
+func readBUMPs(reader *bytes.Reader) ([]*MerklePath, error) {
 	var numberOfBUMPs VarInt
-	_, err = numberOfBUMPs.ReadFrom(reader)
+	_, err := numberOfBUMPs.ReadFrom(reader)
 	if err != nil {
 		return nil, err
 	}
@@ -41,10 +124,12 @@ func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
 			return nil, err
 		}
 	}
+	return BUMPs, nil
+}
 
-	// Read all transactions into an object
+func readTransactions(reader *bytes.Reader, BUMPs []*MerklePath) (*Transaction, error) {
 	var numberOfTransactions VarInt
-	_, err = numberOfTransactions.ReadFrom(reader)
+	_, err := numberOfTransactions.ReadFrom(reader)
 	if err != nil {
 		return nil, err
 	}
@@ -84,6 +169,71 @@ func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
 	}
 
 	return tx, nil
+}
+
+func readTxOrIds(reader *bytes.Reader, BUMPs []*MerklePath) (*map[string]*txOrId, error) {
+	var numberOfTransactions VarInt
+	_, err := numberOfTransactions.ReadFrom(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	txs := make(map[string]*txOrId, 0)
+	for i := 0; i < int(numberOfTransactions); i++ {
+		formatByte, err := reader.ReadByte()
+		if err != nil {
+			return nil, err
+		}
+		var txOrId *txOrId
+		txOrId.dataFormat = DataFormat(formatByte)
+
+		if txOrId.dataFormat > TxIDOnly {
+			return nil, fmt.Errorf("invalid data format: %d", formatByte)
+		}
+
+		if txOrId.dataFormat == TxIDOnly {
+			var txid chainhash.Hash
+			_, err = reader.Read(txid[:])
+			txOrId.KnownTxID = &txid
+			if err != nil {
+				return nil, err
+			}
+			txs[txid.String()] = txOrId
+		} else {
+			bump := txOrId.dataFormat == RawTxAndBumpIndex
+			// read the index of the bump
+			var bumpIndex VarInt
+			if bump {
+				_, err := bumpIndex.ReadFrom(reader)
+				if err != nil {
+					return nil, err
+				}
+			}
+			// read the transaction data
+			_, err = txOrId.Transaction.ReadFrom(reader)
+			if err != nil {
+				return nil, err
+			}
+			// attach the bump
+			if bump {
+				txOrId.Transaction.MerklePath = BUMPs[int(bumpIndex)]
+			}
+
+			for _, input := range txOrId.Transaction.Inputs {
+				sourceTxid := input.SourceTXID.String()
+				if sourceObj, ok := txs[sourceTxid]; ok {
+					input.SourceTransaction = sourceObj.Transaction
+				} else if txOrId.Transaction.MerklePath == nil && txOrId.KnownTxID == nil {
+					panic(fmt.Sprintf("Reference to unknown TXID in BUMP: %s", sourceTxid))
+				}
+			}
+
+			txs[txOrId.Transaction.TxID().String()] = txOrId
+		}
+
+	}
+
+	return &txs, nil
 }
 
 func NewTransactionFromBEEFHex(beefHex string) (*Transaction, error) {
