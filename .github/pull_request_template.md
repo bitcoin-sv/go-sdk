@@ -13,6 +13,7 @@ Describe the tests you've added or any testing steps you've taken.
 - [ ] I have added new unit tests
 - [ ] All tests pass locally
 - [ ] I have tested manually in my local environment
+- [ ] All tests pass when using `go test ./...`
 
 ## Checklist:
 
@@ -20,4 +21,4 @@ Describe the tests you've added or any testing steps you've taken.
 - [ ] I have made corresponding changes to the documentation
 - [ ] My changes generate no new warnings
 - [ ] I have updated `CHANGELOG.md` with my changes
-- [ ] I have run `npm run doc` and `npm run lint` one final time before requesting a review
+- [ ] I have run `go fmt` and `go vet` one final time before requesting a review
