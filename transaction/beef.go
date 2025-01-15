@@ -9,10 +9,12 @@ import (
 	"github.com/bitcoin-sv/go-sdk/chainhash"
 )
 
+// Beef is a set of transactions and their MerklePaths without a strict relationship between each transaction.
+// It's useful when syncing multiple transactions all at once, and a txid can be used in the case that the recipient already knows a particular transaction.
 type Beef struct {
 	Version      uint32
 	BUMPs        []*MerklePath
-	Transactions map[string]*TxOrId
+	Transactions map[string]*BeefTx
 }
 
 // TODO: add methods
@@ -29,7 +31,7 @@ const (
 	TxIDOnly
 )
 
-type txOrId struct {
+type BeefTx struct {
 	dataFormat  DataFormat
 	KnownTxID   *chainhash.Hash
 	Transaction *Transaction
@@ -61,7 +63,7 @@ func NewBEEFFromBytes(beef []byte) (*Beef, error) {
 		return nil, err
 	}
 
-	txs, err := readTxOrIds(reader, BUMPs)
+	txs, err := readBeefTx(reader, BUMPs)
 	if err != nil {
 		return nil, err
 	}
@@ -171,36 +173,36 @@ func readTransactions(reader *bytes.Reader, BUMPs []*MerklePath) (*Transaction, 
 	return tx, nil
 }
 
-func readTxOrIds(reader *bytes.Reader, BUMPs []*MerklePath) (*map[string]*txOrId, error) {
+func readBeefTx(reader *bytes.Reader, BUMPs []*MerklePath) (*map[string]*BeefTx, error) {
 	var numberOfTransactions VarInt
 	_, err := numberOfTransactions.ReadFrom(reader)
 	if err != nil {
 		return nil, err
 	}
 
-	txs := make(map[string]*txOrId, 0)
+	txs := make(map[string]*BeefTx, 0)
 	for i := 0; i < int(numberOfTransactions); i++ {
 		formatByte, err := reader.ReadByte()
 		if err != nil {
 			return nil, err
 		}
-		var txOrId *txOrId
-		txOrId.dataFormat = DataFormat(formatByte)
+		var beefTx *BeefTx
+		.dataFormat = DataFormat(formatByte)
 
-		if txOrId.dataFormat > TxIDOnly {
+		if beefTx.dataFormat > TxIDOnly {
 			return nil, fmt.Errorf("invalid data format: %d", formatByte)
 		}
 
-		if txOrId.dataFormat == TxIDOnly {
+		if beefTx.dataFormat == TxIDOnly {
 			var txid chainhash.Hash
 			_, err = reader.Read(txid[:])
-			txOrId.KnownTxID = &txid
+			beefTx.KnownTxID = &txid
 			if err != nil {
 				return nil, err
 			}
-			txs[txid.String()] = txOrId
+			txs[txid.String()] = beefTx
 		} else {
-			bump := txOrId.dataFormat == RawTxAndBumpIndex
+			bump := beefTx.dataFormat == RawTxAndBumpIndex
 			// read the index of the bump
 			var bumpIndex VarInt
 			if bump {
@@ -210,25 +212,25 @@ func readTxOrIds(reader *bytes.Reader, BUMPs []*MerklePath) (*map[string]*txOrId
 				}
 			}
 			// read the transaction data
-			_, err = txOrId.Transaction.ReadFrom(reader)
+			_, err = beefTx.Transaction.ReadFrom(reader)
 			if err != nil {
 				return nil, err
 			}
 			// attach the bump
 			if bump {
-				txOrId.Transaction.MerklePath = BUMPs[int(bumpIndex)]
+				beefTx.Transaction.MerklePath = BUMPs[int(bumpIndex)]
 			}
 
-			for _, input := range txOrId.Transaction.Inputs {
+			for _, input := range beefTx.Transaction.Inputs {
 				sourceTxid := input.SourceTXID.String()
 				if sourceObj, ok := txs[sourceTxid]; ok {
 					input.SourceTransaction = sourceObj.Transaction
-				} else if txOrId.Transaction.MerklePath == nil && txOrId.KnownTxID == nil {
+				} else if beefTx.Transaction.MerklePath == nil && beefTx.KnownTxID == nil {
 					panic(fmt.Sprintf("Reference to unknown TXID in BUMP: %s", sourceTxid))
 				}
 			}
 
-			txs[txOrId.Transaction.TxID().String()] = txOrId
+			txs[beefTx.Transaction.TxID().String()] = beefTx
 		}
 
 	}
