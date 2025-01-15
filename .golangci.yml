@@ -109,7 +109,7 @@ linters-settings:
   gci:
     # put imports beginning with prefix after 3rd-party packages;
     sections:
-      prefix(github.com/org/project)
+      - prefix(github.com/bitcoin-sv/go-sdk)
   gocognit:
     # minimal code complexity to report, 30 by default (but we recommend 10-20)
     min-complexity: 10
@@ -354,6 +354,7 @@ linters:
     - nestif
     - nlreturn
     - gci
+    - recvcheck
   disable-all: false
   presets:
     - bugs
