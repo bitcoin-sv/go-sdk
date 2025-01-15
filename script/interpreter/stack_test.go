@@ -31,7 +31,7 @@ func tstCheckScriptError(gotErr, wantErr error) error {
 	// Ensure the want error type is a script error.
 	werr := &errs.Error{}
 	if ok := errors.As(wantErr, werr); !ok {
-		return fmt.Errorf("unexpected test error type %T", wantErr) //nolint:errorlint // test code
+		return fmt.Errorf("unexpected test error type %T", wantErr)
 	}
 
 	// Ensure the error codes match.  It's safe to use a raw type assert

@@ -213,7 +213,7 @@ func TestMarshalling(t *testing.T) {
 
 	b, err := json.Marshal(myData)
 	require.NoError(t, err)
-	require.Equal(t, `{"hash":"24988b93623304735e42a71f5c1e161b9ee2b9c52a3be8260ea3b05fba4df22c"}`, string(b))
+	require.JSONEq(t, `{"hash":"24988b93623304735e42a71f5c1e161b9ee2b9c52a3be8260ea3b05fba4df22c"}`, string(b))
 
 	var myData2 test
 	err = json.Unmarshal(b, &myData2)

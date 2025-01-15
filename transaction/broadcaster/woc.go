@@ -32,6 +32,13 @@ func (b *WhatsOnChain) Broadcast(t *transaction.Transaction) (
 	*transaction.BroadcastSuccess,
 	*transaction.BroadcastFailure,
 ) {
+	if t == nil {
+		return nil, &transaction.BroadcastFailure{
+			Code:        "500",
+			Description: "nil transaction",
+		}
+	}
+
 	if b.Client == nil {
 		b.Client = http.DefaultClient
 	}
