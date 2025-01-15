@@ -7,36 +7,36 @@ package interpreter
 // Each function is called during its stage of a threads lifecycle.
 // A high level overview of this lifecycle is:
 //
-//   BeforeExecute
-//   for step
-//      BeforeStep
-//      BeforeExecuteOpcode
-//      for each stack push
-//        BeforeStackPush
-//        AfterStackPush
-//      end for
-//      for each stack pop
-//        BeforeStackPop
-//        AfterStackPop
-//      end for
-//      AfterExecuteOpcode
-//      if end of script
-//        BeforeScriptChange
-//        AfterScriptChange
-//      end if
-//      if bip16 and end of final script
-//        BeforeStackPush
-//        AfterStackPush
-//      end if
-//      AfterStep
-//   end for
-//   AfterExecute
-//   if success
-//     AfterSuccess
-//   end if
-//   if error
-//     AfterError
-//   end if
+//	BeforeExecute
+//	for step
+//	   BeforeStep
+//	   BeforeExecuteOpcode
+//	   for each stack push
+//	     BeforeStackPush
+//	     AfterStackPush
+//	   end for
+//	   for each stack pop
+//	     BeforeStackPop
+//	     AfterStackPop
+//	   end for
+//	   AfterExecuteOpcode
+//	   if end of script
+//	     BeforeScriptChange
+//	     AfterScriptChange
+//	   end if
+//	   if bip16 and end of final script
+//	     BeforeStackPush
+//	     AfterStackPush
+//	   end if
+//	   AfterStep
+//	end for
+//	AfterExecute
+//	if success
+//	  AfterSuccess
+//	end if
+//	if error
+//	  AfterError
+//	end if
 type Debugger interface {
 	BeforeExecute(*State)
 	AfterExecute(*State)
