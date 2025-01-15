@@ -21,4 +21,5 @@ Describe the tests you've added or any testing steps you've taken.
 - [ ] I have made corresponding changes to the documentation
 - [ ] My changes generate no new warnings
 - [ ] I have updated `CHANGELOG.md` with my changes
+- [ ] I ran `golangci-lint run`
 - [ ] I have run `go fmt` and `go vet` one final time before requesting a review
