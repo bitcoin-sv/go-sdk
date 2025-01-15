@@ -164,7 +164,7 @@ func TestMerklePathCombine(t *testing.T) {
 		require.NoError(t, err)
 		out, err := json.Marshal(BRC74JSON)
 		require.NoError(t, err)
-		require.Equal(t, string(out), BRC74JSONTrimmed)
+		require.JSONEq(t, BRC74JSONTrimmed, string(out))
 		root, err := BRC74JSON.ComputeRootHex(nil)
 		require.NoError(t, err)
 		require.Equal(t, root, BRC74Root)
