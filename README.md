@@ -78,9 +78,44 @@ func main() {
 
 See the [Go Doc](https://pkg.go.dev/github.com/bitcoin-sv/go-sdk) for a complete list of available modules and functions.
 
-### Examples
+### Examples & Usage Guides
 
-Check out the [examples folder](https://github.com/bitcoin-sv/go-sdk/tree/master/docs/examples) for more advanced examples.
+Our examples are organized by category to help you find what you need. Each example is self-contained and includes detailed comments.
+
+### Transaction Management
+- [Creating a Simple Transaction](./docs/examples/create_simple_tx/) - Basic transaction creation and signing
+- [Adding OP_RETURN Data](./docs/examples/create_tx_with_op_return/) - How to embed data in transactions
+- [Creating Inscriptions](./docs/examples/create_tx_with_inscription/) - Working with inscriptions
+- [Transaction Verification](./docs/examples/verify_transaction/) - How to verify transactions
+- [Fee Modeling](./docs/examples/fee_modeling/) - Understanding and calculating transaction fees
+- [Broadcasting Transactions](./docs/examples/broadcaster/) - How to broadcast transactions to the network
+
+### Key Management & Cryptography
+- [HD Key Generation](./docs/examples/generate_hd_key/) - Creating hierarchical deterministic keys
+- [HD Key from Extended Public Key](./docs/examples/hd_key_from_xpub/) - Working with xPubs
+- [Child Key Derivation](./docs/examples/derive_child/) - Deriving child keys
+- [Address from WIF](./docs/examples/address_from_wif/) - Converting WIF to addresses
+- [AES Encryption](./docs/examples/aes/) - Symmetric encryption examples
+
+### Advanced Cryptography
+- [ECIES Single Key](./docs/examples/ecies_single/) - Elliptic Curve Integrated Encryption Scheme
+- [ECIES Shared Keys](./docs/examples/ecies_shared/) - Working with shared ECIES keys
+- [ECIES Electrum Binary](./docs/examples/ecies_electrum_binary/) - Electrum-compatible ECIES
+- [Encrypted Messages](./docs/examples/encrypted_message/) - Working with encrypted messages
+
+### Key Sharing & Backup
+- [Key Shares to Backup](./docs/examples/keyshares_pk_to_backup/) - Backing up private keys using Shamir's Secret Sharing
+- [Key Shares from Backup](./docs/examples/keyshares_pk_from_backup/) - Recovering private keys from shares
+
+### Network & Verification
+- [Headers Client](./docs/examples/headers_client/) - Working with blockchain headers
+- [BEEF Verification](./docs/examples/verify_beef/) - Verifying BEEF proofs
+
+### Migration Guides
+- [Converting from go-bt](./docs/examples/GO_BT.md) - Guide for migrating from go-bt
+
+
+Check out the [examples folder](https://github.com/bitcoin-sv/go-sdk/tree/master/docs/examples) for more examples.
 
 ## Features
 
@@ -97,7 +132,31 @@ Check out the [examples folder](https://github.com/bitcoin-sv/go-sdk/tree/master
 
 ## Documentation
 
-The SDK is richly documented with code-level annotations. This should show up well within editors like VSCode. For complete API docs, check out the [Go Doc](https://pkg.go.dev/github.com/bitcoin-sv/go-sdk). Please refer to the [Libraries Wiki](#) (link to be provided) for a deep dive into each feature, tutorials, and usage examples.
+This SDK is supported by multiple layers of documentation:
+
+### Core Documentation
+- [Examples](./docs/examples/README.md) - Common usage examples and code samples
+- [Concepts](./docs/concepts/README.md) - High-level concepts and architectural decisions
+- [Low-Level Details](./docs/low-level/README.md) - Implementation details and technical specifications
+- [Go Doc](https://pkg.go.dev/github.com/bitcoin-sv/go-sdk) - Complete API reference
+
+### Component-Specific Documentation
+- [Script Interpreter](./script/interpreter/README.md) - Comprehensive documentation of the Bitcoin script interpreter
+  - Includes extensive test suite
+  - Based on the [Bitcoin Script specification](https://wiki.bitcoinsv.io/index.php/Script)
+
+### Example Categories
+1. Transaction Management
+   - Basic transaction creation and signing
+   - Converting transactions from go-bt
+2. Cryptographic Operations
+   - Standard Pay-to-pubkey-hash operations
+   - Key management and derivation
+3. Script Operations
+   - Custom script creation
+   - Script interpretation and validation
+
+For hands-on examples, visit our [examples directory](./docs/examples/).
 
 ## Contribution Guidelines
 
