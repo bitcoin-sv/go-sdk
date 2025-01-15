@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ## Table of Contents
 
+- [1.1.18 - 2025-01-15](#1118---2025-01-15)
 - [1.1.17 - 2024-12-24](#1117---2024-12-24)
 - [1.1.16 - 2024-12-01](#1116---2024-12-01)
 - [1.1.15 - 2024-11-26](#1115---2024-11-26)
@@ -23,6 +24,13 @@ All notable changes to this project will be documented in this file. The format 
 - [1.1.1 - 2024-08-28](#111---2024-08-28)
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
+
+## [1.1.18] - 2025-01-15
+  ### Changed
+  - Update golang.org/x/crypto from v0.21.0 to v0.31.0
+  - Update README to highlight examples and improve documentation
+  - Update golangci-lint configuration to handle mixed receiver types
+  - Improved test coverage
 
 ## [1.1.17] - 2024-12-24
   ### Added
