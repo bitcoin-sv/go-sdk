@@ -782,3 +782,69 @@ func (b *Beef) verifyValid(allowTxidOnly bool) verifyResult {
 	r.valid = true
 	return r
 }
+
+func (b *Beef) ToLogString() string {
+	var log string
+	log += fmt.Sprintf("BEEF with %d BUMPs and %d Transactions, isValid %t\n", len(b.BUMPs), len(b.Transactions), b.IsValid(true))
+	for i, bump := range b.BUMPs {
+		log += fmt.Sprintf("  BUMP %d\n    block: %d\n    txids: [\n", i, bump.BlockHeight)
+		for _, node := range bump.Path[0] {
+			if node.Txid != nil {
+				log += fmt.Sprintf("      '%s',\n", node.Hash.String())
+			}
+		}
+		log += "    ]\n"
+	}
+	for i, tx := range b.Transactions {
+		log += fmt.Sprintf("  TX %d\n    txid: %s\n", i, tx.Transaction.TxID().String())
+		if tx.dataFormat == RawTxAndBumpIndex {
+			log += fmt.Sprintf("    bumpIndex: %d\n", tx.Transaction.MerklePath.BlockHeight)
+		}
+		if tx.dataFormat == TxIDOnly {
+			log += "    txidOnly\n"
+		} else {
+			log += fmt.Sprintf("    rawTx length=%d\n", len(tx.Transaction.Bytes()))
+		}
+		if len(tx.Transaction.Inputs) > 0 {
+			log += "    inputs: [\n"
+			for _, input := range tx.Transaction.Inputs {
+				log += fmt.Sprintf("      '%s',\n", input.SourceTXID.String())
+			}
+			log += "    ]\n"
+		}
+	}
+	return log
+}
+
+func (b *Beef) Clone() *Beef {
+	c := &Beef{
+		Version:      b.Version,
+		BUMPs:        append([]*MerklePath(nil), b.BUMPs...),
+		Transactions: make(map[string]*BeefTx, len(b.Transactions)),
+	}
+	for k, v := range b.Transactions {
+		c.Transactions[k] = v
+	}
+	return c
+}
+
+func (b *Beef) TrimKnownTxids(knownTxids []string) {
+	knownTxidSet := make(map[string]struct{}, len(knownTxids))
+	for _, txid := range knownTxids {
+		knownTxidSet[txid] = struct{}{}
+	}
+
+	for txid, tx := range b.Transactions {
+		if tx.dataFormat == TxIDOnly {
+			if _, ok := knownTxidSet[txid]; ok {
+				delete(b.Transactions, txid)
+			}
+		}
+	}
+	// TODO: bumps could be trimmed to eliminate unreferenced proofs.
+}
+
+func (b *Beef) GetValidTxids() []string {
+	r := b.SortTxs()
+	return r.Valid
+}
