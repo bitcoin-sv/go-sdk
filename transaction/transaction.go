@@ -500,7 +500,7 @@ func (tx *Transaction) checkFeeComputed() error {
 //
 // Returns the serialized Atomic BEEF structure as a byte slice.
 // Returns an error if there are any missing sourceTransactions unless allowPartial is true.
-func (tx *Transaction) AtomicBEEF(allowPartial bool) ([]byte, error) {
+func (t *Transaction) AtomicBEEF(allowPartial bool) ([]byte, error) {
 	writer := bytes.NewBuffer(nil)
 
 	// Write the Atomic BEEF prefix
@@ -510,24 +510,51 @@ func (tx *Transaction) AtomicBEEF(allowPartial bool) ([]byte, error) {
 	}
 
 	// Write the subject TXID (big-endian)
-	txid := tx.TxID().CloneBytes()
+	txid := t.TxID().CloneBytes()
 	writer.Write(txid)
 
-	txs := map[string]*BeefTx{}
-	txs[tx.TxID().String()] = &BeefTx{dataFormat: RawTxAndBumpIndex, Transaction: tx}
-
-	// Append the BEEF data
-	beef := Beef{
-		Version:      BEEF_V2,
-		BUMPs:        []*MerklePath{},
-		Transactions: txs,
-	}
-	beefData, err := beef.Bytes(allowPartial)
+	err = binary.Write(writer, binary.LittleEndian, BEEF_V2)
 	if err != nil {
 		return nil, err
 	}
-	writer.Write(beefData)
+	bumps := []*MerklePath{}
+	bumpMap := map[uint32]int{}
+	txns := map[string]*Transaction{t.TxID().String(): t}
+	ancestors, err := t.collectAncestors(txns, allowPartial)
+	if err != nil {
+		return nil, err
+	}
+	for _, txid := range ancestors {
+		tx := txns[txid]
+		if tx.MerklePath == nil {
+			continue
+		}
+		if _, ok := bumpMap[tx.MerklePath.BlockHeight]; !ok {
+			bumpMap[tx.MerklePath.BlockHeight] = len(bumps)
+			bumps = append(bumps, tx.MerklePath)
+		} else {
+			err := bumps[bumpMap[tx.MerklePath.BlockHeight]].Combine(tx.MerklePath)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
 
+	writer.Write(VarInt(len(bumps)).Bytes())
+	for _, bump := range bumps {
+		writer.Write(bump.Bytes())
+	}
+	writer.Write(VarInt(len(txns)).Bytes())
+	for _, txid := range ancestors {
+		tx := txns[txid]
+		if tx.MerklePath != nil {
+			writer.Write([]byte{byte(RawTxAndBumpIndex)})
+			writer.Write(VarInt(bumpMap[tx.MerklePath.BlockHeight]).Bytes())
+		} else {
+			writer.Write([]byte{byte(RawTx)})
+		}
+		writer.Write(tx.Bytes())
+	}
 	return writer.Bytes(), nil
 }
 
@@ -541,7 +568,7 @@ func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
 	}
 
 	if version != BEEF_V1 {
-		return nil, fmt.Errorf("Use NewBEEFFromBytes to parse anything which isn't V1 BEEF")
+		return nil, fmt.Errorf("Use NewBeefFromBytes to parse anything which isn't V1 BEEF")
 	}
 
 	BUMPs, err := readBUMPs(reader)

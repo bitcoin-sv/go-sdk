@@ -8,6 +8,7 @@ import (
 
 	"github.com/bitcoin-sv/go-sdk/chainhash"
 	"github.com/bitcoin-sv/go-sdk/transaction/chaintracker"
+	"github.com/bitcoin-sv/go-sdk/util"
 )
 
 // Beef is a set of Transactions and their MerklePaths.
@@ -96,7 +97,7 @@ func readBeefTx(reader *bytes.Reader, BUMPs []*MerklePath) (*map[string]*BeefTx,
 	return &txs, nil
 }
 
-func NewBEEFFromBytes(beef []byte) (*Beef, error) {
+func NewBeefFromBytes(beef []byte) (*Beef, error) {
 	reader := bytes.NewReader(beef)
 
 	version, err := readVersion(reader)
@@ -213,9 +214,9 @@ func (t *Transaction) BEEF() ([]byte, error) {
 		return nil, err
 	}
 	bumps := []*MerklePath{}
-	bumpIndex := map[uint32]int{}
+	bumpMap := map[uint32]int{}
 	txns := map[string]*Transaction{t.TxID().String(): t}
-	ancestors, err := t.collectAncestors(txns)
+	ancestors, err := t.collectAncestors(txns, false)
 	if err != nil {
 		return nil, err
 	}
@@ -224,11 +225,11 @@ func (t *Transaction) BEEF() ([]byte, error) {
 		if tx.MerklePath == nil {
 			continue
 		}
-		if _, ok := bumpIndex[tx.MerklePath.BlockHeight]; !ok {
-			bumpIndex[tx.MerklePath.BlockHeight] = len(bumps)
+		if _, ok := bumpMap[tx.MerklePath.BlockHeight]; !ok {
+			bumpMap[tx.MerklePath.BlockHeight] = len(bumps)
 			bumps = append(bumps, tx.MerklePath)
 		} else {
-			err := bumps[bumpIndex[tx.MerklePath.BlockHeight]].Combine(tx.MerklePath)
+			err := bumps[bumpMap[tx.MerklePath.BlockHeight]].Combine(tx.MerklePath)
 			if err != nil {
 				return nil, err
 			}
@@ -245,7 +246,7 @@ func (t *Transaction) BEEF() ([]byte, error) {
 		b.Write(tx.Bytes())
 		if tx.MerklePath != nil {
 			b.Write([]byte{1})
-			b.Write(VarInt(bumpIndex[tx.MerklePath.BlockHeight]).Bytes())
+			b.Write(VarInt(bumpMap[tx.MerklePath.BlockHeight]).Bytes())
 		} else {
 			b.Write([]byte{0})
 		}
@@ -261,20 +262,24 @@ func (t *Transaction) BEEFHex() (string, error) {
 	}
 }
 
-func (t *Transaction) collectAncestors(txns map[string]*Transaction) ([]string, error) {
+func (t *Transaction) collectAncestors(txns map[string]*Transaction, allowPartial bool) ([]string, error) {
 	if t.MerklePath != nil {
 		return []string{t.TxID().String()}, nil
 	}
 	ancestors := make([]string, 0)
 	for _, input := range t.Inputs {
 		if input.SourceTransaction == nil {
-			return nil, fmt.Errorf("missing previous transaction for %s", t.TxID())
+			if allowPartial {
+				continue
+			} else {
+				return nil, fmt.Errorf("missing previous transaction for %s", t.TxID())
+			}
 		}
 		if _, ok := txns[input.SourceTXID.String()]; ok {
 			continue
 		}
 		txns[input.SourceTXID.String()] = input.SourceTransaction
-		if grands, err := input.SourceTransaction.collectAncestors(txns); err != nil {
+		if grands, err := input.SourceTransaction.collectAncestors(txns, allowPartial); err != nil {
 			return nil, err
 		} else {
 			ancestors = append(grands, ancestors...)
@@ -538,7 +543,7 @@ func (b *Beef) mergeBeefTx(btx *BeefTx) (*BeefTx, error) {
 }
 
 func (b *Beef) mergeBeefBytes(beef []byte) error {
-	otherBeef, err := NewBEEFFromBytes(beef)
+	otherBeef, err := NewBeefFromBytes(beef)
 	if err != nil {
 		return err
 	}
@@ -832,4 +837,33 @@ func findLeafByOffset(leaves []*PathElement, offset uint64) *PathElement {
 		}
 	}
 	return nil
+}
+
+// Bytes returns the BEEF BRC-96 as a byte slice.
+func (b *Beef) Bytes() ([]byte, error) {
+	// version
+	beef := make([]byte, 0)
+	beef = append(beef, util.LittleEndianBytes(b.Version, 4)...)
+
+	// bumps
+	beef = append(beef, VarInt(len(b.BUMPs)).Bytes()...)
+	for _, bump := range b.BUMPs {
+		beef = append(beef, bump.Bytes()...)
+	}
+
+	// transactions / txids
+	beef = append(beef, VarInt(len(b.Transactions)).Bytes()...)
+	for _, tx := range b.Transactions {
+		beef = append(beef, byte(tx.dataFormat))
+		if tx.dataFormat == TxIDOnly {
+			beef = append(beef, tx.knownTxID[:]...)
+		} else {
+			if tx.dataFormat == RawTxAndBumpIndex {
+				beef = append(beef, VarInt(tx.bumpIndex).Bytes()...)
+			}
+			beef = append(beef, tx.transaction.Bytes()...)
+		}
+	}
+
+	return beef, nil
 }

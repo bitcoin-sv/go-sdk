@@ -18,6 +18,6 @@ type BeefTx struct {
 	dataFormat  DataFormat
 	knownTxID   *chainhash.Hash
 	transaction *Transaction
-	bumpIndexId int
+	bumpIndex   int
 	InputTxids  []*chainhash.Hash
 }
