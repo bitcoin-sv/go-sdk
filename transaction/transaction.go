@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
+	"fmt"
 	"io"
 	"log"
 	"slices"
@@ -488,4 +489,70 @@ func (tx *Transaction) checkFeeComputed() error {
 		}
 	}
 	return nil
+}
+
+// ToAtomicBEEF serializes this transaction and its inputs into the Atomic BEEF (BRC-95) format.
+// The Atomic BEEF format starts with a 4-byte prefix `0x01010101`, followed by the TXID of the subject transaction,
+// and then the BEEF data containing only the subject transaction and its dependencies.
+// This format ensures that the BEEF structure is atomic and contains no unrelated transactions.
+//
+// If allowPartial is true, error will not be thrown if there are any missing sourceTransactions.
+//
+// Returns the serialized Atomic BEEF structure as a byte slice.
+// Returns an error if there are any missing sourceTransactions unless allowPartial is true.
+func (tx *Transaction) AtomicBEEF(allowPartial bool) ([]byte, error) {
+	writer := bytes.NewBuffer(nil)
+
+	// Write the Atomic BEEF prefix
+	err := binary.Write(writer, binary.LittleEndian, ATOMIC_BEEF)
+	if err != nil {
+		return nil, err
+	}
+
+	// Write the subject TXID (big-endian)
+	txid := tx.TxID().CloneBytes()
+	writer.Write(txid)
+
+	txs := map[string]*BeefTx{}
+	txs[tx.TxID().String()] = &BeefTx{dataFormat: RawTxAndBumpIndex, Transaction: tx}
+
+	// Append the BEEF data
+	beef := Beef{
+		Version:      BEEF_V2,
+		BUMPs:        []*MerklePath{},
+		Transactions: txs,
+	}
+	beefData, err := beef.Bytes(allowPartial)
+	if err != nil {
+		return nil, err
+	}
+	writer.Write(beefData)
+
+	return writer.Bytes(), nil
+}
+
+// NewTransactionFromBEEF creates a new Transaction from BEEF bytes.
+func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
+	reader := bytes.NewReader(beef)
+
+	version, err := readVersion(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	if version != BEEF_V1 {
+		return nil, fmt.Errorf("Use NewBEEFFromBytes to parse anything which isn't V1 BEEF")
+	}
+
+	BUMPs, err := readBUMPs(reader)
+	if err != nil {
+		return nil, err
+	}
+
+	transaction, err := readTransactions(reader, BUMPs)
+	if err != nil {
+		return nil, err
+	}
+
+	return transaction, nil
 }
