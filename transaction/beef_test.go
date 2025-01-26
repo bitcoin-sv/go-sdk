@@ -43,5 +43,5 @@ func TestNewBEEFFromBytes(t *testing.T) {
 	// Check the Beef object's properties
 	require.Equal(t, uint32(4022206466), beef.Version, "Version does not match")
 	require.Len(t, beef.BUMPs, 3, "BUMPs length does not match")
-	require.Equal(t, 3, len(beef.Transactions), "Transactions length does not match")
+	require.Len(t, beef.Transactions, 3, "Transactions length does not match")
 }

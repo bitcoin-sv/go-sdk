@@ -356,7 +356,8 @@ func (b *Beef) FindAtomicTransaction(txid string) *Transaction {
 
 func (b *Beef) MergeBump(bump *MerklePath) int {
 	var bumpIndex *int
-	// If this proof is identical to another one previously added, we use that first. Otherwise, we try to merge it with proofs from the same block.
+	// If this proof is identical to another one previously added, we use that first.
+	// Otherwise, we try to merge it with proofs from the same block.
 	for i, existingBump := range b.BUMPs {
 		if existingBump == bump { // Literally the same
 			return i
@@ -373,7 +374,7 @@ func (b *Beef) MergeBump(bump *MerklePath) int {
 			}
 			if rootA == rootB {
 				// Definitely the same... combine them to save space
-				existingBump.Combine(bump)
+				_ = existingBump.Combine(bump)
 				bumpIndex = &i
 				break
 			}
@@ -746,7 +747,11 @@ func (b *Beef) verifyValid(allowTxidOnly bool) verifyResult {
 
 func (b *Beef) ToLogString() string {
 	var log string
-	log += fmt.Sprintf("BEEF with %d BUMPs and %d Transactions, isValid %t\n", len(b.BUMPs), len(b.Transactions), b.IsValid(true))
+	log += fmt.Sprintf(
+		"BEEF with %d BUMPs and %d Transactions, isValid %t\n", len(b.BUMPs),
+		len(b.Transactions),
+		b.IsValid(true),
+	)
 	for i, bump := range b.BUMPs {
 		log += fmt.Sprintf("  BUMP %d\n    block: %d\n    txids: [\n", i, bump.BlockHeight)
 		for _, node := range bump.Path[0] {
