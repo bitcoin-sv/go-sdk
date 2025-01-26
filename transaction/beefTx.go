@@ -15,9 +15,9 @@ const (
 
 // BeefTx represents a Transaction or Txid within a Beef with or without reference to a BUMP.
 type BeefTx struct {
-	dataFormat  DataFormat
-	knownTxID   *chainhash.Hash
-	transaction *Transaction
-	bumpIndex   int
+	DataFormat  DataFormat
+	KnownTxID   *chainhash.Hash
+	Transaction *Transaction
+	BumpIndex   int
 	InputTxids  []*chainhash.Hash
 }
