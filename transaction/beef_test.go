@@ -37,8 +37,8 @@ func TestNewBEEFFromBytes(t *testing.T) {
 	require.NoError(t, err, "Failed to decode BEEF data from hex string")
 
 	// Create a new Beef object
-	beef, err := NewBEEFFromBytes(beefBytes)
-	require.NoError(t, err, "NewBEEFFromBytes method failed")
+	beef, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err, "NewBeefFromBytes method failed")
 
 	// Check the Beef object's properties
 	require.Equal(t, uint32(4022206466), beef.Version, "Version does not match")
