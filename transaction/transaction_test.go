@@ -1,6 +1,7 @@
 package transaction_test
 
 import (
+	"encoding/binary"
 	"encoding/hex"
 	"testing"
 
@@ -291,4 +292,36 @@ func TestTransactionFee(t *testing.T) {
 
 	// Print the fee for informational purposes
 	t.Logf("Computed fee: %d satoshis", fee)
+}
+
+func TestAtomicBEEF(t *testing.T) {
+	// First decode the BEEF data to get a transaction
+	beefBytes, err := hex.DecodeString(BRC62Hex)
+	require.NoError(t, err)
+
+	// Parse the V1 BEEF data to get a transaction
+	tx, err := transaction.NewTransactionFromBEEF(beefBytes)
+	require.NoError(t, err)
+	require.NotNil(t, tx)
+
+	// Test AtomicBEEF with allowPartial=false first
+	atomicBeef, err := tx.AtomicBEEF(false)
+	require.NoError(t, err)
+	require.NotNil(t, atomicBeef)
+
+	// Verify the format:
+	// 1. First 4 bytes should be ATOMIC_BEEF (0x01010101)
+	require.Equal(t, uint32(0x01010101), binary.LittleEndian.Uint32(atomicBeef[:4]))
+
+	// 2. Next 32 bytes should be the subject transaction's TXID
+	txid := tx.TxID()
+	require.Equal(t, txid[:], atomicBeef[4:36])
+
+	// 3. Verify that the remaining bytes contain BEEF_V2 data
+	require.Equal(t, uint32(transaction.BEEF_V2), binary.LittleEndian.Uint32(atomicBeef[36:40]))
+
+	// Test with allowPartial=true
+	atomicBeefPartial, err := tx.AtomicBEEF(true)
+	require.NoError(t, err)
+	require.NotNil(t, atomicBeefPartial)
 }
