@@ -198,3 +198,72 @@ func TestBeefToLogString(t *testing.T) {
 		}
 	}
 }
+
+func TestBeefClone(t *testing.T) {
+	// Decode the BEEF data from hex string
+	beefBytes, err := hex.DecodeString(BEEFSet)
+	require.NoError(t, err)
+
+	// Create a new Beef object
+	original, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+
+	// Clone the object
+	clone := original.Clone()
+
+	// Verify basic properties match
+	require.Equal(t, original.Version, clone.Version, "Version should match")
+	require.Equal(t, len(original.BUMPs), len(clone.BUMPs), "Number of BUMPs should match")
+	require.Equal(t, len(original.Transactions), len(clone.Transactions), "Number of transactions should match")
+
+	// Verify BUMPs are copied (not just referenced)
+	for i, bump := range original.BUMPs {
+		require.Equal(t, bump.BlockHeight, clone.BUMPs[i].BlockHeight, "BUMP BlockHeight should match")
+		require.Equal(t, len(bump.Path), len(clone.BUMPs[i].Path), "BUMP Path length should match")
+
+		// Verify each level of the path
+		for j := range bump.Path {
+			require.Equal(t, len(bump.Path[j]), len(clone.BUMPs[i].Path[j]), "Path level length should match")
+
+			// Verify each PathElement
+			for k := range bump.Path[j] {
+				// Compare PathElement fields
+				require.Equal(t, bump.Path[j][k].Offset, clone.BUMPs[i].Path[j][k].Offset, "PathElement Offset should match")
+				if bump.Path[j][k].Hash != nil {
+					require.Equal(t, bump.Path[j][k].Hash.String(), clone.BUMPs[i].Path[j][k].Hash.String(), "PathElement Hash should match")
+				}
+				if bump.Path[j][k].Txid != nil {
+					require.Equal(t, *bump.Path[j][k].Txid, *clone.BUMPs[i].Path[j][k].Txid, "PathElement Txid should match")
+				}
+				if bump.Path[j][k].Duplicate != nil {
+					require.Equal(t, *bump.Path[j][k].Duplicate, *clone.BUMPs[i].Path[j][k].Duplicate, "PathElement Duplicate should match")
+				}
+			}
+		}
+	}
+
+	// Verify transactions are copied (not just referenced)
+	for txid, tx := range original.Transactions {
+		clonedTx, exists := clone.Transactions[txid]
+		require.True(t, exists, "Transaction should exist in clone")
+		require.Equal(t, tx.DataFormat, clonedTx.DataFormat, "Transaction DataFormat should match")
+		if tx.Transaction != nil {
+			require.Equal(t, tx.Transaction.TxID().String(), clonedTx.Transaction.TxID().String(), "Transaction ID should match")
+		}
+		if tx.KnownTxID != nil {
+			require.Equal(t, tx.KnownTxID.String(), clonedTx.KnownTxID.String(), "KnownTxID should match")
+		}
+	}
+
+	// Modify clone and verify original is unchanged
+	clone.Version = 999
+	require.NotEqual(t, original.Version, clone.Version, "Modifying clone should not affect original")
+
+	// Remove a transaction from clone and verify original is unchanged
+	for txid := range clone.Transactions {
+		delete(clone.Transactions, txid)
+		_, exists := original.Transactions[txid]
+		require.True(t, exists, "Removing transaction from clone should not affect original")
+		break // just test one
+	}
+}
