@@ -501,3 +501,86 @@ func TestTransactionsReadFrom(t *testing.T) {
 		require.Empty(t, *txs)
 	})
 }
+
+func TestBeefMergeBump(t *testing.T) {
+	// Decode the BEEF data from hex string
+	beefBytes, err := hex.DecodeString(BEEFSet)
+	require.NoError(t, err)
+
+	// Create two Beef objects
+	beef1, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+	beef2, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+
+	// Get a BUMP to merge
+	require.NotEmpty(t, beef2.BUMPs, "Should have BUMPs to test with")
+	bumpToMerge := beef2.BUMPs[0]
+
+	// Record initial state
+	initialBumpCount := len(beef1.BUMPs)
+
+	// Test MergeBump
+	beef1.MergeBump(bumpToMerge)
+
+	// Verify the BUMP was merged
+	require.Equal(t, initialBumpCount+1, len(beef1.BUMPs), "Should have one more BUMP after merge")
+	require.Equal(t, bumpToMerge.BlockHeight, beef1.BUMPs[len(beef1.BUMPs)-1].BlockHeight, "Merged BUMP should have same block height")
+
+	// Verify the paths are equal but not the same instance
+	require.Equal(t, len(bumpToMerge.Path), len(beef1.BUMPs[len(beef1.BUMPs)-1].Path), "Path lengths should match")
+	for i := range bumpToMerge.Path {
+		require.Equal(t, len(bumpToMerge.Path[i]), len(beef1.BUMPs[len(beef1.BUMPs)-1].Path[i]), "Path element lengths should match")
+		for j := range bumpToMerge.Path[i] {
+			require.Equal(t, bumpToMerge.Path[i][j].Offset, beef1.BUMPs[len(beef1.BUMPs)-1].Path[i][j].Offset, "Path element offset should match")
+			if bumpToMerge.Path[i][j].Hash != nil {
+				require.Equal(t, bumpToMerge.Path[i][j].Hash.String(), beef1.BUMPs[len(beef1.BUMPs)-1].Path[i][j].Hash.String(), "Path element hash should match")
+			}
+		}
+	}
+}
+
+func TestBeefMergeTransactions(t *testing.T) {
+	// Decode the BEEF data from hex string
+	beefBytes, err := hex.DecodeString(BEEFSet)
+	require.NoError(t, err)
+
+	// Create two Beef objects
+	beef1, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+	beef2, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+
+	// Get a transaction to merge and modify it to make it unique
+	var txToMerge *BeefTx
+	var txid string
+	for id, tx := range beef2.Transactions {
+		if tx.Transaction != nil {
+			// Delete this transaction from beef1 to ensure we can merge it
+			delete(beef1.Transactions, id)
+			txToMerge = tx
+			txid = id
+			break
+		}
+	}
+	require.NotNil(t, txToMerge, "Should have a transaction to test with")
+	require.NotEmpty(t, txid, "Should have a transaction ID")
+
+	// Test MergeRawTx
+	initialTxCount := len(beef1.Transactions)
+	rawTx := txToMerge.Transaction.Bytes()
+	beefTx, err := beef1.MergeRawTx(rawTx, nil)
+	require.NoError(t, err)
+	require.NotNil(t, beefTx)
+	require.Equal(t, initialTxCount+1, len(beef1.Transactions), "Should have one more transaction after merge")
+
+	// Test MergeTransaction
+	beef3, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+	delete(beef3.Transactions, txid)
+	initialTxCount = len(beef3.Transactions)
+	beefTx, err = beef3.MergeTransaction(txToMerge.Transaction)
+	require.NoError(t, err)
+	require.NotNil(t, beefTx)
+	require.Equal(t, initialTxCount+1, len(beef3.Transactions), "Should have one more transaction after merge")
+}
