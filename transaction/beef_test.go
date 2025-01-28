@@ -524,7 +524,7 @@ func TestBeefMergeBump(t *testing.T) {
 	beef1.MergeBump(bumpToMerge)
 
 	// Verify the BUMP was merged
-	require.Equal(t, initialBumpCount+1, len(beef1.BUMPs), "Should have one more BUMP after merge")
+	require.Len(t, beef1.BUMPs, initialBumpCount+1, "Should have one more BUMP after merge")
 	require.Equal(t, bumpToMerge.BlockHeight, beef1.BUMPs[len(beef1.BUMPs)-1].BlockHeight, "Merged BUMP should have same block height")
 
 	// Verify the paths are equal but not the same instance
@@ -572,7 +572,7 @@ func TestBeefMergeTransactions(t *testing.T) {
 	beefTx, err := beef1.MergeRawTx(rawTx, nil)
 	require.NoError(t, err)
 	require.NotNil(t, beefTx)
-	require.Equal(t, initialTxCount+1, len(beef1.Transactions), "Should have one more transaction after merge")
+	require.Len(t, beef1.Transactions, initialTxCount+1, "Should have one more transaction after merge")
 
 	// Test MergeTransaction
 	beef3, err := NewBeefFromBytes(beefBytes)
@@ -582,5 +582,5 @@ func TestBeefMergeTransactions(t *testing.T) {
 	beefTx, err = beef3.MergeTransaction(txToMerge.Transaction)
 	require.NoError(t, err)
 	require.NotNil(t, beefTx)
-	require.Equal(t, initialTxCount+1, len(beef3.Transactions), "Should have one more transaction after merge")
+	require.Len(t, beef3.Transactions, initialTxCount+1, "Should have one more transaction after merge")
 }

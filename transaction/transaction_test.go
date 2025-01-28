@@ -318,7 +318,7 @@ func TestAtomicBEEF(t *testing.T) {
 	require.Equal(t, txid[:], atomicBeef[4:36])
 
 	// 3. Verify that the remaining bytes contain BEEF_V2 data
-	require.Equal(t, uint32(transaction.BEEF_V2), binary.LittleEndian.Uint32(atomicBeef[36:40]))
+	require.Equal(t, transaction.BEEF_V2, binary.LittleEndian.Uint32(atomicBeef[36:40]))
 
 	// Test with allowPartial=true
 	atomicBeefPartial, err := tx.AtomicBEEF(true)
