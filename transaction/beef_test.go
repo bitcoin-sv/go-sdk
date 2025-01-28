@@ -3,6 +3,7 @@
 package transaction
 
 import (
+	"bytes"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
@@ -428,4 +429,75 @@ func TestBeefFindTransactionForSigning(t *testing.T) {
 	tx := beef.FindTransactionForSigning(testTxid)
 	require.NotNil(t, tx, "Should find a transaction for signing")
 	require.Equal(t, testTxid, tx.TxID().String(), "Transaction ID should match")
+}
+
+func TestBeefFindAtomicTransaction(t *testing.T) {
+	// Decode the BEEF data from hex string
+	beefBytes, err := hex.DecodeString(BEEFSet)
+	require.NoError(t, err)
+
+	// Create a new Beef object
+	beef, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+
+	// Get a transaction ID to test with
+	var testTxid string
+	for txid, tx := range beef.Transactions {
+		if tx.Transaction != nil {
+			testTxid = txid
+			break
+		}
+	}
+	require.NotEmpty(t, testTxid, "Should have at least one transaction with full data")
+
+	// Test FindAtomicTransaction
+	tx := beef.FindAtomicTransaction(testTxid)
+	require.NotNil(t, tx, "Should find an atomic transaction")
+	require.Equal(t, testTxid, tx.TxID().String(), "Transaction ID should match")
+}
+
+func TestTransactionsReadFrom(t *testing.T) {
+	t.Run("normal transaction", func(t *testing.T) {
+		// Get a transaction from BEEFSet
+		beefBytes, err := hex.DecodeString(BEEFSet)
+		require.NoError(t, err)
+		beef, err := NewBeefFromBytes(beefBytes)
+		require.NoError(t, err)
+
+		// Find a transaction with full data
+		var txBytes []byte
+		for _, tx := range beef.Transactions {
+			if tx.Transaction != nil {
+				// Create a buffer with transaction count (1) followed by the transaction data
+				buf := bytes.NewBuffer(nil)
+				buf.WriteByte(1) // Write count of 1 transaction
+				buf.Write(tx.Transaction.Bytes())
+				txBytes = buf.Bytes()
+				break
+			}
+		}
+		require.NotEmpty(t, txBytes, "Should have found a transaction with full data")
+
+		// Test ReadFrom
+		reader := bytes.NewReader(txBytes)
+		txs := &Transactions{}
+		n, err := txs.ReadFrom(reader)
+		require.NoError(t, err)
+		require.Equal(t, int64(len(txBytes)), n)
+		require.NotEmpty(t, *txs)
+	})
+
+	t.Run("incomplete transaction with zero inputs", func(t *testing.T) {
+		// Create a buffer with transaction count (0)
+		buf := bytes.NewBuffer(nil)
+		buf.WriteByte(0) // Write count of 0 transactions
+
+		// Test ReadFrom
+		reader := bytes.NewReader(buf.Bytes())
+		txs := &Transactions{}
+		n, err := txs.ReadFrom(reader)
+		require.NoError(t, err)
+		require.Equal(t, int64(1), n) // Should only read the count byte
+		require.Empty(t, *txs)
+	})
 }
