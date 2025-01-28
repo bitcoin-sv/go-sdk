@@ -533,12 +533,6 @@ func (b *Beef) MergeBeefTx(btx *BeefTx) (*BeefTx, error) {
 		if err != nil {
 			return nil, err
 		}
-		// } else if btx.Transaction != nil && (beefTx == nil || beefTx.DataFormat == TxIDOnly) {
-		// 	var err error
-		// 	beefTx, err = b.MergeRawTx(btx.Transaction.Bytes(), nil)
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
 	}
 	return beefTx, nil
 }
