@@ -108,3 +108,53 @@ func TestBeefMakeTxidOnly(t *testing.T) {
 	require.NotNil(t, txidOnly.KnownTxID)
 	require.Equal(t, hash.String(), txidOnly.KnownTxID.String())
 }
+
+func TestBeefSortTxs(t *testing.T) {
+	// Decode the BEEF data from hex string
+	beefBytes, err := hex.DecodeString(BEEFSet)
+	require.NoError(t, err)
+
+	// Create a new Beef object
+	beef, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+
+	// First, let's check what transactions we have
+	for txid, tx := range beef.Transactions {
+		t.Logf("Transaction %s:", txid)
+		t.Logf("  DataFormat: %v", tx.DataFormat)
+		t.Logf("  Has Transaction: %v", tx.Transaction != nil)
+		if tx.Transaction != nil {
+			t.Logf("  Has MerklePath: %v", tx.Transaction.MerklePath != nil)
+			t.Logf("  Number of Inputs: %d", len(tx.Transaction.Inputs))
+		}
+		t.Logf("  Has KnownTxID: %v", tx.KnownTxID != nil)
+	}
+
+	// Test SortTxs
+	result := beef.SortTxs()
+	require.NotNil(t, result)
+
+	// Log the results
+	t.Logf("Valid transactions: %v", result.Valid)
+	t.Logf("TxIDOnly transactions: %v", result.TxidOnly)
+	t.Logf("Transactions with missing inputs: %v", result.WithMissingInputs)
+	t.Logf("Missing inputs: %v", result.MissingInputs)
+	t.Logf("Not valid transactions: %v", result.NotValid)
+
+	// Verify that valid transactions don't have missing inputs
+	for _, txid := range result.Valid {
+		require.NotContains(t, result.MissingInputs, txid, "Valid transaction should not have missing inputs")
+		require.NotContains(t, result.NotValid, txid, "Valid transaction should not be in NotValid list")
+		require.NotContains(t, result.WithMissingInputs, txid, "Valid transaction should not be in WithMissingInputs list")
+	}
+
+	// Verify that transactions with missing inputs are properly categorized
+	for _, txid := range result.WithMissingInputs {
+		require.NotContains(t, result.Valid, txid, "Transaction with missing inputs should not be in Valid list")
+	}
+
+	// Verify that invalid transactions are properly categorized
+	for _, txid := range result.NotValid {
+		require.NotContains(t, result.Valid, txid, "Invalid transaction should not be in Valid list")
+	}
+}
