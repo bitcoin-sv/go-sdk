@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"testing"
 
+	"github.com/bitcoin-sv/go-sdk/chainhash"
 	"github.com/stretchr/testify/require"
 )
 
@@ -69,4 +70,41 @@ func TestBeefTransactionFinding(t *testing.T) {
 		require.Nil(t, tx)
 		break // just test one
 	}
+}
+
+func TestBeefMakeTxidOnly(t *testing.T) {
+	// Decode the BEEF data from hex string
+	beefBytes, err := hex.DecodeString(BEEFSet)
+	require.NoError(t, err)
+
+	// Create a new Beef object
+	beef, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+
+	// Get first transaction and verify it exists
+	var txid string
+	var originalTx *BeefTx
+	for id, tx := range beef.Transactions {
+		if tx.Transaction != nil {
+			txid = id
+			originalTx = tx
+			break
+		}
+	}
+	require.NotEmpty(t, txid)
+	require.NotNil(t, originalTx)
+
+	// Convert the hash to ensure it's valid
+	hash, err := chainhash.NewHashFromHex(txid)
+	require.NoError(t, err)
+
+	// Set the KnownTxID field
+	originalTx.KnownTxID = hash
+
+	// Test MakeTxidOnly
+	txidOnly := beef.MakeTxidOnly(txid)
+	require.NotNil(t, txidOnly)
+	require.Equal(t, TxIDOnly, txidOnly.DataFormat)
+	require.NotNil(t, txidOnly.KnownTxID)
+	require.Equal(t, hash.String(), txidOnly.KnownTxID.String())
 }
