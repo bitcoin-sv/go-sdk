@@ -31,6 +31,7 @@ All notable changes to this project will be documented in this file. The format 
   - Update golang.org/x/crypto from v0.21.0 to v0.31.0
   - Update README to highlight examples and improve documentation
   - Update golangci-lint configuration to handle mixed receiver types
+  - update issue templates
   - Improved test coverage
 
 ## [1.1.17] - 2024-12-24
