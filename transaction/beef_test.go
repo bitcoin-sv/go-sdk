@@ -761,7 +761,7 @@ func TestBeefMergeBeefTx(t *testing.T) {
 		result, err := beef.MergeBeefTx(btx)
 		require.NoError(t, err)
 		require.NotNil(t, result)
-		require.Equal(t, 1, len(beef.Transactions))
+		require.Len(t, beef.Transactions, 1)
 	})
 
 	t.Run("handle nil transaction", func(t *testing.T) {
@@ -776,7 +776,7 @@ func TestBeefMergeBeefTx(t *testing.T) {
 		require.Error(t, err)
 		require.Nil(t, result)
 		require.Contains(t, err.Error(), "nil transaction")
-		require.Equal(t, 0, len(beef.Transactions))
+		require.Empty(t, beef.Transactions)
 	})
 
 	t.Run("handle BeefTx with nil Transaction", func(t *testing.T) {
@@ -796,6 +796,6 @@ func TestBeefMergeBeefTx(t *testing.T) {
 		require.Error(t, err)
 		require.Nil(t, result)
 		require.Contains(t, err.Error(), "nil transaction")
-		require.Equal(t, 0, len(beef.Transactions))
+		require.Empty(t, beef.Transactions)
 	})
 }
