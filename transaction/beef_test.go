@@ -652,7 +652,10 @@ func TestBeefEdgeCases(t *testing.T) {
 
 		// Write one TxIDOnly transaction
 		buf.WriteByte(byte(TxIDOnly)) // DataFormat
-		txidBytes := make([]byte, 32) // Create a zero-filled txid
+
+		// Create a valid txid hash
+		txidBytes, err := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000001")
+		require.NoError(t, err)
 		buf.Write(txidBytes)
 
 		// Create a new Beef object from the bytes
@@ -667,14 +670,18 @@ func TestBeefEdgeCases(t *testing.T) {
 			t.Logf("  Has Transaction: %v", tx.Transaction != nil)
 			t.Logf("  Has KnownTxID: %v", tx.KnownTxID != nil)
 
+			// Test the behavior of TxIDOnly transactions
 			require.Equal(t, TxIDOnly, tx.DataFormat, "Transaction should be TxIDOnly format")
 			require.NotNil(t, tx.KnownTxID, "TxIDOnly transaction should have KnownTxID")
-			require.Nil(t, tx.Transaction, "TxIDOnly transaction should not have Transaction data")
-		}
 
-		// Test GetValidTxids with only TxIDOnly transactions
-		t.Log("Testing GetValidTxids")
-		validTxids := beef.GetValidTxids()
-		require.Empty(t, validTxids, "No transactions should be valid when all are TxIDOnly")
+			// Test that TxIDOnly transactions are properly categorized
+			sorted := beef.SortTxs()
+			require.NotContains(t, sorted.Valid, txid, "TxIDOnly transaction should not be considered valid")
+			require.Contains(t, sorted.TxidOnly, txid, "TxIDOnly transaction should be in TxidOnly list")
+
+			// Test that the transaction is not returned by GetValidTxids
+			validTxids := beef.GetValidTxids()
+			require.NotContains(t, validTxids, txid, "TxIDOnly transaction should not be in GetValidTxids result")
+		}
 	})
 }

@@ -106,7 +106,7 @@ func NewBeefFromBytes(beef []byte) (*Beef, error) {
 	}
 
 	if version == BEEF_V1 {
-		return nil, fmt.Errorf("Use NewTransactionFromBEEF to parse V1 BEEF")
+		return nil, fmt.Errorf("use NewTransactionFromBEEF to parse V1 BEEF")
 	}
 
 	BUMPs, err := readBUMPs(reader)
