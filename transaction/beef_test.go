@@ -729,7 +729,7 @@ func TestBeefMergeBeefBytes(t *testing.T) {
 	require.NoError(t, err)
 
 	// Verify transactions were merged
-	require.Equal(t, initialTxCount+1, len(beef1.Transactions), "Should have merged one transaction")
+	require.Len(t, beef1.Transactions, initialTxCount+1, "Should have merged one transaction")
 
 	// Test merging invalid BEEF bytes
 	invalidBytes := []byte("invalid beef data")
