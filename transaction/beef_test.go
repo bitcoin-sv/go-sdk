@@ -5,6 +5,7 @@ package transaction
 import (
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/chainhash"
@@ -156,5 +157,44 @@ func TestBeefSortTxs(t *testing.T) {
 	// Verify that invalid transactions are properly categorized
 	for _, txid := range result.NotValid {
 		require.NotContains(t, result.Valid, txid, "Invalid transaction should not be in Valid list")
+	}
+}
+
+func TestBeefToLogString(t *testing.T) {
+	// Decode the BEEF data from hex string
+	beefBytes, err := hex.DecodeString(BEEFSet)
+	require.NoError(t, err)
+
+	// Create a new Beef object
+	beef, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+
+	// Get the log string
+	logStr := beef.ToLogString()
+
+	// Verify the log string contains expected information
+	require.Contains(t, logStr, "BEEF with", "Log should contain BEEF summary")
+	require.Contains(t, logStr, "BUMPs", "Log should mention BUMPs")
+	require.Contains(t, logStr, "Transactions", "Log should mention Transactions")
+	require.Contains(t, logStr, "isValid", "Log should mention validity")
+
+	// Verify BUMP information is logged
+	require.Contains(t, logStr, "BUMP", "Log should contain BUMP details")
+	require.Contains(t, logStr, "block:", "Log should contain block height")
+	require.Contains(t, logStr, "txids:", "Log should contain txids")
+
+	// Verify Transaction information is logged
+	require.Contains(t, logStr, "TX", "Log should contain transaction details")
+	require.Contains(t, logStr, "txid:", "Log should contain transaction IDs")
+
+	// Verify each BUMP and transaction is mentioned
+	bumpCount := beef.BUMPs
+	for i := 0; i < len(bumpCount); i++ {
+		require.Contains(t, logStr, fmt.Sprintf("BUMP %d", i), "Log should contain each BUMP")
+	}
+	for _, tx := range beef.Transactions {
+		if tx.Transaction != nil {
+			require.Contains(t, logStr, tx.Transaction.TxID().String(), "Log should contain each transaction ID")
+		}
 	}
 }
