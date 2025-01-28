@@ -45,3 +45,28 @@ func TestNewBEEFFromBytes(t *testing.T) {
 	require.Len(t, beef.BUMPs, 3, "BUMPs length does not match")
 	require.Len(t, beef.Transactions, 3, "Transactions length does not match")
 }
+
+func TestBeefTransactionFinding(t *testing.T) {
+	// Decode the BEEF data from hex string
+	beefBytes, err := hex.DecodeString(BEEFSet)
+	require.NoError(t, err)
+
+	// Create a new Beef object
+	beef, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+
+	// Test RemoveExistingTxid and findTxid
+	for txid := range beef.Transactions {
+		// Verify we can find it
+		tx := beef.findTxid(txid)
+		require.NotNil(t, tx)
+
+		// Remove it
+		beef.RemoveExistingTxid(txid)
+
+		// Verify it's gone
+		tx = beef.findTxid(txid)
+		require.Nil(t, tx)
+		break // just test one
+	}
+}
