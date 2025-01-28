@@ -587,6 +587,7 @@ func (b *Beef) Verify(chainTracker chaintracker.ChainTracker, allowTxidOnly bool
 	return true, nil
 }
 
+// SortTxs sorts the transactions in the BEEF by dependency order.
 func (b *Beef) SortTxs() struct {
 	MissingInputs     []string
 	NotValid          []string
@@ -739,6 +740,7 @@ func (b *Beef) verifyValid(allowTxidOnly bool) verifyResult {
 	return r
 }
 
+// ToLogString returns a summary of `Beef` contents as multi-line string for debugging purposes.
 func (b *Beef) ToLogString() string {
 	var log string
 	log += fmt.Sprintf(
