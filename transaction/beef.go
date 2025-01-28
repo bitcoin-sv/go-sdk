@@ -524,6 +524,9 @@ func (b *Beef) MergeTxidOnly(txid string) *BeefTx {
 }
 
 func (b *Beef) MergeBeefTx(btx *BeefTx) (*BeefTx, error) {
+	if btx == nil || btx.Transaction == nil {
+		return nil, fmt.Errorf("nil transaction")
+	}
 	beefTx := b.findTxid(btx.Transaction.TxID().String())
 	if btx.DataFormat == TxIDOnly && beefTx == nil {
 		beefTx = b.MergeTxidOnly(btx.KnownTxID.String())

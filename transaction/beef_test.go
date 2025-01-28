@@ -736,3 +736,66 @@ func TestBeefMergeBeefBytes(t *testing.T) {
 	err = beef1.MergeBeefBytes(invalidBytes)
 	require.Error(t, err, "Should error on invalid BEEF bytes")
 }
+
+func TestBeefMergeBeefTx(t *testing.T) {
+	t.Run("merge valid transaction", func(t *testing.T) {
+		// Create a valid transaction
+		tx := &Transaction{
+			Version:  1,
+			Inputs:   make([]*TransactionInput, 0),
+			Outputs:  make([]*TransactionOutput, 0),
+			LockTime: 0,
+		}
+
+		beef := &Beef{
+			Version:      BEEF_V2,
+			BUMPs:        make([]*MerklePath, 0),
+			Transactions: make(map[string]*BeefTx),
+		}
+
+		btx := &BeefTx{
+			DataFormat:  RawTx,
+			Transaction: tx,
+		}
+
+		result, err := beef.MergeBeefTx(btx)
+		require.NoError(t, err)
+		require.NotNil(t, result)
+		require.Equal(t, 1, len(beef.Transactions))
+	})
+
+	t.Run("handle nil transaction", func(t *testing.T) {
+		beef := &Beef{
+			Version:      BEEF_V2,
+			BUMPs:        make([]*MerklePath, 0),
+			Transactions: make(map[string]*BeefTx),
+		}
+
+		// Test with nil BeefTx
+		result, err := beef.MergeBeefTx(nil)
+		require.Error(t, err)
+		require.Nil(t, result)
+		require.Contains(t, err.Error(), "nil transaction")
+		require.Equal(t, 0, len(beef.Transactions))
+	})
+
+	t.Run("handle BeefTx with nil Transaction", func(t *testing.T) {
+		beef := &Beef{
+			Version:      BEEF_V2,
+			BUMPs:        make([]*MerklePath, 0),
+			Transactions: make(map[string]*BeefTx),
+		}
+
+		// Test with BeefTx that has nil Transaction
+		btx := &BeefTx{
+			DataFormat:  RawTx,
+			Transaction: nil,
+		}
+
+		result, err := beef.MergeBeefTx(btx)
+		require.Error(t, err)
+		require.Nil(t, result)
+		require.Contains(t, err.Error(), "nil transaction")
+		require.Equal(t, 0, len(beef.Transactions))
+	})
+}
