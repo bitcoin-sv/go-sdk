@@ -7,6 +7,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/chainhash"
@@ -583,4 +584,52 @@ func TestBeefMergeTransactions(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, beefTx)
 	require.Len(t, beef3.Transactions, initialTxCount+1, "Should have one more transaction after merge")
+}
+
+func TestBeefErrorHandling(t *testing.T) {
+	t.Run("invalid_transaction_format", func(t *testing.T) {
+		// Create a transaction with corrupted format byte
+		beefBytes, err := hex.DecodeString(BEEFSet)
+		require.NoError(t, err)
+
+		// Find the first transaction format byte
+		// The format byte comes after the version (4 bytes), number of BUMPs (VarInt),
+		// BUMP data, and number of transactions (VarInt)
+		reader := bytes.NewReader(beefBytes)
+
+		// Skip version
+		_, err = reader.Seek(4, io.SeekStart)
+		require.NoError(t, err)
+
+		// Skip number of BUMPs and BUMP data
+		var numberOfBUMPs VarInt
+		_, err = numberOfBUMPs.ReadFrom(reader)
+		require.NoError(t, err)
+
+		// Skip BUMP data
+		for i := 0; i < int(numberOfBUMPs); i++ {
+			bump, err := NewMerklePathFromReader(reader)
+			require.NoError(t, err)
+			_ = bump
+		}
+
+		// Skip number of transactions
+		var numberOfTransactions VarInt
+		_, err = numberOfTransactions.ReadFrom(reader)
+		require.NoError(t, err)
+
+		// Now we're at the first transaction format byte
+		pos, err := reader.Seek(0, io.SeekCurrent)
+		require.NoError(t, err)
+
+		// Create a copy of the bytes and corrupt the format byte
+		corruptedBytes := make([]byte, len(beefBytes))
+		copy(corruptedBytes, beefBytes)
+		corruptedBytes[pos] = 0xFF // Invalid format byte
+
+		// Attempt to create a new Beef object with corrupted data
+		_, err = NewBeefFromBytes(corruptedBytes)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "invalid data format", "Error should mention invalid format")
+	})
 }
