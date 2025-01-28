@@ -315,3 +315,63 @@ func TestBeefTrimknownTxIDs(t *testing.T) {
 		}
 	}
 }
+
+func TestBeefGetValidTxids(t *testing.T) {
+	// Decode the BEEF data from hex string
+	beefBytes, err := hex.DecodeString(BEEFSet)
+	require.NoError(t, err)
+
+	// Create a new Beef object
+	beef, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+
+	// First, let's check what transactions we have
+	t.Log("Checking transactions in BEEF:")
+	for txid, tx := range beef.Transactions {
+		t.Logf("Transaction %s:", txid)
+		t.Logf("  DataFormat: %v", tx.DataFormat)
+		t.Logf("  Has Transaction: %v", tx.Transaction != nil)
+		if tx.Transaction != nil {
+			t.Logf("  Has MerklePath: %v", tx.Transaction.MerklePath != nil)
+			t.Logf("  Number of Inputs: %d", len(tx.Transaction.Inputs))
+			for i, input := range tx.Transaction.Inputs {
+				t.Logf("    Input %d SourceTXID: %s", i, input.SourceTXID.String())
+			}
+		}
+		t.Logf("  Has KnownTxID: %v", tx.KnownTxID != nil)
+	}
+
+	// Get sorted transactions to see what's valid
+	sorted := beef.SortTxs()
+	t.Log("\nSorted transaction results:")
+	t.Logf("  Valid: %v", sorted.Valid)
+	t.Logf("  TxidOnly: %v", sorted.TxidOnly)
+	t.Logf("  WithMissingInputs: %v", sorted.WithMissingInputs)
+	t.Logf("  MissingInputs: %v", sorted.MissingInputs)
+	t.Logf("  NotValid: %v", sorted.NotValid)
+
+	// Get valid txids
+	validTxids := beef.GetValidTxids()
+	t.Logf("\nGetValidTxids result: %v", validTxids)
+
+	// Verify results match
+	require.Equal(t, sorted.Valid, validTxids, "GetValidTxids should return same txids as SortTxs.Valid")
+
+	// If we have any valid transactions, verify they exist and have valid inputs
+	if len(validTxids) > 0 {
+		for _, txid := range validTxids {
+			tx := beef.findTxid(txid)
+			require.NotNil(t, tx, "Valid txid should exist in transactions map")
+
+			// If it has a transaction, verify it has no missing inputs
+			if tx.Transaction != nil {
+				for _, input := range tx.Transaction.Inputs {
+					sourceTx := beef.findTxid(input.SourceTXID.String())
+					require.NotNil(t, sourceTx, "Input transaction should exist for valid transaction")
+				}
+			}
+		}
+	} else {
+		t.Log("No valid transactions found - this is expected if all transactions have missing inputs or are not valid")
+	}
+}
