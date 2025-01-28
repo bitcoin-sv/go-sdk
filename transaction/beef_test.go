@@ -685,3 +685,54 @@ func TestBeefEdgeCases(t *testing.T) {
 		}
 	})
 }
+
+func TestBeefMergeBeefBytes(t *testing.T) {
+	// Create first BEEF object
+	beefBytes1, err := hex.DecodeString(BEEFSet)
+	require.NoError(t, err)
+	beef1, err := NewBeefFromBytes(beefBytes1)
+	require.NoError(t, err)
+
+	// Create a minimal second BEEF object with a single transaction
+	buf := new(bytes.Buffer)
+
+	// Write version (BEEF_V2)
+	err = binary.Write(buf, binary.LittleEndian, BEEF_V2)
+	require.NoError(t, err)
+
+	// Write number of BUMPs (0)
+	buf.Write(VarInt(0).Bytes())
+
+	// Write number of transactions (1)
+	buf.Write(VarInt(1).Bytes())
+
+	// Write one RawTx transaction
+	buf.WriteByte(byte(RawTx))
+
+	// Create a simple transaction
+	tx := &Transaction{
+		Version:  1,
+		Inputs:   []*TransactionInput{},
+		Outputs:  []*TransactionOutput{},
+		LockTime: 0,
+	}
+
+	// Write the transaction
+	txBytes := tx.Bytes()
+	buf.Write(txBytes)
+
+	// Record initial state
+	initialTxCount := len(beef1.Transactions)
+
+	// Test MergeBeefBytes
+	err = beef1.MergeBeefBytes(buf.Bytes())
+	require.NoError(t, err)
+
+	// Verify transactions were merged
+	require.Equal(t, initialTxCount+1, len(beef1.Transactions), "Should have merged one transaction")
+
+	// Test merging invalid BEEF bytes
+	invalidBytes := []byte("invalid beef data")
+	err = beef1.MergeBeefBytes(invalidBytes)
+	require.Error(t, err, "Should error on invalid BEEF bytes")
+}
