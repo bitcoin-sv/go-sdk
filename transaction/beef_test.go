@@ -267,3 +267,51 @@ func TestBeefClone(t *testing.T) {
 		break // just test one
 	}
 }
+
+func TestBeefTrimknownTxIDs(t *testing.T) {
+	// Decode the BEEF data from hex string
+	beefBytes, err := hex.DecodeString(BEEFSet)
+	require.NoError(t, err)
+
+	// Create a new Beef object
+	beef, err := NewBeefFromBytes(beefBytes)
+	require.NoError(t, err)
+
+	// Convert some transactions to TxIDOnly format
+	var txidsToTrim []string
+	for txid, tx := range beef.Transactions {
+		if tx.Transaction != nil {
+			// Convert to TxIDOnly and add to our list to trim
+			beef.MakeTxidOnly(txid)
+			txidsToTrim = append(txidsToTrim, txid)
+			if len(txidsToTrim) >= 2 { // Convert 2 transactions to test with
+				break
+			}
+		}
+	}
+	require.GreaterOrEqual(t, len(txidsToTrim), 1, "Should have at least one transaction to trim")
+
+	// Verify the transactions are now in TxIDOnly format
+	for _, txid := range txidsToTrim {
+		tx := beef.findTxid(txid)
+		require.NotNil(t, tx)
+		require.Equal(t, TxIDOnly, tx.DataFormat)
+	}
+
+	// Trim the known TxIDs
+	beef.TrimknownTxIDs(txidsToTrim)
+
+	// Verify the transactions were removed
+	for _, txid := range txidsToTrim {
+		tx := beef.findTxid(txid)
+		require.Nil(t, tx, "Transaction should have been removed")
+	}
+
+	// Verify other transactions still exist
+	for txid, tx := range beef.Transactions {
+		require.NotContains(t, txidsToTrim, txid, "Remaining transaction should not have been in trim list")
+		if tx.DataFormat == TxIDOnly {
+			require.NotContains(t, txidsToTrim, txid, "TxIDOnly transaction that wasn't in trim list should still exist")
+		}
+	}
+}
