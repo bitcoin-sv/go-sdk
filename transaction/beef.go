@@ -464,7 +464,7 @@ func (b *Beef) RemoveExistingTxid(txid string) {
 }
 
 func (b *Beef) tryToValidateBumpIndex(tx *BeefTx) {
-	if tx.Transaction.MerklePath == nil {
+	if tx.DataFormat == TxIDOnly || tx.Transaction == nil || tx.Transaction.MerklePath == nil {
 		return
 	}
 	for _, node := range tx.Transaction.MerklePath.Path[0] {
@@ -512,11 +512,14 @@ func (b *Beef) MergeTransaction(tx *Transaction) (*BeefTx, error) {
 func (b *Beef) MergeTxidOnly(txid string) *BeefTx {
 	tx := b.findTxid(txid)
 	if tx == nil {
+		knownTxID, err := chainhash.NewHashFromHex(txid)
+		if err != nil {
+			return nil
+		}
 		tx = &BeefTx{
 			DataFormat: TxIDOnly,
-			KnownTxID:  &chainhash.Hash{},
+			KnownTxID:  knownTxID,
 		}
-		copy(tx.KnownTxID[:], txid)
 		b.Transactions[txid] = tx
 		b.tryToValidateBumpIndex(tx)
 	}

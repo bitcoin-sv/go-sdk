@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/chainhash"
+	script "github.com/bitcoin-sv/go-sdk/script"
 	"github.com/stretchr/testify/require"
 )
 
@@ -424,6 +425,7 @@ func TestBeefFindTransactionForSigning(t *testing.T) {
 			testTxid = txid
 			break
 		}
+
 	}
 	require.NotEmpty(t, testTxid, "Should have at least one transaction with full data")
 
@@ -798,4 +800,155 @@ func TestBeefMergeBeefTx(t *testing.T) {
 		require.Contains(t, err.Error(), "nil transaction")
 		require.Empty(t, beef.Transactions)
 	})
+}
+
+func TestBeefFindAtomicTransactionWithSourceTransactions(t *testing.T) {
+	// Create a BEEF object with transactions that have source transactions
+	beef := &Beef{
+		Version:      BEEF_V2,
+		BUMPs:        make([]*MerklePath, 0),
+		Transactions: make(map[string]*BeefTx),
+	}
+
+	// Create source transaction
+	sourceTx := &Transaction{
+		Version:  1,
+		Inputs:   make([]*TransactionInput, 0),
+		Outputs:  make([]*TransactionOutput, 0),
+		LockTime: 0,
+	}
+	sourceBeefTx := &BeefTx{
+		DataFormat:  RawTx,
+		Transaction: sourceTx,
+	}
+	sourceTxid := sourceTx.TxID().String()
+	beef.Transactions[sourceTxid] = sourceBeefTx
+
+	// Create main transaction that references the source
+	mainTx := &Transaction{
+		Version: 1,
+		Inputs: []*TransactionInput{
+			{
+				SourceTXID:        sourceTx.TxID(),
+				SourceTransaction: sourceTx,
+				SourceTxOutIndex:  0,
+				SequenceNumber:    0xFFFFFFFF,
+				UnlockingScript:   script.NewFromBytes([]byte{}),
+			},
+		},
+		Outputs:  make([]*TransactionOutput, 0),
+		LockTime: 0,
+	}
+	mainBeefTx := &BeefTx{
+		DataFormat:  RawTx,
+		Transaction: mainTx,
+	}
+	mainTxid := mainTx.TxID().String()
+	beef.Transactions[mainTxid] = mainBeefTx
+
+	// Create a BUMP for the source transaction
+	bump := &MerklePath{
+		BlockHeight: 1234,
+		Path: [][]*PathElement{
+			{
+				&PathElement{
+					Hash:   sourceTx.TxID(),
+					Offset: 0,
+				},
+			},
+		},
+	}
+	beef.BUMPs = append(beef.BUMPs, bump)
+
+	// Test FindAtomicTransaction
+	result := beef.FindAtomicTransaction(mainTxid)
+	require.NotNil(t, result)
+	require.Equal(t, mainTxid, result.TxID().String())
+
+	// Verify source transaction has merkle path
+	require.NotNil(t, mainTx.Inputs[0].SourceTransaction)
+	require.NotNil(t, mainTx.Inputs[0].SourceTransaction.MerklePath)
+}
+
+func TestBeefMergeTxidOnly(t *testing.T) {
+	// Create a BEEF object
+	beef := &Beef{
+		Version:      BEEF_V2,
+		BUMPs:        make([]*MerklePath, 0),
+		Transactions: make(map[string]*BeefTx),
+	}
+
+	// Create a transaction ID
+	txidBytes, err := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000001")
+	require.NoError(t, err)
+	txid, err := chainhash.NewHash(txidBytes)
+	require.NoError(t, err)
+
+	// Test MergeTxidOnly
+	result := beef.MergeTxidOnly(txid.String())
+	require.NotNil(t, result)
+	require.Equal(t, TxIDOnly, result.DataFormat)
+	require.NotNil(t, result.KnownTxID)
+	require.Equal(t, txid.String(), result.KnownTxID.String())
+	require.Nil(t, result.Transaction)
+
+	// Verify the transaction was added to the BEEF object
+	require.Len(t, beef.Transactions, 1)
+	require.Contains(t, beef.Transactions, txid.String())
+
+	// Test merging the same txid again
+	result2 := beef.MergeTxidOnly(txid.String())
+	require.NotNil(t, result2)
+	require.Equal(t, result, result2)
+	require.Len(t, beef.Transactions, 1)
+}
+
+func TestBeefFindBumpWithNilBumpIndex(t *testing.T) {
+	// Create a BEEF object
+	beef := &Beef{
+		Version:      BEEF_V2,
+		BUMPs:        make([]*MerklePath, 0),
+		Transactions: make(map[string]*BeefTx),
+	}
+
+	// Create a transaction with a source transaction
+	sourceTx := &Transaction{
+		Version:  1,
+		Inputs:   make([]*TransactionInput, 0),
+		Outputs:  make([]*TransactionOutput, 0),
+		LockTime: 0,
+	}
+
+	mainTx := &Transaction{
+		Version: 1,
+		Inputs: []*TransactionInput{
+			{
+				SourceTXID:        sourceTx.TxID(),
+				SourceTransaction: sourceTx,
+				SourceTxOutIndex:  0,
+				SequenceNumber:    0xFFFFFFFF,
+				UnlockingScript:   script.NewFromBytes([]byte{}),
+			},
+		},
+		Outputs:  make([]*TransactionOutput, 0),
+		LockTime: 0,
+	}
+
+	// Add transactions to BEEF
+	beef.Transactions[sourceTx.TxID().String()] = &BeefTx{
+		DataFormat:  RawTx,
+		Transaction: sourceTx,
+	}
+	beef.Transactions[mainTx.TxID().String()] = &BeefTx{
+		DataFormat:  RawTx,
+		Transaction: mainTx,
+	}
+
+	// Test FindBump with no BUMPs (nil bumpIndex)
+	result := beef.FindBump(mainTx.TxID().String())
+	require.Nil(t, result)
+
+	// Verify the code path for checking source transactions was executed
+	// This is mainly to cover the uncovered lines, as the functionality
+	// is already tested in other test cases
 }
