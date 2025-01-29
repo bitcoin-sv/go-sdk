@@ -952,3 +952,77 @@ func TestBeefFindBumpWithNilBumpIndex(t *testing.T) {
 	// This is mainly to cover the uncovered lines, as the functionality
 	// is already tested in other test cases
 }
+
+func TestBeefBytes(t *testing.T) {
+	t.Run("serialize and deserialize", func(t *testing.T) {
+		// Create a BEEF object with different types of transactions
+		beef := &Beef{
+			Version:      BEEF_V2,
+			BUMPs:        make([]*MerklePath, 0),
+			Transactions: make(map[string]*BeefTx),
+		}
+
+		// Add a TxIDOnly transaction
+		txidBytes, err := hex.DecodeString("0000000000000000000000000000000000000000000000000000000000000001")
+		require.NoError(t, err)
+		txid, err := chainhash.NewHash(txidBytes)
+		require.NoError(t, err)
+		beef.MergeTxidOnly(txid.String())
+
+		// Add a RawTx transaction
+		tx := &Transaction{
+			Version:  1,
+			Inputs:   make([]*TransactionInput, 0),
+			Outputs:  make([]*TransactionOutput, 0),
+			LockTime: 0,
+		}
+		beefTx, err := beef.MergeRawTx(tx.Bytes(), nil)
+		require.NoError(t, err)
+		require.Equal(t, RawTx, beefTx.DataFormat)
+
+		// Add a RawTxAndBumpIndex transaction
+		bump := &MerklePath{
+			BlockHeight: 1234,
+			Path: [][]*PathElement{
+				{
+					&PathElement{
+						Hash:   txid,
+						Offset: 0,
+					},
+				},
+			},
+		}
+		beef.BUMPs = append(beef.BUMPs, bump)
+		bumpIndex := 0
+		tx2 := &Transaction{
+			Version:  1,
+			Inputs:   make([]*TransactionInput, 0),
+			Outputs:  make([]*TransactionOutput, 0),
+			LockTime: 0,
+		}
+		beefTx2, err := beef.MergeRawTx(tx2.Bytes(), &bumpIndex)
+		require.NoError(t, err)
+		require.Equal(t, RawTxAndBumpIndex, beefTx2.DataFormat)
+
+		// Serialize to bytes
+		bytes, err := beef.Bytes()
+		require.NoError(t, err)
+
+		// Deserialize and verify
+		beef2, err := NewBeefFromBytes(bytes)
+		require.NoError(t, err)
+		require.Equal(t, beef.Version, beef2.Version)
+		require.Equal(t, len(beef.BUMPs), len(beef2.BUMPs))
+		require.Equal(t, len(beef.Transactions), len(beef2.Transactions))
+
+		// Verify transactions maintained their format
+		for txid, tx := range beef.Transactions {
+			tx2, ok := beef2.Transactions[txid]
+			require.True(t, ok)
+			require.Equal(t, tx.DataFormat, tx2.DataFormat)
+			if tx.DataFormat == TxIDOnly {
+				require.Equal(t, tx.KnownTxID.String(), tx2.KnownTxID.String())
+			}
+		}
+	})
+}
