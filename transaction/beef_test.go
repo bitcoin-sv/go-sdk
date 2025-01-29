@@ -1026,3 +1026,68 @@ func TestBeefBytes(t *testing.T) {
 		}
 	})
 }
+
+func TestBeefAddComputedLeaves(t *testing.T) {
+	// Create a BEEF object with a BUMP that has incomplete leaves
+	beef := &Beef{
+		Version:      BEEF_V2,
+		BUMPs:        make([]*MerklePath, 0),
+		Transactions: make(map[string]*BeefTx),
+	}
+
+	// Create leaf hashes
+	leaf1, _ := chainhash.NewHashFromHex("0000000000000000000000000000000000000000000000000000000000000001")
+	leaf2, _ := chainhash.NewHashFromHex("0000000000000000000000000000000000000000000000000000000000000002")
+
+	// Create a BUMP with two leaves in row 0 and no computed parent in row 1
+	bump := &MerklePath{
+		BlockHeight: 1234,
+		Path: [][]*PathElement{
+			{
+				&PathElement{Hash: leaf1, Offset: 0}, // Left leaf
+				&PathElement{Hash: leaf2, Offset: 1}, // Right leaf
+			},
+			{}, // Empty row for parent
+		},
+	}
+	beef.BUMPs = append(beef.BUMPs, bump)
+
+	// Call AddComputedLeaves
+	beef.AddComputedLeaves()
+
+	// Verify the parent hash was computed and added
+	require.Len(t, beef.BUMPs[0].Path[1], 1, "Should have one computed parent hash")
+	require.Equal(t, uint64(0), beef.BUMPs[0].Path[1][0].Offset, "Parent offset should be 0")
+	expectedParent := MerkleTreeParent(leaf1, leaf2)
+	require.Equal(t, expectedParent.String(), beef.BUMPs[0].Path[1][0].Hash.String(), "Parent hash should match")
+
+	// Test findLeafByOffset
+	foundLeaf := findLeafByOffset(beef.BUMPs[0].Path[0], 0)
+	require.NotNil(t, foundLeaf, "Should find leaf at offset 0")
+	require.Equal(t, leaf1.String(), foundLeaf.Hash.String(), "Found leaf should match")
+
+	foundLeaf = findLeafByOffset(beef.BUMPs[0].Path[0], 1)
+	require.NotNil(t, foundLeaf, "Should find leaf at offset 1")
+	require.Equal(t, leaf2.String(), foundLeaf.Hash.String(), "Found leaf should match")
+
+	foundLeaf = findLeafByOffset(beef.BUMPs[0].Path[0], 2)
+	require.Nil(t, foundLeaf, "Should not find leaf at offset 2")
+
+	// Test case where right leaf is missing
+	bump2 := &MerklePath{
+		BlockHeight: 1235,
+		Path: [][]*PathElement{
+			{
+				&PathElement{Hash: leaf1, Offset: 0}, // Left leaf only
+			},
+			{}, // Empty row for parent
+		},
+	}
+	beef.BUMPs = append(beef.BUMPs, bump2)
+
+	// Call AddComputedLeaves again
+	beef.AddComputedLeaves()
+
+	// Verify no parent was computed for bump2 since right leaf is missing
+	require.Empty(t, beef.BUMPs[1].Path[1], "Should not compute parent when right leaf is missing")
+}
