@@ -106,7 +106,47 @@ func NewBeefFromBytes(beef []byte) (*Beef, error) {
 	}
 
 	if version == BEEF_V1 {
-		return nil, fmt.Errorf("use NewTransactionFromBEEF to parse V1 BEEF")
+		BUMPs, err := readBUMPs(reader)
+		if err != nil {
+			return nil, err
+		}
+
+		txs, _, err := readAllTransactions(reader, BUMPs)
+		if err != nil {
+			return nil, err
+		}
+
+		// run through the txs map and convert to BeefTx
+		beefTxs := make(map[string]*BeefTx, len(txs))
+		for _, tx := range txs {
+			if tx.MerklePath != nil {
+				// find which bump index this tx is in
+				idx := -1
+				for i, bump := range BUMPs {
+					for _, leaf := range bump.Path[0] {
+						if leaf.Hash.String() == tx.TxID().String() {
+							idx = i
+						}
+					}
+				}
+				beefTxs[tx.TxID().String()] = &BeefTx{
+					DataFormat:  RawTxAndBumpIndex,
+					Transaction: tx,
+					BumpIndex:   idx,
+				}
+			} else {
+				beefTxs[tx.TxID().String()] = &BeefTx{
+					DataFormat:  RawTx,
+					Transaction: tx,
+				}
+			}
+		}
+
+		return &Beef{
+			Version:      version,
+			BUMPs:        bumps,
+			Transactions: beefTxs,
+		}, nil
 	}
 
 	BUMPs, err := readBUMPs(reader)
@@ -155,7 +195,15 @@ func readBUMPs(reader *bytes.Reader) ([]*MerklePath, error) {
 	return BUMPs, nil
 }
 
-func readTransactions(reader *bytes.Reader, BUMPs []*MerklePath) (*Transaction, error) {
+func readTransactionsGetLast(reader *bytes.Reader, BUMPs []*MerklePath) (*Transaction, error) {
+	_, tx, err := readAllTransactions(reader, BUMPs)
+	if err != nil {
+		return nil, err
+	}
+	return tx, nil
+}
+
+func readAllTransactions(reader *bytes.Reader, BUMPs []*MerklePath) (map[string]*Transaction, *Transaction, error) {
 	var numberOfTransactions VarInt
 	_, err := numberOfTransactions.ReadFrom(reader)
 	if err != nil {
@@ -190,13 +238,13 @@ func readTransactions(reader *bytes.Reader, BUMPs []*MerklePath) (*Transaction, 
 			if sourceObj, ok := transactions[sourceTxid]; ok {
 				input.SourceTransaction = sourceObj
 			} else if tx.MerklePath == nil {
-				panic(fmt.Sprintf("Reference to unknown TXID in BUMP: %s", sourceTxid))
+				panic(fmt.Sprintf("There is no Merkle Path or Source Transaction for outpoint: %s, %d", sourceTxid, input.SourceTxOutIndex))
 			}
 		}
 		transactions[txid.String()] = tx
 	}
 
-	return tx, nil
+	return transactions, tx, nil
 }
 
 func NewTransactionFromBEEFHex(beefHex string) (*Transaction, error) {
