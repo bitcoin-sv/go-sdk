@@ -144,7 +144,7 @@ func NewBeefFromBytes(beef []byte) (*Beef, error) {
 
 		return &Beef{
 			Version:      version,
-			BUMPs:        bumps,
+			BUMPs:        BUMPs,
 			Transactions: beefTxs,
 		}, nil
 	}
@@ -207,7 +207,7 @@ func readAllTransactions(reader *bytes.Reader, BUMPs []*MerklePath) (map[string]
 	var numberOfTransactions VarInt
 	_, err := numberOfTransactions.ReadFrom(reader)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	transactions := make(map[string]*Transaction, 0)
@@ -216,20 +216,20 @@ func readAllTransactions(reader *bytes.Reader, BUMPs []*MerklePath) (map[string]
 		tx = &Transaction{}
 		_, err = tx.ReadFrom(reader)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		txid := tx.TxID()
 
 		hasBump := make([]byte, 1)
 		_, err = reader.Read(hasBump)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if hasBump[0] != 0 {
 			var pathIndex VarInt
 			_, err = pathIndex.ReadFrom(reader)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			tx.MerklePath = BUMPs[int(pathIndex)]
 		}
@@ -238,7 +238,11 @@ func readAllTransactions(reader *bytes.Reader, BUMPs []*MerklePath) (map[string]
 			if sourceObj, ok := transactions[sourceTxid]; ok {
 				input.SourceTransaction = sourceObj
 			} else if tx.MerklePath == nil {
-				panic(fmt.Sprintf("There is no Merkle Path or Source Transaction for outpoint: %s, %d", sourceTxid, input.SourceTxOutIndex))
+				panic(fmt.Sprintf(
+					"There is no Merkle Path or Source Transaction for outpoint: %s, %d",
+					sourceTxid,
+					input.SourceTxOutIndex,
+				))
 			}
 		}
 		transactions[txid.String()] = tx
