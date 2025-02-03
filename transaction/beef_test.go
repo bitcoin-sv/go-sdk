@@ -1091,3 +1091,11 @@ func TestBeefAddComputedLeaves(t *testing.T) {
 	// Verify no parent was computed for bump2 since right leaf is missing
 	require.Empty(t, beef.BUMPs[1].Path[1], "Should not compute parent when right leaf is missing")
 }
+
+func TestBeefFromV1(t *testing.T) {
+	beefData, err := hex.DecodeString(BRC62Hex)
+	require.NoError(t, err)
+	beef, err := NewBeefFromBytes(beefData)
+	require.NoError(t, err)
+	require.NotNil(t, beef)
+}
