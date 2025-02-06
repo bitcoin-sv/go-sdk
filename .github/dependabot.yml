@@ -10,11 +10,12 @@ updates:
       time: "10:00"
       timezone: "America/New_York"
     reviewers:
-      - "shruggr"
+      - "galt-tr"
+      - "sirdeggen"
       - "rohenaz"
+      - "jonesjBSV"
     assignees:
-      - "shruggr"
-      - "rohenaz"
+      - "galt-tr"
     labels:
       - "chore"
     open-pull-requests-limit: 10
@@ -27,11 +28,12 @@ updates:
       interval: "weekly"
       day: "monday"
     reviewers:
-      - "shruggr"
+      - "galt-tr"
+      - "sirdeggen"
       - "rohenaz"
+      - "jonesjBSV"
     assignees:
-      - "shruggr"
-      - "rohenaz"
+      - "galt-tr"
     labels:
       - "chore"
     open-pull-requests-limit: 10
