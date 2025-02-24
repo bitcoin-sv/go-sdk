@@ -3,6 +3,7 @@ package message
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -11,17 +12,17 @@ import (
 )
 
 // BRC-78: https://github.com/bitcoin-sv/BRCs/blob/master/peer-to-peer/0078.md
-const VERSION = "42423301"
+const VERSION = "42421033"
 
 var VERSION_BYTES = []byte{0x42, 0x42, 0x10, 0x33}
 
 // Encrypt encrypts a message using the sender's private key and the recipient's public key.
 func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]byte, error) {
-	var keyID [8]byte
+	var keyID [32]byte
 	if _, err := rand.Read(keyID[:]); err != nil {
 		return nil, err
 	}
-	keyIDBase64 := hex.EncodeToString(keyID[:])
+	keyIDBase64 := base64.StdEncoding.EncodeToString(keyID[:])
 	invoiceNumber := "2-message encryption-" + keyIDBase64
 	signingPriv, err := sender.DeriveChild(recipient, invoiceNumber)
 	if err != nil {
@@ -53,7 +54,7 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 
 	encryptedMessage := append(version, senderPublicKey...)
 	encryptedMessage = append(encryptedMessage, recipientDER...)
-	encryptedMessage = append(encryptedMessage, keyID[:8]...)
+	encryptedMessage = append(encryptedMessage, keyID[:]...)
 	encryptedMessage = append(encryptedMessage, ciphertext...)
 	return encryptedMessage, nil
 }
@@ -96,7 +97,7 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 		errorStr := "the encrypted message expects a recipient public key of %x, but the provided key is %x"
 		return nil, fmt.Errorf(errorStr, expectedRecipientDER, actualRecipientDER)
 	}
-	keyID := make([]byte, 8)
+	keyID := make([]byte, 32)
 	_, err = io.ReadFull(reader, keyID)
 	if err != nil {
 		return nil, err
@@ -106,7 +107,7 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	invoiceNumber := "2-message encryption-" + hex.EncodeToString(keyID)
+	invoiceNumber := "2-message encryption-" + base64.StdEncoding.EncodeToString(keyID)
 	signingPub, err := sender.DeriveChild(recipient, invoiceNumber)
 	if err != nil {
 		return nil, err
