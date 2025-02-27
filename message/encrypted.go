@@ -14,8 +14,6 @@ import (
 // BRC-78: https://github.com/bitcoin-sv/BRCs/blob/master/peer-to-peer/0078.md
 const VERSION = "42421033"
 
-var VERSION_BYTES = []byte{0x42, 0x42, 0x10, 0x33}
-
 // Encrypt encrypts a message using the sender's private key and the recipient's public key.
 func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]byte, error) {
 	var keyID [32]byte

@@ -9,6 +9,9 @@ import (
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 )
 
+// https://github.com/bitcoin-sv/BRCs/blob/master/peer-to-peer/0077.md
+var VERSION_BYTES = []byte{0x42, 0x42, 0x33, 0x01}
+
 type SignedMessage struct {
 	Version            []byte
 	SenderPublicKey    *ec.PublicKey
