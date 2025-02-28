@@ -135,7 +135,7 @@ func (o *ParsedOpcode) enforceMinimumDataPush() error {
 // Parse takes a *script.Script and returns a []interpreter.ParsedOp
 func (p *DefaultOpcodeParser) Parse(s *script.Script) (ParsedScript, error) {
 	scr := *s
-	parsedOps := make([]ParsedOpcode, 0, len(scr))
+	parsedOps := make([]ParsedOpcode, 0)
 	conditionalBlock := 0
 
 	for i := 0; i < len(scr); {
