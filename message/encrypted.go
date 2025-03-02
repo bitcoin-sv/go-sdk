@@ -65,16 +65,24 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 //   - @returns The decrypted message
 //     */
 func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
-	messageVersion := message[:4]
+	// 检查消息的最小长度：4字节版本 + 33字节发送者公钥 + 33字节接收者公钥 + 32字节keyID + 至少1字节加密数据
+	minLength := 4 + 33 + 33 + 32 + 1
+	if len(message) < minLength {
+		return nil, fmt.Errorf("message too short: expected at least %d bytes, got %d bytes", minLength, len(message))
+	}
+	
+	reader := bytes.NewReader(message)
+	messageVersion := make([]byte, 4)
+	_, err := io.ReadFull(reader, messageVersion)
+	if err != nil {
+		return nil, err
+	}
+	
 	if hex.EncodeToString(messageVersion) != VERSION {
 		errorStr := "message version mismatch: Expected %s, received %s"
 		return nil, fmt.Errorf(errorStr, VERSION, hex.EncodeToString(messageVersion))
 	}
-	reader := bytes.NewReader(message)
-	_, err := reader.Seek(4, io.SeekStart)
-	if err != nil {
-		return nil, err
-	}
+	
 	senderPublicKey := make([]byte, 33)
 	_, err = io.ReadFull(reader, senderPublicKey)
 	if err != nil {
