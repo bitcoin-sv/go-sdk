@@ -24,7 +24,7 @@ pull_request_rules:
       - "#approved-reviews-by>=1"
       - "#review-requested=0"
       - "#changes-requested-reviews-by=0"
-      - check-success='test (1.22.x, ubuntu-latest)'
+      - check-success='test (1.24.x, ubuntu-latest)'
       - check-success='Analyze (go)'
       - -title~=(?i)wip
       - label!=work-in-progress

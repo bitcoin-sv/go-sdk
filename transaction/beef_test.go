@@ -35,6 +35,9 @@ func TestFromBEEF(t *testing.T) {
 	expectedTxID := "ce70df889d5ba66a989b8e47294c751d19f948f004075cf265c4cbb2a7c97838"
 	actualTxID := tx.TxID().String()
 	require.Equal(t, expectedTxID, actualTxID, "Transaction ID does not match")
+
+	_, err = tx.collectAncestors(map[string]*Transaction{}, true)
+	require.NoError(t, err, "collectAncestors method failed")
 }
 
 func TestNewBEEFFromBytes(t *testing.T) {
@@ -1090,4 +1093,12 @@ func TestBeefAddComputedLeaves(t *testing.T) {
 
 	// Verify no parent was computed for bump2 since right leaf is missing
 	require.Empty(t, beef.BUMPs[1].Path[1], "Should not compute parent when right leaf is missing")
+}
+
+func TestBeefFromV1(t *testing.T) {
+	beefData, err := hex.DecodeString(BRC62Hex)
+	require.NoError(t, err)
+	beef, err := NewBeefFromBytes(beefData)
+	require.NoError(t, err)
+	require.NotNil(t, beef)
 }

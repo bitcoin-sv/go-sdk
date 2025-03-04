@@ -576,7 +576,7 @@ func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
 		return nil, err
 	}
 
-	transaction, err := readTransactions(reader, BUMPs)
+	transaction, err := readTransactionsGetLast(reader, BUMPs)
 	if err != nil {
 		return nil, err
 	}
