@@ -64,6 +64,7 @@ func TestDebugger_BeforeExecute(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, 1, timesCalled)
 		})
@@ -164,6 +165,7 @@ func TestDebugger_BeforeStep(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -264,6 +266,7 @@ func TestDebugger_AfterStep(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -365,6 +368,7 @@ func TestDebugger_BeforeExecuteOpcode(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -465,6 +469,7 @@ func TestDebugger_AfterExecuteOpcode(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -551,6 +556,7 @@ func TestDebugger_BeforeScriptChange(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -698,6 +704,7 @@ func TestDebugger_AfterExecution(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expStack, stack)
 			require.Equal(t, test.expOpcode, opcode)
@@ -758,6 +765,7 @@ func TestDebugger_AfterError(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expCalled, called)
 			if called {
@@ -824,6 +832,7 @@ func TestDebugger_AfterSuccess(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expCalled, called)
 			if called {
@@ -935,6 +944,7 @@ func TestDebugger_BeforeStackPush(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -1044,6 +1054,7 @@ func TestDebugger_AfterStackPush(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -1143,6 +1154,7 @@ func TestDebugger_BeforeStackPop(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -1248,6 +1260,7 @@ func TestDebugger_AfterStackPop(t *testing.T) {
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
+			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
