@@ -56,7 +56,7 @@ func TestEdgeCases(t *testing.T) {
 
 	message := make([]byte, 32)
 	for i := 0; i < 10000; i++ {
-		rand.Read(message)
+		_, _ = rand.Read(message)
 		signature, err := signingPriv.Sign(message)
 		require.NoError(t, err)
 

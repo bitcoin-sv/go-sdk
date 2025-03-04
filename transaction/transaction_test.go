@@ -160,7 +160,8 @@ func TestSignUnsigned(t *testing.T) {
 	}
 
 	// This should sign the inputs with the incorrect key which should change the sigs
-	cloneTx.Sign()
+	err = cloneTx.Sign()
+	require.NoError(t, err)
 	for i := range tx.Inputs {
 		require.NotEqual(t, tx.Inputs[i].UnlockingScript, cloneTx.Inputs[i].UnlockingScript)
 	}
