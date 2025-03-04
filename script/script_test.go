@@ -542,7 +542,7 @@ func TestSpendValid(t *testing.T) {
 			if err != nil {
 				t.Error(err)
 			}
-			tx.AddInputsFromUTXOs(&transaction.UTXO{
+			_ = tx.AddInputsFromUTXOs(&transaction.UTXO{
 				TxID:          prevTxid,
 				Vout:          prevIndex,
 				Satoshis:      1,
