@@ -90,12 +90,12 @@ func parseShortForm(scriptStr string) (*script.Script, error) {
 		// if parses as a plain number
 		if num, err := strconv.ParseInt(tok, 10, 64); err == nil {
 			if num == 0 {
-				scr.AppendOpcodes(script.Op0)
+				_ = scr.AppendOpcodes(script.Op0)
 			} else if num == -1 || (1 <= num && num <= 16) {
-				scr.AppendOpcodes((script.Op1 - 1) + byte(num))
+				_ = scr.AppendOpcodes((script.Op1 - 1) + byte(num))
 			} else {
 				n := &ScriptNumber{Val: big.NewInt(num)}
-				scr.AppendPushData(n.Bytes())
+				_ = scr.AppendPushData(n.Bytes())
 			}
 			continue
 		} else if bts, err := parseHex(tok); err == nil {
@@ -105,7 +105,7 @@ func parseShortForm(scriptStr string) (*script.Script, error) {
 			scr = append(scr, bts...)
 		} else if len(tok) >= 2 &&
 			tok[0] == '\'' && tok[len(tok)-1] == '\'' {
-			scr.AppendPushData([]byte(tok[1 : len(tok)-1]))
+			_ = scr.AppendPushData([]byte(tok[1 : len(tok)-1]))
 		} else if code, ok := shortFormOps[tok]; ok {
 			scr = append(scr, code)
 		} else {

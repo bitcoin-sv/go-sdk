@@ -151,7 +151,8 @@ func TestMerklePathCombine(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, pathBRoot, BRC74Root)
 
-		pathA.Combine(&pathB)
+		err = pathA.Combine(&pathB)
+		require.NoError(t, err)
 		pathARoot, err = pathA.ComputeRootHex(&BRC74TXID2)
 		require.NoError(t, err)
 		require.Equal(t, pathARoot, BRC74Root)
