@@ -1,11 +1,12 @@
 module github.com/bitcoin-sv/go-sdk
 
 go 1.22
+toolchain go1.23.6
 
 require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/stretchr/testify v1.9.0
-	golang.org/x/crypto v0.31.0
+	golang.org/x/crypto v0.35.0
 	golang.org/x/sync v0.6.0
 )
 
