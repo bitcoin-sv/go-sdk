@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/chainhash"
+	"github.com/stretchr/testify/require"
 )
 
 func TestWhatsOnChainGetBlockHeaderSuccess(t *testing.T) {
@@ -40,7 +41,7 @@ func TestWhatsOnChainGetBlockHeaderSuccess(t *testing.T) {
 		}
 		// Write the mock response
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(expectedHeader)
+		_ = json.NewEncoder(w).Encode(expectedHeader)
 	}))
 	defer ts.Close()
 
@@ -93,7 +94,7 @@ func TestWhatsOnChainGetBlockHeaderErrorResponse(t *testing.T) {
 	// Create a test server that returns 500 Internal Server Error
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Internal Server Error"))
+		_, _ = w.Write([]byte("Internal Server Error"))
 	}))
 	defer ts.Close()
 
@@ -123,7 +124,8 @@ func TestWhatsOnChainIsValidRootForHeightSuccess(t *testing.T) {
 	// Create a test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(expectedHeader)
+		err := json.NewEncoder(w).Encode(expectedHeader)
+		require.NoError(t, err)
 	}))
 	defer ts.Close()
 
@@ -154,7 +156,8 @@ func TestWhatsOnChainIsValidRootForHeightInvalidRoot(t *testing.T) {
 	// Create a test server
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(expectedHeader)
+		err := json.NewEncoder(w).Encode(expectedHeader)
+		require.NoError(t, err)
 	}))
 	defer ts.Close()
 
