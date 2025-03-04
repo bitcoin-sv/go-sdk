@@ -35,6 +35,9 @@ func TestFromBEEF(t *testing.T) {
 	expectedTxID := "ce70df889d5ba66a989b8e47294c751d19f948f004075cf265c4cbb2a7c97838"
 	actualTxID := tx.TxID().String()
 	require.Equal(t, expectedTxID, actualTxID, "Transaction ID does not match")
+
+	_, err = tx.collectAncestors(map[string]*Transaction{}, true)
+	require.NoError(t, err, "collectAncestors method failed")
 }
 
 func TestNewBEEFFromBytes(t *testing.T) {
