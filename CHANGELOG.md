@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file. The format 
 
 ## Table of Contents
 
+- [1.1.19 - 2025-03-04](#1119---2025-03-04)
 - [1.1.18 - 2025-01-28](#1118---2025-01-28)
 - [1.1.17 - 2024-12-24](#1117---2024-12-24)
 - [1.1.16 - 2024-12-01](#1116---2024-12-01)
@@ -25,13 +26,24 @@ All notable changes to this project will be documented in this file. The format 
 - [1.1.0 - 2024-08-19](#110---2024-08-19)
 - [1.0.0 - 2024-06-06](#100---2024-06-06)
 
+## [1.1.19] - 2025-03-04
+  ### Added
+  - Dependabot
+  - Mergify
+  ### Changed
+  - Parse Beef V1 into a Beef struct
+  - Fix memory allocation in script interpreter
+  - Fix Message encryption
+  - Update golangci-lint configuration and bump version
+  - Bump go and golangci-lint versions for github actions
+
 ## [1.1.18] - 2025-01-28
   ### Changed
   - Added support for BEEF v2 and AtomicBEEF
   - Update golang.org/x/crypto from v0.21.0 to v0.31.0
   - Update README to highlight examples and improve documentation
   - Update golangci-lint configuration to handle mixed receiver types
-  - update issue templates
+  - Update issue templates
   - Improved test coverage
 
 ## [1.1.17] - 2024-12-24
