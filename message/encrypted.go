@@ -3,6 +3,7 @@ package message
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -11,17 +12,15 @@ import (
 )
 
 // BRC-78: https://github.com/bitcoin-sv/BRCs/blob/master/peer-to-peer/0078.md
-const VERSION = "42423301"
-
-var VERSION_BYTES = []byte{0x42, 0x42, 0x10, 0x33}
+const VERSION = "42421033"
 
 // Encrypt encrypts a message using the sender's private key and the recipient's public key.
 func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]byte, error) {
-	var keyID [8]byte
+	var keyID [32]byte
 	if _, err := rand.Read(keyID[:]); err != nil {
 		return nil, err
 	}
-	keyIDBase64 := hex.EncodeToString(keyID[:])
+	keyIDBase64 := base64.StdEncoding.EncodeToString(keyID[:])
 	invoiceNumber := "2-message encryption-" + keyIDBase64
 	signingPriv, err := sender.DeriveChild(recipient, invoiceNumber)
 	if err != nil {
@@ -53,7 +52,7 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 
 	encryptedMessage := append(version, senderPublicKey...)
 	encryptedMessage = append(encryptedMessage, recipientDER...)
-	encryptedMessage = append(encryptedMessage, keyID[:8]...)
+	encryptedMessage = append(encryptedMessage, keyID[:]...)
 	encryptedMessage = append(encryptedMessage, ciphertext...)
 	return encryptedMessage, nil
 }
@@ -66,16 +65,24 @@ func Encrypt(message []byte, sender *ec.PrivateKey, recipient *ec.PublicKey) ([]
 //   - @returns The decrypted message
 //     */
 func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
-	messageVersion := message[:4]
+	// 检查消息的最小长度：4字节版本 + 33字节发送者公钥 + 33字节接收者公钥 + 32字节keyID + 至少1字节加密数据
+	minLength := 4 + 33 + 33 + 32 + 1
+	if len(message) < minLength {
+		return nil, fmt.Errorf("message too short: expected at least %d bytes, got %d bytes", minLength, len(message))
+	}
+	
+	reader := bytes.NewReader(message)
+	messageVersion := make([]byte, 4)
+	_, err := io.ReadFull(reader, messageVersion)
+	if err != nil {
+		return nil, err
+	}
+	
 	if hex.EncodeToString(messageVersion) != VERSION {
 		errorStr := "message version mismatch: Expected %s, received %s"
 		return nil, fmt.Errorf(errorStr, VERSION, hex.EncodeToString(messageVersion))
 	}
-	reader := bytes.NewReader(message)
-	_, err := reader.Seek(4, io.SeekStart)
-	if err != nil {
-		return nil, err
-	}
+	
 	senderPublicKey := make([]byte, 33)
 	_, err = io.ReadFull(reader, senderPublicKey)
 	if err != nil {
@@ -96,7 +103,7 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 		errorStr := "the encrypted message expects a recipient public key of %x, but the provided key is %x"
 		return nil, fmt.Errorf(errorStr, expectedRecipientDER, actualRecipientDER)
 	}
-	keyID := make([]byte, 8)
+	keyID := make([]byte, 32)
 	_, err = io.ReadFull(reader, keyID)
 	if err != nil {
 		return nil, err
@@ -106,7 +113,7 @@ func Decrypt(message []byte, recipient *ec.PrivateKey) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	invoiceNumber := "2-message encryption-" + hex.EncodeToString(keyID)
+	invoiceNumber := "2-message encryption-" + base64.StdEncoding.EncodeToString(keyID)
 	signingPub, err := sender.DeriveChild(recipient, invoiceNumber)
 	if err != nil {
 		return nil, err
