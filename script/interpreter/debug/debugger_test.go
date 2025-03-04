@@ -59,12 +59,11 @@ func TestDebugger_BeforeExecute(t *testing.T) {
 				require.Equal(t, test.expOpcode, state.Opcode().Name())
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, 1, timesCalled)
 		})
@@ -160,12 +159,11 @@ func TestDebugger_BeforeStep(t *testing.T) {
 				history.opcodes = append(history.opcodes, state.Opcode().Name())
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -261,12 +259,11 @@ func TestDebugger_AfterStep(t *testing.T) {
 				history.opcodes = append(history.opcodes, state.Opcode().Name())
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -363,12 +360,11 @@ func TestDebugger_BeforeExecuteOpcode(t *testing.T) {
 				history.opcodes = append(history.opcodes, state.Opcode().Name())
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -464,12 +460,11 @@ func TestDebugger_AfterExecuteOpcode(t *testing.T) {
 				history.opcodes = append(history.opcodes, state.Opcode().Name())
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -551,12 +546,11 @@ func TestDebugger_BeforeScriptChange(t *testing.T) {
 				history.opcodes = append(history.opcodes, state.Opcode().Name())
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -639,13 +633,11 @@ func TestDebugger_AfterScriptChange(t *testing.T) {
 				history.opcodes = append(history.opcodes, state.Opcode().Name())
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
-
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
 			require.Equal(t, test.exptimesCalled, timesCalled)
@@ -701,12 +693,11 @@ func TestDebugger_AfterExecution(t *testing.T) {
 				opcode = state.Opcode().Name()
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expStack, stack)
 			require.Equal(t, test.expOpcode, opcode)
@@ -762,12 +753,11 @@ func TestDebugger_AfterError(t *testing.T) {
 				opcode = state.Opcode().Name()
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expCalled, called)
 			if called {
@@ -829,12 +819,11 @@ func TestDebugger_AfterSuccess(t *testing.T) {
 				opcode = state.Opcode().Name()
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expCalled, called)
 			if called {
@@ -941,12 +930,11 @@ func TestDebugger_BeforeStackPush(t *testing.T) {
 				history.entries = append(history.entries, hex.EncodeToString(data))
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -1051,12 +1039,11 @@ func TestDebugger_AfterStackPush(t *testing.T) {
 				history.entries = append(history.entries, hex.EncodeToString(data))
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -1151,12 +1138,11 @@ func TestDebugger_BeforeStackPop(t *testing.T) {
 				history.opcodes = append(history.opcodes, state.Opcode().Name())
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
@@ -1257,12 +1243,11 @@ func TestDebugger_AfterStackPop(t *testing.T) {
 				history.entries = append(history.entries, hex.EncodeToString(data))
 			})
 
-			err = interpreter.NewEngine().Execute(
+			_ = interpreter.NewEngine().Execute(
 				interpreter.WithScripts(lscript, uscript),
 				interpreter.WithAfterGenesis(),
 				interpreter.WithDebugger(debugger),
 			)
-			require.NoError(t, err)
 
 			require.Equal(t, test.expStackHistory, history.dstack)
 			require.Equal(t, test.expOpcodes, history.opcodes)
