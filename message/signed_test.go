@@ -46,7 +46,7 @@ func TestSignedMessage(t *testing.T) {
 
 		_, err := Verify(message, signature, recipientPriv)
 		require.Error(t, err)
-		require.Equal(t, "message version mismatch: Expected 42421033, received 01421033", err.Error())
+		require.Equal(t, "message version mismatch: Expected 42423301, received 01423301", err.Error())
 	})
 
 }
