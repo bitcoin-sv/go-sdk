@@ -1173,11 +1173,13 @@ func hydrateInputs(t testing.TB, sourceTxs map[string]*SourceTx, inputs []*Trans
 		val := sourceTxs[sourceTxID]
 		if val == nil {
 			t.Fatalf("input %s not found in sourceTxs", sourceTxID)
-		}
-
-		input.SourceTransaction = val.Tx
-		if val.HadBeef {
-			continue
+		} else if val.Tx == nil {
+			t.Fatalf("sourceTx %s is nil", sourceTxID)
+		} else {
+			input.SourceTransaction = val.Tx
+			if val.HadBeef {
+				continue
+			}
 		}
 
 		hydrateInputs(t, sourceTxs, input.SourceTransaction.Inputs)
