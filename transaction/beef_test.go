@@ -9,6 +9,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"log"
 	"testing"
 
 	"github.com/bitcoin-sv/go-sdk/chainhash"
@@ -1130,6 +1131,7 @@ func TestBEEFGeneratedFromComplexTransactionTree2(t *testing.T) {
 	hydrateInputs(t, sources, theTx.Inputs)
 
 	// when:
+	log.Println("theTx", theTx.TxID().String())
 	beef, err := theTx.BEEFHex()
 	if err != nil {
 		t.Fatalf("failed to generate BEEF hex, %v", err)

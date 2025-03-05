@@ -219,7 +219,6 @@ func readAllTransactions(reader *bytes.Reader, BUMPs []*MerklePath) (map[string]
 			return nil, nil, err
 		}
 		txid := tx.TxID()
-
 		hasBump := make([]byte, 1)
 		_, err = reader.Read(hasBump)
 		if err != nil {
@@ -315,8 +314,9 @@ func (t *Transaction) BEEFHex() (string, error) {
 }
 
 func (t *Transaction) collectAncestors(txns map[string]*Transaction, allowPartial bool) ([]string, error) {
+	txid := t.TxID().String()
 	if t.MerklePath != nil {
-		return []string{t.TxID().String()}, nil
+		return []string{txid}, nil
 	}
 	ancestors := make([]string, 0)
 	for _, input := range t.Inputs {
@@ -327,18 +327,26 @@ func (t *Transaction) collectAncestors(txns map[string]*Transaction, allowPartia
 				return nil, fmt.Errorf("missing previous transaction for %s", t.TxID())
 			}
 		}
-		if _, ok := txns[input.SourceTXID.String()]; ok {
-			continue
-		}
-		txns[input.SourceTXID.String()] = input.SourceTransaction
+		sourceTxid := input.SourceTXID.String()
+		txns[sourceTxid] = input.SourceTransaction
 		if grands, err := input.SourceTransaction.collectAncestors(txns, allowPartial); err != nil {
 			return nil, err
 		} else {
 			ancestors = append(grands, ancestors...)
 		}
 	}
-	ancestors = append(ancestors, t.TxID().String())
-	return ancestors, nil
+	ancestors = append(ancestors, txid)
+
+	found := make(map[string]struct{})
+	results := make([]string, 0, len(ancestors))
+	for _, ancestor := range ancestors {
+		if _, ok := found[ancestor]; !ok {
+			results = append(results, ancestor)
+			found[ancestor] = struct{}{}
+		}
+	}
+
+	return results, nil
 }
 
 func (b *Beef) FindBump(txid string) *MerklePath {
