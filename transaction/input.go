@@ -23,8 +23,13 @@ sequence_no	               normally 0xFFFFFFFF; irrelevant unless transaction's 
                            lock_time is > 0
 */
 
-// DefaultSequenceNumber is the default starting sequence number
-const DefaultSequenceNumber uint32 = 0xFFFFFFFF
+const (
+	// DefaultSequenceNumber is the default starting sequence number
+	DefaultSequenceNumber uint32 = 0xFFFFFFFF
+
+	MB           = 1024 * 1024 // 1 MB in bytes
+	MaxSliceSize = 100 * MB    // 100 MB in bytes
+)
 
 // TransactionInput is a representation of a transaction input
 //
@@ -98,6 +103,9 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 		return bytesRead, err
 	}
 
+	if l >= MaxSliceSize {
+		return bytesRead, fmt.Errorf("scriptBytes size %d exceeds acceptable %d", l, MaxSliceSize)
+	}
 	scriptBytes := make([]byte, l)
 	n, err = io.ReadFull(r, scriptBytes)
 	bytesRead += int64(n)
@@ -135,6 +143,9 @@ func (i *TransactionInput) readFrom(r io.Reader, extended bool) (int64, error) {
 			return bytesRead, err
 		}
 
+		if scriptLen >= MaxSliceSize {
+			return bytesRead, fmt.Errorf("scriptBytes size %d exceeds acceptable %d", scriptLen, MaxSliceSize)
+		}
 		scriptBytes := make([]byte, scriptLen)
 		n, err := io.ReadFull(r, scriptBytes)
 		bytesRead += int64(n)

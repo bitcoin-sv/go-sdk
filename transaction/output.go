@@ -48,6 +48,9 @@ func (o *TransactionOutput) ReadFrom(r io.Reader) (int64, error) {
 		return bytesRead, err
 	}
 
+	if l >= MaxSliceSize {
+		return bytesRead, fmt.Errorf("scriptBytes size %d exceeds acceptable %d", l, MaxSliceSize)
+	}
 	scriptBytes := make([]byte, l)
 	n, err = io.ReadFull(r, scriptBytes)
 	bytesRead += int64(n)
