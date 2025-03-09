@@ -66,3 +66,11 @@ var NetworkNames = map[Network]string{
 	NetworkTestnet: "testnet",
 	NetworkLocal:   "local",
 }
+
+type MetaData struct {
+	Name        string
+	Description string
+	Icon        string
+	Version     string
+	InfoUrl     string
+}
