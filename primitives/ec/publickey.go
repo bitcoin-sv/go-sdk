@@ -205,6 +205,14 @@ func PublicKeyFromString(pubKeyHex string) (*PublicKey, error) {
 	return pubKey, nil
 }
 
+func PublicKeyFromBytes(pubKeyBytes []byte) (*PublicKey, error) {
+	pubKey, err := ParsePubKey(pubKeyBytes)
+	if err != nil {
+		return nil, err
+	}
+	return pubKey, nil
+}
+
 // validate key belongs on given curve
 func (p *PublicKey) Validate() bool {
 	return p.Curve.IsOnCurve(p.X, p.Y)
