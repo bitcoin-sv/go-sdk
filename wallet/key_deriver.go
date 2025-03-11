@@ -33,18 +33,18 @@ func (kd *KeyDeriver) DeriveSymmetricKey(protocol WalletProtocol, keyID string, 
 	// Derive both public and private keys
 	derivedPublicKey, err := kd.DerivePublicKey(protocol, keyID, counterparty, false)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to derive public key: %w", err)
 	}
 
 	derivedPrivateKey, err := kd.DerivePrivateKey(protocol, keyID, counterparty)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to derive private key: %w", err)
 	}
 
 	// Create shared secret
 	sharedSecret, err := derivedPrivateKey.DeriveSharedSecret(derivedPublicKey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create shared secret: %w", err)
 	}
 	if sharedSecret == nil {
 		return nil, fmt.Errorf("failed to derive shared secret")
@@ -58,20 +58,20 @@ func (kd *KeyDeriver) DerivePublicKey(protocol WalletProtocol, keyID string, cou
 	counterpartyKey := kd.NormalizeCounterparty(counterparty)
 	invoiceNumber, err := kd.ComputeInvoiceNumber(protocol, keyID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to compute invoice number: %w", err)
 	}
 
 	var pubKey *ec.PublicKey
 	if forSelf {
 		privKey, err := kd.privateKey.DeriveChild(counterpartyKey, invoiceNumber)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to derive child private key: %w", err)
 		}
 		pubKey = privKey.PubKey()
 	} else {
 		pubKey, err = counterpartyKey.DeriveChild(kd.privateKey, invoiceNumber)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to derive child public key: %w", err)
 		}
 	}
 	return pubKey, nil
@@ -86,7 +86,7 @@ func (kd *KeyDeriver) DerivePrivateKey(protocol WalletProtocol, keyID string, co
 
 	k, err := kd.privateKey.DeriveChild(counterpartyKey, invoiceNumber)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to derive child key: %w", err)
 	}
 	return k, nil
 }
