@@ -21,6 +21,11 @@ func NewKeyDeriver(privateKey *ec.PrivateKey) *KeyDeriver {
 }
 
 func (kd *KeyDeriver) DeriveSymmetricKey(protocol WalletProtocol, keyID string, counterparty WalletCounterparty) ([]byte, error) {
+	// Prevent deriving symmetric key for self
+	if counterparty.Type == CounterpartyTypeSelf {
+		return nil, fmt.Errorf("cannot derive symmetric key for self")
+	}
+
 	// If counterparty is 'anyone', use a fixed public key
 	if counterparty.Type == CounterpartyTypeAnyone {
 		_, fixedKey := ec.PrivateKeyFromBytes([]byte{1})
