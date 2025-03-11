@@ -5,14 +5,10 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"errors"
-	"fmt"
-	"io"
-	"regexp"
-	"strings"
-
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	transaction "github.com/bitcoin-sv/go-sdk/transaction/sighash"
+	"io"
 )
 
 type SecurityLevel int
@@ -42,15 +38,17 @@ type WalletCounterparty struct {
 }
 
 type Wallet struct {
-    privateKey *ec.PrivateKey
-    publicKey  *ec.PublicKey
+	privateKey *ec.PrivateKey
+	publicKey  *ec.PublicKey
+	keyDeriver *KeyDeriver
 }
 
 func NewWallet(privateKey *ec.PrivateKey) *Wallet {
-    return &Wallet{
-        privateKey: privateKey,
-        publicKey:  privateKey.PubKey(),
-    }
+	return &Wallet{
+		privateKey: privateKey,
+		publicKey:  privateKey.PubKey(),
+		keyDeriver: NewKeyDeriver(privateKey),
+	}
 }
 
 type WalletEncryptionArgs struct {
@@ -77,7 +75,7 @@ func (w *Wallet) Encrypt(args *WalletEncryptionArgs) (*WalletEncryptResult, erro
 		return nil, errors.New("counterparty public key required for other")
 	}
 
-	key := w.deriveSymmetricKey(args.ProtocolID, args.KeyID, args.Counterparty)
+	key := w.keyDeriver.DeriveSymmetricKey(args.ProtocolID, args.KeyID, args.Counterparty)
 	ciphertext, err := encryptData(key, args.Plaintext)
 	if err != nil {
 		return nil, err
@@ -90,99 +88,12 @@ func (w *Wallet) Decrypt(args *WalletEncryptionArgs) (*WalletDecryptResult, erro
 		return nil, errors.New("counterparty public key required for other")
 	}
 
-	key := w.deriveSymmetricKey(args.ProtocolID, args.KeyID, args.Counterparty)
+	key := w.keyDeriver.DeriveSymmetricKey(args.ProtocolID, args.KeyID, args.Counterparty)
 	plaintext, err := decryptData(key, args.Ciphertext)
 	if err != nil {
 		return nil, err
 	}
 	return &WalletDecryptResult{Plaintext: plaintext}, nil
-}
-
-func (w *Wallet) deriveSymmetricKey(protocol WalletProtocol, keyID string, counterparty WalletCounterparty) []byte {
-    // If counterparty is 'anyone', use a fixed public key
-    if counterparty.Type == CounterpartyTypeAnyone {
-        _, fixedKey := ec.PrivateKeyFromBytes([]byte{1})
-        counterparty = WalletCounterparty{
-            Type:         CounterpartyTypeOther,
-            Counterparty: fixedKey,
-        }
-    }
-
-    // Derive both public and private keys
-    derivedPublicKey := w.derivePublicKey(protocol, keyID, counterparty, false)
-    derivedPrivateKey := w.derivePrivateKey(protocol, keyID, counterparty)
-
-    // Create shared secret
-    sharedSecret, _ := derivedPrivateKey.DeriveSharedSecret(derivedPublicKey)
-    if sharedSecret == nil {
-        return nil
-    }
-
-    // Return the x coordinate of the shared secret point
-    return sharedSecret.X.Bytes()
-}
-
-func (w *Wallet) derivePublicKey(protocol WalletProtocol, keyID string, counterparty WalletCounterparty, forSelf bool) *ec.PublicKey {
-    counterpartyKey := w.normalizeCounterparty(counterparty)
-	var pubKey *ec.PublicKey
-    if forSelf {
-        privKey, _ := w.privateKey.DeriveChild(counterpartyKey, w.computeInvoiceNumber(protocol, keyID))
-		if privKey != nil {
-			pubKey = privKey.PubKey()
-		}
-    } else {
-		pubKey, _ = counterpartyKey.DeriveChild(w.privateKey, w.computeInvoiceNumber(protocol, keyID))
-	}
-	return pubKey
-}
-
-func (w *Wallet) derivePrivateKey(protocol WalletProtocol, keyID string, counterparty WalletCounterparty) *ec.PrivateKey {
-    counterpartyKey := w.normalizeCounterparty(counterparty)
-    k, _ := w.privateKey.DeriveChild(counterpartyKey, w.computeInvoiceNumber(protocol, keyID))
-	return k
-}
-
-func (w *Wallet) normalizeCounterparty(counterparty WalletCounterparty) *ec.PublicKey {
-    switch counterparty.Type {
-    case CounterpartyTypeSelf:
-        return w.privateKey.PubKey()
-    case CounterpartyTypeOther:
-        return counterparty.Counterparty
-    case CounterpartyTypeAnyone:
-        _, pub := ec.PrivateKeyFromBytes([]byte{1})
-		return pub
-    default:
-        return nil
-    }
-}
-
-func (w *Wallet) computeInvoiceNumber(protocol WalletProtocol, keyID string) string {
-    // Validate protocol security level
-    if protocol.SecurityLevel < 0 || protocol.SecurityLevel > 2 {
-        return ""
-    }
-
-    // Validate protocol name
-    protocolName := strings.ToLower(strings.TrimSpace(protocol.Protocol))
-    if len(protocolName) > 400 || len(protocolName) < 5 {
-        return ""
-    }
-    if strings.Contains(protocolName, "  ") {
-        return ""
-    }
-    if !regexp.MustCompile(`^[a-z0-9 ]+$`).MatchString(protocolName) {
-        return ""
-    }
-    if strings.HasSuffix(protocolName, " protocol") {
-        return ""
-    }
-
-    // Validate key ID
-    if len(keyID) > 800 || len(keyID) < 1 {
-        return ""
-    }
-
-    return fmt.Sprintf("%d-%s-%s", protocol.SecurityLevel, protocolName, keyID)
 }
 
 func encryptData(key, plaintext []byte) ([]byte, error) {
