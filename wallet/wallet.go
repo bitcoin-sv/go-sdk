@@ -59,8 +59,16 @@ type WalletEncryptionArgs struct {
 	Privileged       bool
 	PrivilegedReason string
 	SeekPermission   bool
-	Plaintext        []byte
-	Ciphertext       []byte
+}
+
+type WalletEncryptArgs struct {
+	WalletEncryptionArgs
+	Plaintext []byte
+}
+
+type WalletDecryptArgs struct {
+	WalletEncryptionArgs
+	Ciphertext []byte
 }
 
 type WalletEncryptResult struct {
@@ -71,7 +79,7 @@ type WalletDecryptResult struct {
 	Plaintext []byte
 }
 
-func (w *Wallet) Encrypt(args *WalletEncryptionArgs) (*WalletEncryptResult, error) {
+func (w *Wallet) Encrypt(args *WalletEncryptArgs) (*WalletEncryptResult, error) {
 	if args.Counterparty.Type == CounterpartyTypeOther && args.Counterparty.Counterparty == nil {
 		return nil, errors.New("counterparty public key required for other")
 	}
@@ -88,7 +96,7 @@ func (w *Wallet) Encrypt(args *WalletEncryptionArgs) (*WalletEncryptResult, erro
 	return &WalletEncryptResult{Ciphertext: ciphertext}, nil
 }
 
-func (w *Wallet) Decrypt(args *WalletEncryptionArgs) (*WalletDecryptResult, error) {
+func (w *Wallet) Decrypt(args *WalletDecryptArgs) (*WalletDecryptResult, error) {
 	if args.Counterparty.Type == CounterpartyTypeOther && args.Counterparty.Counterparty == nil {
 		return nil, errors.New("counterparty public key required for other")
 	}

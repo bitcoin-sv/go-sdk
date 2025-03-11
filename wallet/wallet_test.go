@@ -28,12 +28,14 @@ func TestWallet_EncryptDecryptCounterparty(t *testing.T) {
 	}
 
 	// Encrypt message
-	encryptArgs := &wallet.WalletEncryptionArgs{
-		ProtocolID: protocol,
-		KeyID:      "4",
-		Counterparty: wallet.WalletCounterparty{
-			Type:         wallet.CounterpartyTypeOther,
-			Counterparty: counterpartyKey.PubKey(),
+	encryptArgs := &wallet.WalletEncryptArgs{
+		WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+			ProtocolID: protocol,
+			KeyID:      "4",
+			Counterparty: wallet.WalletCounterparty{
+				Type:         wallet.CounterpartyTypeOther,
+				Counterparty: counterpartyKey.PubKey(),
+			},
 		},
 		Plaintext: sampleData,
 	}
@@ -43,12 +45,14 @@ func TestWallet_EncryptDecryptCounterparty(t *testing.T) {
 	assert.NotEqual(t, sampleData, encryptResult.Ciphertext)
 
 	// Decrypt message
-	decryptArgs := &wallet.WalletEncryptionArgs{
-		ProtocolID: protocol,
-		KeyID:      "4",
-		Counterparty: wallet.WalletCounterparty{
-			Type:         wallet.CounterpartyTypeOther,
-			Counterparty: userKey.PubKey(),
+	decryptArgs := &wallet.WalletDecryptArgs{
+		WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+			ProtocolID: protocol,
+			KeyID:      "4",
+			Counterparty: wallet.WalletCounterparty{
+				Type:         wallet.CounterpartyTypeOther,
+				Counterparty: userKey.PubKey(),
+			},
 		},
 		Ciphertext: encryptResult.Ciphertext,
 	}
