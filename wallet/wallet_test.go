@@ -62,21 +62,51 @@ func TestWallet_EncryptDecryptCounterparty(t *testing.T) {
 	assert.Equal(t, sampleData, decryptResult.Plaintext)
 
 	// Test error cases
-	// Wrong protocol
-	wrongProtocolArgs := *decryptArgs
-	wrongProtocolArgs.ProtocolID.Protocol = "wrong"
-	_, err = counterpartyWallet.Decrypt(&wrongProtocolArgs)
-	assert.Error(t, err)
+	t.Run("wrong protocol", func(t *testing.T) {
+		wrongProtocolArgs := *decryptArgs
+		wrongProtocolArgs.ProtocolID.Protocol = "wrong"
+		_, err := counterpartyWallet.Decrypt(&wrongProtocolArgs)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "cipher: message authentication failed")
+	})
 
-	// Wrong key ID
-	wrongKeyArgs := *decryptArgs
-	wrongKeyArgs.KeyID = "5"
-	_, err = counterpartyWallet.Decrypt(&wrongKeyArgs)
-	assert.Error(t, err)
+	t.Run("wrong key ID", func(t *testing.T) {
+		wrongKeyArgs := *decryptArgs
+		wrongKeyArgs.KeyID = "5"
+		_, err := counterpartyWallet.Decrypt(&wrongKeyArgs)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "cipher: message authentication failed")
+	})
 
-	// Wrong counterparty
-	wrongCounterpartyArgs := *decryptArgs
-	wrongCounterpartyArgs.Counterparty.Counterparty = counterpartyKey.PubKey()
-	_, err = counterpartyWallet.Decrypt(&wrongCounterpartyArgs)
-	assert.Error(t, err)
+	t.Run("wrong counterparty", func(t *testing.T) {
+		wrongCounterpartyArgs := *decryptArgs
+		wrongCounterpartyArgs.Counterparty.Counterparty = counterpartyKey.PubKey()
+		_, err := counterpartyWallet.Decrypt(&wrongCounterpartyArgs)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "cipher: message authentication failed")
+	})
+
+	t.Run("invalid protocol name", func(t *testing.T) {
+		invalidProtocolArgs := *decryptArgs
+		invalidProtocolArgs.ProtocolID.Protocol = "x"
+		_, err := counterpartyWallet.Decrypt(&invalidProtocolArgs)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "protocol names must be 5 characters or more")
+	})
+
+	t.Run("invalid key ID", func(t *testing.T) {
+		invalidKeyArgs := *decryptArgs
+		invalidKeyArgs.KeyID = ""
+		_, err := counterpartyWallet.Decrypt(&invalidKeyArgs)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "key IDs must be 1 character or more")
+	})
+
+	t.Run("invalid security level", func(t *testing.T) {
+		invalidSecurityArgs := *decryptArgs
+		invalidSecurityArgs.ProtocolID.SecurityLevel = -1
+		_, err := counterpartyWallet.Decrypt(&invalidSecurityArgs)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "protocol security level must be 0, 1, or 2")
+	})
 }
