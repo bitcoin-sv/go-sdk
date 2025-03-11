@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"errors"
+	"fmt"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
 	transaction "github.com/bitcoin-sv/go-sdk/transaction/sighash"
@@ -75,10 +76,14 @@ func (w *Wallet) Encrypt(args *WalletEncryptionArgs) (*WalletEncryptResult, erro
 		return nil, errors.New("counterparty public key required for other")
 	}
 
-	key := w.keyDeriver.DeriveSymmetricKey(args.ProtocolID, args.KeyID, args.Counterparty)
+	key, err := w.keyDeriver.DeriveSymmetricKey(args.ProtocolID, args.KeyID, args.Counterparty)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive symmetric key: %w", err)
+	}
+
 	ciphertext, err := encryptData(key, args.Plaintext)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to encrypt data: %w", err)
 	}
 	return &WalletEncryptResult{Ciphertext: ciphertext}, nil
 }
@@ -88,10 +93,14 @@ func (w *Wallet) Decrypt(args *WalletEncryptionArgs) (*WalletDecryptResult, erro
 		return nil, errors.New("counterparty public key required for other")
 	}
 
-	key := w.keyDeriver.DeriveSymmetricKey(args.ProtocolID, args.KeyID, args.Counterparty)
+	key, err := w.keyDeriver.DeriveSymmetricKey(args.ProtocolID, args.KeyID, args.Counterparty)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive symmetric key: %w", err)
+	}
+
 	plaintext, err := decryptData(key, args.Ciphertext)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to decrypt data: %w", err)
 	}
 	return &WalletDecryptResult{Plaintext: plaintext}, nil
 }

@@ -20,7 +20,7 @@ func NewKeyDeriver(privateKey *ec.PrivateKey) *KeyDeriver {
 	}
 }
 
-func (kd *KeyDeriver) DeriveSymmetricKey(protocol WalletProtocol, keyID string, counterparty WalletCounterparty) []byte {
+func (kd *KeyDeriver) DeriveSymmetricKey(protocol WalletProtocol, keyID string, counterparty WalletCounterparty) ([]byte, error) {
 	// If counterparty is 'anyone', use a fixed public key
 	if counterparty.Type == CounterpartyTypeAnyone {
 		_, fixedKey := ec.PrivateKeyFromBytes([]byte{1})
@@ -31,37 +31,64 @@ func (kd *KeyDeriver) DeriveSymmetricKey(protocol WalletProtocol, keyID string, 
 	}
 
 	// Derive both public and private keys
-	derivedPublicKey := kd.DerivePublicKey(protocol, keyID, counterparty, false)
-	derivedPrivateKey := kd.DerivePrivateKey(protocol, keyID, counterparty)
+	derivedPublicKey, err := kd.DerivePublicKey(protocol, keyID, counterparty, false)
+	if err != nil {
+		return nil, err
+	}
+
+	derivedPrivateKey, err := kd.DerivePrivateKey(protocol, keyID, counterparty)
+	if err != nil {
+		return nil, err
+	}
 
 	// Create shared secret
-	sharedSecret, _ := derivedPrivateKey.DeriveSharedSecret(derivedPublicKey)
+	sharedSecret, err := derivedPrivateKey.DeriveSharedSecret(derivedPublicKey)
+	if err != nil {
+		return nil, err
+	}
 	if sharedSecret == nil {
-		return nil
+		return nil, fmt.Errorf("failed to derive shared secret")
 	}
 
 	// Return the x coordinate of the shared secret point
-	return sharedSecret.X.Bytes()
+	return sharedSecret.X.Bytes(), nil
 }
 
-func (kd *KeyDeriver) DerivePublicKey(protocol WalletProtocol, keyID string, counterparty WalletCounterparty, forSelf bool) *ec.PublicKey {
+func (kd *KeyDeriver) DerivePublicKey(protocol WalletProtocol, keyID string, counterparty WalletCounterparty, forSelf bool) (*ec.PublicKey, error) {
 	counterpartyKey := kd.NormalizeCounterparty(counterparty)
+	invoiceNumber, err := kd.ComputeInvoiceNumber(protocol, keyID)
+	if err != nil {
+		return nil, err
+	}
+
 	var pubKey *ec.PublicKey
 	if forSelf {
-		privKey, _ := kd.privateKey.DeriveChild(counterpartyKey, kd.ComputeInvoiceNumber(protocol, keyID))
-		if privKey != nil {
-			pubKey = privKey.PubKey()
+		privKey, err := kd.privateKey.DeriveChild(counterpartyKey, invoiceNumber)
+		if err != nil {
+			return nil, err
 		}
+		pubKey = privKey.PubKey()
 	} else {
-		pubKey, _ = counterpartyKey.DeriveChild(kd.privateKey, kd.ComputeInvoiceNumber(protocol, keyID))
+		pubKey, err = counterpartyKey.DeriveChild(kd.privateKey, invoiceNumber)
+		if err != nil {
+			return nil, err
+		}
 	}
-	return pubKey
+	return pubKey, nil
 }
 
-func (kd *KeyDeriver) DerivePrivateKey(protocol WalletProtocol, keyID string, counterparty WalletCounterparty) *ec.PrivateKey {
+func (kd *KeyDeriver) DerivePrivateKey(protocol WalletProtocol, keyID string, counterparty WalletCounterparty) (*ec.PrivateKey, error) {
 	counterpartyKey := kd.NormalizeCounterparty(counterparty)
-	k, _ := kd.privateKey.DeriveChild(counterpartyKey, kd.ComputeInvoiceNumber(protocol, keyID))
-	return k
+	invoiceNumber, err := kd.ComputeInvoiceNumber(protocol, keyID)
+	if err != nil {
+		return nil, err
+	}
+
+	k, err := kd.privateKey.DeriveChild(counterpartyKey, invoiceNumber)
+	if err != nil {
+		return nil, err
+	}
+	return k, nil
 }
 
 func (kd *KeyDeriver) NormalizeCounterparty(counterparty WalletCounterparty) *ec.PublicKey {
@@ -78,31 +105,44 @@ func (kd *KeyDeriver) NormalizeCounterparty(counterparty WalletCounterparty) *ec
 	}
 }
 
-func (kd *KeyDeriver) ComputeInvoiceNumber(protocol WalletProtocol, keyID string) string {
+func (kd *KeyDeriver) ComputeInvoiceNumber(protocol WalletProtocol, keyID string) (string, error) {
 	// Validate protocol security level
 	if protocol.SecurityLevel < 0 || protocol.SecurityLevel > 2 {
-		return ""
+		return "", fmt.Errorf("protocol security level must be 0, 1, or 2")
 	}
 
 	// Validate protocol name
 	protocolName := strings.ToLower(strings.TrimSpace(protocol.Protocol))
-	if len(protocolName) > 400 || len(protocolName) < 5 {
-		return ""
+	if len(protocolName) > 400 {
+		// Special handling for specific linkage revelation
+		if strings.HasPrefix(protocolName, "specific linkage revelation ") {
+			if len(protocolName) > 430 {
+				return "", fmt.Errorf("specific linkage revelation protocol names must be 430 characters or less")
+			}
+		} else {
+			return "", fmt.Errorf("protocol names must be 400 characters or less")
+		}
+	}
+	if len(protocolName) < 5 {
+		return "", fmt.Errorf("protocol names must be 5 characters or more")
 	}
 	if strings.Contains(protocolName, "  ") {
-		return ""
+		return "", fmt.Errorf("protocol names cannot contain multiple consecutive spaces (\"  \")")
 	}
 	if !regexp.MustCompile(`^[a-z0-9 ]+$`).MatchString(protocolName) {
-		return ""
+		return "", fmt.Errorf("protocol names can only contain letters, numbers and spaces")
 	}
 	if strings.HasSuffix(protocolName, " protocol") {
-		return ""
+		return "", fmt.Errorf("no need to end your protocol name with \" protocol\"")
 	}
 
 	// Validate key ID
-	if len(keyID) > 800 || len(keyID) < 1 {
-		return ""
+	if len(keyID) > 800 {
+		return "", fmt.Errorf("key IDs must be 800 characters or less")
+	}
+	if len(keyID) < 1 {
+		return "", fmt.Errorf("key IDs must be 1 character or more")
 	}
 
-	return fmt.Sprintf("%d-%s-%s", protocol.SecurityLevel, protocolName, keyID)
+	return fmt.Sprintf("%d-%s-%s", protocol.SecurityLevel, protocolName, keyID), nil
 }
