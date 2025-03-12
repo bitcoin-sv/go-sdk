@@ -62,6 +62,10 @@ func TestNewBEEFFromBytes(t *testing.T) {
 	require.Equal(t, uint32(4022206466), beef.Version, "Version does not match")
 	require.Len(t, beef.BUMPs, 3, "BUMPs length does not match")
 	require.Len(t, beef.Transactions, 3, "Transactions length does not match")
+
+	binary.LittleEndian.PutUint32(beefBytes[0:4], 0xdeadbeef)
+	_, err = NewTransactionFromBEEF(beefBytes)
+	require.Error(t, err, "use NewBeefFromBytes to parse anything which isn't V1 BEEF or AtomicBEEF")
 }
 
 func TestBeefTransactionFinding(t *testing.T) {
