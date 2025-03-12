@@ -561,8 +561,9 @@ func (t *Transaction) AtomicBEEF(allowPartial bool) ([]byte, error) {
 // NewTransactionFromBEEF creates a new Transaction from BEEF bytes.
 func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
 	reader := bytes.NewReader(beef)
-	version, err := readVersion(reader)
-	if err != nil {
+
+	var version uint32
+	if err := binary.Read(reader, binary.LittleEndian, &version); err != nil {
 		return nil, err
 	}
 
