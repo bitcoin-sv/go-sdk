@@ -591,7 +591,7 @@ func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
 
 		return transaction, nil
 	} else {
-		return nil, fmt.Errorf("use NewBeefFromBytes to parse anything which isn't V1 BEEF")
+		return nil, fmt.Errorf("use NewBeefFromBytes to parse anything which isn't V1 BEEF or AtomicBEEF")
 	}
 
 }
