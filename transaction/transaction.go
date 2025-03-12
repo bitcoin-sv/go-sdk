@@ -562,24 +562,36 @@ func (t *Transaction) AtomicBEEF(allowPartial bool) ([]byte, error) {
 func NewTransactionFromBEEF(beef []byte) (*Transaction, error) {
 	reader := bytes.NewReader(beef)
 
-	version, err := readVersion(reader)
-	if err != nil {
+	var version uint32
+	if err := binary.Read(reader, binary.LittleEndian, &version); err != nil {
 		return nil, err
 	}
 
-	if version != BEEF_V1 {
-		return nil, fmt.Errorf("use NewBeefFromBytes to parse anything which isn't V1 BEEF")
+	if version == ATOMIC_BEEF {
+		hash := make([]byte, 32)
+		if _, err := io.ReadFull(reader, hash); err != nil {
+			return nil, err
+		} else if b, err := NewBeefFromBytes(beef[36:]); err != nil {
+			return nil, err
+		} else if txid, err := chainhash.NewHash(hash); err != nil {
+			return nil, err
+		} else {
+			return b.FindAtomicTransaction(txid.String()), nil
+		}
+	} else if version == BEEF_V1 {
+		BUMPs, err := readBUMPs(reader)
+		if err != nil {
+			return nil, err
+		}
+
+		transaction, err := readTransactionsGetLast(reader, BUMPs)
+		if err != nil {
+			return nil, err
+		}
+
+		return transaction, nil
+	} else {
+		return nil, fmt.Errorf("use NewBeefFromBytes to parse anything which isn't V1 BEEF or AtomicBEEF")
 	}
 
-	BUMPs, err := readBUMPs(reader)
-	if err != nil {
-		return nil, err
-	}
-
-	transaction, err := readTransactionsGetLast(reader, BUMPs)
-	if err != nil {
-		return nil, err
-	}
-
-	return transaction, nil
 }
