@@ -15,5 +15,3 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-
-replace github.com/bsv-blockchain/go-sdk => github.com/shruggr/go-sdk c8f50b2b0cbc823c7e1daa545c4c79cfe15b2be0
