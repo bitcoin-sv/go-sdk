@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/bsv-blockchain/go-sdk-sdk/script/interpreter"
-	"github.com/bsv-blockchain/go-sdk-sdk/script/interpreter/debug"
 	"github.com/bsv-blockchain/go-sdk/script"
+	"github.com/bsv-blockchain/go-sdk/script/interpreter"
+	"github.com/bsv-blockchain/go-sdk/script/interpreter/debug"
 )
 
 func ExampleDebugger_AfterStep() {

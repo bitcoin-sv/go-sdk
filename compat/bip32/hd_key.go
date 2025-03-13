@@ -3,10 +3,10 @@ package compat
 import (
 	"encoding/hex"
 
-	ec "github.com/bsv-blockchain/go-sdk-sdk/primitives/ec"
-	script "github.com/bsv-blockchain/go-sdk-sdk/script"
-	chaincfg "github.com/bsv-blockchain/go-sdk-sdk/transaction/chaincfg"
 	"github.com/bsv-blockchain/go-sdk/compat/bip39"
+	ec "github.com/bsv-blockchain/go-sdk/primitives/ec"
+	script "github.com/bsv-blockchain/go-sdk/script"
+	chaincfg "github.com/bsv-blockchain/go-sdk/transaction/chaincfg"
 )
 
 const (

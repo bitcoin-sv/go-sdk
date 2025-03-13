@@ -1,8 +1,8 @@
 package transaction
 
 import (
-	script "github.com/bsv-blockchain/go-sdk-sdk/script"
 	"github.com/bsv-blockchain/go-sdk/chainhash"
+	script "github.com/bsv-blockchain/go-sdk/script"
 )
 
 // UTXO an unspent transaction output, used for creating inputs

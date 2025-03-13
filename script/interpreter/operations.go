@@ -9,13 +9,13 @@ import (
 
 	"golang.org/x/crypto/ripemd160" //nolint:gosec // required
 
-	crypto "github.com/bsv-blockchain/go-sdk-sdk/primitives/hash"
-	script "github.com/bsv-blockchain/go-sdk-sdk/script"
-	"github.com/bsv-blockchain/go-sdk-sdk/script/interpreter/errs"
-	"github.com/bsv-blockchain/go-sdk-sdk/script/interpreter/scriptflag"
-	"github.com/bsv-blockchain/go-sdk-sdk/transaction"
-	sighash "github.com/bsv-blockchain/go-sdk-sdk/transaction/sighash"
 	ec "github.com/bsv-blockchain/go-sdk/primitives/ec"
+	crypto "github.com/bsv-blockchain/go-sdk/primitives/hash"
+	script "github.com/bsv-blockchain/go-sdk/script"
+	"github.com/bsv-blockchain/go-sdk/script/interpreter/errs"
+	"github.com/bsv-blockchain/go-sdk/script/interpreter/scriptflag"
+	"github.com/bsv-blockchain/go-sdk/transaction"
+	sighash "github.com/bsv-blockchain/go-sdk/transaction/sighash"
 )
 
 // Conditional execution constants.

@@ -6,10 +6,10 @@ import (
 	"mime"
 	"os"
 
-	script "github.com/bsv-blockchain/go-sdk-sdk/script"
-	"github.com/bsv-blockchain/go-sdk-sdk/transaction"
-	"github.com/bsv-blockchain/go-sdk-sdk/transaction/template/p2pkh"
 	ec "github.com/bsv-blockchain/go-sdk/primitives/ec"
+	script "github.com/bsv-blockchain/go-sdk/script"
+	"github.com/bsv-blockchain/go-sdk/transaction"
+	"github.com/bsv-blockchain/go-sdk/transaction/template/p2pkh"
 )
 
 func main() {

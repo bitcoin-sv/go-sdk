@@ -19,10 +19,10 @@ import (
 	"math/big"
 	"sync"
 
-	ec "github.com/bsv-blockchain/go-sdk-sdk/primitives/ec"
-	crypto "github.com/bsv-blockchain/go-sdk-sdk/primitives/hash"
-	chaincfg "github.com/bsv-blockchain/go-sdk-sdk/transaction/chaincfg"
 	base58 "github.com/bsv-blockchain/go-sdk/compat/base58"
+	ec "github.com/bsv-blockchain/go-sdk/primitives/ec"
+	crypto "github.com/bsv-blockchain/go-sdk/primitives/hash"
+	chaincfg "github.com/bsv-blockchain/go-sdk/transaction/chaincfg"
 )
 
 const (

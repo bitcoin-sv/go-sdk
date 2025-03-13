@@ -3,10 +3,10 @@ package p2pkh
 import (
 	"errors"
 
-	"github.com/bsv-blockchain/go-sdk-sdk/script"
-	"github.com/bsv-blockchain/go-sdk-sdk/transaction"
-	sighash "github.com/bsv-blockchain/go-sdk-sdk/transaction/sighash"
 	ec "github.com/bsv-blockchain/go-sdk/primitives/ec"
+	"github.com/bsv-blockchain/go-sdk/script"
+	"github.com/bsv-blockchain/go-sdk/transaction"
+	sighash "github.com/bsv-blockchain/go-sdk/transaction/sighash"
 )
 
 var (

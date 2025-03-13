@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"log"
 
-	opcodes "github.com/bsv-blockchain/go-sdk-sdk/script"
-	script "github.com/bsv-blockchain/go-sdk-sdk/script"
-	"github.com/bsv-blockchain/go-sdk-sdk/transaction/template/p2pkh"
 	ec "github.com/bsv-blockchain/go-sdk/primitives/ec"
+	opcodes "github.com/bsv-blockchain/go-sdk/script"
+	script "github.com/bsv-blockchain/go-sdk/script"
+	"github.com/bsv-blockchain/go-sdk/transaction/template/p2pkh"
 )
 
 func main() {

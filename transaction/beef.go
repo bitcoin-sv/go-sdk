@@ -6,9 +6,9 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/bsv-blockchain/go-sdk-sdk/transaction/chaintracker"
-	"github.com/bsv-blockchain/go-sdk-sdk/util"
 	"github.com/bsv-blockchain/go-sdk/chainhash"
+	"github.com/bsv-blockchain/go-sdk/transaction/chaintracker"
+	"github.com/bsv-blockchain/go-sdk/util"
 )
 
 // Beef is a set of Transactions and their MerklePaths.

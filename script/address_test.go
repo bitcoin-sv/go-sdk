@@ -4,8 +4,8 @@ import (
 	"encoding/hex"
 	"testing"
 
-	script "github.com/bsv-blockchain/go-sdk-sdk/script"
 	ec "github.com/bsv-blockchain/go-sdk/primitives/ec"
+	script "github.com/bsv-blockchain/go-sdk/script"
 	"github.com/stretchr/testify/require"
 )
 

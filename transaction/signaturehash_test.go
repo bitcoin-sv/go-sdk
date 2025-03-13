@@ -4,9 +4,9 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/bsv-blockchain/go-sdk-sdk/transaction"
-	sighash "github.com/bsv-blockchain/go-sdk-sdk/transaction/sighash"
 	script "github.com/bsv-blockchain/go-sdk/script"
+	"github.com/bsv-blockchain/go-sdk/transaction"
+	sighash "github.com/bsv-blockchain/go-sdk/transaction/sighash"
 	"github.com/stretchr/testify/require"
 )
 

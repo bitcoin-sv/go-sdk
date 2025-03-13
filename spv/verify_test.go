@@ -6,8 +6,8 @@ import (
 	"encoding/base64"
 	"testing"
 
-	feemodel "github.com/bsv-blockchain/go-sdk-sdk/transaction/fee_model"
 	"github.com/bsv-blockchain/go-sdk/transaction"
+	feemodel "github.com/bsv-blockchain/go-sdk/transaction/fee_model"
 	"github.com/stretchr/testify/require"
 )
 

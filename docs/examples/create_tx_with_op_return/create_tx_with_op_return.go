@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
-	ec "github.com/bsv-blockchain/go-sdk-sdk/primitives/ec"
-	"github.com/bsv-blockchain/go-sdk-sdk/script"
-	"github.com/bsv-blockchain/go-sdk-sdk/transaction"
-	"github.com/bsv-blockchain/go-sdk-sdk/transaction/template/p2pkh"
 	"github.com/bsv-blockchain/go-sdk/chainhash"
+	ec "github.com/bsv-blockchain/go-sdk/primitives/ec"
+	"github.com/bsv-blockchain/go-sdk/script"
+	"github.com/bsv-blockchain/go-sdk/transaction"
+	"github.com/bsv-blockchain/go-sdk/transaction/template/p2pkh"
 )
 
 func main() {

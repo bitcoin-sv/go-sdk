@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	ec "github.com/bsv-blockchain/go-sdk-sdk/primitives/ec"
-	script "github.com/bsv-blockchain/go-sdk-sdk/script"
 	compat "github.com/bsv-blockchain/go-sdk/compat/bip32"
+	ec "github.com/bsv-blockchain/go-sdk/primitives/ec"
+	script "github.com/bsv-blockchain/go-sdk/script"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

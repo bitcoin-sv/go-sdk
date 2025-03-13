@@ -8,8 +8,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/bsv-blockchain/go-sdk-sdk/script/interpreter/errs"
 	"github.com/bsv-blockchain/go-sdk/script"
+	"github.com/bsv-blockchain/go-sdk/script/interpreter/errs"
 	"github.com/stretchr/testify/require"
 )
 

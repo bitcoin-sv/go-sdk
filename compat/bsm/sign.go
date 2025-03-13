@@ -5,9 +5,9 @@ import (
 	"encoding/base64"
 	"errors"
 
-	crypto "github.com/bsv-blockchain/go-sdk-sdk/primitives/hash"
-	"github.com/bsv-blockchain/go-sdk-sdk/transaction"
 	ec "github.com/bsv-blockchain/go-sdk/primitives/ec"
+	crypto "github.com/bsv-blockchain/go-sdk/primitives/hash"
+	"github.com/bsv-blockchain/go-sdk/transaction"
 )
 
 const hBSV = "Bitcoin Signed Message:\n"
