@@ -14,11 +14,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 
-	"github.com/bitcoin-sv/go-sdk/chainhash"
-	script "github.com/bitcoin-sv/go-sdk/script"
-	"github.com/bitcoin-sv/go-sdk/script/interpreter"
-	"github.com/bitcoin-sv/go-sdk/script/testdata"
-	"github.com/bitcoin-sv/go-sdk/transaction"
+	script "github.com/bsv-blockchain/go-sdk-sdk/script"
+	"github.com/bsv-blockchain/go-sdk-sdk/script/interpreter"
+	"github.com/bsv-blockchain/go-sdk-sdk/script/testdata"
+	"github.com/bsv-blockchain/go-sdk-sdk/transaction"
+	"github.com/bsv-blockchain/go-sdk/chainhash"
 )
 
 func TestNewFromHex(t *testing.T) {

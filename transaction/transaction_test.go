@@ -5,12 +5,12 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/bitcoin-sv/go-sdk/chainhash"
-	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	"github.com/bitcoin-sv/go-sdk/script"
-	"github.com/bitcoin-sv/go-sdk/transaction"
-	feemodel "github.com/bitcoin-sv/go-sdk/transaction/fee_model"
-	"github.com/bitcoin-sv/go-sdk/transaction/template/p2pkh"
+	ec "github.com/bsv-blockchain/go-sdk-sdk/primitives/ec"
+	"github.com/bsv-blockchain/go-sdk-sdk/script"
+	"github.com/bsv-blockchain/go-sdk-sdk/transaction"
+	feemodel "github.com/bsv-blockchain/go-sdk-sdk/transaction/fee_model"
+	"github.com/bsv-blockchain/go-sdk-sdk/transaction/template/p2pkh"
+	"github.com/bsv-blockchain/go-sdk/chainhash"
 	"github.com/stretchr/testify/require"
 )
 

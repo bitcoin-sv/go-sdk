@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/binary"
 
-	"github.com/bitcoin-sv/go-sdk/script"
-	"github.com/bitcoin-sv/go-sdk/script/interpreter/errs"
+	"github.com/bsv-blockchain/go-sdk-sdk/script/interpreter/errs"
+	"github.com/bsv-blockchain/go-sdk/script"
 )
 
 // OpcodeParser parses *script.Script into a ParsedScript, and unparsing back

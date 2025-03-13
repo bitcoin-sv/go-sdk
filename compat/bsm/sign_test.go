@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"testing"
 
-	compat "github.com/bitcoin-sv/go-sdk/compat/bsm"
-	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	"github.com/bitcoin-sv/go-sdk/script"
+	ec "github.com/bsv-blockchain/go-sdk-sdk/primitives/ec"
+	"github.com/bsv-blockchain/go-sdk-sdk/script"
+	compat "github.com/bsv-blockchain/go-sdk/compat/bsm"
 )
 
 func TestSigningCompression(t *testing.T) {
