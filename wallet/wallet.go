@@ -7,9 +7,9 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
-	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
-	sighash "github.com/bitcoin-sv/go-sdk/transaction/sighash"
-	transaction "github.com/bitcoin-sv/go-sdk/transaction/sighash"
+	ec "github.com/bsv-blockchain/go-sdk/primitives/ec"
+	sighash "github.com/bsv-blockchain/go-sdk/transaction/sighash"
+	transaction "github.com/bsv-blockchain/go-sdk/transaction/sighash"
 	"io"
 )
 
