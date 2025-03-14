@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
@@ -196,9 +197,85 @@ var (
 	SignOutputsSingle SignOutputs = SignOutputs(sighash.Single)
 )
 
-func (w *Wallet) CreateSignature(args *CreateSignatureArgs, originator string) CreateSignatureResult {
-	// a := sighash.All
-	return CreateSignatureResult{
-		Signature: ec.Signature{},
+func (w *Wallet) CreateSignature(args *CreateSignatureArgs, originator string) (*CreateSignatureResult, error) {
+	if len(args.Data) == 0 && len(args.DashToDirectlySign) == 0 {
+		return nil, fmt.Errorf("args.data or args.hashToDirectlySign must be valid")
 	}
+
+	// Get hash to sign
+	var hash []byte
+	if len(args.DashToDirectlySign) > 0 {
+		hash = args.DashToDirectlySign
+	} else {
+		sum := sha256.Sum256(args.Data)
+		hash = sum[:]
+	}
+
+	// Derive private key
+	privKey, err := w.keyDeriver.DerivePrivateKey(
+		args.ProtocolID,
+		args.KeyID,
+		args.Counterparty,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive private key: %w", err)
+	}
+
+	// Create signature
+	signature, err := privKey.Sign(hash)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create signature: %w", err)
+	}
+
+	return &CreateSignatureResult{
+		Signature: *signature,
+	}, nil
+}
+
+type VerifySignatureArgs struct {
+	WalletEncryptionArgs
+	Data                []byte
+	DashToDirectlyVerify []byte
+	Signature           ec.Signature
+	ForSelf             bool
+}
+
+type VerifySignatureResult struct {
+	Valid bool
+}
+
+func (w *Wallet) VerifySignature(args *VerifySignatureArgs, originator string) (*VerifySignatureResult, error) {
+	if len(args.Data) == 0 && len(args.DashToDirectlyVerify) == 0 {
+		return nil, fmt.Errorf("args.data or args.hashToDirectlyVerify must be valid")
+	}
+
+	// Get hash to verify
+	var hash []byte
+	if len(args.DashToDirectlyVerify) > 0 {
+		hash = args.DashToDirectlyVerify
+	} else {
+		sum := sha256.Sum256(args.Data)
+		hash = sum[:]
+	}
+
+	// Derive public key
+	pubKey, err := w.keyDeriver.DerivePublicKey(
+		args.ProtocolID,
+		args.KeyID,
+		args.Counterparty,
+		args.ForSelf,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to derive public key: %w", err)
+	}
+
+	// Verify signature
+	valid := args.Signature.Verify(hash, pubKey)
+	if !valid {
+		return nil, fmt.Errorf("signature is not valid")
+	}
+
+	return &VerifySignatureResult{
+		Valid: valid,
+	}, nil
 }

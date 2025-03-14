@@ -1,13 +1,14 @@
 package wallet_test
 
 import (
+	"crypto/sha256"
 	ec "github.com/bitcoin-sv/go-sdk/primitives/ec"
 	"github.com/bitcoin-sv/go-sdk/wallet"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestWallet_EncryptDecryptCounterparty(t *testing.T) {
+func TestWallet(t *testing.T) {
 	// Create test data
 	sampleData := []byte{3, 1, 4, 1, 5, 9}
 
@@ -26,12 +27,13 @@ func TestWallet_EncryptDecryptCounterparty(t *testing.T) {
 		SecurityLevel: wallet.SecurityLevelEveryAppAndCounterparty,
 		Protocol:      "tests",
 	}
+	keyID := "4"
 
 	// Encrypt message
 	encryptArgs := &wallet.WalletEncryptArgs{
 		WalletEncryptionArgs: wallet.WalletEncryptionArgs{
 			ProtocolID: protocol,
-			KeyID:      "4",
+			KeyID:      keyID,
 			Counterparty: wallet.WalletCounterparty{
 				Type:         wallet.CounterpartyTypeOther,
 				Counterparty: counterpartyKey.PubKey(),
@@ -108,5 +110,254 @@ func TestWallet_EncryptDecryptCounterparty(t *testing.T) {
 		_, err := counterpartyWallet.Decrypt(&invalidSecurityArgs)
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), "protocol security level must be 0, 1, or 2")
+	})
+
+	t.Run("signs messages verifiable by counterparty", func(t *testing.T) {
+		// Create signature
+		signArgs := &wallet.CreateSignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: counterpartyKey.PubKey(),
+				},
+			},
+			Data: sampleData,
+		}
+
+		signResult, err := userWallet.CreateSignature(signArgs, "")
+		assert.NoError(t, err)
+		assert.NotEmpty(t, signResult.Signature)
+
+		// Verify signature
+		verifyArgs := &wallet.VerifySignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: userKey.PubKey(),
+				},
+			},
+			Signature: signResult.Signature,
+			Data:      sampleData,
+		}
+
+		verifyResult, err := counterpartyWallet.VerifySignature(verifyArgs, "")
+		assert.NoError(t, err)
+		assert.True(t, verifyResult.Valid)
+	})
+
+	t.Run("directly signs hash of message", func(t *testing.T) {
+		// Hash the sample data
+		hash := sha256.Sum256(sampleData)
+
+		// Create signature
+		signArgs := &wallet.CreateSignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: counterpartyKey.PubKey(),
+				},
+			},
+			DashToDirectlySign: hash[:],
+		}
+
+		signResult, err := userWallet.CreateSignature(signArgs, "")
+		assert.NoError(t, err)
+		assert.NotEmpty(t, signResult.Signature)
+
+		// Verify signature with data
+		verifyArgs := &wallet.VerifySignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: userKey.PubKey(),
+				},
+			},
+			Signature: signResult.Signature,
+			Data:      sampleData,
+		}
+
+		verifyResult, err := counterpartyWallet.VerifySignature(verifyArgs, "")
+		assert.NoError(t, err)
+		assert.True(t, verifyResult.Valid)
+
+		// Verify signature with hash directly
+		verifyHashArgs := &wallet.VerifySignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: userKey.PubKey(),
+				},
+			},
+			Signature:           signResult.Signature,
+			DashToDirectlyVerify: hash[:],
+		}
+
+		verifyHashResult, err := counterpartyWallet.VerifySignature(verifyHashArgs, "")
+		assert.NoError(t, err)
+		assert.True(t, verifyHashResult.Valid)
+	})
+
+	t.Run("fails to verify signature with wrong data", func(t *testing.T) {
+		// Create signature
+		signArgs := &wallet.CreateSignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: counterpartyKey.PubKey(),
+				},
+			},
+			Data: sampleData,
+		}
+
+		signResult, err := userWallet.CreateSignature(signArgs, "")
+		assert.NoError(t, err)
+		assert.NotEmpty(t, signResult.Signature)
+
+		// Verify with wrong data
+		wrongData := append([]byte{0}, sampleData...)
+		verifyArgs := &wallet.VerifySignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: userKey.PubKey(),
+				},
+			},
+			Signature: signResult.Signature,
+			Data:      wrongData,
+		}
+
+		verifyResult, err := counterpartyWallet.VerifySignature(verifyArgs, "")
+		assert.Error(t, err)
+		assert.Nil(t, verifyResult)
+	})
+
+	t.Run("fails to verify signature with wrong protocol", func(t *testing.T) {
+		// Create signature
+		signArgs := &wallet.CreateSignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: counterpartyKey.PubKey(),
+				},
+			},
+			Data: sampleData,
+		}
+
+		signResult, err := userWallet.CreateSignature(signArgs, "")
+		assert.NoError(t, err)
+		assert.NotEmpty(t, signResult.Signature)
+
+		// Verify with wrong protocol
+		wrongProtocol := wallet.WalletProtocol{
+			SecurityLevel: wallet.SecurityLevelEveryAppAndCounterparty,
+			Protocol:      "wrong",
+		}
+		verifyArgs := &wallet.VerifySignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: wrongProtocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: userKey.PubKey(),
+				},
+			},
+			Signature: signResult.Signature,
+			Data:      sampleData,
+		}
+
+		verifyResult, err := counterpartyWallet.VerifySignature(verifyArgs, "")
+		assert.Error(t, err)
+		assert.Nil(t, verifyResult)
+	})
+
+	t.Run("fails to verify signature with wrong key ID", func(t *testing.T) {
+		// Create signature
+		signArgs := &wallet.CreateSignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: counterpartyKey.PubKey(),
+				},
+			},
+			Data: sampleData,
+		}
+
+		signResult, err := userWallet.CreateSignature(signArgs, "")
+		assert.NoError(t, err)
+		assert.NotEmpty(t, signResult.Signature)
+
+		// Verify with wrong key ID
+		verifyArgs := &wallet.VerifySignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      "wrong",
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: userKey.PubKey(),
+				},
+			},
+			Signature: signResult.Signature,
+			Data:      sampleData,
+		}
+
+		verifyResult, err := counterpartyWallet.VerifySignature(verifyArgs, "")
+		assert.Error(t, err)
+		assert.Nil(t, verifyResult)
+	})
+
+	t.Run("fails to verify signature with wrong counterparty", func(t *testing.T) {
+		// Create signature
+		signArgs := &wallet.CreateSignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: counterpartyKey.PubKey(),
+				},
+			},
+			Data: sampleData,
+		}
+
+		signResult, err := userWallet.CreateSignature(signArgs, "")
+		assert.NoError(t, err)
+		assert.NotEmpty(t, signResult.Signature)
+
+		// Verify with wrong counterparty
+		wrongKey, _ := ec.NewPrivateKey()
+		verifyArgs := &wallet.VerifySignatureArgs{
+			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
+				ProtocolID: protocol,
+				KeyID:      keyID,
+				Counterparty: wallet.WalletCounterparty{
+					Type:         wallet.CounterpartyTypeOther,
+					Counterparty: wrongKey.PubKey(),
+				},
+			},
+			Signature: signResult.Signature,
+			Data:      sampleData,
+		}
+
+		verifyResult, err := counterpartyWallet.VerifySignature(verifyArgs, "")
+		assert.Error(t, err)
+		assert.Nil(t, verifyResult)
 	})
 }
