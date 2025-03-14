@@ -79,7 +79,7 @@ func (p *PushDropTemplate) Lock(
 		for _, e := range fields {
 			dataToSign = append(dataToSign, e...)
 		}
-		sig := p.Wallet.CreateSignature(&wallet.CreateSignatureArgs{
+		sig, err := p.Wallet.CreateSignature(&wallet.CreateSignatureArgs{
 			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
 				ProtocolID:   protocolID,
 				KeyID:        keyID,
@@ -87,6 +87,9 @@ func (p *PushDropTemplate) Lock(
 			},
 			Data: dataToSign,
 		}, p.Originator)
+		if err != nil {
+			return nil, err
+		}
 		fields = append(fields, sig.Signature.Serialize())
 	}
 	pushDropChunks := make([]*script.ScriptChunk, 0)
@@ -159,7 +162,7 @@ func (p *PushDropUnlocker) Sign(
 		return nil, err
 	} else {
 		preimageHash := sha256.Sum256(sh)
-		sig := p.pushDrop.Wallet.CreateSignature(&wallet.CreateSignatureArgs{
+		sig, err := p.pushDrop.Wallet.CreateSignature(&wallet.CreateSignatureArgs{
 			WalletEncryptionArgs: wallet.WalletEncryptionArgs{
 				ProtocolID:   p.protocolID,
 				KeyID:        p.keyID,
@@ -167,6 +170,9 @@ func (p *PushDropUnlocker) Sign(
 			},
 			Data: preimageHash[:],
 		}, p.pushDrop.Originator)
+		if err != nil {
+			return nil, err
+		}
 		s := (&script.Script{})
 		s.AppendPushData(sig.Signature.Serialize())
 		return s, nil
